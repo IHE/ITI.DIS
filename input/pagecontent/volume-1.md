@@ -13,17 +13,16 @@ Figure 1:52.1-1 shows the actors directly involved in the DIS Profile and the re
 
 <figure>
 
-```plantuml
-@startuml
-agent "De-Identification Requester" as REQ
-agent "De-ID Manager" as MGR
-agent "De-Identifier" as DI
+```mermaid
+graph LR
+    REQ["De-Identification<br/>Requester"]
+    MGR["De-ID<br/>Manager"]
+    DI["De-Identifier"]
 
-REQ --> MGR : "ITI-x1 Submit\nDe-Identification Job"
-REQ --> MGR : "ITI-x4 Retrieve\nJob Output"
-MGR --> DI : "ITI-x3 Submit\nDe-Identification Task"
-MGR --> DI : "ITI-x7 Retrieve\nTask Output"
-@enduml
+    REQ -- "ITI-x1 Submit<br/>De-Identification Job" --> MGR
+    REQ -- "ITI-x4 Retrieve<br/>Job Output" --> MGR
+    MGR -- "ITI-x3 Submit<br/>De-Identification Task" --> DI
+    MGR -- "ITI-x7 Retrieve<br/>Task Output" --> DI
 ```
 
 <figcaption><strong>Figure 1:52.1-1: DIS Actor Diagram</strong></figcaption>
