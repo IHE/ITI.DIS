@@ -321,7 +321,7 @@ sequenceDiagram
     MGR-->>DAC: 200 OK (de-identified FHIR output + evidence)
     deactivate MGR
 
-    Note over DAC: Forward FHIR output to SPE; consistencyKey reused for future DICOM pipeline
+    Note over DAC: Forward FHIR output to SPE, consistencyKey reused for future DICOM pipeline
 ```
 
 **Figure 1:52.4.2.2.2-1: Use Case 2 - AI/ML Method Development (FHIR Input-Preparation) Process Flow**
