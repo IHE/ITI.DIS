@@ -13,7 +13,7 @@ DIS addresses this by providing a governed, auditable path from authorization to
 ## What Phase 1 Delivers
 
 - **Three actors** — De-ID Manager, De-Identifier, De-Identification Requester
-- **Three transactions** — ITI-x1 (Submit Job), ITI-x3 (Submit Task), ITI-x4 (Retrieve Output)
+- **Four transactions** — ITI-x1 (Submit Job), ITI-x3 (Submit Task), ITI-x4 (Retrieve Job Output), ITI-x7 (Retrieve Task Output)
 - **A composable policy model** — with a baseline execution plan format (DIS-EXE1-Baseline)
 - **A minimum de-id evidence baseline** — 9-element evidence structure carried in FHIR Provenance
 - **A single FHIR payload binding (DIS-FHIR1)** — covering R4/R5 resources, Bundles, and Bulk Data
@@ -46,8 +46,9 @@ DIS is built on a modular, binding-neutral core architecture. Phase 1 profiles t
 | Transaction | Pattern | Purpose |
 |-------------|---------|---------|
 | **ITI-x1** Submit De-Identification Job | Request/response (sync or async) | Present authorization and policy; receive de-identified output or job acceptance |
-| **ITI-x3** Submit De-Identification Task | Manager → De-Identifier | Execute one de-identification task per a compiled execution plan stage |
-| **ITI-x4** Retrieve Job Output | Request/response | Poll status and retrieve output for an async job |
+| **ITI-x3** Submit De-Identification Task | Manager → De-Identifier | Dispatch one de-identification task; return output inline (immediate) or task acceptance (deferred) |
+| **ITI-x4** Retrieve Job Output | Requester → Manager | Poll status and retrieve output for an async job |
+| **ITI-x7** Retrieve Task Output | Manager → De-Identifier | Retrieve output, evidence, and validation status for a completed deferred task |
 
 ### Interaction Diagram
 
@@ -62,13 +63,14 @@ DIS is built on a modular, binding-neutral core architecture. Phase 1 profiles t
 ┌──────────────┐   ITI-x1    ┌──────────────┐   ITI-x3    ┌──────────────┐
 │ De-ID        │ ──────────► │  De-ID       │ ──────────► │ De-Identifier│
 │ Requester    │ ◄────────── │  Manager     │ ◄────────── │              │
-│              │  (output     │              │  (output +   │              │
-│              │   or job ID) │              │   evidence)  │              │
-│              │   ITI-x4    │              │              │              │
-│              │ ──────────► │              │              │              │
-│              │ ◄────────── │              │              │              │
-│              │  (poll +     │              │              │              │
-│              │   output)    │              │              │              │
+│              │  (output     │              │  (output or  │              │
+│              │   or job ID) │              │   acceptance)│              │
+│              │   ITI-x4    │              │   ITI-x7    │              │
+│              │ ──────────► │              │ ──────────► │              │
+│              │ ◄────────── │              │ ◄────────── │              │
+│              │  (poll +     │              │  (deferred   │              │
+│              │   output)    │              │   output +   │              │
+│              │              │              │   evidence)  │              │
 └──────────────┘              └──────────────┘              └──────────────┘
 ```
 
