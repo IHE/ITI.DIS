@@ -1,7 +1,7 @@
 
-**This Implementation Guide template includes skeleton pages for each part of an IHE supplement. The instructions for how to fill out these sections can be found in the included [Supplement Template](https://github.com/IHE/supplement-template/blob/master/suppl_template.md). This supplement template should not be included in your github repo or publication. It is included here for easy reference.**
+The De-Identification Services (DIS) Profile provides a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. It defines three actors -- De-ID Manager, De-Identifier, and De-Identification Requester -- four transactions (ITI-x1 Submit Job, ITI-x3 Submit Task, ITI-x4 Retrieve Job Output, and ITI-x7 Retrieve Task Output), a composable policy model, a minimum de-identification evidence baseline, and a FHIR payload binding (DIS-FHIR1).
 
-**TODO: Write your executive overview here. Usually a one paragraph explanation of what problem this implementation guide solves.**
+DIS addresses the lack of a standard, interoperable workflow for how de-identification is requested, executed, validated, and delivered. It provides a governed, auditable path from authorization to delivery -- reducing reliance on manual processes and local one-off agreements. DIS starts after data request authorization has been established; it does not standardize permit lifecycle or data-request authorization.
 
 <div markdown="1" class="stu-note">
 
@@ -14,23 +14,23 @@
 
 This guide is organized into the following sections:
 
-1. Volume 1: Profile Detail
+1. Volume 1: Profiles
    1. [Introduction](volume-1.html)
-   1. [Actors, Transactions, and Content](volume-1.html#actors-and-transactions)
+   1. [Actors, Transactions, and Content Modules](volume-1.html#actors-and-transactions)
    1. [Actor Options](volume-1.html#actor-options)
-   1. [Actor Required Groupings](volume-1.html#required-groupings)
+   1. [Required Actor Groupings](volume-1.html#required-groupings)
    1. [Overview](volume-1.html#overview)
    1. [Security Considerations](volume-1.html#security-considerations)
    1. [Cross Profile Considerations](volume-1.html#other-grouping)
-   1. **TODO: point to the Volume 1 Appendix if there is one**
 2. Volume 2: Transaction Detail
-   1. [ToDo do \[domain-YY\]](domain-YY.html)
-   1. **TODO: point to the Volume 2 Appendix if there is one**
-3. Volume 3: Metadata and Content
-   1. [Content One](domain-ZZ.html)
-4. Volume 4: National Extensions
-   1. **TODO: point at the National Extensions if there are any**
-5. Other
+   1. [Submit Job \[ITI-x1\]](ITI-x1.html)
+   1. [Submit Task \[ITI-x3\]](ITI-x3.html)
+   1. [Retrieve Job Output \[ITI-x4\]](ITI-x4.html)
+   1. [Retrieve Task Output \[ITI-x7\]](ITI-x7.html)
+3. Volume 3: Content Modules
+   1. [DIS-EXE1 Execution Plan](domain-ZZ.html)
+   1. [De-ID Evidence](domain-ZZ.html#de-id-evidence)
+4. Other
    1. [Changes to Other IHE Specifications](other.html)
    1. [Download and Analysis](download.html)
    1. [Test Plan](testplan.html)

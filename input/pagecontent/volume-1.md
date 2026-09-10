@@ -1,587 +1,511 @@
 
-**TODO: Provide an end-user friendly overview of what the profile does for them. Keep it brief (a paragraph or two, up to a page). If extensive detail is needed, it should be included in Section XX.4- Use Cases.**
+The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policy carriers and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
 
-**TODO: Explicitly state whether this is a Workflow, Transport, or Content Module (or combination) profile. See the IHE Technical Frameworks General Introduction for definitions of these profile types. The IHE Technical Frameworks [General Introduction](https://profiles.ihe.net/GeneralIntro/). **
+DIS is a **Workflow** profile. It defines three actors, four transactions, a composable policy model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
 
 <a name="actors-and-transactions"> </a>
 
-## 1:XX.1 ToDo Actors, Transactions, and Content Modules
+## 1:52.1 DIS Actors, Transactions, and Content Modules
 
-* Actors
-  * [Client](#client)
-  * [Server](#server)
-* Transactions
-  * [do domain-Y](domain-YY.html)
+This section defines the actors and transactions in the DIS Profile.
 
-Actors and transactions are used to achieve this use-case...
+Figure 1:52.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them.
 
 <figure>
-{%include usecase1-processflow.svg%}
-<figcaption><strong>Figure 1:X.X.X.X-X: Use Case 1 Process Flow</strong></figcaption>
+
+```plantuml
+@startuml
+agent "De-Identification Requester" as REQ
+agent "De-ID Manager" as MGR
+agent "De-Identifier" as DI
+
+REQ --> MGR : "ITI-x1 Submit\nDe-Identification Job"
+REQ --> MGR : "ITI-x4 Retrieve\nJob Output"
+MGR --> DI : "ITI-x3 Submit\nDe-Identification Task"
+MGR --> DI : "ITI-x7 Retrieve\nTask Output"
+@enduml
+```
+
+<figcaption><strong>Figure 1:52.1-1: DIS Actor Diagram</strong></figcaption>
 </figure>
 <br clear="all">
 
-This section defines the actors and transactions in this implementation guide.
+<p id="t52.1-1" class="tableTitle"><strong>Table 1:52.1-1: DIS Profile - Actors and Transactions</strong></p>
 
-Figure below shows the actors directly
-involved in the ToDo 
-Profile and the relevant transactions between them.
-
-<figure>
-{%include ActorsAndTransactions.svg%}
-<figcaption><strong>Figure 1:XX.1-2: ToDo Actor Diagram</strong></figcaption>
-</figure>
-<br clear="all">
-
-or for Content Profiles use this
-<figure>
-{%include docSharing.svg%}
-<figcaption><strong>Figure 1:XX.1-2: ToDo Document Sharing Actor Diagram</strong></figcaption>
-</figure>
-<br clear="all">
-
-<p id ="tXX.1-1" class="tableTitle"><strong>Table 1:XX.1-1: Profile Acronym Profile - Actors and Transactions</strong></p>
-
-| Actors  | Transactions  | Initiator or Responder | Optionality     | Reference                                  |
-|---------|---------------|------------------------|-----------------|--------------------------------------------|
-| Actor A | Transaction 1 |                        | R               | [Domain Acronym TF-2: 3.Y1](./domain-Y1.html) |
-|         | Transaction 2 |                        | R               | [Domain Acronym TF-2: 3.Y2](./domain-Y2.html) |
-| Actor F | Transaction 1 |                        | R               | [Domain Acronym TF-2: 3.Y1](./domain-Y1.html) |
-|         | Transaction 2 |                        | R               | [Domain Acronym TF-2: 3.Y2](./domain-Y2.html) |
-| Actor D | Transaction 1 |                        | R               | [Domain Acronym TF-2: 3.Y1](./domain-Y1.html) |
-| Actor E | Transaction 2 |                        | R               | [Domain Acronym TF-2: 3.Y2](./domain-Y2.html) |
-|         | Transaction 3 |                        | O ( See Note 1) | [Domain Acronym TF-2: 3.Y3](./domain-Y3.html) |
-|         | Transaction 4 |                        | O ( See Note 1) | [Domain Acronym TF-2: 3.Y4](./domain-Y4.html) |
-| Actor B | Transaction 3 |                        | R               | [Domain Acronym TF-2: 3.Y3](./domain-Y3.html) |
-|         | Transaction 4 |                        | O ( See Note 2) | [Domain Acronym TF-2: 3.Y4](./domain-Y4.html) |
+| Actors | Transactions | Initiator or Responder | Optionality | Reference |
+|--------|-------------|------------------------|-------------|-----------|
+| De-Identification Requester | ITI-x1 Submit De-Identification Job | Initiator | R | ITI TF-2: 3.x1 |
+|  | ITI-x4 Retrieve Job Output | Initiator | O (See Note 1) | ITI TF-2: 3.x4 |
+| De-ID Manager | ITI-x1 Submit De-Identification Job | Responder | R | ITI TF-2: 3.x1 |
+|  | ITI-x3 Submit De-Identification Task | Initiator | R | ITI TF-2: 3.x3 |
+|  | ITI-x4 Retrieve Job Output | Responder | O (See Note 1) | ITI TF-2: 3.x4 |
+|  | ITI-x7 Retrieve Task Output | Initiator | O (See Note 2) | ITI TF-2: 3.x7 |
+| De-Identifier | ITI-x3 Submit De-Identification Task | Responder | R | ITI TF-2: 3.x3 |
+|  | ITI-x7 Retrieve Task Output | Responder | O (See Note 2) | ITI TF-2: 3.x7 |
 {: .grid}
 
-Note 1: *For example, a note could specify that at least one of the
-transactions shall be supported by an actor or other variations. For
-example: Note: Either Transaction Y3 or Transaction Y4 shall be
-implemented for Actor E.*
+Note 1: *ITI-x4 is required when the Asynchronous Job Processing Option is supported.*
 
-Note 2: *For example, could specify that Transaction Y4 is required
-if Actor B supports XYZ Option, see Section 1:XX.3.X.*
+Note 2: *ITI-x7 is required when the Deferred Task Output Option is supported.*
 
-### 1:XX.1.1 Actors
+### 1:52.1.1 Actors
+
 The actors in this profile are described in more detail in the sections below.
 
-<a name="client"> </a>
+<a name="de-identification-requester"> </a>
 
-#### 1:XX.1.1.1 Client
+#### 1:52.1.1.1 De-Identification Requester
 
-The Client queries for blah meeting certain criteria and may retrieve selected blah.
+The De-Identification Requester submits de-identification jobs to the De-ID Manager, presenting a data request authorization and a signed de-identification policy carrier. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
 
-FHIR Capability Statement for [Client](CapabilityStatement-IHE.ToDo.client.html)
+In Phase 1, the De-Identification Requester is grouped with the De-Identified Data Receiver role -- the Requester receives output directly. No separate push-delivery path is standardized.
 
-<a name="server"> </a>
+Phase 1 does not standardize how the Requester obtains a signed de-identification policy carrier. The Requester presents the carrier in ITI-x1; the mechanism by which it was obtained is an implementation-defined concern. Implementers MAY use any mechanism that produces a valid signed policy carrier, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
-#### 1:XX.1.1.2 Server
+<a name="de-id-manager"> </a>
 
-The Sever processes query request from the Client actor.
+#### 1:52.1.1.2 De-ID Manager
 
-FHIR Capability Statement for [Server](CapabilityStatement-IHE.ToDo.server.html)
+The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and de-identification policy carrier, compiles the validated policy into an execution plan, dispatches de-identification tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
-### 1:XX.1.2 Transaction Descriptions
+The De-ID Manager is the sole custodian of reversibility material. When reversible pseudonymization is enabled (DIS-RP1), the De-ID Manager retains the identity table (cryptographic seed to patient identity mapping) and builds a pseudonym index from de-identification evidence reported by the De-Identifier at job completion. Together these two tables form the reverse-mapping chain: pseudonym to seed to patient identity. Phase 1 does not standardize re-identification transactions; however, implementations claiming DIS-RP1 SHALL retain reversibility material so that standardized re-identification can be enabled without re-processing previously de-identified data.
+
+The De-ID Manager performs four-point validation on all policy carrier variants:
+
+1. **Signature validity** -- the carrier's digital signature is cryptographically valid and issued by a trusted authority
+2. **Schema conformance** -- the policy content conforms to the expected schema
+3. **Currency** -- the policy is not expired or revoked
+4. **Authorization consistency** -- the policy is consistent with the data request authorization (scope, purpose, and processing target are compatible)
+
+<a name="de-identifier"> </a>
+
+#### 1:52.1.1.3 De-Identifier
+
+The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives a cryptographic seed, produces transformations and evidence, and retains no identity-linking material. The De-Identifier derives pseudonyms from the seed and reports them in evidence but does not store the seed-to-identity mapping.
+
+A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR1), supported action families (`core`), and zero or more named standardized policies it natively supports. The De-ID Manager SHALL verify the De-Identifier's capability declaration before dispatching tasks via ITI-x3.
+
+### 1:52.1.2 Transaction Descriptions
 
 The transactions in this profile are summarized in the sections below.
 
-#### 1:XX.1.2.1 ToDo do transaction
+#### 1:52.1.2.1 Submit De-Identification Job [ITI-x1]
 
-This transaction is used to **do things**
+This transaction allows the De-Identification Requester to present a data request authorization and a signed de-identification policy carrier, and to trigger de-identification processing. The De-ID Manager validates the authorization and policy carrier, compiles the policy into an execution plan, orchestrates task execution, and returns de-identified output and evidence. The transaction supports both synchronous (output inline) and asynchronous (job acceptance with polling URL) response modes.
 
-For more details see the detailed [transaction description](domain-YY.html)
+The transaction SHALL reject a job when the data request authorization is missing, untrusted, expired, or inconsistent with the requested processing target. The transaction SHALL also reject a job when the de-identification policy carrier is missing, has an invalid or untrusted signature, is expired, or is inconsistent with the data request authorization. Rejection is always synchronous regardless of the requested response mode.
+
+For more details see the detailed [transaction description](ITI-x1.html).
+
+#### 1:52.1.2.2 Submit De-Identification Task [ITI-x3]
+
+This transaction allows the De-ID Manager to submit a de-identification task to a De-Identifier. The task carries a reference to a Library resource containing execution rules for the assigned stage, the processing target (or reference to prior stage output), and a cryptographic seed. The De-Identifier applies the transformation rules, produces de-identified output and evidence, and returns a completed task with validation status.
+
+When the De-ID Manager compiles multiple stages, ITI-x3 is invoked once per stage in sequence. Each invocation references a Library containing only the rules assigned to that stage -- the De-Identifier SHALL NOT have visibility into stages assigned to other instances.
+
+For more details see the detailed [transaction description](ITI-x3.html).
+
+#### 1:52.1.2.3 Retrieve Job Output [ITI-x4]
+
+This transaction allows the De-Identification Requester to retrieve the status and output of a previously submitted asynchronous job. The De-ID Manager authenticates the Requester, verifies authorization for the specified job, and returns the current job status. When the job is complete, the response includes all output and evidence that would have been returned inline in a synchronous ITI-x1 response.
+
+For more details see the detailed [transaction description](ITI-x4.html).
+
+#### 1:52.1.2.4 Retrieve Task Output [ITI-x7]
+
+This transaction allows the De-ID Manager to retrieve the output of a deferred de-identification task from a De-Identifier. When the De-Identifier uses deferred response mode for ITI-x3, it accepts the task and processes asynchronously; the De-ID Manager retrieves the completed output via ITI-x7.
+
+For more details see the detailed [transaction description](ITI-x7.html).
 
 <a name="actor-options"> </a>
 
-## 1:XX.2 ToDo Actor Options
+## 1:52.2 DIS Actor Options
 
-Options that may be selected for each actor in this implementation guide, are listed in Table 1:XX.2-1 below. Dependencies
-between options when applicable are specified in notes.
+Options that may be selected for each actor in this profile are listed in Table 1:52.2-1 below. Dependencies between options when applicable are specified in notes.
 
-<p id ="tXX.2-1" class="tableTitle"><strong>Table 1:XX.2-1: Actor Options</strong></p>
+<p id="t52.2-1" class="tableTitle"><strong>Table 1:52.2-1: DIS Profile - Actor Options</strong></p>
 
-| Actor   | Option Name |
-|---------|-------------|
-| Actor A | Option AB  |
-| Actor B | none |
+| Actor | Option Name | Reference |
+|-------|-------------|-----------|
+| De-Identification Requester | Asynchronous Job Processing | [1:52.2.1](#15221-asynchronous-job-processing-option) |
+| De-ID Manager | Asynchronous Job Processing | [1:52.2.1](#15221-asynchronous-job-processing-option) |
+| De-ID Manager | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
+| De-ID Manager | Composable Execution Plan | [1:52.2.3](#15223-composable-execution-plan-option) |
+| De-ID Manager | Local Authorized Export | [1:52.2.4](#15224-local-authorized-export-option) |
+| De-Identifier | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
+| De-Identifier | Composable Execution Plan | [1:52.2.3](#15223-composable-execution-plan-option) |
+| De-Identifier | Deferred Task Output | [1:52.2.5](#15225-deferred-task-output-option) |
 {: .grid}
 
-### 1:XX.2.1 AB Option
+### 1:52.2.1 Asynchronous Job Processing Option
 
-**TODO: describe this option and the Volume 1 requirements for this option
+The Asynchronous Job Processing Option (DIS-ASYNC) enables the De-Identification Requester and De-ID Manager to support asynchronous de-identification workflows. When a Requester sends ITI-x1 with `Prefer: respond-async`, the De-ID Manager SHALL return HTTP `202 Accepted` with a `Content-Location` header containing a polling URL. The Requester retrieves de-identified output and evidence via ITI-x4 using the polling URL.
+
+This option is required for multi-patient cohort workflows where processing time exceeds the request timeout. Both the De-Identification Requester and the De-ID Manager SHALL support ITI-x4 when this option is declared.
+
+A De-ID Manager that supports the Asynchronous Job Processing Option SHALL retain the polling endpoint for at least 24 hours after job completion. After successful retrieval, the De-ID Manager MAY return `410 Gone` for subsequent requests per local retention policy.
+
+### 1:52.2.2 Reversible Pseudonymization Option
+
+The Reversible Pseudonymization Option (DIS-RP1) enables the De-ID Manager to retain reversibility material (identity table and pseudonym index) so that future re-identification can be performed without re-processing previously de-identified data. The baseline mode is irreversible de-identification (DIS-RP0).
+
+When this option is supported, the De-ID Manager SHALL:
+
+- Retain the identity table (cryptographic seed to patient identity mapping) created during policy compilation
+- Build a pseudonym index from de-identification evidence reported by the De-Identifier at job completion
+- Protect reversibility material within its trust boundary -- this material SHALL NOT be disclosed outside the Manager's trust boundary
+
+A De-Identifier supporting this option SHALL produce pseudonyms that are deterministically derivable from the cryptographic seed, enabling the De-ID Manager to build its reverse-mapping chain from evidence without requiring the De-Identifier to retain any identity-linking material.
+
+### 1:52.2.3 Composable Execution Plan Option
+
+The Composable Execution Plan Option (DIS-EXE1) enables the De-ID Manager and De-Identifier to support the full composable policy model with the DIS-EXE1 execution plan schema, including policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, and selector specificity rules.
+
+The baseline execution plan format (DIS-EXE1-Baseline) supports flat ordered rule lists only. A De-ID Manager or De-Identifier that does not declare this option SHALL support DIS-EXE1-Baseline and SHALL NOT require composable features in dispatched or received execution plans.
+
+### 1:52.2.4 Local Authorized Export Option
+
+The Local Authorized Export Option (DIS-LAE1) enables the De-ID Manager to support clinician-initiated local export workflows where authorization derives from the clinician's local role and declared purpose rather than an external data permit. No external policy carrier acquisition is required -- the policy is pre-configured by institutional administration.
+
+When this option is supported, the De-ID Manager SHALL map the local authorization (role and purpose) to a configured de-identification policy using the DIS-LAE1 bridge pattern. The De-ID Manager SHALL validate that the local authorization is consistent with the configured policy before proceeding with task execution.
+
+This option is intended for lightweight clinical workflows such as de-identified document export from a clinical workstation, where heavy external permit infrastructure is not required.
+
+### 1:52.2.5 Deferred Task Output Option
+
+The Deferred Task Output Option (DIS-DEFER) enables the De-Identifier to accept a task via ITI-x3 and process it asynchronously. The De-ID Manager retrieves the completed output via ITI-x7. This option is required for large payloads where task processing time may exceed the ITI-x3 request timeout.
+
+When this option is supported by the De-Identifier, the De-Identifier MAY respond to ITI-x3 with an accepted status and a location for output retrieval. The De-ID Manager SHALL support ITI-x7 when interacting with a De-Identifier that declares this option.
 
 <a name="required-groupings"> </a>
 
-## 1:XX.3 ToDo Required Actor Groupings
+## 1:52.3 DIS Required Actor Groupings
 
-*Describe any requirements for actors in this profile to be grouped
-with other actors.*
+An actor from this profile (Column 1) SHALL implement all of the required transactions and/or content modules in this profile ***in addition to*** ***<u>all</u>*** of the requirements for the grouped actor (Column 2).
 
-*This section specifies all REQUIRED Actor Groupings (although
-"required" sometimes allows for a selection of one of several). To
-SUGGEST other profile groupings or helpful references for other profiles
-to consider, use Section XX.6 Cross Profile Considerations. Use Section
-X.5 for security profile recommendations.*
+<p id="t52.3-1" class="tableTitle"><strong>Table 1:52.3-1: DIS Profile - Required Actor Groupings</strong></p>
 
-An actor from this profile (Column 1) shall implement all of the
-required transactions and/or content modules in this profile ***in
-addition to*** ***<u>all</u>*** of the requirements for the grouped
-actor (Column 2) (Column 3 in alternative 2).
+| DIS Actor | Actor to be grouped with | Reference | Content Bindings Reference |
+|-----------|--------------------------|-----------|---------------------------|
+| De-Identification Requester | ATNA / Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+| De-ID Manager | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+| De-ID Manager | IUA / Authorization Client or Resource Server | [ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html) | -- |
+| De-Identifier | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+{: .grid}
 
-If this is a content profile, and actors from this profile are grouped
-with actors from a workflow or transport profile, the Reference column
-references any specifications for mapping data from the content module
-into data elements from the workflow or transport transactions.
+All DIS actors SHALL be grouped with ATNA Secure Node or Secure Application to ensure that all transactions are audit-logged and that communications are secured via TLS.
 
-In some cases, required groupings are defined as at least one of an
-enumerated set of possible actors; this is designated by merging column
-one into a single cell spanning multiple potential grouped actors. Notes
-are used to highlight this situation.
-
-Section XX.5 describes some optional groupings that may be of interest
-for security considerations and Section XX.6 describes some optional
-groupings in other related profiles.
-
-Two alternatives for Table 1:XX.3-1 are presented below.
-
-- If there are no required groupings for any actor in this profile,
-    use alternative 1 as a template.
-- If an actor in this profile (with no option), has a required
-    grouping, use alternative 1.
-- If any required grouping is associated with an actor/option
-    combination in this profile, use alternative 2.
-
-alternative 1 Table 1:XX.3-1: Profile Name - Required Actor
-Groupings
-
-All actors from this profile should be listed in Column 1, even if
-none of the actors has a required groupings. If no required grouping
-exists, "None" should be indicated in Column 2. If an actor in a content
-profile is required to be grouped with an actor in a transport or
-workflow profile, it will be listed **with at least one** required
-grouping. Do not use "XD\*" as an actor name.
-
-In some cases, required groupings are defined as at least one of an
-enumerated set of possible actors; to designate this, create a row for
-each potential actor grouping and merge column one to form a single cell
-containing the profile actor which should be grouped with at least one
-of the actors in the spanned rows. In addition, a note should be
-included to explain the enumerated set. See example below showing
-Document Consumer needing to be grouped with at least one of XDS.b
-Document Consumer, XDR Document Recipient or XDM Portable Media
-Importer
-
-The author should pay special consideration to security profiles in
-this grouping section. Consideration should be given to Consistent Time
-(CT) Client, ATNA Secure Node or Secure Application, as well as other
-profiles. For the sake of clarity and completeness, even if this table
-begins to become long, a line should be added for each actor for each of
-the required grouping for security. Also see the ITI document titled
-'Cookbook: Preparing the IHE Profile Security Section' at
-<http://ihe.net/Technical_Frameworks/#IT> for a list of suggested IT and
-security groupings.
-
-<p id ="tXX.3-1" class="tableTitle"><strong>Table 1:XX.3-1: Actor Groupings</strong></p>
-
-<table border="1" borderspacing="0" style='border: 1px solid black; border-collapse: collapse'>
-<thead>
-<tr class="header">
-<th>this Profile Acronym Actor</th>
-<th>Actor(s) to be grouped with</th>
-<th>Reference</th>
-<th>Content Bindings Reference</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Actor A</td>
-<td><p><em>external Domain Acronym or blank</em></p>
-<p><em>profile acronym/Actor</em></p>
-<p><em>e.g., ITI CT / Time Client</em></p></td>
-<td><p><em>TF Reference; typically from Vol 1</em></p>
-<p><em>e.g., ITI-TF-1: 7.1</em></p></td>
-<td>--</td>
-</tr>
-<tr class="even">
-<td>Actor B</td>
-<td>None</td>
-<td>--</td>
-<td>--</td>
-</tr>
-<tr class="odd">
-<td><p>Actor C</p>
-<p><em>In this example, Actor C shall be grouped with all three actors listed in column 2</em></p></td>
-<td><p><em>external Domain Acronym or blank</em></p>
-<p><em>profile acronym/Actor</em></p></td>
-<td>--</td>
-<td>See Note 1</td>
-</tr>
-<tr class="even">
-<td></td>
-<td><em>external Domain Acronym or blank profile acronym/Actor</em></td>
-<td>--</td>
-<td>See Note 1</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td><p><em>external Domain Acronym or blank</em></p>
-<p><em>profile acronym/Actor</em></p></td>
-<td>--</td>
-<td>See Note 1</td>
-</tr>
-<tr class="even">
-<td><p>Actor D <em>(See note 1)</em></p>
-<p><em>In this example, the note is used to indicate that the Actor D shall be grouped with one or more of the two actors of the two actors in column 2.</em></p></td>
-<td><p><em>external Domain Acronym or blank</em></p>
-<p><em>profile acronym/Actor</em></p></td>
-<td>--</td>
-<td>See Note 1</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td><p><em>external Domain Acronym or blank</em></p>
-<p><em>profile acronym/Actor</em></p></td>
-<td>--</td>
-<td>See Note 1</td>
-</tr>
-<tr class="even">
-<td><p>Actor E</p>
-<p><em>In rare cases, the actor to be grouped with must implement an option. An example is in column 2.)</em></p></td>
-<td><p><em>external Domain Acronym or blank</em></p>
-<p><em>profile acronym Actor</em></p>
-<p><em>e.g., ITI RFD Form Filler with the Archive Form Option</em></p></td>
-<td><p><em>TF Reference to the Option definition; typically from Vol 1</em></p>
-<p><em>(e.g., ITI TF-1: 17.3.11)</em></p></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><em>e.g., Content Consumer (See Note 1)</em></td>
-<td><em>ITI XDS.b / Document Consumer</em></td>
-<td><em>ITI TF-1: 10.1</em></td>
-<td><em>PCC TF-2:4.1 (See Note 2)</em></td>
-</tr>
-<tr class="even">
-<td></td>
-<td><em>ITI XDR / Document Recipient</em></td>
-<td><em>ITI TF-1: 15.1</em></td>
-<td><em>PCC TF-2:4.1 (See Note 2)</em></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td><em>ITI XDM / Portable Media Importer</em></td>
-<td><em>ITI TF-1: 16.1</em></td>
-<td><em>PCC TF-2:4.1 (See Note 2)</em></td>
-</tr>
-<tr class="even">
-<td><em>e.g., Content Consumer</em></td>
-<td><em>ITI CT / Time Client</em></td>
-<td><em>ITI TF-1: 7.1</em></td>
-<td>--</td>
-</tr>
-</tbody>
-</table>
-
-Note 1: *This is a short note. It may be used to describe situations
-where an actor from this profile may be grouped with one of several
-other profiles/actors.*
-
-Note 2: *A note could also be used to explain why the grouping is
-required, if that is still not clear from the text above.*
-
-alternative 2 Table 1:XX.3-1: this Profile Acronym Profile
-
-- Required Actor Groupings
-
-All actors from this profile should be listed in Column 1. If no
-required grouping exists, "None" should be indicated in Column 3.
-
-Guidance on using the "Grouping Condition" column:
-
-- If an actor has no required grouping, Column 2 should contain "--".
-    See Actor A below.
-- If an actor has a required grouping that is not associated with a
-    profile option (i.e., it has no condition), column 2 should contain
-    "Required". See Actor B below.
-- Sometimes an option requires that an actor in this profile be
-    grouped with an actor in another profile. That condition is
-    specified in Column 2. See Actor C below.
-
-<p id ="tXX.3-1" class="tableTitle"><strong>Table 1:XX.3-1: Actor Groupings</strong></p>
-
-<table border="1" borderspacing="0" style='border: 1px solid black; border-collapse: collapse'>
-<tbody>
-<tr class="odd">
-<td>this Profile Acronym Actor</td>
-<td>Grouping Condition</td>
-<td>Actor(s) to be grouped with</td>
-<td>Reference</td>
-</tr>
-<tr class="even">
-<td>Actor A</td>
-<td>--</td>
-<td>None</td>
-<td>--</td>
-</tr>
-<tr class="odd">
-<td>Actor B</td>
-<td>Required</td>
-<td><p><em>external Domain Acronym or blank profile acronym/Actor</em></p>
-<p><em>e.g., ITI CT / Time Client</em></p></td>
-<td><p><em>TF Reference; typically from Vol 1</em></p>
-<p><em>(e.g., ITI TF-1: 7.1)</em></p></td>
-</tr>
-<tr class="even">
-<td>Actor C</td>
-<td>With the <em>Option name in this profile</em> Option</td>
-<td><em>external Domain Acronym or blank profile acronym/Actor</em></td>
-<td><em>Where the Option is defined in this profile Section XX.3 z</em></td>
-</tr>
-<tr class="odd">
-<td><p>Actor D</p>
-<p><em>if an actor has both required and conditional groupings, list the Required grouping first</em></p></td>
-<td>Required</td>
-<td><em>external Domain Acronym or blank profile acronym/Actor</em></td>
-<td><em>TF Reference; typically from Vol 1</em></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>If the <em>Option name in this profile</em> Option is supported.</td>
-<td><em>external Domain Acronym or blank profile acronym/Actor</em></td>
-<td><em>TF Reference; typically from Vol 1</em></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>If the <em>other Option name in this profile</em> Option is supported.</td>
-<td><em>external Domain Acronym or blank profile acronym/Actor</em></td>
-<td><em>TF Reference; typically from Vol 1</em></td>
-</tr>
-<tr class="even">
-<td><p>Actor E</p>
-<p><em>(In rare cases, the actor to be grouped with must implement an option, an example is in column 3)</em></p></td>
-<td>Required</td>
-<td><p><em>external Domain Acronym or blank profile acronym/Actor</em> with the <em>option name</em></p>
-<p><em>e.g. ITI RFD Form Filler with the Archive Form Option</em></p></td>
-<td><p><em>TF Reference to the Option definition; typically from Vol 1</em></p>
-<p><em>(eg ITI TF-1:17.3.11)</em></p></td>
-</tr>
-</tbody>
-</table>
+The De-ID Manager SHALL be grouped with IUA Authorization Client or Resource Server to ensure that system-to-system authorization is enforced for job submission (ITI-x1) and output retrieval (ITI-x4). Implementations SHOULD use SMART Backend Services for automated system-to-system workflows.
 
 <a name="overview"> </a>
 
-## 1:XX.4 ToDo Overview
+## 1:52.4 DIS Overview
 
-This section shows how the transactions/content modules of the profile
-are combined to address the use cases.
+This section shows how the transactions of the DIS Profile are combined to address the use cases.
 
-Use cases are informative, not normative, and "SHALL" language is
-not allowed in use cases.
+### 1:52.4.1 Concepts
 
-<div>
-<img src="anImage.png" caption="Figure 1:XX.4.1: Diagrammed in an image" width="70%" >
-</div>
+DIS introduces the following key concepts that provide necessary background for understanding the profile.
 
-### 1:XX.4.1 Concepts
+**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A signed de-identification policy carrier governs what transformations are applied. The De-ID Manager validates the policy and compiles it into an execution plan; the De-Identifier executes the plan. Trust is anchored in the policy carrier's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed policy.
 
-If needed, this section provides an overview of the concepts that
-provide necessary background for understanding the profile. If not
-needed, state "Not applicable." For an example of why/how this section
-may be needed, please see ITI Cross Enterprise Workflow (XDW).
+**Staged Execution.** DIS supports multi-stage de-identification. A preliminary stage handles direct identifiers (pseudonymization, suppression). An advanced stage handles quasi-identifiers and statistical disclosure control (generalization, rare-condition suppression, noise addition). The De-ID Manager dispatches one ITI-x3 task per stage. Each De-Identifier sees only its assigned stage, enforcing trust isolation between stages.
 
-It may be useful in this section but is not necessary, to provide a
-short list of the use cases described below and explain why they are
-different.
+**Reversibility Custody.** When reversible pseudonymization is enabled, the De-ID Manager retains the identity table and pseudonym index. The De-Identifier is stateless with respect to reversibility. Protected security material (seeds, identity tables, pseudonym indices) never leaves the Manager's trust boundary.
 
-### 1:XX.4.2 Use Cases
+**Consistency Keys.** A shared `consistencyKey` ensures that the same patient receives identical pseudonyms across jobs, stages, and (in future phases) across payload standards. This enables longitudinal linkage of de-identified data without exposing patient identity.
 
-#### XX.4.2.1 Use Case \#1: simple name
+**Evidence Baseline.** Every completed de-identification task produces provenance evidence containing at minimum nine elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, stage category, reversibility state, validation status, and audit correlation identifier.
 
-One or two sentence simple description of this particular use
-case.
+### 1:52.4.2 Use Cases
 
-Note that Section 1:XX.4.2.1 repeats in its entirety for additional use
-cases (replicate as Section 1:XX.4.2.2, 1:XX.4.2.3, etc.).
+#### 1:52.4.2.1 Use Case 1: Cross-Border Epidemiological Study Using IPS+
 
-##### 1:XX.4.2.1.1 simple name Use Case Description
+A research consortium conducts a cross-border epidemiological study combining population-based cancer-registry data with selected clinical information originally collected for healthcare delivery. The study examines incidence, treatment patterns, comorbidities, outcomes, and survival across participating jurisdictions.
 
-Describe the key use cases addressed by the profile. Limit to a
-maximum of one page of text or consider an appendix.
+##### 1:52.4.2.1.1 Cross-Border Epidemiological Study Use Case Description
 
-##### 1:XX.4.2.1.2 simple name Process Flow
+Clinical data remain under primary-use governance when recorded or exchanged for care. Their reuse begins only after a secondary-use request has been assessed and an authorization context has been issued. The Data Access Coordinator (DAC) coordinates participating jurisdictions, resolves authorized source-data provision, and -- acting as the De-Identification Requester -- submits a DIS job to produce a pseudonymized, disclosure-controlled dataset suitable for delivery to a Secure Processing Environment (SPE).
 
-Diagram and describe the process flow(s) covered by this profile in
-order to satisfy the use cases. Demonstrate how the profile transactions
-are combined/sequenced. To provide context and demonstrate how the
-profile interacts with other profiles, feel free to include transactions
-and events that are "external" to this profile (using appropriate
-notation.)
+The DAC submits an asynchronous ITI-x1 job with a signed policy carrier and FHIR processing targets. The De-ID Manager validates the policy and compiles a two-stage execution plan. The preliminary stage pseudonymizes direct identifiers with reversible, project-scoped pseudonyms using a shared `consistencyKey` to preserve longitudinal linkage. The advanced stage applies rare-condition suppression, small-cell handling, and quasi-identifier generalization. The DAC retrieves the de-identified output and evidence via ITI-x4 polling and forwards it to the SPE.
 
-The set of process flows will typically be exemplary, not exhaustive
-(i.e., it will address all the use cases, but will not show all possible
-combinations of actors, or all possible sequencing of transactions).
-
-If there are detailed behavioral rules that apply to a specific process
-flow or multiple process flows, an appendix may be added as needed.
-
-The roles at the top of the swimlane diagram should correspond to
-actor names, include the profile acronym:actor name if referencing an
-actor from a different profile.
-
-Modify the following "Swimlane Diagram". You can use plantuml or mermaid. see details on [using mermaid in the IG publisher](https://build.fhir.org/ig/FHIR/ig-guidance/diagrams-mermaid.html). Mermaid [user guide online](https://mermaid.js.org/intro/getting-started.html).  Plantuml seems more stable, and does support clickable links on artifacts. Goto [plantuml.com](http://plantuml.com) for an online tool to draft plantuml files.
+##### 1:52.4.2.1.2 Cross-Border Epidemiological Study Process Flow
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant Server
-    activate Client
-    activate Server
-    Client ->> Server: 1. Go Query Domain-YY
-    Server -->> Client: 2. Go Response Domain-YY
-    deactivate Server
-    deactivate Client
-    activate Client
-    Client ->> Client: process response
-    deactivate Client
+    participant DAC as De-Identification Requester<br/>(DAC)
+    participant MGR as De-ID Manager
+    participant DI_P as De-Identifier<br/>(Preliminary)
+    participant DI_A as De-Identifier<br/>(Advanced)
+
+    Note over DAC,MGR: Data request authorization and signed policy exist
+
+    DAC->>MGR: ITI-x1 Submit De-Identification Job (async)
+    activate MGR
+    MGR-->>DAC: 202 Accepted + Content-Location: [polling-url]
+    deactivate MGR
+
+    activate MGR
+    Note over MGR: Validate policy carrier, compile two-stage execution plan
+
+    MGR->>DI_P: ITI-x3 Submit Task (preliminary: pseudonymize direct identifiers)
+    activate DI_P
+    DI_P-->>MGR: Transformed output + evidence
+    deactivate DI_P
+
+    MGR->>DI_A: ITI-x3 Submit Task (advanced: rare-condition suppression, generalization)
+    activate DI_A
+    DI_A-->>MGR: Transformed output + evidence
+    deactivate DI_A
+    deactivate MGR
+
+    DAC->>MGR: ITI-x4 GET [polling-url]
+    activate MGR
+    MGR-->>DAC: 202 Accepted + Retry-After (in-progress)
+    deactivate MGR
+
+    DAC->>MGR: ITI-x4 GET [polling-url]
+    activate MGR
+    MGR-->>DAC: 200 OK (de-identified output + evidence)
+    deactivate MGR
 ```
 
-**Figure 1:XX.4.2.2-1: Basic Process Flow in Profile Acronym Profile**:
+**Figure 1:52.4.2.1.2-1: Use Case 1 - Cross-Border Epidemiological Study Process Flow**
 
-If process flow "swimlane" diagrams require additional explanation
-to clarify conditional flows, or flow variations need to be described
-where alternate systems may be playing different actor roles, document
-those conditional flows here.
+#### 1:52.4.2.2 Use Case 2: Multimodal AI/ML Method Development (FHIR Input-Preparation)
 
-Delete the material below if this is a workflow or transport
-profile. Delete the material above if this profile is a content module
-only profile.
+An AI/ML consortium develops or validates cancer models using multimodal data -- structured clinical information, radiology, digital pathology, laboratory data, genomics, annotations, and outcomes. DIS handles the FHIR input-preparation portion of the pipeline.
 
-**Pre-conditions**:
+##### 1:52.4.2.2.1 AI/ML Method Development Use Case Description
 
-Very briefly (typically one sentence) describe the conditions or
-timing when this content module would be used.
+The consortium holds a data permit identifying the approved cohort, modalities, linkage requirements, and de-identification stages. The DAC acts as the De-Identification Requester and submits an asynchronous job for the structured clinical data (EHR records, laboratory results, outcome labels, annotations).
 
-**Main Flow**:
+The De-ID Manager compiles a two-stage execution plan. The preliminary stage pseudonymizes direct identifiers with reversible, project-scoped pseudonyms using a shared `consistencyKey`. This key is designed to be reused by future DICOM processing so that the same pseudonym links a patient's clinical and imaging data. The advanced stage applies quasi-identifier generalization, rare-condition suppression, and FHIR-specific disclosure control. The DAC retrieves the de-identified FHIR output via ITI-x4 and delivers it to the SPE.
 
-Typically in an enumerated list, describe the clinical workflow
-when, where, and how this content module would be used.
+##### 1:52.4.2.2.2 AI/ML Method Development Process Flow
 
-**Post-conditions:**
+```mermaid
+sequenceDiagram
+    participant DAC as De-Identification Requester<br/>(DAC)
+    participant MGR as De-ID Manager
+    participant DI_P as De-Identifier<br/>(Preliminary)
+    participant DI_A as De-Identifier<br/>(Advanced)
 
-Very briefly (typically one sentence) describe the state of the
-clinical scenario after this content module has been created including
-examples of potential next steps.
+    Note over DAC,MGR: Data permit and signed policy exist
+
+    DAC->>MGR: ITI-x1 Submit De-Identification Job (async, with consistencyKey)
+    activate MGR
+    MGR-->>DAC: 202 Accepted + Content-Location: [polling-url]
+    deactivate MGR
+
+    activate MGR
+    Note over MGR: Validate policy carrier, compile two-stage execution plan
+
+    MGR->>DI_P: ITI-x3 Submit Task (preliminary: pseudonymize with shared consistencyKey)
+    activate DI_P
+    DI_P-->>MGR: Transformed output + evidence
+    deactivate DI_P
+
+    MGR->>DI_A: ITI-x3 Submit Task (advanced: generalization, suppression)
+    activate DI_A
+    DI_A-->>MGR: Transformed output + evidence
+    deactivate DI_A
+    deactivate MGR
+
+    DAC->>MGR: ITI-x4 GET [polling-url]
+    activate MGR
+    MGR-->>DAC: 202 Accepted + Retry-After (in-progress)
+    deactivate MGR
+
+    DAC->>MGR: ITI-x4 GET [polling-url]
+    activate MGR
+    MGR-->>DAC: 200 OK (de-identified FHIR output + evidence)
+    deactivate MGR
+
+    Note over DAC: Forward FHIR output to SPE; consistencyKey reused for future DICOM pipeline
+```
+
+**Figure 1:52.4.2.2.2-1: Use Case 2 - AI/ML Method Development (FHIR Input-Preparation) Process Flow**
+
+#### 1:52.4.2.3 Use Case 3: Clinical Pathology Order (Pseudonymous Care)
+
+A hospital EHR pseudonymizes patient context before sending a laboratory order to an external pathology lab. The lab operates under a pseudonymous-care model and processes orders referencing only the pseudonym.
+
+##### 1:52.4.2.3.1 Clinical Pathology Order Use Case Description
+
+Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR acts as the De-Identification Requester and submits a synchronous ITI-x1 job with care-context authorization, a pseudonymization policy carrier, and Patient plus ServiceRequest resources.
+
+The De-ID Manager validates the policy and compiles a single-stage execution plan. The De-Identifier replaces patient identifiers with scoped pseudonyms -- the same pseudonym is used for the same patient within the project scope, enabling longitudinal result correlation. The De-ID Manager returns the pseudonymized payload and evidence inline in the ITI-x1 response.
+
+The De-ID Manager retains the identity table and pseudonym index so that future re-identification can be enabled. The EHR resolves the pseudonym back to the original patient to file the lab result into the correct chart using a local reverse-mapping mechanism.
+
+##### 1:52.4.2.3.2 Clinical Pathology Order Process Flow
+
+```mermaid
+sequenceDiagram
+    participant EHR as De-Identification Requester<br/>(EHR)
+    participant MGR as De-ID Manager
+    participant DI as De-Identifier
+
+    Note over EHR,MGR: Care-context authorization and pseudonymization policy exist
+
+    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync, Patient + ServiceRequest)
+    activate MGR
+    Note over MGR: Validate policy carrier, compile single-stage plan
+
+    MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
+    activate DI
+    Note over DI: Replace identifiers with scoped pseudonyms using seed
+    DI-->>MGR: Pseudonymized resources + evidence
+    deactivate DI
+
+    Note over MGR: Retain identity table + pseudonym index
+    MGR-->>EHR: ITI-x1 Response (pseudonymized payload + evidence)
+    deactivate MGR
+
+    Note over EHR: Send pseudonymized order to external lab
+    Note over EHR: Receive lab result referencing pseudonym
+    Note over EHR: Resolve pseudonym to original patient, file result
+```
+
+**Figure 1:52.4.2.3.2-1: Use Case 3 - Clinical Pathology Order Process Flow**
+
+#### 1:52.4.2.4 Use Case 4: AI-Assisted Clinical Decision Support (Cloud Deployment)
+
+A hospital EHR pseudonymizes patient data before transmitting to a cloud-hosted AI service for clinical decision support. The AI service operates outside the hospital trust boundary and receives only pseudonymized data.
+
+##### 1:52.4.2.4.1 AI-Assisted Clinical Decision Support Use Case Description
+
+A clinician triggers AI decision support for an active patient encounter. The EHR submits the patient's FHIR resources (Observations, Conditions, MedicationStatements, Encounters) to the on-premise De-ID Manager for reversible pseudonymization. The De-ID Manager and De-Identifier operate entirely within the hospital trust boundary -- no identifiable data or protected security material leaves the on-premise environment during the de-identification step.
+
+The De-ID Manager returns the pseudonymized payload synchronously. The EHR transmits pseudonymized data to the cloud AI service and receives recommendations referencing the pseudonym. The EHR resolves the pseudonym back to the original patient and files the AI output to the correct chart.
+
+Protected security material (identity table, pseudonym index, cryptographic seeds) never leaves the hospital trust boundary.
+
+##### 1:52.4.2.4.2 AI-Assisted Clinical Decision Support Process Flow
+
+```mermaid
+sequenceDiagram
+    participant EHR as De-Identification Requester<br/>(EHR)
+    participant MGR as De-ID Manager<br/>(on-premise)
+    participant DI as De-Identifier<br/>(on-premise)
+    participant AI as Cloud AI Service<br/>(external)
+
+    Note over EHR,DI: All DIS actors within hospital trust boundary
+
+    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync, clinical resources)
+    activate MGR
+    Note over MGR: Validate policy, compile single-stage plan
+
+    MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
+    activate DI
+    Note over DI: Pseudonymize within trust boundary
+    DI-->>MGR: Pseudonymized resources + evidence
+    deactivate DI
+
+    Note over MGR: Retain identity table + pseudonym index on-premise
+    MGR-->>EHR: ITI-x1 Response (pseudonymized payload + evidence)
+    deactivate MGR
+
+    EHR->>AI: Transmit pseudonymized data (outside DIS)
+    activate AI
+    AI-->>EHR: AI recommendation referencing pseudonym (outside DIS)
+    deactivate AI
+
+    Note over EHR: Resolve pseudonym, file AI result to patient chart
+```
+
+**Figure 1:52.4.2.4.2-1: Use Case 4 - AI-Assisted Clinical Decision Support Process Flow**
+
+#### 1:52.4.2.5 Use Case 5: Local Authorized Clinical Document Export
+
+An authorized clinician exports a de-identified FHIR document Bundle from a clinical workstation. Authorization derives from the clinician's local role and declared purpose -- no external data permit is required.
+
+##### 1:52.4.2.5.1 Local Authorized Clinical Document Export Use Case Description
+
+A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts a grouped De-ID Manager and De-Identifier. The grouped De-ID Manager maps the local authorization to a configured de-identification policy using the DIS-LAE1 bridge pattern. No external policy carrier acquisition is needed -- the policy is pre-configured by institutional administration.
+
+The grouped De-Identifier performs identifier handling per the configured policy and returns the de-identified document Bundle with evidence. The De-ID Manager writes the de-identified output and Provenance evidence to the export destination. An ATNA audit record is emitted recording the policy identifier, stage, outcome, and audit correlation.
+
+This use case demonstrates that DIS supports lightweight local workflows without requiring heavy external permit infrastructure.
+
+##### 1:52.4.2.5.2 Local Authorized Clinical Document Export Process Flow
+
+```mermaid
+sequenceDiagram
+    participant CLI as Clinician
+    participant WS as Clinical Workstation<br/>(grouped Requester +<br/>De-ID Manager + De-Identifier)
+
+    CLI->>WS: Initiate document export (local action)
+    activate WS
+    Note over WS: DIS-LAE1: Map local authorization (role + purpose) to configured policy
+    Note over WS: Compile single-stage execution plan
+
+    Note over WS: ITI-x3 (internal): De-Identifier handles identifiers per policy
+    Note over WS: Return de-identified document Bundle + evidence
+
+    Note over WS: Write de-identified output + Provenance to export destination
+    Note over WS: Emit ATNA audit record
+    WS-->>CLI: Export complete
+    deactivate WS
+```
+
+**Figure 1:52.4.2.5.2-1: Use Case 5 - Local Authorized Clinical Document Export Process Flow**
 
 <a name="security-considerations"> </a>
 
-## 1:XX.5 ToDo Security Considerations
+## 1:52.5 DIS Security Considerations
 
-See ITI TF-2: [Appendix Z.8 "Mobile Security Considerations"](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.8-mobile-security-considerations)
+See ITI TF-2: [Appendix Z.8 "Mobile Security Considerations"](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.8-mobile-security-considerations).
 
-The following is instructions to the editor and this text is not to be included in a publication.
-The material initially from [RFC 3552 "Security Considerations Guidelines" July 2003](https://tools.ietf.org/html/rfc3552).
+DIS processes health data that is identifiable at input and de-identified at output. The security architecture addresses threats arising during the transformation workflow.
 
-This section should address downstream design considerations, specifically for: Privacy, Security, and Safety. These might need to be individual header sections if they are significant or need to be referenced.
+### 1:52.5.1 Actor Grouping and Transport Security
 
-The editor needs to understand Security and Privacy fundamentals.
-General [Security and Privacy guidance]({{site.data.fhir.path}}secpriv-module.html) is provided in the FHIR Specification. 
-The FHIR core specification should be leveraged where possible to inform the reader of your specification.
+All DIS actors SHALL be grouped with ATNA Secure Node or Secure Application ([ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html)). This grouping ensures that all DIS transactions are audit-logged and that communications are secured via mutual TLS. Implementations SHALL use TLS 1.2 or later for all DIS transactions.
 
-IHE FHIR based profiles should reference the [ITI Appendix Z](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html) section 8 Mobile Security and Privacy Considerations base when appropriate.
+### 1:52.5.2 Authorization
 
-IHE Document Content profiles can reference the security and privacy provided by the Document Sharing infrastructure as directly grouped or possibly to be grouped.
+The De-ID Manager SHALL be grouped with IUA Authorization Client or Resource Server ([ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html)). System-to-system authorization for automated workflows SHOULD use SMART Backend Services with OAuth 2.0 client credentials grants. The De-ID Manager SHALL verify that the Requester is authorized under the submitted data request authorization before accepting a job.
 
-   While it is not a requirement that any given specification or system be
-   immune to all forms of attack, it is still necessary for authors of specifications to
-   consider as many forms as possible.  Part of the purpose of the
-   Security and Privacy Considerations section is to explain what attacks have been
-   considered and what countermeasures can be applied to defend against them.
+### 1:52.5.3 Policy Carrier Integrity
 
-   There should be a clear description of the kinds of threats on the
-   described specification.  This should be approached as an
-   effort to perform "due diligence" in describing all known or
-   foreseeable risks and threats to potential implementers and users.
+De-identification policy carriers are digitally signed. Trust is anchored in the policy carrier's signature, not in the Requester's identity -- the Requester acts as a courier. The De-ID Manager SHALL verify the signature, schema conformance, currency, and authorization consistency of every policy carrier before job execution. Policy carriers with invalid, expired, or untrusted signatures SHALL be rejected.
 
-Authors MUST describe:
+### 1:52.5.4 Reversibility Material Custody
 
-- which attacks have been considered and addressed in the specification
-- which attacks have been considered but not addressed in the specification
-- what could be done in system design, system deployment, or user training
+The De-ID Manager is the sole custodian of reversibility material (identity table and pseudonym index). Protected security material -- including cryptographic seeds, identity tables, and pseudonym indices -- SHALL NOT be disclosed outside the De-ID Manager's trust boundary. The De-Identifier is stateless with respect to reversibility and retains no identity-linking material after task completion.
 
-   At least the following forms of attack MUST be considered:
-   eavesdropping, replay, message insertion, deletion, modification, and
-   man-in-the-middle.  Potential denial of service attacks MUST be
-   identified as well.  If the specification incorporates cryptographic
-   protection mechanisms, it should be clearly indicated which portions
-   of the data are protected and what the protections are (i.e.,
-   integrity only, confidentiality, and/or endpoint authentication,
-   etc.).  Some indication should also be given to what sorts of attacks
-   the cryptographic protection is susceptible.  Data which should be
-   held secret (keying material, random seeds, etc.) should be clearly
-   labeled.
+Implementations deploying DIS-RP1 (Reversible Pseudonymization) SHALL implement access controls, encryption at rest, and audit logging for all reversibility material. The De-ID Manager SHALL enforce access controls preventing unauthorized access to reversibility material even by other DIS actors.
 
-   If the specification involves authentication, particularly user-host
-   authentication, the security of the authentication method MUST be
-   clearly specified.  That is, authors MUST document the assumptions
-   that the security of this authentication method is predicated upon.
+### 1:52.5.5 Trust Isolation Between Stages
 
-   The threat environment addressed by the Security and Privacy Considerations
-   section MUST at a minimum include deployment across the global
-   Internet across multiple administrative boundaries without assuming
-   that firewalls are in place, even if only to provide justification
-   for why such consideration is out of scope for the protocol.  It is
-   not acceptable to only discuss threats applicable to LANs and ignore
-   the broader threat environment.  In
-   some cases, there might be an Applicability Statement discouraging
-   use of a technology or protocol in a particular environment.
-   Nonetheless, the security issues of broader deployment should be
-   discussed in the document.
+When the De-ID Manager compiles a multi-stage execution plan, each De-Identifier receives only the execution rules for its assigned stage. A De-Identifier performing the advanced stage (quasi-identifier generalization, suppression) does not have access to the preliminary stage's pseudonym-to-identity mappings. This stage-scoped dispatch provides defense-in-depth: compromise of a single De-Identifier does not expose the complete identity-to-pseudonym chain.
 
-   There should be a clear description of the residual risk to the user
-   or operator of that specification after threat mitigation has been
-   deployed.  Such risks might arise from compromise in a related
-   specification (e.g., IPsec is useless if key management has been
-   compromised), from incorrect implementation, compromise of the
-   security technology used for risk reduction (e.g., a cipher with a
-   40-bit key), or there might be risks that are not addressed by the
-   specification (e.g., denial of service attacks on an
-   underlying link protocol).  Particular care should be taken in
-   situations where the compromise of a single system would compromise
-   an entire protocol.  For instance, in general specification designers
-   assume that end-systems are inviolate and don't worry about physical
-   attack.  However, in cases (such as a certificate authority) where
-   compromise of a single system could lead to widespread compromises,
-   it is appropriate to consider systems and physical security as well.
+### 1:52.5.6 Audit Logging
 
-   There should also be some discussion of potential security risks
-   arising from potential misapplications of the specification or technology
-   described in the specification.  
-  
-This section also include specific considerations regarding Digital Signatures, Provenance, Audit Logging, and De-Identification.
-
-Where audit logging is specified, a StructureDefinition profile(s) should be included, and Examples of those logs might be included.
+All DIS transactions SHALL generate ATNA audit events. Every completed de-identification task produces evidence containing an audit correlation identifier linking the de-identification event to the ATNA audit trail. Implementations SHOULD use IHE Basic Audit Log Patterns (BALP) for structured audit events.
 
 <a name="other-grouping"> </a>
 
-## 1:XX.6 ToDo Cross-Profile Considerations
+## 1:52.6 DIS Cross-Profile Considerations
 
-This section is informative, not normative. It is intended to put
-this profile in context with other profiles. Any required groupings
-should have already been described above. Brief descriptions can go
-directly into this section; lengthy descriptions should go into an
-appendix. Examples of this material include ITI Cross Community Access
-(XCA) Grouping Rules (Section 18.2.3), the Radiology associated profiles
-listed at wiki.ihe.net, or ITI Volume 1 Appendix E "Cross Profile
-Considerations", and the "See Also" sections Radiology Profile
-descriptions on the wiki such as
-<http://wiki.ihe.net/index.php/Scheduled_Workflow#See_Also>. If this
-section is left blank, add "Not applicable."
+### IHE IUA - Internet User Authorization
 
-Consider using a format such as the following:
+The De-ID Manager groups with IUA for system-to-system authorization. IUA Authorization Client is used when the De-ID Manager needs to obtain tokens; IUA Resource Server is used when the De-ID Manager validates tokens presented by the De-Identification Requester. Implementations using SMART Backend Services for automated workflows operate through the IUA framework.
 
-other profile acronym - other profile name
+### IHE ATNA / BALP - Audit Trail and Node Authentication / Basic Audit Log Patterns
 
-A other profile actor name in other profile name might
-be grouped with a this profile actor name to describe
-benefit/what is accomplished by grouping.
+All DIS actors group with ATNA for transport security and audit logging. Implementations SHOULD use BALP for structured, FHIR-based audit event representation. The audit correlation identifier in DIS de-identification evidence links de-identification events to the broader ATNA audit trail, enabling end-to-end traceability from authorization through de-identification to output delivery.
+
+### IHE MHD - Mobile Access to Health Documents
+
+When de-identified output is delivered to a document sharing infrastructure, the De-Identification Requester (or a downstream consumer) MAY group with MHD Document Source to publish de-identified documents. MHD provides a FHIR-native document sharing transport that complements the DIS de-identification workflow.
+
+### SMART on FHIR Backend Services
+
+SMART Backend Services provides the OAuth 2.0 client credentials flow used for system-to-system authorization in automated DIS workflows. This is the recommended authorization pattern for server-to-server interactions where no end-user is present (for example, asynchronous cohort de-identification jobs submitted by a Data Access Coordinator).
+
+### External Data Permit and Data Request Profiles
+
+DIS consumes data request authorizations but does not produce them. The data request authorization presented in ITI-x1 is obtained through mechanisms outside DIS -- including national EHDS infrastructure, institutional governance workflows, bilateral agreements, or integration with external data permit services. DIS validates the authorization but is agnostic to its origin.

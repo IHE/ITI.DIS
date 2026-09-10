@@ -62,18 +62,17 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 
 
 pages:
-# itemize here each narrative page. Include assigned section numbers when appropriate. The order they appear here is the order they will appear in the TOC and on the next/prev navigation.
   index.md:
-    title: ToDo Home
+    title: De-Identification Services (DIS)
     generation: markdown
   volume-1.md:
-    title: 1:XX ToDo Volume 1
+    title: 1:52 De-Identification Services (DIS)
     generation: markdown
   domain-YY.md:
-    title: 2:3.YY Transaction one [Domain-YY]
+    title: 2:3.YY Transaction Placeholder [Domain-YY]
     generation: markdown
   domain-ZZ.md:
-    title: 3:?.ZZ Content one [Domain-ZZ]
+    title: 3:5.ZZ Content Module Placeholder [Domain-ZZ]
     generation: markdown
   testplan.md:
     title: "Test Plan"
@@ -99,9 +98,9 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    "Transaction one [Domain-YY]": domain-YY.html
+    "Transaction Placeholder [Domain-YY]": domain-YY.html
   Volume 3:
-    "Content one [Domain-ZZ]": domain-ZZ.html
+    "Content Module Placeholder [Domain-ZZ]": domain-ZZ.html
   Artifacts: artifacts.html
   Other:
     Changes to Other IHE Specifications: other.html
