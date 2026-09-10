@@ -241,7 +241,7 @@ sequenceDiagram
 
     DAC->>MGR: ITI-x1 Submit De-Identification Job (async)
     activate MGR
-    MGR-->>DAC: 202 Accepted + Content-Location: [polling-url]
+    MGR-->>DAC: 202 Accepted + Content-Location: polling-url
     deactivate MGR
 
     activate MGR
@@ -258,12 +258,12 @@ sequenceDiagram
     deactivate DI_A
     deactivate MGR
 
-    DAC->>MGR: ITI-x4 GET [polling-url]
+    DAC->>MGR: ITI-x4 GET polling-url
     activate MGR
     MGR-->>DAC: 202 Accepted + Retry-After (in-progress)
     deactivate MGR
 
-    DAC->>MGR: ITI-x4 GET [polling-url]
+    DAC->>MGR: ITI-x4 GET polling-url
     activate MGR
     MGR-->>DAC: 200 OK (de-identified output + evidence)
     deactivate MGR
@@ -294,7 +294,7 @@ sequenceDiagram
 
     DAC->>MGR: ITI-x1 Submit De-Identification Job (async, with consistencyKey)
     activate MGR
-    MGR-->>DAC: 202 Accepted + Content-Location: [polling-url]
+    MGR-->>DAC: 202 Accepted + Content-Location: polling-url
     deactivate MGR
 
     activate MGR
@@ -311,12 +311,12 @@ sequenceDiagram
     deactivate DI_A
     deactivate MGR
 
-    DAC->>MGR: ITI-x4 GET [polling-url]
+    DAC->>MGR: ITI-x4 GET polling-url
     activate MGR
     MGR-->>DAC: 202 Accepted + Retry-After (in-progress)
     deactivate MGR
 
-    DAC->>MGR: ITI-x4 GET [polling-url]
+    DAC->>MGR: ITI-x4 GET polling-url
     activate MGR
     MGR-->>DAC: 200 OK (de-identified FHIR output + evidence)
     deactivate MGR
