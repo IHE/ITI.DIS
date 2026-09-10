@@ -2,12 +2,12 @@
 # ───────────────────────────────────────────────────
 # the id should be lowercase made up of "ihe." + {domain acronym} + "." + {profile acronym/short-name}
 # e.g. ihe.iti.mhds, or ihe.iti.basicaudit
-id: ihe.domain.profile
-canonical: https://profiles.ihe.net/Domain/Profile
+id: ihe.iti.dis
+canonical: https://profiles.ihe.net/ITI/DIS
 version: 0.0.1-current
-name: IHE_Domain_Profile
-title: "spelled out name of the IHE Profile"
-description: put the short description of the profile here. it should explain what problem is being solved
+name: IHE_ITI_DIS
+title: "De-Identification Service (DIS) Profile"
+description: DIS (De-Identification Services) is an IHE interoperability profile that standardizes the workflow for policy-governed de-identification of HL7 FHIR health data through three actors (De-ID Manager, De-Identifier, Requester) and three transactions, supporting both synchronous and asynchronous job patterns with auditable provenance evidence.
 releaseLabel: ci-build
 #releaseLabel: ballot
 #releaseLabel: trial-use
