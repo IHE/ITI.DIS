@@ -1,7 +1,11 @@
 
 The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policy carriers and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
 
-DIS is a **Workflow** profile. It defines three actors, four transactions, a composable policy model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
+DIS is a **Workflow** profile. It defines three actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
+
+DIS separates core workflow semantics, the FHIR transaction binding, and the version of the processing payload. The initial DIS transaction binding uses FHIR R4 APIs and resources. DIS-FHIR1 supports independently versioned FHIR R4 and R5 processing payloads; support for R5 payloads does not require an R5 binding of the DIS workflow resources. Future transaction bindings may target other FHIR releases while preserving the core workflow semantics.
+
+The processing payload's FHIR version SHALL be explicitly identified. De-Identifiers SHALL declare supported processing payload versions, and the Manager SHALL verify version compatibility before dispatch. Payloads SHALL be validated against their declared version. A payload using a different FHIR version from the transaction binding SHALL be referenced or carried as explicitly identified serialized content using the payload binding's packaging rules; it SHALL NOT be embedded as a native resource of the other version in the transaction envelope. Detailed version identification and packaging rules are to be specified in the DIS-FHIR1 binding.
 
 <a name="actors-and-transactions"> </a>
 
@@ -67,7 +71,7 @@ Phase 1 does not standardize how the Requester obtains a signed de-identificatio
 
 The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and de-identification policy carrier, compiles the validated policy into an execution plan, dispatches de-identification tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
-The De-ID Manager is the sole custodian of reversibility material. When reversible pseudonymization is enabled (DIS-RP1), the De-ID Manager retains the identity table (cryptographic seed to patient identity mapping) and builds a pseudonym index from de-identification evidence reported by the De-Identifier at job completion. Together these two tables form the reverse-mapping chain: pseudonym to seed to patient identity. Phase 1 does not standardize re-identification transactions; however, implementations claiming DIS-RP1 SHALL retain reversibility material so that standardized re-identification can be enabled without re-processing previously de-identified data.
+The De-ID Manager is the sole persistent custodian of identity mappings and reversibility records. When reversible pseudonymization is enabled (DIS-RP1), the De-ID Manager retains the identity table (cryptographic seed to patient identity mapping) and builds a pseudonym index from de-identification evidence reported by the De-Identifier at job completion. Together these two tables form the reverse-mapping chain: pseudonym to seed to patient identity. Phase 1 does not standardize re-identification transactions; however, implementations claiming DIS-RP1 SHALL retain reversibility material so that standardized re-identification can be enabled without re-processing previously de-identified data.
 
 The De-ID Manager performs four-point validation on all policy carrier variants:
 
@@ -80,9 +84,9 @@ The De-ID Manager performs four-point validation on all policy carrier variants:
 
 #### 1:52.1.1.3 De-Identifier
 
-The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives a cryptographic seed, produces transformations and evidence, and retains no identity-linking material. The De-Identifier derives pseudonyms from the seed and reports them in evidence but does not store the seed-to-identity mapping.
+The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives scoped, purpose-specific seeds as required by the assigned rules, produces transformations and evidence, and retains no identity-linking material after task termination. The De-Identifier derives transformation values, such as pseudonyms or date-shift offsets, according to the execution plan and its declared capabilities. It reports pseudonyms needed for reversibility to the Manager but does not retain the seed-to-identity mapping. The Manager supplies policy, scope, and seed material; it is not required to compute pseudonyms or date-shift offsets.
 
-A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR1), supported action families (`core`), and zero or more named standardized policies it natively supports. The De-ID Manager SHALL verify the De-Identifier's capability declaration before dispatching tasks via ITI-x3.
+A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR1), supported action families (`core`), and zero or more named standardized policies it natively supports. The declaration SHALL also identify supported transformation parameter inputs and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
 
 ### 1:52.1.2 Transaction Descriptions
 
@@ -94,11 +98,15 @@ This transaction allows the De-Identification Requester to present a data reques
 
 The transaction SHALL reject a job when the data request authorization is missing, untrusted, expired, or inconsistent with the requested processing target. The transaction SHALL also reject a job when the de-identification policy carrier is missing, has an invalid or untrusted signature, is expired, or is inconsistent with the data request authorization. Rejection is always synchronous regardless of the requested response mode.
 
+Before accepting a job or dispatching any task, the De-ID Manager SHALL validate the data request authorization and complete all four policy carrier checks: signature validity, schema conformance, currency, and authorization consistency. If admission validation fails or cannot be completed, the Manager SHALL return a synchronous error response and SHALL NOT accept the job or dispatch tasks. This requirement applies to both synchronous and asynchronous requests.
+
+For an accepted asynchronous job, failures discovered during subsequent processing SHALL be reported through ITI-x4 job status. The Manager SHALL withhold de-identified output from a failed job, including when output validation fails.
+
 For more details see the detailed [transaction description](ITI-x1.html).
 
 #### 1:52.1.2.2 Submit De-Identification Task [ITI-x3]
 
-This transaction allows the De-ID Manager to submit a de-identification task to a De-Identifier. The task carries a reference to a Library resource containing execution rules for the assigned stage, the processing target (or reference to prior stage output), and a cryptographic seed. The De-Identifier applies the transformation rules, produces de-identified output and evidence, and returns a completed task with validation status.
+This transaction allows the De-ID Manager to submit a de-identification task to a De-Identifier. The task carries a reference to a Library resource containing execution rules for the assigned stage, the processing target (or reference to prior stage output), and scoped, purpose-specific seeds when required by the assigned rules and supported parameter inputs. The De-Identifier applies the transformation rules, produces de-identified output and evidence, and returns a completed task with validation status.
 
 When the De-ID Manager compiles multiple stages, ITI-x3 is invoked once per stage in sequence. Each invocation references a Library containing only the rules assigned to that stage -- the De-Identifier SHALL NOT have visibility into stages assigned to other instances.
 
@@ -129,16 +137,14 @@ Options that may be selected for each actor in this profile are listed in Table 
 | De-Identification Requester | Asynchronous Job Processing | [1:52.2.1](#15221-asynchronous-job-processing-option) |
 | De-ID Manager | Asynchronous Job Processing | [1:52.2.1](#15221-asynchronous-job-processing-option) |
 | De-ID Manager | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
-| De-ID Manager | Composable Execution Plan | [1:52.2.3](#15223-composable-execution-plan-option) |
 | De-ID Manager | Local Authorized Export | [1:52.2.4](#15224-local-authorized-export-option) |
 | De-Identifier | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
-| De-Identifier | Composable Execution Plan | [1:52.2.3](#15223-composable-execution-plan-option) |
 | De-Identifier | Deferred Task Output | [1:52.2.5](#15225-deferred-task-output-option) |
 {: .grid}
 
 ### 1:52.2.1 Asynchronous Job Processing Option
 
-The Asynchronous Job Processing Option (DIS-ASYNC) enables the De-Identification Requester and De-ID Manager to support asynchronous de-identification workflows. When a Requester sends ITI-x1 with `Prefer: respond-async`, the De-ID Manager SHALL return HTTP `202 Accepted` with a `Content-Location` header containing a polling URL. The Requester retrieves de-identified output and evidence via ITI-x4 using the polling URL.
+The Asynchronous Job Processing Option (DIS-ASYNC) enables the De-Identification Requester and De-ID Manager to support asynchronous de-identification workflows. When a Requester sends ITI-x1 with `Prefer: respond-async` and admission validation succeeds, the De-ID Manager SHALL return HTTP `202 Accepted` with a `Content-Location` header containing a polling URL. The Requester retrieves de-identified output and evidence via ITI-x4 using the polling URL.
 
 This option is required for multi-patient cohort workflows where processing time exceeds the request timeout. Both the De-Identification Requester and the De-ID Manager SHALL support ITI-x4 when this option is declared.
 
@@ -152,15 +158,17 @@ When this option is supported, the De-ID Manager SHALL:
 
 - Retain the identity table (cryptographic seed to patient identity mapping) created during policy compilation
 - Build a pseudonym index from de-identification evidence reported by the De-Identifier at job completion
-- Protect reversibility material within its trust boundary -- this material SHALL NOT be disclosed outside the Manager's trust boundary
+- Protect identity tables and pseudonym indices within its trust boundary -- these records SHALL NOT be disclosed outside the Manager's trust boundary; seed sharing with authorized De-Identifiers follows §1:52.5.4
 
 A De-Identifier supporting this option SHALL produce pseudonyms that are deterministically derivable from the cryptographic seed, enabling the De-ID Manager to build its reverse-mapping chain from evidence without requiring the De-Identifier to retain any identity-linking material.
 
-### 1:52.2.3 Composable Execution Plan Option
+UC-3 and UC-4 illustrate authorized, implementation-defined access to the Manager's mapping service for patient association. Such access returns only the resolution result needed by the EHR and does not export the identity table or pseudonym index. Phase 1 does not standardize this interaction or introduce a re-identification transaction.
 
-The Composable Execution Plan Option (DIS-EXE1) enables the De-ID Manager and De-Identifier to support the full composable policy model with the DIS-EXE1 execution plan schema, including policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, and selector specificity rules.
+### 1:52.2.3 Baseline Execution Plan Requirements
 
-The baseline execution plan format (DIS-EXE1-Baseline) supports flat ordered rule lists only. A De-ID Manager or De-Identifier that does not declare this option SHALL support DIS-EXE1-Baseline and SHALL NOT require composable features in dispatched or received execution plans.
+Every Phase 1 De-ID Manager and De-Identifier SHALL support DIS-EXE1-Baseline, which supports flat, ordered rule lists. Phase 1 execution plans SHALL NOT require policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, or selector specificity rules. The full Composable Execution Plan Option (DIS-EXE1), including these features, is deferred to a future phase and is not a Phase 1 actor option.
+
+Multi-stage processing remains supported in Phase 1. The De-ID Manager dispatches a separate DIS-EXE1-Baseline plan for each stage through ITI-x3; each plan contains only the ordered rules assigned to that stage.
 
 ### 1:52.2.4 Local Authorized Export Option
 
@@ -210,7 +218,7 @@ DIS introduces the following key concepts that provide necessary background for 
 
 **Staged Execution.** DIS supports multi-stage de-identification. A preliminary stage handles direct identifiers (pseudonymization, suppression). An advanced stage handles quasi-identifiers and statistical disclosure control (generalization, rare-condition suppression, noise addition). The De-ID Manager dispatches one ITI-x3 task per stage. Each De-Identifier sees only its assigned stage, enforcing trust isolation between stages.
 
-**Reversibility Custody.** When reversible pseudonymization is enabled, the De-ID Manager retains the identity table and pseudonym index. The De-Identifier is stateless with respect to reversibility. Protected security material (seeds, identity tables, pseudonym indices) never leaves the Manager's trust boundary.
+**Reversibility Custody.** When reversible pseudonymization is enabled, the De-ID Manager retains the identity table and pseudonym index. The De-Identifier is stateless with respect to reversibility. Identity tables and pseudonym indices remain within the Manager's trust boundary. Scoped, purpose-specific seeds may be shared with authorized De-Identifiers in separate trust boundaries under the controls in §1:52.5.4.
 
 **Consistency Keys.** A shared `consistencyKey` ensures that the same patient receives identical pseudonyms across jobs, stages, and (in future phases) across payload standards. This enables longitudinal linkage of de-identified data without exposing patient identity.
 
@@ -241,11 +249,13 @@ sequenceDiagram
 
     DAC->>MGR: ITI-x1 Submit De-Identification Job (async)
     activate MGR
-    MGR-->>DAC: 202 Accepted + Content-Location: polling-url
+    Note over MGR: Validate authorization and all four policy carrier checks
+    Note over DAC,MGR: If validation fails or cannot complete: synchronous error, no acceptance or dispatch
+    MGR-->>DAC: 202 Accepted + Content-Location: polling-url (validation succeeded)
     deactivate MGR
 
     activate MGR
-    Note over MGR: Validate policy carrier, compile two-stage execution plan
+    Note over MGR: Compile two-stage execution plan
 
     MGR->>DI_P: ITI-x3 Submit Task (preliminary: pseudonymize direct identifiers)
     activate DI_P
@@ -294,11 +304,13 @@ sequenceDiagram
 
     DAC->>MGR: ITI-x1 Submit De-Identification Job (async, with consistencyKey)
     activate MGR
-    MGR-->>DAC: 202 Accepted + Content-Location: polling-url
+    Note over MGR: Validate authorization and all four policy carrier checks
+    Note over DAC,MGR: If validation fails or cannot complete: synchronous error, no acceptance or dispatch
+    MGR-->>DAC: 202 Accepted + Content-Location: polling-url (validation succeeded)
     deactivate MGR
 
     activate MGR
-    Note over MGR: Validate policy carrier, compile two-stage execution plan
+    Note over MGR: Compile two-stage execution plan
 
     MGR->>DI_P: ITI-x3 Submit Task (preliminary: pseudonymize with shared consistencyKey)
     activate DI_P
@@ -336,7 +348,7 @@ Institutional policy prohibits the external lab from seeing direct patient ident
 
 The De-ID Manager validates the policy and compiles a single-stage execution plan. The De-Identifier replaces patient identifiers with scoped pseudonyms -- the same pseudonym is used for the same patient within the project scope, enabling longitudinal result correlation. The De-ID Manager returns the pseudonymized payload and evidence inline in the ITI-x1 response.
 
-The De-ID Manager retains the identity table and pseudonym index so that future re-identification can be enabled. The EHR resolves the pseudonym back to the original patient to file the lab result into the correct chart using a local reverse-mapping mechanism.
+The De-ID Manager retains custody of the identity table and pseudonym index. To associate the returned lab result with the correct patient chart, the EHR uses an authorized, implementation-defined interaction with the Manager's mapping service. The EHR receives only the resolution result needed for this association; the identity table and pseudonym index are not exported. This interaction is outside the transactions standardized by DIS Phase 1.
 
 ##### 1:52.4.2.3.2 Clinical Pathology Order Process Flow
 
@@ -364,7 +376,9 @@ sequenceDiagram
 
     Note over EHR: Send pseudonymized order to external lab
     Note over EHR: Receive lab result referencing pseudonym
-    Note over EHR: Resolve pseudonym to original patient, file result
+    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS Phase 1)
+    MGR-->>EHR: Resolution result needed for patient association (no mapping-table export)
+    Note over EHR: File lab result to patient chart
 ```
 
 **Figure 1:52.4.2.3.2-1: Use Case 3 - Clinical Pathology Order Process Flow**
@@ -377,7 +391,7 @@ A hospital EHR pseudonymizes patient data before transmitting to a cloud-hosted 
 
 A clinician triggers AI decision support for an active patient encounter. The EHR submits the patient's FHIR resources (Observations, Conditions, MedicationStatements, Encounters) to the on-premise De-ID Manager for reversible pseudonymization. The De-ID Manager and De-Identifier operate entirely within the hospital trust boundary -- no identifiable data or protected security material leaves the on-premise environment during the de-identification step.
 
-The De-ID Manager returns the pseudonymized payload synchronously. The EHR transmits pseudonymized data to the cloud AI service and receives recommendations referencing the pseudonym. The EHR resolves the pseudonym back to the original patient and files the AI output to the correct chart.
+The De-ID Manager returns the pseudonymized payload synchronously. The EHR transmits pseudonymized data to the cloud AI service and receives recommendations referencing the pseudonym. The EHR uses an authorized, implementation-defined interaction with the Manager's mapping service to associate the AI output with the correct patient chart. The Manager retains custody of the identity table and pseudonym index and returns only the resolution result needed for that association. This interaction is outside the transactions standardized by DIS Phase 1.
 
 Protected security material (identity table, pseudonym index, cryptographic seeds) never leaves the hospital trust boundary.
 
@@ -411,7 +425,9 @@ sequenceDiagram
     AI-->>EHR: AI recommendation referencing pseudonym (outside DIS)
     deactivate AI
 
-    Note over EHR: Resolve pseudonym, file AI result to patient chart
+    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS Phase 1)
+    MGR-->>EHR: Resolution result needed for patient association (no mapping-table export)
+    Note over EHR: File AI result to patient chart
 ```
 
 **Figure 1:52.4.2.4.2-1: Use Case 4 - AI-Assisted Clinical Decision Support Process Flow**
@@ -473,7 +489,11 @@ De-identification policy carriers are digitally signed. Trust is anchored in the
 
 ### 1:52.5.4 Reversibility Material Custody
 
-The De-ID Manager is the sole custodian of reversibility material (identity table and pseudonym index). Protected security material -- including cryptographic seeds, identity tables, and pseudonym indices -- SHALL NOT be disclosed outside the De-ID Manager's trust boundary. The De-Identifier is stateless with respect to reversibility and retains no identity-linking material after task completion.
+The De-ID Manager is the sole persistent custodian of identity mappings and reversibility records (identity table and pseudonym index). These records SHALL NOT be disclosed outside the De-ID Manager's trust boundary.
+
+Seeds SHALL contain no PII and SHALL NOT directly encode patient identity. Seeds remain protected transformation material because possession may enable linkage or reproduction of transformations. The Manager MAY transmit scoped, purpose-specific seeds to an authorized De-Identifier over a protected channel for the assigned task. The Manager and De-Identifier MAY operate in separate trust boundaries; deployment within a shared trust boundary is optional.
+
+The De-Identifier SHALL use received seeds only for the assigned task and SHALL retain them only for task execution, including deferred execution. It SHALL delete them when the task terminates, whether successfully or unsuccessfully, and SHALL retain no identity-linking material after termination. Seeds SHALL NOT be disclosed to data recipients or included in recipient-facing output, evidence, or logs.
 
 Implementations deploying DIS-RP1 (Reversible Pseudonymization) SHALL implement access controls, encryption at rest, and audit logging for all reversibility material. The De-ID Manager SHALL enforce access controls preventing unauthorized access to reversibility material even by other DIS actors.
 

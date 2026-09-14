@@ -14,7 +14,7 @@ DIS addresses this by providing a governed, auditable path from authorization to
 
 - **Three actors** — De-ID Manager, De-Identifier, De-Identification Requester
 - **Four transactions** — ITI-x1 (Submit Job), ITI-x3 (Submit Task), ITI-x4 (Retrieve Job Output), ITI-x7 (Retrieve Task Output)
-- **A composable policy model** — with a baseline execution plan format (DIS-EXE1-Baseline)
+- **A baseline policy execution model** — flat, ordered rule lists (DIS-EXE1-Baseline), with a separate plan for each stage in multi-stage workflows
 - **A minimum de-id evidence baseline** — 9-element evidence structure carried in FHIR Provenance
 - **A single FHIR payload binding (DIS-FHIR1)** — covering R4/R5 resources, Bundles, and Bulk Data
 - **Synchronous and asynchronous job patterns** — inline output for single-patient workflows, deferred output with polling for multi-patient cohorts
@@ -31,15 +31,19 @@ DIS addresses this by providing a governed, auditable path from authorization to
 
 ## Architecture Overview
 
-DIS is built on a modular, binding-neutral core architecture. Phase 1 profiles the FHIR binding against this core.
+DIS is built on a modular, binding-neutral core architecture. Phase 1 specifies an initial FHIR R4 transaction binding against this core. The workflow resources and APIs use R4, while the data being de-identified may independently use FHIR R4 or R5. The IG configuration targets the DIS-defined FHIR artifacts; it does not restrict processing payloads to that release.
+
+Payload version identification, packaging, and capability matching are specified separately from the transaction binding. R5 payloads are referenced or carried as explicitly identified serialized content, rather than embedded as native R5 resources in an R4 envelope. R5 processing requires version-specific examples and validation tests, not an R5 version of the DIS workflow resources. Bulk Data input/output direction and packaging remain a separate open decision.
 
 ### Actors
 
 | Actor | Responsibility |
 |-------|---------------|
-| **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Sole custodian of reversibility material. |
-| **De-Identifier** | Executes assigned de-identification tasks. Stateless with respect to reversibility — receives a cryptographic seed, produces transformations and evidence, retains no identity-linking material. |
+| **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Sole persistent custodian of identity mappings and reversibility records. |
+| **De-Identifier** | Executes assigned de-identification tasks. Stateless with respect to reversibility — receives scoped, purpose-specific seeds as needed, derives transformation values according to declared capabilities, produces transformations and evidence, and retains no seeds or identity-linking material after task termination. |
 | **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Grouped with the De-Identified Data Receiver in Phase 1. |
+
+The Manager may share seeds containing no PII with authorized De-Identifiers over protected channels, including across deployment trust boundaries. Seeds are protected transformation material and are not disclosed to data recipients. A shared trust boundary is optional.
 
 ### Transactions
 
@@ -99,7 +103,7 @@ DIS can reference named policies defined by existing standards. Externally stand
 
 However, supporting DICOM including relevant named policies is out of the scope of DIS phase 1
 
-Adopters MAY define their own named policies for use-case-specific needs (e.g., pseudonymization for multi-site research, clinical trial export, teaching files, AI training) through the composable policy model. These are adopter-defined — DIS does not itself author named policies without a grounding standard.
+Adopters MAY define their own named policies for use-case-specific needs (e.g., pseudonymization for multi-site research, clinical trial export, teaching files, AI training) using the Phase 1 baseline policy execution model. These are adopter-defined — DIS does not itself author named policies without a grounding standard.
 
 ## Transformation Actions
 
@@ -120,7 +124,8 @@ A conformant Phase 1 implementation declares:
 
 - **ISO/IEC 20889:2018** — De-identification technique taxonomy
 - **ISO 25237:2017** — Pseudonymization guidance
-- **HL7 FHIR R4/R5** — Service behavior, knowledge artifacts, Provenance
+- **HL7 FHIR R4** — Initial DIS workflow APIs, resources, and conformance artifacts
+- **HL7 FHIR R4/R5** — Independently versioned processing payloads
 - **IHE ATNA / IUA** — Security, identity, authorization, audit
 - **SMART on FHIR Backend Services** — System-to-system authorization
 - **W3C PROV-O** — Provenance modeling
@@ -129,7 +134,7 @@ A conformant Phase 1 implementation declares:
 
 Phase 1 is designed for additive expansion without breaking changes:
 
-- **Core additions** — Policy Authority actor, ITI-x5 push delivery, ITI-x6 re-identification, full composable policy model (composition, conditions, constraints)
+- **Core additions** — Policy Authority actor, ITI-x5 push delivery, ITI-x6 re-identification, full DIS-EXE1 composable policy model (policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, and selector specificity rules)
 - **Payload bindings** — DIS-CDA1, DIS-DICOM1, DIS-V2-1, DIS-OMOP1 (each self-contained, developed independently)
 - **Advanced capabilities** — Dataset-level statistical disclosure control, cross-community federation
 
