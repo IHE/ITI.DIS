@@ -2,7 +2,7 @@
 
 **ITI.DIS** is a joint work item of the IHE [IT Infrastructure (ITI)](https://www.ihe.net/ihe_domains/it_infrastructure/), [Quality, Research, and Public Health (QRPH)](https://www.ihe.net/ihe_domains/quality_research_and_public_health/), and [Patient Care Coordination (PCC)](https://www.ihe.net/ihe_domains/patient_care_coordination/) domains, with ITI as the lead domain.
 
-**This repository focuses on Phase 1 scope** — a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. Additional payload bindings (CDA, DICOM, HL7 v2) and advanced capabilities (re-identification, push delivery, policy retrieval) are planned for future phases and do not require modification of Phase 1 specifications.
+**This repository focuses on Phase 1 scope** — a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. Additional payload bindings (CDA, DICOM, HL7 v2) and advanced capabilities (re-identification, push delivery, policy retrieval) are planned for future phases, with preservation of Phase 1 contracts as a design objective.
 
 ## Problem Statement
 
@@ -23,7 +23,7 @@ DIS addresses this by providing a governed, auditable path from authorization to
 
 | UC | Name | Pattern | Description |
 |----|------|---------|-------------|
-| UC-1 | Cross-Border Epidemiological Study Using IPS+ | Async | Pseudonymized, disclosure-controlled cohort dataset for a cross-border cancer study |
+| UC-1 | Cross-Border Epidemiological Study Using IPS+ | Async | Cohort dataset transformed using pseudonymization and policy-specified record-level rules for a cross-border cancer study |
 | UC-2 | Multimodal AI/ML Method Development (FHIR input-preparation) | Async | De-identification of structured clinical data for a training-ready multimodal dataset |
 | UC-3 | Clinical Pathology Order (Pseudonymous Care) | Sync | Pseudonymization before sending a lab order to an external pathology lab |
 | UC-4 | AI-Assisted Clinical Decision Support (Cloud Deployment) | Sync | Pseudonymization before transmitting patient data to a cloud-hosted AI service |
@@ -44,6 +44,8 @@ Payload version identification, packaging, and capability matching are specified
 | **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Grouped with the De-Identified Data Receiver in Phase 1. |
 
 The Manager may share seeds containing no PII with authorized De-Identifiers over protected channels, including across deployment trust boundaries. Seeds are protected transformation material and are not disclosed to data recipients. A shared trust boundary is optional.
+
+The `consistencyKey` identifies an authorized linkage scope; it is separate from secret seeds and protected transformation parameters. The Manager manages scope authorization and seed lifecycle, while the De-Identifier derives pseudonyms and date-shift values. Consistent results also require compatible identity resolution, derivation methods, versions, and parameters.
 
 ### Transactions
 
@@ -86,9 +88,11 @@ Phase 1 supports three policy carrier variants in ITI-x1:
 |---------|-------------|
 | **Inline** | Signed policy artifact embedded directly in the request |
 | **By reference** | Reference pointing to a signed policy artifact stored externally |
-| **Named standardized policy** | Identifier referencing a well-known policy (e.g., `DIS-Pseudonymization/1.0.0`) |
+| **Named standardized policy** | Policy identifier and any required version, resolved by the Manager to a specific signed policy artifact |
 
 The De-ID Manager validates every carrier for **signature validity**, **schema conformance**, **currency**, and **authorization consistency** before compiling it into a payload-specific execution plan.
+
+The Manager is responsible for resolving named policies unambiguously to specific, versioned, signed artifacts before acceptance. Resolution may use local configuration, a registry, or an external source; the mechanism is implementation-defined. Unresolved, ambiguous, or invalid policies cause synchronous rejection. Locally configured policies, including DIS-LAE1 policies, undergo the same four validation checks. The De-Identifier receives the compiled plan; native named-policy execution requires a capability match for the resolved policy and version.
 
 ### Named Standardized Policies
 
@@ -111,14 +115,21 @@ Phase 1 requires support for 9 Core actions aligned with ISO/IEC 20889:2018:
 
 `dis:local-suppression` · `dis:masking` · `dis:retain` · `dis:pseudonymize` · `dis:rounding` · `dis:top-bottom-coding` · `dis:combine-attributes` · `dis:local-generalization` · `dis:noise-addition`
 
+Phase 1 excludes dataset- or database-level de-identification actions, including small-cell handling and suppression or generalization that requires computing cohort statistics. Multi-patient and Bulk Data workflows remain in scope for applying supported record-level rules. Generalization, suppression, and noise addition use policy-specified parameters rather than parameters calculated from the cohort. Dataset-level statistical disclosure control is deferred to a future phase.
+
 ## Conformance
 
 A conformant Phase 1 implementation declares:
 
 - **DIS-BASE** — synchronous job support (required for all)
 - **DIS-FHIR-Job** / **DIS-FHIR-Task** / **DIS-FHIR1** — FHIR protocol and payload bindings
-- **DIS-ASYNC** + **DIS-FHIR-JobStatus** — additionally, if async jobs are supported
-- **DIS-RP0** or **DIS-RP1** — irreversible or reversible pseudonymization mode(s)
+- **DIS-ASYNC** + **DIS-FHIR-JobStatus** — Requester and Manager declare support for asynchronous jobs; ITI-x4 is required
+- **DIS-DEFER** — Manager and De-Identifier declare support for deferred tasks; ITI-x7 is required
+- **DIS-LAE1** — Manager declares support for local authorized export
+- **DIS-EXE1-Baseline** — required for Manager and De-Identifier; full DIS-EXE1 is deferred
+- **DIS-RP0** or **DIS-RP1** — irreversible or reversible pseudonymization mode(s); reversible execution requires DIS-RP1 support from both Manager and De-Identifier
+
+DIS-ASYNC and DIS-DEFER are independent capabilities: an asynchronous job may use immediately completed tasks. See the [Volume 1 declaration matrix](input/pagecontent/volume-1.md#actor-options) for actor obligations and option dependencies.
 
 ## Standards Alignment
 
@@ -132,13 +143,13 @@ A conformant Phase 1 implementation declares:
 
 ## Phase 1 Expansion Path
 
-Phase 1 is designed for additive expansion without breaking changes:
+DIS aims for additive expansion that preserves existing Phase 1 contracts where possible:
 
 - **Core additions** — Policy Authority actor, ITI-x5 push delivery, ITI-x6 re-identification, full DIS-EXE1 composable policy model (policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, and selector specificity rules)
 - **Payload bindings** — DIS-CDA1, DIS-DICOM1, DIS-V2-1, DIS-OMOP1 (each self-contained, developed independently)
 - **Advanced capabilities** — Dataset-level statistical disclosure control, cross-community federation
 
-A system conformant to Phase 1 remains conformant when additional payload bindings or core capabilities are added.
+Compatibility with Phase 1 is a design objective, supported by explicit versioning and regression tests. Future additions should preserve existing contracts where possible. Any incompatible change must identify affected contracts, its impact on existing implementations and conformance claims, and migration requirements. Conformance is assessed against the declared profile version and supported options; it is not an unconditional guarantee of conformance to future versions.
 
 ## Contact
 

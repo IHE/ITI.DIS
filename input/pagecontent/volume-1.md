@@ -80,6 +80,10 @@ The De-ID Manager performs four-point validation on all policy carrier variants:
 3. **Currency** -- the policy is not expired or revoked
 4. **Authorization consistency** -- the policy is consistent with the data request authorization (scope, purpose, and processing target are compatible)
 
+For a named policy carrier, the Requester supplies the policy identifier and any required version. The De-ID Manager SHALL resolve it unambiguously to a specific, versioned, signed policy artifact and complete all four validation checks before accepting the job. If resolution is ambiguous, unavailable, or cannot produce a valid artifact, the Manager SHALL reject the request synchronously without dispatching tasks. Resolution MAY use a local registry, administrative configuration, or an external source; Phase 1 does not standardize the provisioning or resolution mechanism. Resolution of named or by-reference carriers does not introduce a policy discovery or retrieval transaction into Phase 1.
+
+The De-Identifier receives the compiled execution plan and is not responsible for resolving the Requester's named carrier. Where execution relies on native named-policy support, the Manager SHALL verify that the De-Identifier supports the resolved policy and version before dispatch.
+
 <a name="de-identifier"> </a>
 
 #### 1:52.1.1.3 De-Identifier
@@ -138,9 +142,23 @@ Options that may be selected for each actor in this profile are listed in Table 
 | De-ID Manager | Asynchronous Job Processing | [1:52.2.1](#15221-asynchronous-job-processing-option) |
 | De-ID Manager | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
 | De-ID Manager | Local Authorized Export | [1:52.2.4](#15224-local-authorized-export-option) |
+| De-ID Manager | Deferred Task Output | [1:52.2.5](#15225-deferred-task-output-option) |
 | De-Identifier | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
 | De-Identifier | Deferred Task Output | [1:52.2.5](#15225-deferred-task-output-option) |
 {: .grid}
+
+The following matrix summarizes Phase 1 declarations and their dependencies. Actor-specific obligations apply to each declared actor.
+
+| Declaration | Requester | Manager | De-Identifier | Dependency / obligation |
+|-------------|-----------|---------|---------------|-------------------------|
+| DIS-ASYNC | Optional | Optional | Not applicable | Both participating Requester and Manager declare support; ITI-x4 and DIS-FHIR-JobStatus are required. |
+| DIS-DEFER | Not applicable | Optional | Optional | Both participating Manager and De-Identifier declare support; ITI-x7 is required. |
+| DIS-LAE1 | Not applicable | Optional | Not applicable | Manager supports local authorization-to-policy mapping and all admission checks. |
+| DIS-RP1 | Not applicable | Optional | Optional | Both participating Manager and De-Identifier declare reversible pseudonymization support. |
+| DIS-EXE1-Baseline | Not applicable | Required | Required | Flat, ordered rules; full DIS-EXE1 is deferred. |
+{: .grid}
+
+DIS-ASYNC and DIS-DEFER are separate capabilities. An asynchronous job MAY use immediately completed tasks; declaring DIS-ASYNC does not by itself declare DIS-DEFER, or vice versa.
 
 ### 1:52.2.1 Asynchronous Job Processing Option
 
@@ -174,7 +192,7 @@ Multi-stage processing remains supported in Phase 1. The De-ID Manager dispatche
 
 The Local Authorized Export Option (DIS-LAE1) enables the De-ID Manager to support clinician-initiated local export workflows where authorization derives from the clinician's local role and declared purpose rather than an external data permit. No external policy carrier acquisition is required -- the policy is pre-configured by institutional administration.
 
-When this option is supported, the De-ID Manager SHALL map the local authorization (role and purpose) to a configured de-identification policy using the DIS-LAE1 bridge pattern. The De-ID Manager SHALL validate that the local authorization is consistent with the configured policy before proceeding with task execution.
+When this option is supported, the De-ID Manager SHALL map the local authorization (role and purpose) to a configured de-identification policy using the DIS-LAE1 bridge pattern. The configured policy SHALL be a specific, versioned, signed artifact. The De-ID Manager SHALL complete signature validity, schema conformance, currency, and authorization consistency checks before accepting the job or dispatching tasks. Administrative provisioning replaces external acquisition, not validation; failed or incomplete validation SHALL produce a synchronous error.
 
 This option is intended for lightweight clinical workflows such as de-identified document export from a clinical workstation, where heavy external permit infrastructure is not required.
 
@@ -182,7 +200,7 @@ This option is intended for lightweight clinical workflows such as de-identified
 
 The Deferred Task Output Option (DIS-DEFER) enables the De-Identifier to accept a task via ITI-x3 and process it asynchronously. The De-ID Manager retrieves the completed output via ITI-x7. This option is required for large payloads where task processing time may exceed the ITI-x3 request timeout.
 
-When this option is supported by the De-Identifier, the De-Identifier MAY respond to ITI-x3 with an accepted status and a location for output retrieval. The De-ID Manager SHALL support ITI-x7 when interacting with a De-Identifier that declares this option.
+For deferred task execution, both the De-ID Manager and De-Identifier SHALL declare DIS-DEFER and SHALL support ITI-x7 in their respective initiator and responder roles. When both actors declare this option, the De-Identifier MAY respond to ITI-x3 with an accepted status and a location for output retrieval. Deferred execution SHALL NOT be used with a Manager that does not declare DIS-DEFER.
 
 <a name="required-groupings"> </a>
 
@@ -216,11 +234,17 @@ DIS introduces the following key concepts that provide necessary background for 
 
 **Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A signed de-identification policy carrier governs what transformations are applied. The De-ID Manager validates the policy and compiles it into an execution plan; the De-Identifier executes the plan. Trust is anchored in the policy carrier's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed policy.
 
-**Staged Execution.** DIS supports multi-stage de-identification. A preliminary stage handles direct identifiers (pseudonymization, suppression). An advanced stage handles quasi-identifiers and statistical disclosure control (generalization, rare-condition suppression, noise addition). The De-ID Manager dispatches one ITI-x3 task per stage. Each De-Identifier sees only its assigned stage, enforcing trust isolation between stages.
+**Staged Execution.** DIS supports multi-stage de-identification. A preliminary stage handles direct identifiers (pseudonymization, suppression). An advanced stage applies policy-specified record-level rules to quasi-identifiers, such as fixed generalization, suppression, or noise addition. The De-ID Manager dispatches one ITI-x3 task per stage. Each De-Identifier sees only its assigned stage, enforcing trust isolation between stages.
+
+**Phase 1 Transformation Scope.** Phase 1 excludes dataset- or database-level de-identification actions, including small-cell handling, frequency-based rare-condition suppression, and generalization or other transformations requiring statistics computed across the cohort. Multi-patient cohort processing remains supported for applying record-level rules with policy-specified parameters. Multi-stage execution does not extend this action scope. Dataset-level statistical disclosure control is deferred to a future phase; completing a Phase 1 workflow does not establish that any separately required dataset-level disclosure criteria have been met.
 
 **Reversibility Custody.** When reversible pseudonymization is enabled, the De-ID Manager retains the identity table and pseudonym index. The De-Identifier is stateless with respect to reversibility. Identity tables and pseudonym indices remain within the Manager's trust boundary. Scoped, purpose-specific seeds may be shared with authorized De-Identifiers in separate trust boundaries under the controls in §1:52.5.4.
 
-**Consistency Keys.** A shared `consistencyKey` ensures that the same patient receives identical pseudonyms across jobs, stages, and (in future phases) across payload standards. This enables longitudinal linkage of de-identified data without exposing patient identity.
+**Consistency Scope and Transformation Material.** The `consistencyKey` identifies an authorized linkage scope, such as a research project. It is not secret seed material and SHALL NOT, by itself, enable derivation of pseudonyms or date shifts. The Manager SHALL enforce authorization to use or reuse the scope. The Manager manages the lifecycle of consistent patient- and purpose-scoped seeds; the De-Identifier derives and applies transformation values using compatible methods, versions, and policy parameters. The Manager is not required to calculate those transformation values.
+
+A shared `consistencyKey` alone does not guarantee identical results. Consistency also depends on resolving the same patient, supplying consistent seed material, and using compatible derivation methods, versions, and parameters. Identity resolution assumptions, derivation compatibility, seed rotation, and collision handling require explicit contracts and conformance tests.
+
+Date-shift reference dates and offsets are protected transformation parameters, not consistency keys. Deterministic derivation from purpose-specific seeds is preferred. Where a De-Identifier generates a parameter that must be reused, an explicit capability contract SHALL define its protected return to the Manager, authorized retention, and reuse in subsequent tasks. Acceptance of precomputed parameters is not mandatory for all De-Identifiers. Seed handling follows §1:52.5.4.
 
 **Evidence Baseline.** Every completed de-identification task produces provenance evidence containing at minimum nine elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, stage category, reversibility state, validation status, and audit correlation identifier.
 
@@ -232,9 +256,9 @@ A research consortium conducts a cross-border epidemiological study combining po
 
 ##### 1:52.4.2.1.1 Cross-Border Epidemiological Study Use Case Description
 
-Clinical data remain under primary-use governance when recorded or exchanged for care. Their reuse begins only after a secondary-use request has been assessed and an authorization context has been issued. The Data Access Coordinator (DAC) coordinates participating jurisdictions, resolves authorized source-data provision, and -- acting as the De-Identification Requester -- submits a DIS job to produce a pseudonymized, disclosure-controlled dataset suitable for delivery to a Secure Processing Environment (SPE).
+Clinical data remain under primary-use governance when recorded or exchanged for care. Their reuse begins only after a secondary-use request has been assessed and an authorization context has been issued. The Data Access Coordinator (DAC) coordinates participating jurisdictions, resolves authorized source-data provision, and -- acting as the De-Identification Requester -- submits a DIS job to produce a cohort dataset transformed by pseudonymization and policy-specified record-level rules for subsequent delivery to a Secure Processing Environment (SPE).
 
-The DAC submits an asynchronous ITI-x1 job with a signed policy carrier and FHIR processing targets. The De-ID Manager validates the policy and compiles a two-stage execution plan. The preliminary stage pseudonymizes direct identifiers with reversible, project-scoped pseudonyms using a shared `consistencyKey` to preserve longitudinal linkage. The advanced stage applies rare-condition suppression, small-cell handling, and quasi-identifier generalization. The DAC retrieves the de-identified output and evidence via ITI-x4 polling and forwards it to the SPE.
+The DAC submits an asynchronous ITI-x1 job with a signed policy carrier and FHIR processing targets. The De-ID Manager validates the policy and compiles a two-stage execution plan. The preliminary stage pseudonymizes direct identifiers with reversible, project-scoped pseudonyms within the authorized scope identified by `consistencyKey`, using consistent patient-scoped seeds and compatible derivation parameters to preserve longitudinal linkage. The advanced stage applies policy-specified record-level suppression and fixed quasi-identifier generalization. Small-cell handling and transformations requiring cohort statistics are outside Phase 1; any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE. The DAC retrieves the de-identified output and evidence via ITI-x4 polling and forwards it to the SPE.
 
 ##### 1:52.4.2.1.2 Cross-Border Epidemiological Study Process Flow
 
@@ -262,7 +286,7 @@ sequenceDiagram
     DI_P-->>MGR: Transformed output + evidence
     deactivate DI_P
 
-    MGR->>DI_A: ITI-x3 Submit Task (advanced: rare-condition suppression, generalization)
+    MGR->>DI_A: ITI-x3 Submit Task (advanced: record-level suppression, fixed generalization)
     activate DI_A
     DI_A-->>MGR: Transformed output + evidence
     deactivate DI_A
@@ -289,7 +313,7 @@ An AI/ML consortium develops or validates cancer models using multimodal data --
 
 The consortium holds a data permit identifying the approved cohort, modalities, linkage requirements, and de-identification stages. The DAC acts as the De-Identification Requester and submits an asynchronous job for the structured clinical data (EHR records, laboratory results, outcome labels, annotations).
 
-The De-ID Manager compiles a two-stage execution plan. The preliminary stage pseudonymizes direct identifiers with reversible, project-scoped pseudonyms using a shared `consistencyKey`. This key is designed to be reused by future DICOM processing so that the same pseudonym links a patient's clinical and imaging data. The advanced stage applies quasi-identifier generalization, rare-condition suppression, and FHIR-specific disclosure control. The DAC retrieves the de-identified FHIR output via ITI-x4 and delivers it to the SPE.
+The De-ID Manager compiles a two-stage execution plan. The preliminary stage pseudonymizes direct identifiers with reversible, project-scoped pseudonyms within the authorized scope identified by `consistencyKey`, using consistent patient-scoped seeds and compatible derivation parameters. Future DICOM processing could reuse that authorized scope for clinical/imaging linkage, provided identity resolution and derivation compatibility are also established; reusing the scope identifier alone is insufficient. The advanced stage applies fixed quasi-identifier generalization and policy-specified record-level suppression to the FHIR payload. Any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE. The DAC retrieves the de-identified FHIR output via ITI-x4 and delivers it to the SPE.
 
 ##### 1:52.4.2.2.2 AI/ML Method Development Process Flow
 
@@ -312,12 +336,12 @@ sequenceDiagram
     activate MGR
     Note over MGR: Compile two-stage execution plan
 
-    MGR->>DI_P: ITI-x3 Submit Task (preliminary: pseudonymize with shared consistencyKey)
+    MGR->>DI_P: ITI-x3 Submit Task (preliminary: pseudonymize using scoped seed and agreed derivation parameters)
     activate DI_P
     DI_P-->>MGR: Transformed output + evidence
     deactivate DI_P
 
-    MGR->>DI_A: ITI-x3 Submit Task (advanced: generalization, suppression)
+    MGR->>DI_A: ITI-x3 Submit Task (advanced: fixed generalization, record-level suppression)
     activate DI_A
     DI_A-->>MGR: Transformed output + evidence
     deactivate DI_A
@@ -333,7 +357,7 @@ sequenceDiagram
     MGR-->>DAC: 200 OK (de-identified FHIR output + evidence)
     deactivate MGR
 
-    Note over DAC: Forward FHIR output to SPE, consistencyKey reused for future DICOM pipeline
+    Note over DAC: Forward FHIR output to SPE; future DICOM linkage requires authorized scope and compatible derivation
 ```
 
 **Figure 1:52.4.2.2.2-1: Use Case 2 - AI/ML Method Development (FHIR Input-Preparation) Process Flow**
@@ -453,7 +477,8 @@ sequenceDiagram
 
     CLI->>WS: Initiate document export (local action)
     activate WS
-    Note over WS: DIS-LAE1: Map local authorization (role + purpose) to configured policy
+    Note over WS: DIS-LAE1: Map local authorization (role + purpose) to configured signed, versioned policy
+    Note over WS: Validate authorization and all four policy checks before acceptance or dispatch
     Note over WS: Compile single-stage execution plan
 
     Note over WS: ITI-x3 (internal): De-Identifier handles identifiers per policy
@@ -496,6 +521,8 @@ Seeds SHALL contain no PII and SHALL NOT directly encode patient identity. Seeds
 The De-Identifier SHALL use received seeds only for the assigned task and SHALL retain them only for task execution, including deferred execution. It SHALL delete them when the task terminates, whether successfully or unsuccessfully, and SHALL retain no identity-linking material after termination. Seeds SHALL NOT be disclosed to data recipients or included in recipient-facing output, evidence, or logs.
 
 Implementations deploying DIS-RP1 (Reversible Pseudonymization) SHALL implement access controls, encryption at rest, and audit logging for all reversibility material. The De-ID Manager SHALL enforce access controls preventing unauthorized access to reversibility material even by other DIS actors.
+
+Date-shift reference dates, offsets, and other protected transformation parameters SHALL NOT be disclosed to data recipients or included in recipient-facing output, evidence, or logs. A De-Identifier SHALL retain them only for task execution and delete them at task termination. Any return to the Manager for authorized retention and reuse SHALL follow an explicit capability contract and use a protected channel. Such retention SHALL be consistent with the authorized policy and declared reversibility mode.
 
 ### 1:52.5.5 Trust Isolation Between Stages
 
