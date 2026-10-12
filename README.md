@@ -145,15 +145,33 @@ Phase 1 excludes dataset- or database-level de-identification actions, including
 
 ## Conformance
 
-A conformant Phase 1 implementation declares:
+A conformant Phase 1 implementation declares the specific claims it supports. The table below defines each declaration.
 
-- **DIS-BASE** — synchronous job support (required for all)
-- **DIS-FHIR-Job** / **DIS-FHIR-Task** / **DIS-FHIR1** — FHIR protocol and payload bindings
-- **DIS-ASYNC** + **DIS-FHIR-JobStatus** — Requester and Manager declare support for asynchronous jobs; ITI-x4 is required
-- **DIS-DEFER** — Manager and De-Identifier declare support for deferred tasks; ITI-x7 is required. Does not apply to the Integrated De-ID Manager/De-Identifier.
-- **DIS-LAE1** — Manager or Integrated De-ID Manager/De-Identifier declares support for local authorized export
-- **DIS-EXE1-Baseline** — required for Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier; full DIS-EXE1 is deferred
-- **DIS-RP0** or **DIS-RP1** — irreversible or reversible pseudonymization mode(s); reversible execution requires DIS-RP1 support from both Manager and De-Identifier, or from the Integrated De-ID Manager/De-Identifier as a single actor
+### Base Declarations (required for all implementations)
+
+| Declaration | Applies to | Description | Dependency |
+|-------------|-----------|-------------|------------|
+| **DIS-BASE** | All actors | Synchronous job support — the minimum operational capability for any DIS implementation | None |
+| **DIS-EXE1-Baseline** | Manager, De-Identifier, Integrated | Flat, ordered rule lists carried as FHIR Library resources. Excludes policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, and selector specificity rules. Full DIS-EXE1 is deferred. | DIS-BASE |
+
+### FHIR Protocol and Payload Bindings
+
+| Declaration | Applies to | Description | Dependency |
+|-------------|-----------|-------------|------------|
+| **DIS-FHIR-Job** | Requester, Manager, Integrated | FHIR protocol binding for ITI-x1 (`POST [base]/$submit-dis-job` with FHIR Parameters). Content-neutral — can orchestrate any payload type. | DIS-BASE |
+| **DIS-FHIR-Task** | Manager, De-Identifier | FHIR protocol binding for ITI-x3 (FHIR Task REST). Task references a Library containing DIS-EXE1 rules, the processing target, and a cryptographic seed. Does not apply to the Integrated De-ID Manager/De-Identifier. | DIS-BASE |
+| **DIS-FHIR1** | All actors | FHIR payload binding — defines the content model (FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence) and data-plane access (FHIR REST read/write or inline by-value). Covers independently versioned R4 and R5 processing payloads. | DIS-FHIR-Job |
+| **DIS-FHIR-JobStatus** | Requester, Manager, Integrated | FHIR protocol binding for ITI-x4 (FHIR Asynchronous Request Pattern — `GET` on `Content-Location` URL). | DIS-ASYNC |
+
+### Optional Capabilities
+
+| Declaration | Applies to | Description | Dependency |
+|-------------|-----------|-------------|------------|
+| **DIS-ASYNC** | Requester, Manager, Integrated | Asynchronous job processing — the Manager returns `202 Accepted` with a polling URL; the Requester retrieves output via ITI-x4. Required for multi-patient cohort workflows. | Both participating Requester and Manager (or Integrated actor) declare support; DIS-FHIR-JobStatus required |
+| **DIS-DEFER** | Manager, De-Identifier | Deferred task output — the De-Identifier accepts a task via ITI-x3 and processes asynchronously; the Manager retrieves output via ITI-x7. Does not apply to the Integrated De-ID Manager/De-Identifier. | Both participating Manager and De-Identifier declare support; ITI-x7 required |
+| **DIS-LAE1** | Manager, Integrated | Local authorized export — maps a clinician's local authorization (role + purpose) to a configured, signed, versioned de-identification policy using the DIS-LAE1 bridge pattern. No external policy carrier acquisition required; all four validation checks still apply. | DIS-BASE |
+| **DIS-RP0** | Manager, De-Identifier, Integrated | Irreversible de-identification — the baseline pseudonymization mode. No reversibility material is retained. | DIS-BASE |
+| **DIS-RP1** | Manager, De-Identifier, Integrated | Reversible pseudonymization — the Manager retains the identity table (seed-to-patient mapping) and pseudonym index for future re-identification without re-processing. Requires both participating Manager and De-Identifier to declare support, or the Integrated actor declares it as a single actor. Phase 1 does not standardize re-identification transactions. | DIS-RP0 or DIS-RP1 required; DIS-RP1 requires both sides |
 
 DIS-ASYNC and DIS-DEFER are independent capabilities: an asynchronous job may use immediately completed tasks. See the [Volume 1 declaration matrix](input/pagecontent/volume-1.md#actor-options) for actor obligations and option dependencies.
 
