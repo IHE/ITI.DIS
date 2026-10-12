@@ -12,7 +12,7 @@ DIS addresses this by providing a governed, auditable path from authorization to
 
 ## What Phase 1 Delivers
 
-- **Three actors** — De-ID Manager, De-Identifier, De-Identification Requester
+- **Four actors** — De-ID Manager, De-Identifier, De-Identification Requester, Integrated De-ID Manager/De-Identifier
 - **Four transactions** — ITI-x1 (Submit Job), ITI-x3 (Submit Task), ITI-x4 (Retrieve Job Output), ITI-x7 (Retrieve Task Output)
 - **A baseline policy execution model** — flat, ordered rule lists (DIS-EXE1-Baseline), with a separate plan for each stage in multi-stage workflows
 - **A minimum de-id evidence baseline** — 9-element evidence structure carried in FHIR Provenance
@@ -42,6 +42,7 @@ Payload version identification, packaging, and capability matching are specified
 | **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Sole persistent custodian of identity mappings and reversibility records. |
 | **De-Identifier** | Executes assigned de-identification tasks. Stateless with respect to reversibility — receives scoped, purpose-specific seeds as needed, derives transformation values according to declared capabilities, produces transformations and evidence, and retains no seeds or identity-linking material after task termination. |
 | **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Grouped with the De-Identified Data Receiver in Phase 1. |
+| **Integrated De-ID Manager/De-Identifier** | Combines the functionality of the De-ID Manager and De-Identifier into a single actor. Receives jobs (ITI-x1), validates policy, compiles execution plans, executes de-identification internally, and returns output and evidence. Does not initiate nor accept ITI-x3 or ITI-x7. Sole persistent custodian of identity mappings and reversibility records. |
 
 The Manager may share seeds containing no PII with authorized De-Identifiers over protected channels, including across deployment trust boundaries. Seeds are protected transformation material and are not disclosed to data recipients. A shared trust boundary is optional.
 
@@ -52,11 +53,13 @@ The `consistencyKey` identifies an authorized linkage scope; it is separate from
 | Transaction | Pattern | Purpose |
 |-------------|---------|---------|
 | **ITI-x1** Submit De-Identification Job | Request/response (sync or async) | Present authorization and policy; receive de-identified output or job acceptance |
-| **ITI-x3** Submit De-Identification Task | Manager → De-Identifier | Dispatch one de-identification task; return output inline (immediate) or task acceptance (deferred) |
+| **ITI-x3** Submit De-Identification Task | Manager → De-Identifier | Dispatch one de-identification task; return output inline (immediate) or task acceptance (deferred). Not used by the Integrated De-ID Manager/De-Identifier. |
 | **ITI-x4** Retrieve Job Output | Requester → Manager | Poll status and retrieve output for an async job |
-| **ITI-x7** Retrieve Task Output | Manager → De-Identifier | Retrieve output, evidence, and validation status for a completed deferred task |
+| **ITI-x7** Retrieve Task Output | Manager → De-Identifier | Retrieve output, evidence, and validation status for a completed deferred task. Not used by the Integrated De-ID Manager/De-Identifier. |
 
-### Interaction Diagram
+### Interaction Diagrams
+
+**Distributed deployment (separate Manager and De-Identifier):**
 
 ```
                           ┌──────────────────────┐
@@ -78,6 +81,29 @@ The `consistencyKey` identifies an authorized linkage scope; it is separate from
 │              │   output)    │              │   output +   │              │
 │              │              │              │   evidence)  │              │
 └──────────────┘              └──────────────┘              └──────────────┘
+```
+
+**Integrated deployment (Integrated De-ID Manager/De-Identifier):**
+
+```
+                          ┌──────────────────────┐
+                          │   Data Request        │
+                          │   Authorization       │
+                          │   (outside DIS)       │
+                          └──────────┬───────────┘
+                                     │ presented in ITI-x1
+                                     ▼
+┌──────────────┐   ITI-x1    ┌──────────────────────────┐
+│ De-ID        │ ──────────► │  Integrated De-ID        │
+│ Requester    │ ◄────────── │  Manager/De-Identifier   │
+│              │  (output     │                          │
+│              │   or job ID) │  (validates, compiles,   │
+│              │   ITI-x4    │   executes, and returns   │
+│              │ ──────────► │   output internally)      │
+│              │ ◄────────── │                          │
+│              │  (poll +     │                          │
+│              │   output)    │                          │
+└──────────────┘              └──────────────────────────┘
 ```
 
 ## Policy Model
@@ -124,10 +150,10 @@ A conformant Phase 1 implementation declares:
 - **DIS-BASE** — synchronous job support (required for all)
 - **DIS-FHIR-Job** / **DIS-FHIR-Task** / **DIS-FHIR1** — FHIR protocol and payload bindings
 - **DIS-ASYNC** + **DIS-FHIR-JobStatus** — Requester and Manager declare support for asynchronous jobs; ITI-x4 is required
-- **DIS-DEFER** — Manager and De-Identifier declare support for deferred tasks; ITI-x7 is required
-- **DIS-LAE1** — Manager declares support for local authorized export
-- **DIS-EXE1-Baseline** — required for Manager and De-Identifier; full DIS-EXE1 is deferred
-- **DIS-RP0** or **DIS-RP1** — irreversible or reversible pseudonymization mode(s); reversible execution requires DIS-RP1 support from both Manager and De-Identifier
+- **DIS-DEFER** — Manager and De-Identifier declare support for deferred tasks; ITI-x7 is required. Does not apply to the Integrated De-ID Manager/De-Identifier.
+- **DIS-LAE1** — Manager or Integrated De-ID Manager/De-Identifier declares support for local authorized export
+- **DIS-EXE1-Baseline** — required for Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier; full DIS-EXE1 is deferred
+- **DIS-RP0** or **DIS-RP1** — irreversible or reversible pseudonymization mode(s); reversible execution requires DIS-RP1 support from both Manager and De-Identifier, or from the Integrated De-ID Manager/De-Identifier as a single actor
 
 DIS-ASYNC and DIS-DEFER are independent capabilities: an asynchronous job may use immediately completed tasks. See the [Volume 1 declaration matrix](input/pagecontent/volume-1.md#actor-options) for actor obligations and option dependencies.
 
