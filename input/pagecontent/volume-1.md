@@ -1,7 +1,7 @@
 
 The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policy carriers and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
 
-DIS is a **Workflow** profile. It defines three actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
+DIS is a **Workflow** profile. It defines four actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
 
 DIS separates core workflow semantics, the FHIR transaction binding, and the version of the processing payload. The initial DIS transaction binding uses FHIR R4 APIs and resources. DIS-FHIR1 supports independently versioned FHIR R4 and R5 processing payloads; support for R5 payloads does not require an R5 binding of the DIS workflow resources. Future transaction bindings may target other FHIR releases while preserving the core workflow semantics.
 
@@ -22,11 +22,14 @@ graph LR
     REQ["De-Identification<br/>Requester"]
     MGR["De-ID<br/>Manager"]
     DI["De-Identifier"]
+    INT["Integrated De-ID<br/>Manager/De-Identifier"]
 
     REQ -- "ITI-x1 Submit<br/>De-Identification Job" --> MGR
     REQ -- "ITI-x4 Retrieve<br/>Job Output" --> MGR
     MGR -- "ITI-x3 Submit<br/>De-Identification Task" --> DI
     MGR -- "ITI-x7 Retrieve<br/>Task Output" --> DI
+    REQ -- "ITI-x1 Submit<br/>De-Identification Job" --> INT
+    REQ -- "ITI-x4 Retrieve<br/>Job Output" --> INT
 ```
 
 <figcaption><strong>Figure 1:52.1-1: DIS Actor Diagram</strong></figcaption>
@@ -45,6 +48,8 @@ graph LR
 |  | ITI-x7 Retrieve Task Output | Initiator | O (See Note 2) | ITI TF-2: 3.x7 |
 | De-Identifier | ITI-x3 Submit De-Identification Task | Responder | R | ITI TF-2: 3.x3 |
 |  | ITI-x7 Retrieve Task Output | Responder | O (See Note 2) | ITI TF-2: 3.x7 |
+| Integrated De-ID Manager/De-Identifier | ITI-x1 Submit De-Identification Job | Responder | R | ITI TF-2: 3.x1 |
+|  | ITI-x4 Retrieve Job Output | Responder | O (See Note 1) | ITI TF-2: 3.x4 |
 {: .grid}
 
 Note 1: *ITI-x4 is required when the Asynchronous Job Processing Option is supported.*
@@ -91,6 +96,20 @@ The De-Identifier receives the compiled execution plan and is not responsible fo
 The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives scoped, purpose-specific seeds as required by the assigned rules, produces transformations and evidence, and retains no identity-linking material after task termination. The De-Identifier derives transformation values, such as pseudonyms or date-shift offsets, according to the execution plan and its declared capabilities. It reports pseudonyms needed for reversibility to the Manager but does not retain the seed-to-identity mapping. The Manager supplies policy, scope, and seed material; it is not required to compute pseudonyms or date-shift offsets.
 
 A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR1), supported action families (`core`), and zero or more named standardized policies it natively supports. The declaration SHALL also identify supported transformation parameter inputs and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
+
+<a name="integrated-de-id-manager-de-identifier"> </a>
+
+#### 1:52.1.1.4 Integrated De-ID Manager/De-Identifier
+
+The Integrated De-ID Manager/De-Identifier combines the functionality of the De-ID Manager and the De-Identifier into a single actor. It does not initiate nor accept the Submit De-Identification Task [ITI-x3] or Retrieve Task Output [ITI-x7] transactions.
+
+The Integrated De-ID Manager/De-Identifier receives de-identification jobs via ITI-x1, validates the data request authorization and de-identification policy carrier, compiles the validated policy into an execution plan, executes the plan internally, and returns de-identified output and provenance evidence to the Requester. It performs all Manager obligations (policy validation, execution plan compilation, reversibility material custody) and all De-Identifier obligations (transformation execution, evidence production, capability declaration) within a single actor.
+
+The Integrated De-ID Manager/De-Identifier is the sole persistent custodian of identity mappings and reversibility records, consistent with the De-ID Manager's custody obligations. Seeds, identity tables, pseudonym indices, and other protected transformation material remain within the integrated actor's trust boundary.
+
+A Phase 1 Integrated De-ID Manager/De-Identifier SHALL declare its capabilities using the same structure required of a standalone De-Identifier, including supported payload families (at least `fhir` for DIS-FHIR1), supported action families (`core`), and zero or more named standardized policies. The Integrated De-ID Manager/De-Identifier SHALL support DIS-EXE1-Baseline. Multi-stage execution is performed internally; the integrated actor compiles and executes each stage in sequence without externalizing the inter-stage dispatch.
+
+The Deferred Task Output Option (DIS-DEFER) does not apply to the Integrated De-ID Manager/De-Identifier because ITI-x3 and ITI-x7 are not part of this actor's transaction set.
 
 ### 1:52.1.2 Transaction Descriptions
 
@@ -145,17 +164,20 @@ Options that may be selected for each actor in this profile are listed in Table 
 | De-ID Manager | Deferred Task Output | [1:52.2.5](#15225-deferred-task-output-option) |
 | De-Identifier | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
 | De-Identifier | Deferred Task Output | [1:52.2.5](#15225-deferred-task-output-option) |
+| Integrated De-ID Manager/De-Identifier | Asynchronous Job Processing | [1:52.2.1](#15221-asynchronous-job-processing-option) |
+| Integrated De-ID Manager/De-Identifier | Reversible Pseudonymization | [1:52.2.2](#15222-reversible-pseudonymization-option) |
+| Integrated De-ID Manager/De-Identifier | Local Authorized Export | [1:52.2.4](#15224-local-authorized-export-option) |
 {: .grid}
 
 The following matrix summarizes Phase 1 declarations and their dependencies. Actor-specific obligations apply to each declared actor.
 
-| Declaration | Requester | Manager | De-Identifier | Dependency / obligation |
-|-------------|-----------|---------|---------------|-------------------------|
-| DIS-ASYNC | Optional | Optional | Not applicable | Both participating Requester and Manager declare support; ITI-x4 and DIS-FHIR-JobStatus are required. |
-| DIS-DEFER | Not applicable | Optional | Optional | Both participating Manager and De-Identifier declare support; ITI-x7 is required. |
-| DIS-LAE1 | Not applicable | Optional | Not applicable | Manager supports local authorization-to-policy mapping and all admission checks. |
-| DIS-RP1 | Not applicable | Optional | Optional | Both participating Manager and De-Identifier declare reversible pseudonymization support. |
-| DIS-EXE1-Baseline | Not applicable | Required | Required | Flat, ordered rules; full DIS-EXE1 is deferred. |
+| Declaration | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
+|-------------|-----------|---------|---------------|-----------------------------------|-------------------------|
+| DIS-ASYNC | Optional | Optional | Not applicable | Optional | Both participating Requester and Manager (or Integrated actor) declare support; ITI-x4 and DIS-FHIR-JobStatus are required. |
+| DIS-DEFER | Not applicable | Optional | Optional | Not applicable | Both participating Manager and De-Identifier declare support; ITI-x7 is required. Does not apply to the Integrated actor. |
+| DIS-LAE1 | Not applicable | Optional | Not applicable | Optional | Manager or Integrated actor supports local authorization-to-policy mapping and all admission checks. |
+| DIS-RP1 | Not applicable | Optional | Optional | Optional | Both participating Manager and De-Identifier declare reversible pseudonymization support. The Integrated actor declares this as a single actor. |
+| DIS-EXE1-Baseline | Not applicable | Required | Required | Required | Flat, ordered rules; full DIS-EXE1 is deferred. |
 {: .grid}
 
 DIS-ASYNC and DIS-DEFER are separate capabilities. An asynchronous job MAY use immediately completed tasks; declaring DIS-ASYNC does not by itself declare DIS-DEFER, or vice versa.
@@ -216,11 +238,13 @@ An actor from this profile (Column 1) SHALL implement all of the required transa
 | De-ID Manager | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
 | De-ID Manager | IUA / Authorization Client or Resource Server | [ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html) | -- |
 | De-Identifier | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+| Integrated De-ID Manager/De-Identifier | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+| Integrated De-ID Manager/De-Identifier | IUA / Authorization Client or Resource Server | [ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html) | -- |
 {: .grid}
 
 All DIS actors SHALL be grouped with ATNA Secure Node or Secure Application to ensure that all transactions are audit-logged and that communications are secured via TLS.
 
-The De-ID Manager SHALL be grouped with IUA Authorization Client or Resource Server to ensure that system-to-system authorization is enforced for job submission (ITI-x1) and output retrieval (ITI-x4). Implementations SHOULD use SMART Backend Services for automated system-to-system workflows.
+The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be grouped with IUA Authorization Client or Resource Server to ensure that system-to-system authorization is enforced for job submission (ITI-x1) and output retrieval (ITI-x4). Implementations SHOULD use SMART Backend Services for automated system-to-system workflows.
 
 <a name="overview"> </a>
 
@@ -468,27 +492,27 @@ An authorized clinician exports a de-identified FHIR document Bundle from a clin
 
 ##### 1:52.4.2.5.1 Local Authorized Clinical Document Export Use Case Description
 
-A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts a grouped De-ID Manager and De-Identifier. The grouped De-ID Manager maps the local authorization to a configured de-identification policy using the DIS-LAE1 bridge pattern. No external policy carrier acquisition is needed -- the policy is pre-configured by institutional administration.
+A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier grouped with the De-Identification Requester. The Integrated De-ID Manager/De-Identifier maps the local authorization to a configured de-identification policy using the DIS-LAE1 bridge pattern. No external policy carrier acquisition is needed -- the policy is pre-configured by institutional administration.
 
-The grouped De-Identifier performs identifier handling per the configured policy and returns the de-identified document Bundle with evidence. The De-ID Manager writes the de-identified output and Provenance evidence to the export destination. An ATNA audit record is emitted recording the policy identifier, stage, outcome, and audit correlation.
+The Integrated De-ID Manager/De-Identifier performs policy validation, compiles the execution plan, executes identifier handling per the configured policy, and produces the de-identified document Bundle with evidence -- all within a single actor. It writes the de-identified output and Provenance evidence to the export destination. An ATNA audit record is emitted recording the policy identifier, stage, outcome, and audit correlation.
 
-This use case demonstrates that DIS supports lightweight local workflows without requiring heavy external permit infrastructure.
+This use case demonstrates that DIS supports lightweight local workflows without requiring heavy external permit infrastructure, using the Integrated De-ID Manager/De-Identifier to eliminate inter-actor transactions.
 
 ##### 1:52.4.2.5.2 Local Authorized Clinical Document Export Process Flow
 
 ```mermaid
 sequenceDiagram
     participant CLI as Clinician
-    participant WS as Clinical Workstation<br/>(grouped Requester +<br/>De-ID Manager + De-Identifier)
+    participant WS as Clinical Workstation<br/>(grouped Requester +<br/>Integrated De-ID<br/>Manager/De-Identifier)
 
     CLI->>WS: Initiate document export (local action)
     activate WS
     Note over WS: DIS-LAE1: Map local authorization (role + purpose) to configured signed, versioned policy
-    Note over WS: Validate authorization and all four policy checks before acceptance or dispatch
+    Note over WS: Validate authorization and all four policy checks before acceptance
     Note over WS: Compile single-stage execution plan
 
-    Note over WS: ITI-x3 (internal): De-Identifier handles identifiers per policy
-    Note over WS: Return de-identified document Bundle + evidence
+    Note over WS: Execute de-identification internally (no ITI-x3)
+    Note over WS: Produce de-identified document Bundle + evidence
 
     Note over WS: Write de-identified output + Provenance to export destination
     Note over WS: Emit ATNA audit record
@@ -512,7 +536,7 @@ All DIS actors SHALL be grouped with ATNA Secure Node or Secure Application ([IT
 
 ### 1:52.5.2 Authorization
 
-The De-ID Manager SHALL be grouped with IUA Authorization Client or Resource Server ([ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html)). System-to-system authorization for automated workflows SHOULD use SMART Backend Services with OAuth 2.0 client credentials grants. The De-ID Manager SHALL verify that the Requester is authorized under the submitted data request authorization before accepting a job.
+The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be grouped with IUA Authorization Client or Resource Server ([ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html)). System-to-system authorization for automated workflows SHOULD use SMART Backend Services with OAuth 2.0 client credentials grants. The De-ID Manager or Integrated De-ID Manager/De-Identifier SHALL verify that the Requester is authorized under the submitted data request authorization before accepting a job.
 
 ### 1:52.5.3 Policy Carrier Integrity
 
@@ -534,6 +558,8 @@ Date-shift reference dates, offsets, and other protected transformation paramete
 
 When the De-ID Manager compiles a multi-stage execution plan, each De-Identifier receives only the execution rules for its assigned stage. A De-Identifier performing the advanced stage (quasi-identifier generalization, suppression) does not have access to the preliminary stage's pseudonym-to-identity mappings. This stage-scoped dispatch provides defense-in-depth: compromise of a single De-Identifier does not expose the complete identity-to-pseudonym chain.
 
+The Integrated De-ID Manager/De-Identifier executes all stages within a single actor. Inter-stage trust isolation through separate De-Identifiers is not available in this deployment model. Implementations requiring defense-in-depth through stage-level trust boundaries SHALL use the separate De-ID Manager and De-Identifier actors.
+
 ### 1:52.5.6 Audit Logging
 
 All DIS transactions SHALL generate ATNA audit events. Every completed de-identification task produces evidence containing an audit correlation identifier linking the de-identification event to the ATNA audit trail. Implementations SHOULD use IHE Basic Audit Log Patterns (BALP) for structured audit events.
@@ -544,7 +570,7 @@ All DIS transactions SHALL generate ATNA audit events. Every completed de-identi
 
 ### IHE IUA - Internet User Authorization
 
-The De-ID Manager groups with IUA for system-to-system authorization. IUA Authorization Client is used when the De-ID Manager needs to obtain tokens; IUA Resource Server is used when the De-ID Manager validates tokens presented by the De-Identification Requester. Implementations using SMART Backend Services for automated workflows operate through the IUA framework.
+The De-ID Manager and the Integrated De-ID Manager/De-Identifier group with IUA for system-to-system authorization. IUA Authorization Client is used when these actors need to obtain tokens; IUA Resource Server is used when they validate tokens presented by the De-Identification Requester. Implementations using SMART Backend Services for automated workflows operate through the IUA framework.
 
 ### IHE ATNA / BALP - Audit Trail and Node Authentication / Basic Audit Log Patterns
 
