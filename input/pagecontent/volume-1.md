@@ -15,26 +15,22 @@ This section defines the actors and transactions in the DIS Profile.
 
 Figure 1:52.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them.
 
-<figure>
-
 ```mermaid
 graph LR
-    REQ["De-Identification<br/>Requester"]
+    REQ["De-Identification Requester"]
 
     subgraph INT ["Integrated De-ID Manager/De-Identifier"]
-        MGR["De-ID<br/>Manager"]
+        MGR["De-ID Manager"]
         DI["De-Identifier"]
     end
 
-    REQ -- "ITI-x1 Submit<br/>De-Identification Job" --> MGR
-    REQ -- "ITI-x4 Retrieve<br/>Job Output" --> MGR
-    MGR -- "ITI-x3 Submit<br/>De-Identification Task" --> DI
-    MGR -- "ITI-x7 Retrieve<br/>Task Output" --> DI
+    REQ -- "ITI-x1 Submit De-Identification Job" --> MGR
+    REQ -- "ITI-x4 Retrieve Job Output" --> MGR
+    MGR -- "ITI-x3 Submit De-Identification Task" --> DI
+    MGR -- "ITI-x7 Retrieve Task Output" --> DI
 ```
 
-<figcaption><strong>Figure 1:52.1-1: DIS Actor Diagram</strong></figcaption>
-</figure>
-<br clear="all">
+**Figure 1:52.1-1: DIS Actor Diagram**
 
 <p id="t52.1-1" class="tableTitle"><strong>Table 1:52.1-1: DIS Profile - Actors and Transactions</strong></p>
 
