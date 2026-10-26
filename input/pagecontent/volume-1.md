@@ -467,7 +467,7 @@ sequenceDiagram
     MGR-->>DAC: 200 OK (de-identified FHIR output + evidence)
     deactivate MGR
 
-    Note over DAC: Forward FHIR output to SPE<br/>Future DICOM linkage requires<br/>authorized scope + compatible derivation
+    Note over DAC: Forward FHIR output to SPE. Future DICOM linkage requires authorized scope and compatible derivation.
 ```
 
 **Figure 1:52.4.2.2.2-1: Use Case 2 - AI/ML Method Development (FHIR Input-Preparation) Process Flow**
