@@ -59,30 +59,19 @@ The `consistencyKey` identifies an authorized linkage scope; it is separate from
 
 ### Interaction Diagram
 
-```
-                                     ┌──────────────────────┐
-                                     │   Data Request        │
-                                     │   Authorization       │
-                                     │   (outside DIS)       │
-                                     └──────────┬───────────┘
-                                                │ presented in ITI-x1
-                                                ▼
-                                ┌──────────────────────────────────────────────┐
-                                │      Integrated De-ID Manager/De-Identifier │
-                                │                                              │
-┌──────────────┐   ITI-x1      │  ┌──────────────┐   ITI-x3  ┌────────────┐  │
-│ De-ID        │ ─────────────►│  │  De-ID       │ ────────► │ De-        │  │
-│ Requester    │ ◄─────────────│  │  Manager     │ ◄──────── │ Identifier │  │
-│              │  (output       │  │              │ (output +  │            │  │
-│              │   or job ID)   │  │              │  evidence) │            │  │
-│              │   ITI-x4      │  │              │  ITI-x7   │            │  │
-│              │ ─────────────►│  │              │ ────────► │            │  │
-│              │ ◄─────────────│  │              │ ◄──────── │            │  │
-│              │  (poll +       │  │              │ (async    │            │  │
-│              │   output)      │  │              │  task out) │            │  │
-└──────────────┘                │  └──────────────┘            └────────────┘  │
-                                │                                              │
-                                └──────────────────────────────────────────────┘
+```mermaid
+graph LR
+    REQ["De-Identification Requester"]
+
+    subgraph INT ["Integrated De-ID Manager/De-Identifier"]
+        MGR["De-ID Manager"]
+        DI["De-Identifier"]
+    end
+
+    REQ -- "ITI-x1 Submit De-Identification Job" --> MGR
+    REQ -- "ITI-x4 Retrieve Job Output" --> MGR
+    MGR -- "ITI-x3 Submit De-Identification Task" --> DI
+    MGR -- "ITI-x7 Retrieve Task Output" --> DI
 ```
 
 The outer box represents the Integrated De-ID Manager/De-Identifier, which combines both roles into a single actor. When integrated, ITI-x3 and ITI-x7 are internal and not externalized as transactions.
