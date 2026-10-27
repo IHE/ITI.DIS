@@ -11,12 +11,17 @@ The processing payload's format and version SHALL be explicitly identified. De-I
 
 ## 1:52.1 DIS Actors, Transactions, and Content Modules
 
-This section defines the actors and transactions in the DIS Profile.
+This section defines the actors, transactions, and content modules in the DIS Profile.
 
-Figure 1:52.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them.
+DIS defines two deployment models for de-identification processing:
+
+- **Distributed model** -- the De-Identification Requester submits jobs to a De-ID Manager, which validates the policy carrier, compiles an execution plan, and dispatches tasks to one or more De-Identifiers. This model supports multi-stage execution with trust isolation between stages.
+- **Integrated model** -- the Integrated De-ID Manager/De-Identifier combines policy validation, execution plan compilation, and transformation execution within a single actor. It receives jobs directly from the Requester and does not use inter-actor task dispatch.
+
+Figure 1:52.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them. The dashed boundary represents the Integrated De-ID Manager/De-Identifier, which combines the De-ID Manager and De-Identifier into a single actor. When the Integrated actor is deployed, ITI-x3 and ITI-x7 are performed internally and do not appear on the wire.
 
 ```mermaid
-graph LR
+flowchart TB
     REQ["De-Identification Requester"]
 
     subgraph INT ["Integrated De-ID Manager/De-Identifier"]
@@ -24,13 +29,17 @@ graph LR
         DI["De-Identifier"]
     end
 
-    REQ -- "ITI-x1 Submit De-Identification Job" --> MGR
-    REQ -- "ITI-x4 Retrieve Job Output" --> MGR
-    MGR -- "ITI-x3 Submit De-Identification Task" --> DI
-    MGR -- "ITI-x7 Retrieve Task Output" --> DI
+    REQ -->|"ITI-x1 Submit De-Identification Job"| MGR
+    REQ -->|"ITI-x4 Retrieve Job Output"| MGR
+    MGR -->|"ITI-x3 Submit De-Identification Task"| DI
+    MGR -->|"ITI-x7 Retrieve Task Output"| DI
+
+    style INT stroke-dasharray: 5 5
 ```
 
 **Figure 1:52.1-1: DIS Actor Diagram**
+
+Table 1:52.1-1 lists the transactions for each actor directly involved in the DIS Profile. To claim compliance with this profile, an actor SHALL support all required transactions (labeled "R") and MAY support the optional transactions (labeled "O").
 
 <p id="t52.1-1" class="tableTitle"><strong>Table 1:52.1-1: DIS Profile - Actors and Transactions</strong></p>
 
@@ -48,7 +57,21 @@ graph LR
 |  | ITI-x4 Retrieve Job Output | Responder | O (See Note 1) | ITI TF-2: 3.x4 |
 {: .grid}
 
-Note 1: *ITI-x4 and ITI-x7 are required when the Asynchronous Job Processing Option (DIS-ASYNC) is supported. ITI-x4 enables the Requester to poll for job output; ITI-x7 enables the Manager to retrieve task output from the De-Identifier.*
+Note 1: *ITI-x4 and ITI-x7 are required when the Asynchronous Job Processing Option (DIS-ASYNC) is supported. ITI-x4 enables the Requester to poll for job output; ITI-x7 enables the Manager to retrieve task output from the De-Identifier. ITI-x7 does not apply to the Integrated De-ID Manager/De-Identifier.*
+
+Table 1:52.1-2 lists the content modules defined for each actor. Each content module specifies the payload-specific rules for addressing, transformation, evidence, and packaging within a particular data format family.
+
+<p id="t52.1-2" class="tableTitle"><strong>Table 1:52.1-2: DIS Profile - Actors and Content Modules</strong></p>
+
+| Actors | Content Modules | Optionality | Reference |
+|--------|----------------|-------------|-----------|
+| De-Identification Requester | DIS-FHIR-Payload | R (See Note 4) | [3:5.9](volume-3.html#fhir-payload-content-module) |
+| De-ID Manager | DIS-FHIR-Payload | R (See Note 4) | [3:5.9](volume-3.html#fhir-payload-content-module) |
+| De-Identifier | DIS-FHIR-Payload | R (See Note 4) | [3:5.9](volume-3.html#fhir-payload-content-module) |
+| Integrated De-ID Manager/De-Identifier | DIS-FHIR-Payload | R (See Note 4) | [3:5.9](volume-3.html#fhir-payload-content-module) |
+{: .grid}
+
+Note 4: *DIS-FHIR-Payload is the only payload binding available in Phase 1. It supports independently versioned FHIR R4, R5, and R6 processing payloads. Future content modules (e.g., DIS-DICOM1, DIS-CDA1) may be defined for additional data formats.*
 
 ### 1:52.1.1 Actors
 
