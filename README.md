@@ -63,7 +63,7 @@ The `consistencyKey` identifies an authorized linkage scope; it is separate from
 flowchart TB
     REQ["De-Identification Requester"]
 
-    subgraph INT ["Integrated De-ID Manager/De-Identifier"]
+    subgraph INT ["Integrated De-ID Manager / De-Identifier"]
         MGR["De-ID Manager"]
         DI["De-Identifier"]
     end
