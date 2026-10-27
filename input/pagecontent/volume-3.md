@@ -130,7 +130,7 @@ However, several governed elements were renamed between R4 and R5. The De-ID Man
 | Semantic Group | R4 Path | R5 Path | Affected Element |
 |----------------|---------|---------|-----------------|
 | `subject.dates` | `Encounter.period` | `Encounter.actualPeriod` | Encounter date/time |
-| `subject.dates` | `Procedure.performedDateTime` | `Procedure.occurrenceDateTime` | Procedure date/time |
+| `subject.dates` | `Procedure.performed[x]` | `Procedure.occurrence[x]` | Procedure date/time (all choice types: dateTime, Period, string, Age, Range) |
 | `provider.name` | `Encounter.participant.individual` | `Encounter.participant.actor` | Encounter participant reference |
 | `device-identifiers` | `Device.deviceName` | `Device.name` | Device name |
 {: .grid}
