@@ -6,8 +6,8 @@ id: ihe.iti.dis
 canonical: https://profiles.ihe.net/ITI/DIS
 version: 0.0.1-current
 name: IHE_ITI_DIS
-title: "De-Identification Service (DIS) Profile"
-description: DIS (De-Identification Services) is an IHE interoperability profile that standardizes the workflow for policy-governed de-identification of HL7 FHIR health data through three actors (De-ID Manager, De-Identifier, Requester) and three transactions, supporting both synchronous and asynchronous job patterns with auditable provenance evidence.
+title: "De-Identification Services (DIS) Profile"
+description: DIS (De-Identification Services) is an IHE interoperability profile that standardizes the workflow for policy-governed de-identification of HL7 FHIR health data through four actors (De-ID Manager, De-Identifier, Requester, Integrated De-ID Manager/De-Identifier) and four transactions, supporting both synchronous and asynchronous job patterns with auditable provenance evidence.
 releaseLabel: ci-build
 #releaseLabel: ballot
 #releaseLabel: trial-use

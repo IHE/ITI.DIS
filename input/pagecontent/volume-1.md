@@ -140,7 +140,7 @@ Before accepting a job or dispatching any task, the De-ID Manager SHALL validate
 
 For an accepted asynchronous job, failures discovered during subsequent processing SHALL be reported through ITI-x4 job status. The Manager SHALL withhold de-identified output from a failed job, including when output validation fails.
 
-For more details see the detailed [transaction description](ITI-x1.html).
+For more details see the detailed [transaction description](volume-2.html).
 
 #### 1:52.1.2.2 Submit De-Identification Task [ITI-x3]
 
@@ -148,19 +148,19 @@ This transaction allows the De-ID Manager to submit a de-identification task to 
 
 When the De-ID Manager compiles multiple stages, ITI-x3 is invoked once per stage in sequence. Each invocation references a Library containing only the rules assigned to that stage -- the De-Identifier SHALL NOT have visibility into stages assigned to other instances.
 
-For more details see the detailed [transaction description](ITI-x3.html).
+For more details see the detailed [transaction description](volume-2.html).
 
 #### 1:52.1.2.3 Retrieve Job Output [ITI-x4]
 
 This transaction allows the De-Identification Requester to retrieve the status and output of a previously submitted asynchronous job. The De-ID Manager authenticates the Requester, verifies authorization for the specified job, and returns the current job status. When the job is complete, the response includes all output and evidence that would have been returned inline in a synchronous ITI-x1 response.
 
-For more details see the detailed [transaction description](ITI-x4.html).
+For more details see the detailed [transaction description](volume-2.html).
 
 #### 1:52.1.2.4 Retrieve Task Output [ITI-x7]
 
 This transaction allows the De-ID Manager to retrieve the output of a de-identification task from a De-Identifier during asynchronous job processing. When the De-ID Manager dispatches a task via ITI-x3 as part of an asynchronous job, it retrieves the completed output, evidence, and validation status via ITI-x7. This transaction is required when the Asynchronous Job Processing Option (DIS-ASYNC) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
 
-For more details see the detailed [transaction description](ITI-x7.html).
+For more details see the detailed [transaction description](volume-2.html).
 
 <a name="actor-options"> </a>
 
@@ -210,7 +210,9 @@ Note 3: *FHIR Job Status Protocol is required when the Asynchronous Job Processi
 
 Note 4: *DIS-FHIR-Payload is required for all actors in Phase 1 since it is the only available payload binding. It supports independently versioned FHIR R4, R5, and R6 processing payloads. Future payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be declared alongside DIS-FHIR-Payload.*
 
-The following matrix summarizes all Phase 1 declarations and their dependencies. Actor-specific obligations apply to each declared actor.
+Table 1:52.2-2 summarizes all Phase 1 declarations and their dependencies. Actor-specific obligations apply to each declared actor.
+
+<p id="t52.2-2" class="tableTitle"><strong>Table 1:52.2-2: DIS Profile - Declaration Matrix</strong></p>
 
 | Declaration | Option Name | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
 |-------------|-------------|-----------|---------|---------------|-----------------------------------|-------------------------|
@@ -329,7 +331,7 @@ At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared by the De-I
 
 ## 1:52.3 DIS Required Actor Groupings
 
-An actor from this profile (Column 1) SHALL implement all of the required transactions and/or content modules in this profile ***in addition to*** ***<u>all</u>*** of the requirements for the grouped actor (Column 2).
+An actor from this profile (Column 1) SHALL implement all of the required transactions and/or content modules in this profile ***in addition to*** ***<u>all</u>*** of the requirements for the grouped actor (Column 2). Table 1:52.3-1 lists the required actor groupings.
 
 <p id="t52.3-1" class="tableTitle"><strong>Table 1:52.3-1: DIS Profile - Required Actor Groupings</strong></p>
 
@@ -398,6 +400,7 @@ The following table illustrates how future payload bindings could extend DIS to 
 | DIS-DICOM1 (future) | DICOM | DICOM tag paths, sequence item traversal, pixel data handling | DICOM Part 10 objects, studies, series | By-reference via DICOMweb WADO-RS or as DICOM Part 10 binary attachments |
 | DIS-CDA1 (future) | HL7 CDA R2 | XPath / CDA document model, section and entry traversal, narrative block handling | CDA documents (Continuity of Care, Discharge Summary, etc.) | Inline XML or by-reference as document attachments |
 | DIS-V2-1 (future) | HL7 v2.x | Segment/field/component paths (e.g., PID-5, OBX-5) | HL7 v2 messages (ADT, ORU, ORM, etc.) | By-reference or inline as ER7/XML-encoded messages |
+{: .grid}
 
 An actor declares which payload bindings it supports. The De-ID Manager verifies payload binding compatibility between the Requester's job and the De-Identifier's declared capabilities before dispatching tasks. A single job uses one payload binding; the Manager does not perform cross-format transformation. An actor MAY declare multiple payload bindings to support de-identification workflows across different data format families.
 

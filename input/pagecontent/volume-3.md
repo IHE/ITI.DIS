@@ -21,7 +21,9 @@ Each processing payload SHALL explicitly declare its FHIR version. The version d
 
 A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the FHIR payload versions it supports in its capability declaration. The De-ID Manager SHALL verify that the processing payload's declared version is included in the assigned De-Identifier's supported versions before dispatching a task via ITI-x3. The De-ID Manager SHALL reject a job when no available De-Identifier supports the payload's declared FHIR version.
 
-The payload version is declared through one of the following mechanisms:
+Table 3:5.9.1-1 lists the mechanisms for declaring the payload version.
+
+<p id="t3.5.9.1-1" class="tableTitle"><strong>Table 3:5.9.1-1: Payload Version Declaration Mechanisms</strong></p>
 
 | Mechanism | Context | Example |
 |-----------|---------|---------|
@@ -73,7 +75,7 @@ The payload is serialized as JSON or XML and carried as a `valueAttachment` in t
 }
 ```
 
-The content type parameter `fhirVersion` declares the payload version. The De-Identifier SHALL parse the attachment content according to the declared version.
+The content type parameter `fhirVersion` is a DIS-defined convention for declaring the payload version within inline attachments; it is not a registered FHIR MIME type parameter. The De-Identifier SHALL parse the attachment content according to the declared version.
 
 ##### Bulk Data Manifest
 
@@ -95,7 +97,9 @@ When output is persisted by reference (e.g., to an output FHIR server or as NDJS
 
 ##### Protocol Resources Remain R4
 
-The following resources are part of the R4 protocol layer and remain R4 regardless of the payload version:
+Table 3:5.9.1-2 lists the resources that are part of the R4 protocol layer and remain R4 regardless of the payload version.
+
+<p id="t3.5.9.1-2" class="tableTitle"><strong>Table 3:5.9.1-2: R4 Protocol Resources</strong></p>
 
 | R4 Protocol Resource | Role |
 |----------------------|------|
@@ -110,17 +114,30 @@ The following resources are part of the R4 protocol layer and remain R4 regardle
 
 #### 3:5.9.1.3 Version-Neutral Element Addressing
 
-DIS-FHIR-Payload uses FHIRPath-compatible path expressions to address data elements within the processing payload (see [1:52.2.7](volume-1.html#15227-fhir-payload-option)). The path expressions used by DIS execution plans, semantic group mappings, and Provenance transformation summaries are version-neutral: they resolve consistently across FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions.
+DIS-FHIR-Payload uses FHIRPath-compatible path expressions to address data elements within the processing payload (see [§1:52.2.7](volume-1.html#15227-fhir-payload-option)). The path expressions used by DIS execution plans, semantic group mappings, and Provenance transformation summaries are version-neutral: they resolve consistently across FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions.
 
-This version neutrality holds because:
+Most governed element paths are stable across R4, R5, and R6:
 
-- Core patient-demographic resource types (`Patient`, `Practitioner`, `Encounter`, `Condition`, `Observation`, `DiagnosticReport`, `Procedure`, `MedicationRequest`, `DocumentReference`, `ImagingStudy`) and their direct-identifier and quasi-identifier elements retain stable path structures across R4, R5, and R6.
+- `Patient` direct-identifier and demographic elements (`Patient.name`, `Patient.identifier`, `Patient.birthDate`, `Patient.address`, `Patient.telecom`, `Patient.photo`, `Patient.gender`, `Patient.maritalStatus`) retain identical paths across all three versions.
 - FHIR datatypes used by DIS transformation actions (`HumanName`, `Identifier`, `Address`, `ContactPoint`, `Narrative`, `date`, `dateTime`, `instant`, `Period`, `Quantity`) have stable structures across these versions.
-- DIS semantic groups (`subject.direct-identifiers`, `subject.dates`, `subject.demographics`, `subject.contact-information`, `subject.identifiers`, `fhir.references`, `fhir.narrative`) map to these stable paths.
+- DIS semantic groups for subject identifiers, demographics, contact information, references, and narrative map to stable paths.
+- Resource types commonly governed by DIS (`Patient`, `Practitioner`, `Encounter`, `Condition`, `Observation`, `DiagnosticReport`, `Procedure`, `MedicationRequest`, `DocumentReference`, `ImagingStudy`) exist in all three versions.
 
-A single execution plan can therefore govern payloads of different FHIR versions without requiring version-specific rule variants. The De-ID Manager compiles the same semantic groups into the same FHIRPath targets regardless of whether the payload is R4, R5, or R6.
+However, several governed elements were renamed between R4 and R5. The De-ID Manager SHALL apply version-conditional path mappings for these elements when compiling execution plans for R5 or R6 payloads.
 
-When a future FHIR version introduces structural changes to governed elements (e.g., renamed paths, restructured datatypes), the DIS-FHIR-Payload content module will define version-conditional mappings for the affected elements. Until such changes occur, no version-conditional logic is required.
+<p id="t3.5.9.1-3" class="tableTitle"><strong>Table 3:5.9.1-3: Version-Conditional Path Mappings (R4 to R5)</strong></p>
+
+| Semantic Group | R4 Path | R5 Path | Affected Element |
+|----------------|---------|---------|-----------------|
+| `subject.dates` | `Encounter.period` | `Encounter.actualPeriod` | Encounter date/time |
+| `subject.dates` | `Procedure.performedDateTime` | `Procedure.occurrenceDateTime` | Procedure date/time |
+| `provider.name` | `Encounter.participant.individual` | `Encounter.participant.actor` | Encounter participant reference |
+| `device-identifiers` | `Device.deviceName` | `Device.name` | Device name |
+{: .grid}
+
+The De-ID Manager SHALL resolve these mappings at execution plan compilation time based on the declared payload version. A single governance policy using semantic groups remains version-neutral; the version-conditional mapping is applied during compilation, not by the De-Identifier. The De-Identifier receives resolved paths appropriate for the payload version.
+
+For elements not listed in Table 3:5.9.1-3, a single execution plan can govern payloads of different FHIR versions without requiring version-specific rule variants. When future FHIR versions introduce additional structural changes to governed elements, this table SHALL be extended.
 
 #### 3:5.9.1.4 Evidence Representation Across Versions
 
