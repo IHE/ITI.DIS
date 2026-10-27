@@ -72,8 +72,6 @@ flowchart TB
     REQ -->|"ITI-x4 Retrieve Job Output"| MGR
     MGR -->|"ITI-x3 Submit De-Identification Task"| DI
     MGR -->|"ITI-x7 Retrieve Task Output"| DI
-
-    style INT stroke-dasharray: 5 5
 ```
 
 The outer box represents the Integrated De-ID Manager/De-Identifier, which combines both roles into a single actor. When integrated, ITI-x3 and ITI-x7 are internal and not externalized as transactions.
