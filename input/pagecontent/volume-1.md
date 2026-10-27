@@ -261,6 +261,24 @@ DIS-FHIR-Payload is one of potentially several payload binding options. Each pay
 
 Actors declaring DIS-FHIR-Payload SHALL also declare the applicable protocol binding options (DIS-FHIR-Job and/or DIS-FHIR-Task). In Phase 1, DIS-FHIR-Payload is required for all actors since it is the only available payload binding.
 
+#### 1:52.2.7.1 Cross-Version Payload Support
+
+DIS-FHIR-Payload supports processing payloads whose FHIR version differs from the FHIR R4 protocol binding. An R5 or R6 resource can be de-identified through R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on three design properties: explicit version identification, version-safe packaging, and version-neutral addressing.
+
+**Version identification.** Each processing payload SHALL explicitly identify its FHIR version. De-Identifiers SHALL declare which payload FHIR versions they support. The De-ID Manager SHALL verify that the declared payload version is compatible with the assigned De-Identifier's capabilities before dispatching a task via ITI-x3. FHIR payloads SHALL be validated against their declared version, not against the R4 protocol binding version.
+
+**Version-safe packaging.** A FHIR payload whose version differs from the R4 protocol binding SHALL be carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the R4 transaction envelope. Permitted packaging patterns include:
+
+- **By-reference** -- the processing target identifies the resource by FHIR reference or URL, and the De-Identifier retrieves it from a source FHIR server that supports the payload version.
+- **Inline attachment** -- the payload is serialized and carried as a `valueAttachment` with an explicit content type (e.g., `application/fhir+json`). The R4 transaction envelope treats it as opaque bytes.
+- **Bulk Data manifest** -- the payload is referenced as NDJSON files in a manifest. Each NDJSON line is a serialized resource in the declared payload version.
+
+De-identified output is returned or persisted using the same packaging patterns. R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain R4 regardless of the payload version.
+
+**Version-neutral addressing.** DIS-FHIR-Payload uses FHIRPath expressions to address data elements within the processing payload. The FHIRPath addresses used by DIS execution plans and semantic group mappings (e.g., `Patient.name`, `Patient.birthDate`, `DomainResource.text`) resolve consistently across FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions. Execution plan rules, semantic group definitions, and Provenance transformation summaries use these version-neutral paths and do not require version-specific variants.
+
+**Evidence across versions.** De-identification evidence is represented as R4 FHIR `Provenance` -- it is part of the protocol layer, not the payload. Provenance references de-identified output by resource URI or identifier and records transformation summaries using version-neutral FHIRPath target paths. The evidence model does not depend on the payload's FHIR version.
+
 ### 1:52.2.8 FHIR Job Status Protocol Option
 
 The FHIR Job Status Protocol Option (DIS-FHIR-JobStatus) provides the FHIR R4 protocol binding for the Retrieve Job Output transaction [ITI-x4] using the FHIR Asynchronous Request Pattern (`GET` on `Content-Location` URL).
