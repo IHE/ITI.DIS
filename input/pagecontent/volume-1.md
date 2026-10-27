@@ -24,7 +24,7 @@ Figure 1:PXX.1-1 shows the actors directly involved in the DIS Profile and the r
 flowchart TB
     REQ["De-Identification Requester"]
 
-    subgraph INT ["Integrated De-ID Manager/De-Identifier"]
+    subgraph INT ["Integrated De-ID Manager / De-Identifier"]
         MGR["De-ID Manager"]
         DI["De-Identifier"]
     end
