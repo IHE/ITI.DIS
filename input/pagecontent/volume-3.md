@@ -114,7 +114,7 @@ Table 3:5.9.1-2 lists the resources that are part of the R4 protocol layer and r
 
 #### 3:5.9.1.3 Version-Neutral Element Addressing
 
-DIS-FHIR-Payload uses FHIRPath-compatible path expressions to address data elements within the processing payload (see [§1:52.2.7](volume-1.html#15227-fhir-payload-option)). The path expressions used by DIS execution plans, semantic group mappings, and Provenance transformation summaries are version-neutral: they resolve consistently across FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions.
+DIS-FHIR-Payload uses FHIRPath-compatible path expressions to address data elements within the processing payload (see [§1:PXX.2.7](volume-1.html#1pxx27-fhir-payload-option)). The path expressions used by DIS execution plans, semantic group mappings, and Provenance transformation summaries are version-neutral: they resolve consistently across FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions.
 
 Most governed element paths are stable across R4, R5, and R6:
 
@@ -153,7 +153,7 @@ The `Provenance` resource MAY include the payload FHIR version in an extension w
 
 De-identified output SHALL be validated against the processing payload's declared FHIR version, not against the R4 protocol binding version.
 
-The minimum validation checks specified in [1:52.2.7](volume-1.html#15227-fhir-payload-option) apply to all payload versions:
+The minimum validation checks specified in [1:PXX.2.7](volume-1.html#1pxx27-fhir-payload-option) apply to all payload versions:
 
 1. Well-formed FHIR JSON or XML conforming to the declared version.
 2. Valid against the base resource definition for the declared version.
