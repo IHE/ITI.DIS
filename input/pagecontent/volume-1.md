@@ -13,10 +13,11 @@ The processing payload's format and version SHALL be explicitly identified. De-I
 
 This section defines the actors, transactions, and content modules in the DIS Profile.
 
-DIS defines two deployment models for de-identification processing:
+DIS defines three deployment models for de-identification processing:
 
 - **Distributed model** -- the De-Identification Requester submits jobs to a De-ID Manager, which validates the policy carrier, compiles an execution plan, and dispatches tasks to one or more De-Identifiers. This model supports multi-stage execution with trust isolation between stages.
-- **Integrated model** -- the Integrated De-ID Manager/De-Identifier combines policy validation, execution plan compilation, and transformation execution within a single actor. It receives jobs directly from the Requester and does not use inter-actor task dispatch.
+- **Integrated model with external Requester** -- the Integrated De-ID Manager/De-Identifier accepts jobs via ITI-x1, combines policy validation, execution plan compilation, and transformation execution within a single actor, and returns output to the Requester. ITI-x3 and ITI-x7 are internal.
+- **Integrated standalone model** -- the Integrated De-ID Manager/De-Identifier operates without external transactions, producing conformant de-identified output and evidence through local invocation. This model supports lightweight workflows such as clinician-initiated document export (see [Use Case 5](#1pxx425-use-case-5-local-authorized-clinical-document-export)).
 
 Figure 1:PXX.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them. The dashed boundary represents the Integrated De-ID Manager/De-Identifier, which combines the De-ID Manager and De-Identifier into a single actor. When the Integrated actor is deployed, ITI-x3 and ITI-x7 are performed internally and do not appear on the wire.
 
@@ -223,21 +224,14 @@ The execution plan model is payload-specific. Each payload binding defines its o
 
 #### 1:PXX.2.3.2 Cross-Version Payload Support
 
-DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. An R5 or R6 resource can be de-identified through R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on three design properties: explicit version identification, version-safe packaging, and version-neutral addressing.
+DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. An R5 or R6 resource can be de-identified through R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on four design properties:
 
-**Version identification.** Each processing payload SHALL explicitly identify its HL7 FHIR version. De-Identifiers SHALL declare which payload HL7 FHIR versions they support. The De-ID Manager SHALL verify that the declared payload version is compatible with the assigned De-Identifier's capabilities before dispatching a task via ITI-x3. HL7 FHIR payloads SHALL be validated against their declared version, not against the R4 protocol binding version.
+- **Version identification** -- each processing payload explicitly identifies its HL7 FHIR version. De-Identifiers declare which payload versions they support, and the Manager verifies compatibility before dispatch.
+- **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the R4 transaction envelope. Packaging patterns are specified in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module).
+- **Version-neutral addressing** -- FHIRPath expressions used by execution plans and semantic group mappings resolve consistently across HL7 FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions.
+- **Evidence across versions** -- de-identification evidence is represented as R4 HL7 FHIR Provenance (protocol layer, not payload). The evidence model does not depend on the payload's HL7 FHIR version.
 
-**Version-safe packaging.** An HL7 FHIR payload whose version differs from the R4 protocol binding SHALL be carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the R4 transaction envelope. Permitted packaging patterns include:
-
-- **By-reference** -- the processing target identifies the resource by HL7 FHIR reference or URL, and the De-Identifier retrieves it from a source HL7 FHIR server that supports the payload version.
-- **Inline attachment** -- the payload is serialized and carried as a `valueAttachment` with an explicit content type (e.g., `application/fhir+json`). The R4 transaction envelope treats it as opaque bytes.
-- **Bulk Data manifest** -- the payload is referenced as NDJSON files in a manifest. Each NDJSON line is a serialized resource in the declared payload version.
-
-De-identified output is returned or persisted using the same packaging patterns. R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain R4 regardless of the payload version.
-
-**Version-neutral addressing.** DIS-FHIR-Payload uses FHIRPath expressions to address data elements within the processing payload. The FHIRPath addresses used by DIS execution plans and semantic group mappings (e.g., `Patient.name`, `Patient.birthDate`, `DomainResource.text`) resolve consistently across HL7 FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions. Execution plan rules, semantic group definitions, and Provenance transformation summaries use these version-neutral paths and do not require version-specific variants.
-
-**Evidence across versions.** De-identification evidence is represented as R4 HL7 FHIR `Provenance` -- it is part of the protocol layer, not the payload. Provenance references de-identified output by resource URI or identifier and records transformation summaries using version-neutral FHIRPath target paths. The evidence model does not depend on the payload's HL7 FHIR version.
+R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain R4 regardless of the payload version.
 
 ### 1:PXX.2.4 Asynchronous Job Processing Option
 
@@ -330,6 +324,13 @@ A shared `consistencyKey` alone does not guarantee identical results. Consistenc
 Date-shift reference dates and offsets are protected transformation parameters, not consistency keys. Deterministic derivation from purpose-specific seeds is preferred. Where a De-Identifier generates a parameter that SHALL be reused, an explicit capability contract SHALL define its protected return to the Manager, authorized retention, and reuse in subsequent tasks. Acceptance of precomputed parameters is not mandatory for all De-Identifiers. Seed handling follows §1:PXX.5.4.
 
 **Evidence Baseline.** Every completed de-identification task produces provenance evidence containing at minimum nine elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, stage category, reversibility state, validation status, and audit correlation identifier.
+
+**Conformance Layers.** DIS defines two conformance layers:
+
+- **Content conformance** -- de-identified output and provenance evidence conform to the declared content module (e.g., DIS-FHIR-Payload). Content conformance covers the full pipeline: policy validation, execution plan compilation, transformation execution, and evidence production. The Integrated De-ID Manager/De-Identifier is the actor for content conformance claims. It MAY operate standalone without external transactions, producing conformant output through local invocation.
+- **Transaction conformance** -- actors participate in external DIS transactions (ITI-x1, ITI-x3, ITI-x4, ITI-x7). Transaction conformance applies when actors communicate over standardized interfaces. The distributed model (Requester, Manager, De-Identifier) requires transaction conformance. The Integrated actor adds transaction conformance when it supports ITI-x1 (and optionally ITI-x4).
+
+Content conformance is the foundation. An Integrated actor operating standalone claims content conformance only. When the Integrated actor also supports ITI-x1, it claims both content and transaction conformance. In the distributed model, the De-ID Manager and De-Identifier each claim transaction conformance for their respective transactions; the Manager is responsible for ensuring that the combined output achieves content conformance.
 
 **Payload Binding Framework (Informative).** DIS separates the mandatory HL7 FHIR R4 protocol binding from the payload binding so that additional data formats can be supported without changing the protocol layer. The protocol binding defines how transactions are initiated, dispatched, and polled -- it is content-neutral and carries or references payloads of any format. Each payload binding defines the format-specific rules for a particular data format family. Phase 1 defines DIS-FHIR-Payload as the initial payload binding; additional payload bindings are expected to follow the same architectural pattern.
 
