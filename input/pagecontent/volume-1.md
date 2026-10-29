@@ -3,7 +3,7 @@ The De-Identification Services (DIS) Profile defines a standardized, policy-gove
 
 DIS is a **Workflow** profile. It defines four actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
 
-DIS separates core workflow semantics, the FHIR protocol binding, and the processing payload binding. The DIS FHIR protocol binding (DIS-FHIR-Job, DIS-FHIR-Task, DIS-FHIR-JobStatus) uses FHIR R4 APIs and resources exclusively; it is content-neutral and can orchestrate any payload type for which a corresponding payload binding is declared. DIS-FHIR-Payload is the FHIR payload binding, supporting independently versioned FHIR R4, R5, and R6 processing payloads; support for R5 or R6 payloads does not require an R5 or R6 version of the DIS protocol binding. Additional payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be defined independently to support non-FHIR data formats within the same FHIR R4 protocol layer.
+DIS separates the mandatory HL7 FHIR R4 protocol binding from the processing payload binding. The protocol binding uses HL7 FHIR R4 APIs and resources exclusively for job submission, task dispatch, and status reporting; it is content-neutral and can orchestrate any payload type for which a corresponding payload binding is declared. DIS-FHIR-Payload is the HL7 FHIR payload binding, supporting independently versioned HL7 FHIR R4, R5, and R6 processing payloads; support for R5 or R6 payloads does not require an R5 or R6 version of the DIS protocol binding. Additional payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be defined independently to support non-FHIR data formats within the same HL7 FHIR R4 protocol layer.
 
 The processing payload's format and version SHALL be explicitly identified. De-Identifiers SHALL declare supported payload bindings and versions, and the Manager SHALL verify compatibility before dispatch. FHIR payloads SHALL be validated against their declared version. A FHIR payload using a different version from the R4 protocol binding SHALL be referenced or carried as explicitly identified serialized content using the payload binding's packaging rules; it SHALL NOT be embedded as a native resource of the other version in the R4 transaction envelope. Non-FHIR payloads (e.g., DICOM, CDA) SHALL be carried or referenced using their respective payload binding's packaging rules. Detailed version identification and packaging rules are specified in each payload binding.
 
@@ -37,25 +37,27 @@ flowchart TB
 
 **Figure 1:PXX.1-1: DIS Actor Diagram**
 
-Table 1:PXX.1-1 lists the transactions for each actor directly involved in the DIS Profile. To claim compliance with this profile, an actor SHALL support all required transactions (labeled "R") and MAY support the optional transactions (labeled "O").
+Table 1:PXX.1-1 lists the transactions for each actor directly involved in the DIS Profile. To claim compliance with this profile, an actor SHALL support all required transactions (labeled "R") and MAY support the optional transactions. Transactions labeled "C" (Conditional) are required when the corresponding option is declared.
 
 <p id="tPXX.1-1" class="tableTitle"><strong>Table 1:PXX.1-1: DIS Profile - Actors and Transactions</strong></p>
 
 | Actors | Transactions | Initiator or Responder | Optionality | Reference |
 |--------|-------------|------------------------|-------------|-----------|
 | De-Identification Requester | ITI-x1 Submit De-Identification Job | Initiator | R | ITI TF-2: 3.x1 |
-|  | ITI-x4 Retrieve Job Output | Initiator | O (See Note 1) | ITI TF-2: 3.x4 |
+|  | ITI-x4 Retrieve Job Output | Initiator | C (See Note 1) | ITI TF-2: 3.x4 |
 | De-ID Manager | ITI-x1 Submit De-Identification Job | Responder | R | ITI TF-2: 3.x1 |
 |  | ITI-x3 Submit De-Identification Task | Initiator | R | ITI TF-2: 3.x3 |
-|  | ITI-x4 Retrieve Job Output | Responder | O (See Note 1) | ITI TF-2: 3.x4 |
-|  | ITI-x7 Retrieve Task Output | Initiator | O (See Note 1) | ITI TF-2: 3.x7 |
+|  | ITI-x4 Retrieve Job Output | Responder | C (See Note 1) | ITI TF-2: 3.x4 |
+|  | ITI-x7 Retrieve Task Output | Initiator | C (See Note 1) | ITI TF-2: 3.x7 |
 | De-Identifier | ITI-x3 Submit De-Identification Task | Responder | R | ITI TF-2: 3.x3 |
-|  | ITI-x7 Retrieve Task Output | Responder | O (See Note 1) | ITI TF-2: 3.x7 |
-| Integrated De-ID Manager/De-Identifier | ITI-x1 Submit De-Identification Job | Responder | R | ITI TF-2: 3.x1 |
-|  | ITI-x4 Retrieve Job Output | Responder | O (See Note 1) | ITI TF-2: 3.x4 |
+|  | ITI-x7 Retrieve Task Output | Responder | C (See Note 1) | ITI TF-2: 3.x7 |
+| Integrated De-ID Manager/De-Identifier | ITI-x1 Submit De-Identification Job | Responder | O (See Note 2) | ITI TF-2: 3.x1 |
+|  | ITI-x4 Retrieve Job Output | Responder | C (See Note 1, Note 2) | ITI TF-2: 3.x4 |
 {: .grid}
 
-Note 1: *ITI-x4 and ITI-x7 are required when the Asynchronous Job Processing Option (DIS-ASYNC) is supported. ITI-x4 enables the Requester to poll for job output; ITI-x7 enables the Manager to retrieve task output from the De-Identifier. ITI-x7 does not apply to the Integrated De-ID Manager/De-Identifier.*
+Note 1: *ITI-x4 is required when the Asynchronous Job Processing Option (DIS-ASYNC-JOB) is supported. ITI-x7 is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. ITI-x4 enables the Requester to poll for job output; ITI-x7 enables the Manager to retrieve task output from the De-Identifier. ITI-x7 does not apply to the Integrated De-ID Manager/De-Identifier.*
+
+Note 2: *The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions (content conformance only). When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester. ITI-x4 is required when both ITI-x1 and DIS-ASYNC-JOB are supported.*
 
 Table 1:PXX.1-2 lists the content modules defined for each actor. Each content module specifies the payload-specific rules for addressing, transformation, evidence, and packaging within a particular data format family.
 
@@ -93,16 +95,25 @@ The De-ID Manager receives de-identification jobs via ITI-x1, validates the data
 
 The De-ID Manager is the sole persistent custodian of identity mappings and reversibility records. When reversible pseudonymization is enabled (DIS-REVERSIBLE), the De-ID Manager retains the identity table (cryptographic seed to patient identity mapping) and builds a pseudonym index from de-identification evidence reported by the De-Identifier at job completion. Together these two tables form the reverse-mapping chain: pseudonym to seed to patient identity. Phase 1 does not standardize re-identification transactions; however, implementations claiming DIS-REVERSIBLE SHALL retain reversibility material so that standardized re-identification can be enabled without re-processing previously de-identified data.
 
-The De-ID Manager performs four-point validation on all policy carrier variants:
+The De-ID Manager performs four-point validation on all carriers:
 
 1. **Signature validity** -- the carrier's digital signature is cryptographically valid and issued by a trusted authority
-2. **Schema conformance** -- the policy content conforms to the expected schema
-3. **Currency** -- the policy is not expired or revoked
-4. **Authorization consistency** -- the policy is consistent with the data request authorization (scope, purpose, and processing target are compatible)
+2. **Schema conformance** -- the carrier content conforms to the expected schema
+3. **Currency** -- the carrier is not expired or revoked
+4. **Authorization consistency** -- the carrier is consistent with the data request authorization (scope, purpose, and processing target are compatible)
 
-For a named policy carrier, the Requester supplies the policy identifier and any required version. The De-ID Manager SHALL resolve it unambiguously to a specific, versioned, signed policy artifact and complete all four validation checks before accepting the job. If resolution is ambiguous, unavailable, or cannot produce a valid artifact, the Manager SHALL reject the request synchronously without dispatching tasks. Resolution MAY use a local registry, administrative configuration, or an external source; Phase 1 does not standardize the provisioning or resolution mechanism. Resolution of named or by-reference carriers does not introduce a policy discovery or retrieval transaction into Phase 1.
+Phase 1 supports four carrier variants in ITI-x1:
 
-The De-Identifier receives the compiled execution plan and is not responsible for resolving the Requester's named carrier. Where execution relies on native named-policy support, the Manager SHALL verify that the De-Identifier supports the resolved policy and version before dispatch.
+- **Inline policy** -- a signed, format-neutral policy artifact embedded directly in the request. The Manager compiles it into a payload-specific execution plan.
+- **By-reference policy** -- a reference pointing to a signed, format-neutral policy artifact stored externally. The Manager retrieves, validates, and compiles it.
+- **Registered policy identifier** -- a policy identifier and optional version, resolved by the Manager to a specific, signed, format-neutral policy artifact. The resolved artifact undergoes the same four validation checks and compilation as inline or by-reference policies. Resolution MAY use a local registry, administrative configuration, or an external source; Phase 1 does not standardize the provisioning or resolution mechanism.
+- **Named execution plan** -- an identifier referencing a pre-compiled, format-specific execution plan defined by an existing data standard (e.g., DICOM PS 3.15 Basic Profile). Because the plan is already expressed in the terms of a specific data standard, it does not require compilation. The Manager validates the carrier and verifies that the De-Identifier declares native support for the named plan and version before dispatch.
+
+A registered policy is described in format-neutral language and can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A named execution plan is already executable for its target data standard — it bypasses compilation because it is defined in format-specific terms. Both undergo the same four-point validation.
+
+Resolution of registered policy identifiers, named execution plans, or by-reference carriers does not introduce a policy discovery or retrieval transaction into Phase 1.
+
+The De-Identifier receives an execution plan (compiled by the Manager, or the named plan itself) and is not responsible for resolving the Requester's carrier.
 
 <a name="de-identifier"> </a>
 
@@ -110,7 +121,7 @@ The De-Identifier receives the compiled execution plan and is not responsible fo
 
 The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives scoped, purpose-specific seeds as required by the assigned rules, produces transformations and evidence, and retains no identity-linking material after task termination. The De-Identifier derives transformation values, such as pseudonyms or date-shift offsets, according to the execution plan and its declared capabilities. It reports pseudonyms needed for reversibility to the Manager but does not retain the seed-to-identity mapping. The Manager supplies policy, scope, and seed material; it is not required to compute pseudonyms or date-shift offsets.
 
-A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core`), and zero or more named standardized policies it natively supports. The declaration SHALL also identify supported transformation parameter inputs and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
+A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core`), and zero or more named execution plans it natively supports. The declaration SHALL also identify supported transformation parameter inputs and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
 
 <a name="integrated-de-id-manager-de-identifier"> </a>
 
@@ -118,11 +129,13 @@ A Phase 1 De-Identifier SHALL declare its capabilities, including supported payl
 
 The Integrated De-ID Manager/De-Identifier combines the functionality of the De-ID Manager and the De-Identifier into a single actor. It does not initiate nor accept the Submit De-Identification Task [ITI-x3] transaction.
 
-The Integrated De-ID Manager/De-Identifier receives de-identification jobs via ITI-x1, validates the data request authorization and de-identification policy carrier, compiles the validated policy into an execution plan, executes the plan internally, and returns de-identified output and provenance evidence to the Requester. It performs all Manager obligations (policy validation, execution plan compilation, reversibility material custody) and all De-Identifier obligations (transformation execution, evidence production, capability declaration) within a single actor.
+The Integrated De-ID Manager/De-Identifier validates de-identification policy carriers, compiles validated policy into execution plans, executes the plans internally, and produces de-identified output and provenance evidence. It performs all Manager obligations (policy validation, execution plan compilation, reversibility material custody) and all De-Identifier obligations (transformation execution, evidence production, capability declaration) within a single actor.
+
+The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions, producing conformant de-identified output and evidence through local invocation. When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester and returns output inline (synchronous) or via ITI-x4 polling (when DIS-ASYNC-JOB is also supported).
 
 The Integrated De-ID Manager/De-Identifier is the sole persistent custodian of identity mappings and reversibility records, consistent with the De-ID Manager's custody obligations. Seeds, identity tables, pseudonym indices, and other protected transformation material remain within the integrated actor's trust boundary.
 
-A Phase 1 Integrated De-ID Manager/De-Identifier SHALL declare its capabilities using the same structure required of a standalone De-Identifier, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core`), and zero or more named standardized policies. The Integrated De-ID Manager/De-Identifier SHALL support DIS-BASELINE-EXEC. Multi-stage execution is performed internally; the integrated actor compiles and executes each stage in sequence without externalizing the inter-stage dispatch.
+A Phase 1 Integrated De-ID Manager/De-Identifier SHALL declare its capabilities using the same structure required of a standalone De-Identifier, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core`), and zero or more named execution plans. Multi-stage execution is performed internally; the integrated actor compiles and executes each stage in sequence without externalizing the inter-stage dispatch.
 
 ### 1:PXX.1.2 Transaction Descriptions
 
@@ -156,7 +169,7 @@ For more details see the detailed [transaction description](volume-2.html).
 
 #### 1:PXX.1.2.4 Retrieve Task Output [ITI-x7]
 
-This transaction allows the De-ID Manager to retrieve the output of a de-identification task from a De-Identifier during asynchronous job processing. When the De-ID Manager dispatches a task via ITI-x3 as part of an asynchronous job, it retrieves the completed output, evidence, and validation status via ITI-x7. This transaction is required when the Asynchronous Job Processing Option (DIS-ASYNC) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
+This transaction allows the De-ID Manager to retrieve the output of a de-identification task from a De-Identifier during asynchronous task processing. When the De-ID Manager dispatches a task via ITI-x3 and the De-Identifier processes it asynchronously, the Manager retrieves the completed output, evidence, and validation status via ITI-x7. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
 
 For more details see the detailed [transaction description](volume-2.html).
 
@@ -164,77 +177,47 @@ For more details see the detailed [transaction description](volume-2.html).
 
 ## 1:PXX.2 DIS Actor Options
 
-Options that may be selected for each actor in this profile are listed in Table 1:PXX.2-1 below. Dependencies between options when applicable are specified in notes.
+Options that may be selected for each actor in this profile are listed in Table 1:PXX.2-1 below. Dependencies between options when applicable are specified in notes. All DIS actors support the HL7 FHIR R4 protocol binding as the mandatory baseline — the protocol binding is not an option but a requirement of implementing the profile.
 
 <p id="tPXX.2-1" class="tableTitle"><strong>Table 1:PXX.2-1: DIS Profile - Actor Options</strong></p>
 
 | Actor | Option Name | Reference |
 |-------|-------------|-----------|
-| De-Identification Requester | Base De-Identification Support (DIS-BASE) | [1:PXX.2.1](#1pxx21-base-de-identification-support) |
-| De-Identification Requester | FHIR Job Protocol (DIS-FHIR-Job) (See Note 2) | [1:PXX.2.5](#1pxx25-fhir-job-protocol-option) |
-| De-Identification Requester | FHIR Payload (DIS-FHIR-Payload) (See Note 4) | [1:PXX.2.7](#1pxx27-fhir-payload-option) |
-| De-Identification Requester | FHIR Job Status Protocol (DIS-FHIR-JobStatus) (See Note 3) | [1:PXX.2.8](#1pxx28-fhir-job-status-protocol-option) |
-| De-Identification Requester | Asynchronous Job Processing (DIS-ASYNC) | [1:PXX.2.9](#1pxx29-asynchronous-job-processing-option) |
-| De-ID Manager | Base De-Identification Support (DIS-BASE) | [1:PXX.2.1](#1pxx21-base-de-identification-support) |
-| De-ID Manager | Baseline Execution Plan (DIS-BASELINE-EXEC) | [1:PXX.2.3](#1pxx23-baseline-execution-plan-option) |
-| De-ID Manager | FHIR Job Protocol (DIS-FHIR-Job) (See Note 2) | [1:PXX.2.5](#1pxx25-fhir-job-protocol-option) |
-| De-ID Manager | FHIR Task Protocol (DIS-FHIR-Task) (See Note 2) | [1:PXX.2.6](#1pxx26-fhir-task-protocol-option) |
-| De-ID Manager | FHIR Payload (DIS-FHIR-Payload) (See Note 4) | [1:PXX.2.7](#1pxx27-fhir-payload-option) |
-| De-ID Manager | FHIR Job Status Protocol (DIS-FHIR-JobStatus) (See Note 3) | [1:PXX.2.8](#1pxx28-fhir-job-status-protocol-option) |
-| De-ID Manager | Asynchronous Job Processing (DIS-ASYNC) | [1:PXX.2.9](#1pxx29-asynchronous-job-processing-option) |
-| De-ID Manager | Local Authorized Export (DIS-LOCAL-EXPORT) | [1:PXX.2.4](#1pxx24-local-authorized-export-option) |
-| De-ID Manager | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.10](#1pxx210-irreversible-de-identification-option) |
+| De-Identification Requester | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
+| De-Identification Requester | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
+| De-ID Manager | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
+| De-ID Manager | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
+| De-ID Manager | Asynchronous Task Processing (DIS-ASYNC-TASK) | [1:PXX.2.5](#1pxx25-asynchronous-task-processing-option) |
+| De-ID Manager | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | De-ID Manager | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
-| De-Identifier | Base De-Identification Support (DIS-BASE) | [1:PXX.2.1](#1pxx21-base-de-identification-support) |
-| De-Identifier | Baseline Execution Plan (DIS-BASELINE-EXEC) | [1:PXX.2.3](#1pxx23-baseline-execution-plan-option) |
-| De-Identifier | FHIR Task Protocol (DIS-FHIR-Task) (See Note 2) | [1:PXX.2.6](#1pxx26-fhir-task-protocol-option) |
-| De-Identifier | FHIR Payload (DIS-FHIR-Payload) (See Note 4) | [1:PXX.2.7](#1pxx27-fhir-payload-option) |
-| De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.10](#1pxx210-irreversible-de-identification-option) |
+| De-Identifier | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
+| De-Identifier | Asynchronous Task Processing (DIS-ASYNC-TASK) | [1:PXX.2.5](#1pxx25-asynchronous-task-processing-option) |
+| De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | De-Identifier | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
-| Integrated De-ID Manager/De-Identifier | Base De-Identification Support (DIS-BASE) | [1:PXX.2.1](#1pxx21-base-de-identification-support) |
-| Integrated De-ID Manager/De-Identifier | Baseline Execution Plan (DIS-BASELINE-EXEC) | [1:PXX.2.3](#1pxx23-baseline-execution-plan-option) |
-| Integrated De-ID Manager/De-Identifier | FHIR Job Protocol (DIS-FHIR-Job) (See Note 2) | [1:PXX.2.5](#1pxx25-fhir-job-protocol-option) |
-| Integrated De-ID Manager/De-Identifier | FHIR Payload (DIS-FHIR-Payload) (See Note 4) | [1:PXX.2.7](#1pxx27-fhir-payload-option) |
-| Integrated De-ID Manager/De-Identifier | FHIR Job Status Protocol (DIS-FHIR-JobStatus) (See Note 3) | [1:PXX.2.8](#1pxx28-fhir-job-status-protocol-option) |
-| Integrated De-ID Manager/De-Identifier | Asynchronous Job Processing (DIS-ASYNC) | [1:PXX.2.9](#1pxx29-asynchronous-job-processing-option) |
-| Integrated De-ID Manager/De-Identifier | Local Authorized Export (DIS-LOCAL-EXPORT) | [1:PXX.2.4](#1pxx24-local-authorized-export-option) |
-| Integrated De-ID Manager/De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.10](#1pxx210-irreversible-de-identification-option) |
+| Integrated De-ID Manager/De-Identifier | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
+| Integrated De-ID Manager/De-Identifier | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
+| Integrated De-ID Manager/De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | Integrated De-ID Manager/De-Identifier | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
 {: .grid}
 
-Note 2: *FHIR R4 protocol bindings are required for all applicable actors in Phase 1 since FHIR R4 is the only available protocol binding. The protocol binding is content-neutral and can orchestrate any payload type.*
+Note 1: *DIS-FHIR-Payload is required for all actors in Phase 1 since it is the only available payload binding. It is structured as an option to support future payload bindings for additional data formats (e.g., DIS-DICOM1, DIS-CDA1). Each payload binding is independent of the protocol binding version.*
 
-Note 3: *FHIR Job Status Protocol is required when the Asynchronous Job Processing Option is supported.*
+Table 1:PXX.2-2 summarizes all Phase 1 options and their applicability per actor.
 
-Note 4: *DIS-FHIR-Payload is required for all actors in Phase 1 since it is the only available payload binding. It supports independently versioned FHIR R4, R5, and R6 processing payloads. Future payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be declared alongside DIS-FHIR-Payload.*
+<p id="tPXX.2-2" class="tableTitle"><strong>Table 1:PXX.2-2: DIS Profile - Option Matrix</strong></p>
 
-Table 1:PXX.2-2 summarizes all Phase 1 declarations and their dependencies. Actor-specific obligations apply to each declared actor.
-
-<p id="tPXX.2-2" class="tableTitle"><strong>Table 1:PXX.2-2: DIS Profile - Declaration Matrix</strong></p>
-
-| Declaration | Option Name | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
-|-------------|-------------|-----------|---------|---------------|-----------------------------------|-------------------------|
-| DIS-BASE | Base De-Identification Support | Required | Required | Required | Required | Synchronous job support — the minimum operational capability for any DIS implementation. |
-| DIS-BASELINE-EXEC | Baseline Execution Plan | Not applicable | Required | Required | Required | Flat, ordered rules; full DIS-EXE1 is deferred. |
-| DIS-FHIR-Job | FHIR Job Protocol | Required (Note 2) | Required (Note 2) | Not applicable | Required (Note 2) | FHIR R4 protocol binding for ITI-x1 (`POST [base]/$submit-dis-job`). Content-neutral — can orchestrate any payload type. |
-| DIS-FHIR-Task | FHIR Task Protocol | Not applicable | Required (Note 2) | Required (Note 2) | Not applicable | FHIR R4 protocol binding for ITI-x3 (FHIR Task REST). Does not apply to the Integrated actor. |
-| DIS-FHIR-Payload | FHIR Payload | Required (Note 4) | Required (Note 4) | Required (Note 4) | Required (Note 4) | FHIR payload binding — content model, data-plane access for independently versioned FHIR R4, R5, and R6 processing payloads. |
-| DIS-FHIR-JobStatus | FHIR Job Status Protocol | Conditional (Note 3) | Conditional (Note 3) | Not applicable | Conditional (Note 3) | FHIR R4 protocol binding for ITI-x4 (FHIR Asynchronous Request Pattern). Required when DIS-ASYNC is declared. |
-| DIS-ASYNC | Asynchronous Job Processing | Optional | Optional | Not applicable | Optional | Both participating Requester and Manager (or Integrated actor) declare support; ITI-x4, ITI-x7, and DIS-FHIR-JobStatus are required. ITI-x7 does not apply to the Integrated actor. |
-| DIS-LOCAL-EXPORT | Local Authorized Export | Not applicable | Optional | Not applicable | Optional | Manager or Integrated actor supports local authorization-to-policy mapping and all admission checks. |
-| DIS-IRREVERSIBLE | Irreversible De-Identification | Not applicable | Optional | Optional | Optional | Baseline pseudonymization mode — no reversibility material is retained. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
-| DIS-REVERSIBLE | Reversible Pseudonymization | Not applicable | Optional | Optional | Optional | Both participating Manager and De-Identifier declare reversible pseudonymization support. The Integrated actor declares this as a single actor. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
+| Option | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
+|--------|-----------|---------|---------------|-----------------------------------|-------------------------|
+| DIS-FHIR-Payload | Required (Note 1) | Required (Note 1) | Required (Note 1) | Required (Note 1) | HL7 FHIR payload binding — content model, baseline execution plan, and data-plane access for independently versioned HL7 FHIR R4, R5, and R6 processing payloads. |
+| DIS-ASYNC-JOB | Optional | Optional | Not applicable | Optional | Asynchronous job processing. Both participating Requester and Manager (or Integrated actor) declare support; ITI-x4 required. For the Integrated actor, DIS-ASYNC-JOB requires ITI-x1. |
+| DIS-ASYNC-TASK | Not applicable | Optional | Optional | Not applicable | Asynchronous task processing. Both participating Manager and De-Identifier declare support; ITI-x7 required. Not applicable to the Integrated actor. |
+| DIS-IRREVERSIBLE | Not applicable | Optional | Optional | Optional | Baseline pseudonymization mode — no reversibility material is retained. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
+| DIS-REVERSIBLE | Not applicable | Optional | Optional | Optional | Both participating Manager and De-Identifier declare reversible pseudonymization support. The Integrated actor declares this as a single actor. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
 {: .grid}
 
-Note 2: *In Phase 1, the FHIR R4 protocol bindings (DIS-FHIR-Job, DIS-FHIR-Task, DIS-FHIR-JobStatus) are required for all applicable actors since FHIR R4 is the only available protocol binding.*
+### 1:PXX.2.1 Mandatory Baseline
 
-Note 3: *DIS-FHIR-JobStatus is required when DIS-ASYNC is declared.*
-
-Note 4: *In Phase 1, DIS-FHIR-Payload is required for all actors since it is the only available payload binding. It is structured as an option to support future payload bindings for additional data formats (e.g., DIS-DICOM1, DIS-CDA1). Each payload binding is independent of the protocol binding version.*
-
-### 1:PXX.2.1 Base De-Identification Support
-
-Base De-Identification Support (DIS-BASE) represents the minimum operational capability for any DIS implementation: synchronous de-identification job processing. All DIS actors SHALL declare DIS-BASE. This establishes support for the core workflow — the Requester submits a job via ITI-x1 and receives de-identified output and evidence inline in the response.
+All DIS actors implement the HL7 FHIR R4 protocol binding as a mandatory requirement of the profile. This includes synchronous job processing via ITI-x1, task dispatch via ITI-x3 (for the De-ID Manager and De-Identifier), and the associated HL7 FHIR R4 workflow resources (Parameters, Task, Provenance, OperationOutcome). The protocol binding is content-neutral — it can orchestrate de-identification of any payload type for which a corresponding payload binding is declared. The HL7 FHIR R4 protocol binding is not an option because it is the only protocol binding and there is no alternative to declare against.
 
 ### 1:PXX.2.2 Reversible Pseudonymization Option
 
@@ -250,76 +233,57 @@ A De-Identifier supporting this option SHALL produce pseudonyms that are determi
 
 UC-3 and UC-4 illustrate authorized, implementation-defined access to the Manager's mapping service for patient association. Such access returns only the resolution result needed by the EHR and does not export the identity table or pseudonym index. Phase 1 does not standardize this interaction or introduce a re-identification transaction.
 
-### 1:PXX.2.3 Baseline Execution Plan Option
+### 1:PXX.2.3 HL7 FHIR Payload Option
 
-Every Phase 1 De-ID Manager and De-Identifier SHALL support DIS-BASELINE-EXEC, which supports flat, ordered rule lists. Phase 1 execution plans SHALL NOT require policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, or selector specificity rules. The full Composable Execution Plan Option (DIS-EXE1), including these features, is deferred to a future phase and is not a Phase 1 actor option.
+The HL7 FHIR Payload Option (DIS-FHIR-Payload) defines the content model, baseline execution plan, and data-plane access for HL7 FHIR processing payloads. This includes FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence, and HL7 FHIR REST read/write or inline by-value data-plane access. DIS-FHIR-Payload covers independently versioned HL7 FHIR R4, R5, and R6 processing payloads. The processing payload's HL7 FHIR version is independent of the R4 protocol binding version.
 
-Multi-stage processing remains supported in Phase 1. The De-ID Manager dispatches a separate DIS-BASELINE-EXEC plan for each stage through ITI-x3; each plan contains only the ordered rules assigned to that stage.
+DIS-FHIR-Payload is one of potentially several payload binding options. Each payload binding defines format-specific content models, addressing, execution plan structure, and data-plane access for a particular data format family. Future payload bindings (e.g., DIS-DICOM1 for DICOM, DIS-CDA1 for CDA) are developed independently and can be carried within the same HL7 FHIR R4 protocol layer. An actor MAY declare multiple payload bindings to support de-identification of different data formats.
 
-### 1:PXX.2.4 Local Authorized Export Option
+In Phase 1, DIS-FHIR-Payload is required for all actors since it is the only available payload binding.
 
-The Local Authorized Export Option (DIS-LOCAL-EXPORT) enables the De-ID Manager to support clinician-initiated local export workflows where authorization derives from the clinician's local role and declared purpose rather than an external data permit. No external policy carrier acquisition is required -- the policy is pre-configured by institutional administration.
+#### 1:PXX.2.3.1 Baseline Execution Plan
 
-When this option is supported, the De-ID Manager SHALL map the local authorization (role and purpose) to a configured de-identification policy using the DIS-LOCAL-EXPORT bridge pattern. The configured policy SHALL be a specific, versioned, signed artifact. The De-ID Manager SHALL complete signature validity, schema conformance, currency, and authorization consistency checks before accepting the job or dispatching tasks. Administrative provisioning replaces external acquisition, not validation; failed or incomplete validation SHALL produce a synchronous error.
+DIS-FHIR-Payload defines a baseline execution plan model for HL7 FHIR payloads: flat, ordered rule lists carried as HL7 FHIR Library resources. Phase 1 execution plans SHALL NOT require policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, or selector specificity rules. The full Composable Execution Plan (DIS-EXE1), including these features, is deferred to a future phase.
 
-This option is intended for lightweight clinical workflows such as de-identified document export from a clinical workstation, where heavy external permit infrastructure is not required.
+Multi-stage processing remains supported in Phase 1. The De-ID Manager dispatches a separate execution plan for each stage through ITI-x3; each plan contains only the ordered rules assigned to that stage.
 
-### 1:PXX.2.5 FHIR Job Protocol Option
+The execution plan model is payload-specific. Each payload binding defines its own execution plan structure appropriate to its data standard. The policy layer, not the execution plan, serves as the cross-payload abstraction for de-identification requirements.
 
-The FHIR Job Protocol Option (DIS-FHIR-Job) provides the FHIR R4 protocol binding for the Submit De-Identification Job transaction [ITI-x1]. The Requester submits a job using `POST [base]/$submit-dis-job` with FHIR R4 Parameters. This protocol binding is content-neutral -- it can orchestrate de-identification of any payload type (FHIR, DICOM, CDA, or other formats) for which a corresponding payload binding is declared. The payload data format and version are independent of the R4 protocol binding.
+#### 1:PXX.2.3.2 Cross-Version Payload Support
 
-The De-Identification Requester, De-ID Manager, and Integrated De-ID Manager/De-Identifier SHALL declare DIS-FHIR-Job when participating in ITI-x1 using the FHIR R4 protocol binding. In Phase 1, this option is required for all applicable actors since FHIR R4 is the only available protocol binding.
+DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. An R5 or R6 resource can be de-identified through R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on three design properties: explicit version identification, version-safe packaging, and version-neutral addressing.
 
-### 1:PXX.2.6 FHIR Task Protocol Option
+**Version identification.** Each processing payload SHALL explicitly identify its HL7 FHIR version. De-Identifiers SHALL declare which payload HL7 FHIR versions they support. The De-ID Manager SHALL verify that the declared payload version is compatible with the assigned De-Identifier's capabilities before dispatching a task via ITI-x3. HL7 FHIR payloads SHALL be validated against their declared version, not against the R4 protocol binding version.
 
-The FHIR Task Protocol Option (DIS-FHIR-Task) provides the FHIR R4 protocol binding for the Submit De-Identification Task transaction [ITI-x3]. The De-ID Manager dispatches tasks using FHIR R4 Task REST. The task references a Library containing DIS-EXE1 rules, the processing target, and a cryptographic seed. The payload carried or referenced by the task may be any data format for which the De-Identifier declares a corresponding payload binding.
+**Version-safe packaging.** An HL7 FHIR payload whose version differs from the R4 protocol binding SHALL be carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the R4 transaction envelope. Permitted packaging patterns include:
 
-The De-ID Manager and De-Identifier SHALL declare DIS-FHIR-Task when participating in ITI-x3 using the FHIR R4 protocol binding. This option does not apply to the Integrated De-ID Manager/De-Identifier because ITI-x3 is not part of that actor's transaction set. In Phase 1, this option is required for the De-ID Manager and De-Identifier since FHIR R4 is the only available protocol binding.
-
-### 1:PXX.2.7 FHIR Payload Option
-
-The FHIR Payload Option (DIS-FHIR-Payload) defines the content model and data-plane access for FHIR processing payloads. This includes FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence, and FHIR REST read/write or inline by-value data-plane access. DIS-FHIR-Payload covers independently versioned FHIR R4, R5, and R6 processing payloads. The processing payload's FHIR version is independent of the R4 protocol binding version.
-
-DIS-FHIR-Payload is one of potentially several payload binding options. Each payload binding defines format-specific content models, addressing, and data-plane access for a particular data format family. Future payload bindings (e.g., DIS-DICOM1 for DICOM, DIS-CDA1 for CDA) are developed independently and can be carried within the same FHIR R4 protocol layer. An actor MAY declare multiple payload bindings to support de-identification of different data formats.
-
-Actors declaring DIS-FHIR-Payload SHALL also declare the applicable protocol binding options (DIS-FHIR-Job and/or DIS-FHIR-Task). In Phase 1, DIS-FHIR-Payload is required for all actors since it is the only available payload binding.
-
-#### 1:PXX.2.7.1 Cross-Version Payload Support
-
-DIS-FHIR-Payload supports processing payloads whose FHIR version differs from the FHIR R4 protocol binding. An R5 or R6 resource can be de-identified through R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on three design properties: explicit version identification, version-safe packaging, and version-neutral addressing.
-
-**Version identification.** Each processing payload SHALL explicitly identify its FHIR version. De-Identifiers SHALL declare which payload FHIR versions they support. The De-ID Manager SHALL verify that the declared payload version is compatible with the assigned De-Identifier's capabilities before dispatching a task via ITI-x3. FHIR payloads SHALL be validated against their declared version, not against the R4 protocol binding version.
-
-**Version-safe packaging.** A FHIR payload whose version differs from the R4 protocol binding SHALL be carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the R4 transaction envelope. Permitted packaging patterns include:
-
-- **By-reference** -- the processing target identifies the resource by FHIR reference or URL, and the De-Identifier retrieves it from a source FHIR server that supports the payload version.
+- **By-reference** -- the processing target identifies the resource by HL7 FHIR reference or URL, and the De-Identifier retrieves it from a source HL7 FHIR server that supports the payload version.
 - **Inline attachment** -- the payload is serialized and carried as a `valueAttachment` with an explicit content type (e.g., `application/fhir+json`). The R4 transaction envelope treats it as opaque bytes.
 - **Bulk Data manifest** -- the payload is referenced as NDJSON files in a manifest. Each NDJSON line is a serialized resource in the declared payload version.
 
 De-identified output is returned or persisted using the same packaging patterns. R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain R4 regardless of the payload version.
 
-**Version-neutral addressing.** DIS-FHIR-Payload uses FHIRPath expressions to address data elements within the processing payload. The FHIRPath addresses used by DIS execution plans and semantic group mappings (e.g., `Patient.name`, `Patient.birthDate`, `DomainResource.text`) resolve consistently across FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions. Execution plan rules, semantic group definitions, and Provenance transformation summaries use these version-neutral paths and do not require version-specific variants.
+**Version-neutral addressing.** DIS-FHIR-Payload uses FHIRPath expressions to address data elements within the processing payload. The FHIRPath addresses used by DIS execution plans and semantic group mappings (e.g., `Patient.name`, `Patient.birthDate`, `DomainResource.text`) resolve consistently across HL7 FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions. Execution plan rules, semantic group definitions, and Provenance transformation summaries use these version-neutral paths and do not require version-specific variants.
 
-**Evidence across versions.** De-identification evidence is represented as R4 FHIR `Provenance` -- it is part of the protocol layer, not the payload. Provenance references de-identified output by resource URI or identifier and records transformation summaries using version-neutral FHIRPath target paths. The evidence model does not depend on the payload's FHIR version.
+**Evidence across versions.** De-identification evidence is represented as R4 HL7 FHIR `Provenance` -- it is part of the protocol layer, not the payload. Provenance references de-identified output by resource URI or identifier and records transformation summaries using version-neutral FHIRPath target paths. The evidence model does not depend on the payload's HL7 FHIR version.
 
-### 1:PXX.2.8 FHIR Job Status Protocol Option
+### 1:PXX.2.4 Asynchronous Job Processing Option
 
-The FHIR Job Status Protocol Option (DIS-FHIR-JobStatus) provides the FHIR R4 protocol binding for the Retrieve Job Output transaction [ITI-x4] using the FHIR Asynchronous Request Pattern (`GET` on `Content-Location` URL).
+The Asynchronous Job Processing Option (DIS-ASYNC-JOB) enables the De-Identification Requester and De-ID Manager (or Integrated actor) to support asynchronous job-level workflows. When a Requester sends ITI-x1 with `Prefer: respond-async` and admission validation succeeds, the De-ID Manager SHALL return HTTP `202 Accepted` with a `Content-Location` header containing a polling URL. The Requester retrieves de-identified output and evidence via ITI-x4 using the HL7 FHIR Asynchronous Request Pattern (`GET` on `Content-Location` URL).
 
-This option is required when the Asynchronous Job Processing Option (DIS-ASYNC) is supported. The De-Identification Requester and the De-ID Manager (or the Integrated De-ID Manager/De-Identifier) SHALL declare DIS-FHIR-JobStatus when they declare DIS-ASYNC.
+This option is required for multi-patient cohort workflows where processing time exceeds the request timeout. Both the participating Requester and Manager (or Integrated actor) SHALL declare DIS-ASYNC-JOB and SHALL support ITI-x4 (Retrieve Job Output) for job-level polling. The Integrated actor SHALL support ITI-x1 when declaring DIS-ASYNC-JOB, since asynchronous job processing requires an external Requester.
 
-### 1:PXX.2.9 Asynchronous Job Processing Option
+A De-ID Manager that supports DIS-ASYNC-JOB SHALL retain the polling endpoint for at least 24 hours after job completion. After successful retrieval, the De-ID Manager MAY return `410 Gone` for subsequent requests per local retention policy.
 
-The Asynchronous Job Processing Option (DIS-ASYNC) enables the De-Identification Requester and De-ID Manager to support asynchronous de-identification workflows. When a Requester sends ITI-x1 with `Prefer: respond-async` and admission validation succeeds, the De-ID Manager SHALL return HTTP `202 Accepted` with a `Content-Location` header containing a polling URL. The Requester retrieves de-identified output and evidence via ITI-x4 using the polling URL.
+### 1:PXX.2.5 Asynchronous Task Processing Option
 
-This option is required for multi-patient cohort workflows where processing time exceeds the request timeout. When this option is declared:
+The Asynchronous Task Processing Option (DIS-ASYNC-TASK) enables the De-ID Manager and De-Identifier to support asynchronous task-level workflows. When DIS-ASYNC-TASK is declared, the De-ID Manager dispatches tasks via ITI-x3 and retrieves output, evidence, and validation status via ITI-x7 (Retrieve Task Output) after task completion.
 
-- The De-Identification Requester and the De-ID Manager (or Integrated actor) SHALL support ITI-x4 (Retrieve Job Output) for job-level polling.
-- The De-ID Manager and De-Identifier SHALL support ITI-x7 (Retrieve Task Output) for task-level output retrieval. ITI-x7 does not apply to the Integrated De-ID Manager/De-Identifier.
+Both the participating De-ID Manager and De-Identifier SHALL declare DIS-ASYNC-TASK and SHALL support ITI-x7. This option does not apply to the Integrated De-ID Manager/De-Identifier because ITI-x3 and ITI-x7 are internal to that actor.
 
-A De-ID Manager that supports the Asynchronous Job Processing Option SHALL retain the polling endpoint for at least 24 hours after job completion. After successful retrieval, the De-ID Manager MAY return `410 Gone` for subsequent requests per local retention policy.
+DIS-ASYNC-JOB and DIS-ASYNC-TASK are independent. A Manager may support async jobs without async tasks (processing tasks synchronously), or async tasks without async jobs (returning results synchronously to the Requester while dispatching tasks asynchronously to De-Identifiers).
 
-### 1:PXX.2.10 Irreversible De-Identification Option
+### 1:PXX.2.6 Irreversible De-Identification Option
 
 The Irreversible De-Identification Option (DIS-IRREVERSIBLE) declares the baseline pseudonymization mode where no reversibility material is retained. When this option is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. De-identified output cannot be reversed to recover the original patient identities.
 
@@ -357,7 +321,7 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 DIS introduces the following key concepts that provide necessary background for understanding the profile.
 
-**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A signed de-identification policy carrier governs what transformations are applied. The De-ID Manager validates the policy and compiles it into an execution plan; the De-Identifier executes the plan. Trust is anchored in the policy carrier's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed policy.
+**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A Requester submits a carrier that governs what transformations are applied. The carrier may be a format-neutral policy (inline, by reference, or registered identifier) that the Manager compiles into a payload-specific execution plan, or a named execution plan already defined in format-specific terms by an existing data standard (e.g., DICOM PS 3.15 Basic Profile) that the Manager dispatches directly. The De-ID Manager validates the carrier and the De-Identifier executes the plan. Trust is anchored in the carrier's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed carrier.
 
 **Staged Execution.** DIS supports multi-stage de-identification. A preliminary stage handles direct identifiers (pseudonymization, suppression). An advanced stage applies policy-specified record-level rules to quasi-identifiers, such as fixed generalization, suppression, or noise addition. The De-ID Manager dispatches one ITI-x3 task per stage. Each De-Identifier sees only its assigned stage, enforcing trust isolation between stages.
 
@@ -379,7 +343,7 @@ Date-shift reference dates and offsets are protected transformation parameters, 
 
 **Evidence Baseline.** Every completed de-identification task produces provenance evidence containing at minimum nine elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, stage category, reversibility state, validation status, and audit correlation identifier.
 
-**Payload Binding Framework (Informative).** DIS separates the protocol binding from the payload binding so that additional data formats can be supported without changing the protocol layer. The FHIR R4 protocol binding (DIS-FHIR-Job, DIS-FHIR-Task, DIS-FHIR-JobStatus) defines how transactions are initiated, dispatched, and polled -- it is content-neutral and carries or references payloads of any format. Each payload binding defines the format-specific rules for a particular data format family. Phase 1 defines DIS-FHIR-Payload as the initial payload binding; additional payload bindings are expected to follow the same architectural pattern.
+**Payload Binding Framework (Informative).** DIS separates the mandatory HL7 FHIR R4 protocol binding from the payload binding so that additional data formats can be supported without changing the protocol layer. The protocol binding defines how transactions are initiated, dispatched, and polled -- it is content-neutral and carries or references payloads of any format. Each payload binding defines the format-specific rules for a particular data format family. Phase 1 defines DIS-FHIR-Payload as the initial payload binding; additional payload bindings are expected to follow the same architectural pattern.
 
 A payload binding defines at minimum:
 
@@ -616,26 +580,26 @@ sequenceDiagram
 
 #### 1:PXX.4.2.5 Use Case 5: Local Authorized Clinical Document Export
 
-An authorized clinician exports a de-identified FHIR document Bundle from a clinical workstation. Authorization derives from the clinician's local role and declared purpose -- no external data permit is required.
+An authorized clinician exports a de-identified HL7 FHIR document Bundle from a clinical workstation. Authorization derives from the clinician's local role and declared purpose -- no external data permit is required.
 
 ##### 1:PXX.4.2.5.1 Local Authorized Clinical Document Export Use Case Description
 
-A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier grouped with the De-Identification Requester. The Integrated De-ID Manager/De-Identifier maps the local authorization to a configured de-identification policy using the DIS-LOCAL-EXPORT bridge pattern. No external policy carrier acquisition is needed -- the policy is pre-configured by institutional administration.
+A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier operating standalone (without ITI-x1). The Integrated actor maps the local authorization to a configured registered de-identification policy. No external policy carrier acquisition is needed -- the policy is pre-configured by institutional administration.
 
 The Integrated De-ID Manager/De-Identifier performs policy validation, compiles the execution plan, executes identifier handling per the configured policy, and produces the de-identified document Bundle with evidence -- all within a single actor. It writes the de-identified output and Provenance evidence to the export destination. An ATNA audit record is emitted recording the policy identifier, stage, outcome, and audit correlation.
 
-This use case demonstrates that DIS supports lightweight local workflows without requiring heavy external permit infrastructure, using the Integrated De-ID Manager/De-Identifier to eliminate inter-actor transactions.
+This use case demonstrates that DIS supports lightweight local workflows without requiring heavy external permit infrastructure, using the Integrated De-ID Manager/De-Identifier in standalone mode without external transactions.
 
 ##### 1:PXX.4.2.5.2 Local Authorized Clinical Document Export Process Flow
 
 ```mermaid
 sequenceDiagram
     participant CLI as Clinician
-    participant WS as Clinical Workstation<br/>(grouped Requester +<br/>Integrated De-ID<br/>Manager/De-Identifier)
+    participant WS as Clinical Workstation<br/>(Integrated De-ID<br/>Manager/De-Identifier,<br/>standalone)
 
     CLI->>WS: Initiate document export (local action)
     activate WS
-    Note over WS: DIS-LOCAL-EXPORT: Map local authorization (role + purpose) to configured signed, versioned policy
+    Note over WS: Map local authorization (role + purpose) to configured registered policy
     Note over WS: Validate authorization and all four policy checks before acceptance
     Note over WS: Compile single-stage execution plan
 
