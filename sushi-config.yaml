@@ -6,8 +6,8 @@ id: ihe.iti.dis
 canonical: https://profiles.ihe.net/ITI/DIS
 version: 0.0.1-current
 name: IHE_ITI_DIS
-title: "De-Identification Service (DIS) Profile"
-description: DIS (De-Identification Services) is an IHE interoperability profile that standardizes the workflow for policy-governed de-identification of HL7 FHIR health data through three actors (De-ID Manager, De-Identifier, Requester) and three transactions, supporting both synchronous and asynchronous job patterns with auditable provenance evidence.
+title: "De-Identification Services (DIS) Profile"
+description: DIS (De-Identification Services) is an IHE interoperability profile that standardizes the workflow for policy-governed de-identification of HL7 FHIR health data through four actors (De-ID Manager, De-Identifier, Requester, Integrated De-ID Manager/De-Identifier) and four transactions, supporting both synchronous and asynchronous job patterns with auditable provenance evidence.
 releaseLabel: ci-build
 #releaseLabel: ballot
 #releaseLabel: trial-use
@@ -66,13 +66,13 @@ pages:
     title: De-Identification Services (DIS)
     generation: markdown
   volume-1.md:
-    title: 1:52 De-Identification Services (DIS)
+    title: 1:PXX De-Identification Services (DIS)
     generation: markdown
-  domain-YY.md:
-    title: 2:3.YY Transaction Placeholder [Domain-YY]
+  volume-2.md:
+    title: 2:3.YY Transaction Placeholder
     generation: markdown
-  domain-ZZ.md:
-    title: 3:5.ZZ Content Module Placeholder [Domain-ZZ]
+  volume-3.md:
+    title: 3:5.9 DIS-FHIR-Payload Content Module
     generation: markdown
   testplan.md:
     title: "Test Plan"
@@ -98,9 +98,9 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    "Transaction Placeholder [Domain-YY]": domain-YY.html
+    "Transaction Placeholder": volume-2.html
   Volume 3:
-    "Content Module Placeholder [Domain-ZZ]": domain-ZZ.html
+    "DIS-FHIR-Payload Content Module": volume-3.html
   Artifacts: artifacts.html
   Other:
     Changes to Other IHE Specifications: other.html
