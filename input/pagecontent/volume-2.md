@@ -10,8 +10,8 @@ The Client [ITI-Y] transaction passes a go Request from a Client to a Server.
 
 |Actor | Role |
 |-------------------+--------------------------|
-| [Client](volume-1.html#client)    | Sends query to Server |
-| [Server](volume-1.html#server) | Receives the query and responds |
+| [De-Identification Requester](volume-1.html#de-identification-requester) | Sends query to Server |
+| [De-ID Manager](volume-1.html#de-id-manager) | Receives the query and responds |
 
 ### Referenced Standards
 
