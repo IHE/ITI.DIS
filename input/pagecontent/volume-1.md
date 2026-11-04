@@ -1,5 +1,5 @@
 
-The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policy carriers and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
+The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policies and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
 
 DIS is a **Workflow** profile. It defines four actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
 
@@ -15,7 +15,7 @@ This section defines the actors, transactions, and content modules in the DIS Pr
 
 DIS defines three deployment models for de-identification processing:
 
-- **Distributed model** -- the De-Identification Requester submits jobs to a De-ID Manager, which validates the policy carrier, compiles an execution plan, and dispatches tasks to one or more De-Identifiers. This model supports multi-stage execution with trust isolation between stages.
+- **Distributed model** -- the De-Identification Requester submits jobs to a De-ID Manager, which validates the policy, compiles an execution plan, and dispatches tasks to one or more De-Identifiers. This model supports multi-stage execution with trust isolation between stages.
 - **Integrated model with external Requester** -- the Integrated De-ID Manager/De-Identifier accepts jobs via ITI-x1, combines policy validation, execution plan compilation, and transformation execution within a single actor, and returns output to the Requester. ITI-x3 and ITI-x7 are internal.
 - **Integrated standalone model** -- the Integrated De-ID Manager/De-Identifier operates without external transactions, producing conformant de-identified output and evidence through local invocation. This model supports lightweight workflows such as clinician-initiated document export (see [Use Case 5](#1pxx425-use-case-5-de-identified-health-data-export-content-conformance)).
 
@@ -82,19 +82,19 @@ The actors in this profile are described in more detail in the sections below.
 
 #### 1:PXX.1.1.1 De-Identification Requester
 
-The De-Identification Requester submits de-identification jobs to the De-ID Manager, presenting a data request authorization and a signed de-identification policy carrier. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
+The De-Identification Requester submits de-identification jobs to the De-ID Manager, presenting a data request authorization and a signed de-identification policy. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
 
 In Phase 1, the De-Identification Requester is grouped with the De-Identified Data Receiver role -- the Requester receives output directly. No separate push-delivery path is standardized.
 
-Phase 1 does not standardize how the Requester obtains a signed de-identification policy carrier. The Requester presents the carrier in ITI-x1; the mechanism by which it was obtained is an implementation-defined concern. Implementers MAY use any mechanism that produces a valid signed policy carrier, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
+Phase 1 does not standardize how the Requester obtains a signed de-identification policy. The Requester presents the policy in ITI-x1; the mechanism by which it was obtained is an implementation-defined concern. Implementers MAY use any mechanism that produces a valid signed policy, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
 <a name="de-id-manager"> </a>
 
 #### 1:PXX.1.1.2 De-ID Manager
 
-The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and policy carrier, compiles the policy into an execution plan, dispatches tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
+The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and policy, compiles the policy into an execution plan, dispatches tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
-The De-ID Manager is the sole actor authorized to retain identity mappings and reversibility records. Whether these records are persisted depends on the declared reversibility mode (see [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) and [1:PXX.2.6](#1pxx26-irreversible-de-identification-option)). See [1:PXX.4.1](#1pxx41-concepts) for the policy carrier model, four-point validation, and carrier variants. See [1:PXX.5.4](#1pxx54-reversibility-material-custody) for custody obligations.
+The De-ID Manager is the sole actor authorized to retain identity mappings and reversibility records. Whether these records are persisted depends on the declared reversibility mode (see [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) and [1:PXX.2.6](#1pxx26-irreversible-de-identification-option)). See [1:PXX.4.1](#1pxx41-concepts) for the policy model, four-point validation, and policy variants. See [1:PXX.5.4](#1pxx54-reversibility-material-custody) for custody obligations.
 
 <a name="de-identifier"> </a>
 
@@ -110,7 +110,7 @@ A Phase 1 De-Identifier SHALL declare its capabilities, including supported payl
 
 The Integrated De-ID Manager/De-Identifier combines the functionality of the De-ID Manager and the De-Identifier into a single actor. It does not initiate nor accept the Submit De-Identification Task [ITI-x3] transaction.
 
-The Integrated De-ID Manager/De-Identifier validates de-identification policy carriers, compiles validated policy into execution plans, executes the plans internally, and produces de-identified output and provenance evidence. It performs all Manager obligations (policy validation, execution plan compilation, reversibility material custody) and all De-Identifier obligations (transformation execution, evidence production, capability declaration) within a single actor.
+The Integrated De-ID Manager/De-Identifier validates de-identification policies, compiles validated policy into execution plans, executes the plans internally, and produces de-identified output and provenance evidence. It performs all Manager obligations (policy validation, execution plan compilation, reversibility material custody) and all De-Identifier obligations (transformation execution, evidence production, capability declaration) within a single actor.
 
 The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions, producing conformant de-identified output and evidence through local invocation. When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester and returns output inline (synchronous) or via ITI-x4 polling (when DIS-ASYNC-JOB is also supported).
 
@@ -124,27 +124,27 @@ The transactions in this profile are summarized in the sections below.
 
 #### 1:PXX.1.2.1 Submit De-Identification Job [ITI-x1]
 
-This transaction is used to submit a de-identification job with a data request authorization and signed policy carrier. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
+This transaction is used to submit a de-identification job with a data request authorization and signed policy. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
 
-For more details see the detailed [transaction description](volume-2.html).
+For more details see the detailed [transaction description](volume-2.html#23x1-submit-de-identification-job-iti-x1).
 
 #### 1:PXX.1.2.2 Submit De-Identification Task [ITI-x3]
 
 This transaction is used to dispatch a de-identification task from the De-ID Manager to a De-Identifier. Each task carries the execution rules for one stage. The De-Identifier applies the transformation rules and returns de-identified output and evidence.
 
-For more details see the detailed [transaction description](volume-2.html).
+For more details see the detailed [transaction description](volume-2.html#23x3-submit-de-identification-task-iti-x3).
 
 #### 1:PXX.1.2.3 Retrieve Job Output [ITI-x4]
 
 This transaction is used by the De-Identification Requester to retrieve the status and output of a previously submitted asynchronous job.
 
-For more details see the detailed [transaction description](volume-2.html).
+For more details see the detailed [transaction description](volume-2.html#23x4-retrieve-job-output-iti-x4).
 
 #### 1:PXX.1.2.4 Retrieve Task Output [ITI-x7]
 
 This transaction is used by the De-ID Manager to retrieve the output of a completed asynchronous task from a De-Identifier. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
 
-For more details see the detailed [transaction description](volume-2.html).
+For more details see the detailed [transaction description](volume-2.html#23x7-retrieve-task-output-iti-x7).
 
 <a name="actor-options"> </a>
 
@@ -287,25 +287,25 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 DIS introduces the following key concepts that provide necessary background for understanding the profile.
 
-**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A Requester submits a carrier that governs what transformations are applied. The De-ID Manager validates the carrier and the De-Identifier executes the plan. Trust is anchored in the carrier's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed carrier.
+**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A Requester submits a signed policy that governs what transformations are applied. The De-ID Manager validates the policy and the De-Identifier executes the plan. Trust is anchored in the policy's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed policy.
 
-The De-ID Manager performs four-point validation on all carriers:
+The De-ID Manager performs four-point validation on all policies:
 
-1. **Signature validity** -- the carrier's digital signature is cryptographically valid and issued by a trusted authority
-2. **Schema conformance** -- the carrier content conforms to the expected schema
-3. **Currency** -- the carrier is not expired or revoked
-4. **Authorization consistency** -- the carrier is consistent with the data request authorization (scope, purpose, and processing target are compatible)
+1. **Signature validity** -- the policy's digital signature is cryptographically valid and issued by a trusted authority
+2. **Schema conformance** -- the policy content conforms to the expected schema
+3. **Currency** -- the policy is not expired or revoked
+4. **Authorization consistency** -- the policy is consistent with the data request authorization (scope, purpose, and processing target are compatible)
 
-Phase 1 supports four carrier variants in ITI-x1:
+Phase 1 supports four policy variants in ITI-x1:
 
 - **Inline policy** -- a signed, format-neutral policy artifact embedded directly in the request. The Manager compiles it into a payload-specific execution plan.
 - **By-reference policy** -- a reference pointing to a signed, format-neutral policy artifact stored externally. The Manager retrieves, validates, and compiles it.
 - **Registered policy identifier** -- a policy identifier and optional version, resolved by the Manager to a specific, signed, format-neutral policy artifact. The resolved artifact undergoes the same four validation checks and compilation as inline or by-reference policies. Resolution MAY use a local registry, administrative configuration, or an external source; Phase 1 does not standardize the provisioning or resolution mechanism.
-- **Named execution plan** -- an identifier referencing a pre-compiled, format-specific execution plan defined by an existing data standard (e.g., DICOM PS3.15 Basic Application Level Confidentiality Profile). The plan is already expressed in the terms of a specific data standard and does not require compilation. The Manager validates the carrier and verifies that the De-Identifier declares native support for the named plan and version before dispatch.
+- **Named execution plan** -- an identifier referencing a pre-compiled, format-specific execution plan defined by an existing data standard (e.g., DICOM PS3.15 Basic Application Level Confidentiality Profile). The plan is already expressed in the terms of a specific data standard and does not require compilation. The Manager validates the policy and verifies that the De-Identifier declares native support for the named plan and version before dispatch.
 
 A registered policy is described in format-neutral language and can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A named execution plan is already executable for its target data standard. Both undergo the same four-point validation.
 
-Resolution of registered policy identifiers, named execution plans, or by-reference carriers does not introduce a policy discovery or retrieval transaction into Phase 1.
+Resolution of registered policy identifiers, named execution plans, or by-reference policies does not introduce a policy discovery or retrieval transaction into Phase 1.
 
 **Staged Execution.** DIS supports multi-stage de-identification. A preliminary stage handles direct identifiers (pseudonymization, suppression). An advanced stage applies policy-specified record-level rules to quasi-identifiers, such as fixed generalization, suppression, or noise addition. The De-ID Manager dispatches one ITI-x3 task per stage. Each De-Identifier sees only its assigned stage, enforcing trust isolation between stages.
 
@@ -371,7 +371,7 @@ A research consortium conducts a cross-border epidemiological study combining po
 
 Clinical data remain under primary-use governance when recorded or exchanged for care. Their reuse begins only after a secondary-use request has been assessed and an authorization context has been issued. The Data Access Coordinator (DAC) coordinates participating jurisdictions, resolves authorized source-data provision, and -- acting as the De-Identification Requester -- submits a DIS job to produce a cohort dataset transformed by pseudonymization and policy-specified record-level rules for subsequent delivery to a Secure Processing Environment (SPE).
 
-The DAC submits an asynchronous ITI-x1 job with a signed policy carrier and HL7 FHIR processing targets. The De-ID Manager validates the policy and compiles a two-stage execution plan.
+The DAC submits an asynchronous ITI-x1 job with a signed policy and HL7 FHIR processing targets. The De-ID Manager validates the policy and compiles a two-stage execution plan.
 
 The preliminary stage pseudonymizes direct identifiers with irreversible, project-scoped pseudonyms within the authorized scope identified by `consistencyKey`, using consistent patient-scoped seeds and compatible derivation parameters to preserve longitudinal linkage within the de-identified dataset. The advanced stage applies policy-specified record-level suppression and fixed quasi-identifier generalization. Small-cell handling and transformations requiring cohort statistics are outside Phase 1; any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE.
 
@@ -392,7 +392,7 @@ sequenceDiagram
 
     DAC->>MGR: ITI-x1 Submit De-Identification Job (async)
     activate MGR
-    Note over MGR: Validate authorization and all four policy carrier checks
+    Note over MGR: Validate authorization and all four policy checks
     Note over DAC,MGR: If validation fails or cannot complete: synchronous error, no acceptance or dispatch
     MGR-->>DAC: 202 Accepted + Content-Location: polling-url (validation succeeded)
     deactivate MGR
@@ -465,7 +465,7 @@ sequenceDiagram
 
     DAC->>MGR: ITI-x1 Submit De-Identification Job (async, with consistencyKey)
     activate MGR
-    Note over MGR: Validate authorization and all four policy carrier checks
+    Note over MGR: Validate authorization and all four policy checks
     Note over DAC,MGR: If validation fails or cannot complete: synchronous error, no acceptance or dispatch
     MGR-->>DAC: 202 Accepted + Content-Location: polling-url (validation succeeded)
     deactivate MGR
@@ -519,7 +519,7 @@ A hospital EHR pseudonymizes patient context before sending a laboratory order t
 
 ##### 1:PXX.4.2.3.1 Clinical Pathology Order Use Case Description
 
-Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR acts as the De-Identification Requester and submits a synchronous ITI-x1 job with care-context authorization, a pseudonymization policy carrier, and Patient plus ServiceRequest resources.
+Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR acts as the De-Identification Requester and submits a synchronous ITI-x1 job with care-context authorization, a pseudonymization policy, and Patient plus ServiceRequest resources.
 
 The De-ID Manager validates the policy and compiles a single-stage execution plan. The De-Identifier replaces patient identifiers with scoped pseudonyms -- the same pseudonym is used for the same patient within the project scope, enabling longitudinal result correlation. The De-ID Manager returns the pseudonymized payload and evidence inline in the ITI-x1 response.
 
@@ -537,7 +537,7 @@ sequenceDiagram
 
     EHR->>MGR: ITI-x1 Submit De-Identification Job (sync, Patient + ServiceRequest)
     activate MGR
-    Note over MGR: Validate policy carrier, compile single-stage plan
+    Note over MGR: Validate policy, compile single-stage plan
 
     MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
     activate DI
@@ -615,7 +615,7 @@ An authorized clinician exports a de-identified HL7 FHIR document from a clinica
 
 ##### 1:PXX.4.2.5.1 De-Identified Health Data Export Use Case Description
 
-A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier operating standalone. The Integrated actor maps the clinician's local authorization (role and declared purpose) to a configured registered de-identification policy. No external data permit or policy carrier acquisition is needed -- the policy is pre-configured by institutional administration.
+A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier operating standalone. The Integrated actor maps the clinician's local authorization (role and declared purpose) to a configured registered de-identification policy. No external data permit or policy acquisition is needed -- the policy is pre-configured by institutional administration.
 
 The Integrated De-ID Manager/De-Identifier validates the policy, compiles a single-stage execution plan, executes identifier handling per the configured policy, and produces the de-identified document Bundle with Provenance evidence. It writes the output to the export destination. An ATNA audit record is emitted recording the policy identifier, stage, outcome, and audit correlation.
 
@@ -680,9 +680,9 @@ All DIS actors SHALL be grouped with ATNA Secure Node or Secure Application ([IT
 
 The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be grouped with IUA Authorization Client or Resource Server ([ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html)). System-to-system authorization for automated workflows SHOULD use SMART Backend Services with OAuth 2.0 client credentials grants. The De-ID Manager or Integrated De-ID Manager/De-Identifier SHALL verify that the Requester is authorized under the submitted data request authorization before accepting a job.
 
-### 1:PXX.5.3 Policy Carrier Integrity
+### 1:PXX.5.3 Policy Integrity
 
-De-identification policy carriers are digitally signed. Trust is anchored in the policy carrier's signature, not in the Requester's identity -- the Requester acts as a courier. The De-ID Manager SHALL verify the signature, schema conformance, currency, and authorization consistency of every policy carrier before job execution. Policy carriers with invalid, expired, or untrusted signatures SHALL be rejected.
+De-identification policies are digitally signed. Trust is anchored in the policy's signature, not in the Requester's identity -- the Requester acts as a courier. The De-ID Manager SHALL verify the signature, schema conformance, currency, and authorization consistency of every policy before job execution. Policies with invalid, expired, or untrusted signatures SHALL be rejected.
 
 ### 1:PXX.5.4 Reversibility Material Custody
 

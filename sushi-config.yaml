@@ -69,7 +69,7 @@ pages:
     title: 1:PXX De-Identification Services (DIS)
     generation: markdown
   volume-2.md:
-    title: 2:3.YY Transaction Placeholder
+    title: 2:3.x DIS Transactions
     generation: markdown
   volume-3.md:
     title: 3:5.9 DIS-FHIR-Payload Content Module
@@ -98,7 +98,10 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    "Transaction Placeholder": volume-2.html
+    "Submit De-Identification Job [ITI-x1]": volume-2.html#23x1-submit-de-identification-job-iti-x1
+    "Submit De-Identification Task [ITI-x3]": volume-2.html#23x3-submit-de-identification-task-iti-x3
+    "Retrieve Job Output [ITI-x4]": volume-2.html#23x4-retrieve-job-output-iti-x4
+    "Retrieve Task Output [ITI-x7]": volume-2.html#23x7-retrieve-task-output-iti-x7
   Volume 3:
     "DIS-FHIR-Payload Content Module": volume-3.html
   Artifacts: artifacts.html

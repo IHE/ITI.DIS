@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IHE DIS Profile — Volume 1 Review Guidelines — ITI F2F November 2026</title>
+<style>
+  @page { size: A4; margin: 22mm 20mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 20mm 18mm;
+  }
+
+  .doc-header {
+    border-bottom: 3px solid #003366;
+    padding-bottom: 12px;
+    margin-bottom: 22px;
+  }
+  .doc-header .org-line {
+    font-size: 9pt; color: #555;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .doc-header h1 {
+    font-size: 18pt; font-weight: 700; color: #003366;
+    line-height: 1.25; margin-bottom: 2px;
+  }
+  .doc-header .subtitle { font-size: 12pt; color: #336; }
+
+  h2 {
+    font-size: 13pt; color: #003366;
+    border-bottom: 1.5px solid #ccd6e0;
+    padding-bottom: 4px;
+    margin-top: 24px; margin-bottom: 12px;
+  }
+  p { margin-bottom: 10px; }
+
+  .session {
+    border: 1.5px solid #003366;
+    border-radius: 4px;
+    margin: 18px 0;
+    page-break-inside: avoid;
+  }
+  .session-hdr {
+    background: #003366; color: #fff;
+    padding: 8px 14px;
+    font-weight: 700; font-size: 11pt;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .session-hdr .time { font-weight: 400; font-size: 9.5pt; opacity: 0.9; }
+  .session-body { padding: 12px 16px; }
+  .session-body .scope {
+    font-size: 10pt; color: #444;
+    margin-bottom: 8px;
+  }
+  .hint {
+    margin: 6px 0;
+    padding-left: 10px;
+    border-left: 3px solid #4a7fb5;
+    font-size: 10.5pt;
+  }
+
+  .footer {
+    margin-top: 28px; padding-top: 10px;
+    border-top: 1.5px solid #ccd6e0;
+    font-size: 8.5pt; color: #777;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .session { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="org-line">Integrating the Healthcare Enterprise — IT Infrastructure Domain</div>
+  <h1>De-Identification Services (DIS) Profile</h1>
+  <div class="subtitle">Volume 1 Review Guidelines — ITI Face-to-Face, November 2026</div>
+</div>
+
+<p>Four read-and-comment sessions reviewing the DIS Profile Volume 1 (early draft, v0.0.1-current). Each session: <strong>20 min reading, 10 min discussion</strong>. Volume 2 (transactions) is not yet drafted; these sessions cover Volume 1 only.</p>
+
+<p>DIS defines a policy-governed de-identification workflow for HL7 FHIR health data with four actors, four transactions, and five options. It separates the mandatory HL7 FHIR R4 <em>protocol binding</em> (transaction APIs) from the <em>payload binding</em> (content model for data being de-identified, version- and format-independent).</p>
+
+<!-- Session 1 -->
+<div class="session">
+  <div class="session-hdr">
+    Session 1: Actors, Transactions &amp; Content Modules
+    <span class="time">Mon Nov 9 &nbsp;|&nbsp; 9:30–10:00 AM CST (3:30–4:00 PM UTC)</span>
+  </div>
+  <div class="session-body">
+    <div class="scope"><strong>Read:</strong> Introduction (top of page) through §1:PXX.1.2.4 &nbsp;|&nbsp; ~2,000 words</div>
+    <div class="hint">
+      DIS separates a mandatory HL7 FHIR R4 <strong>protocol binding</strong> (transaction APIs) from the <strong>payload binding</strong> (content model for the data being de-identified). The payload binding is version- and format-independent.
+    </div>
+    <div class="hint">
+      Four actors: Requester, De-ID Manager, De-Identifier, and an <strong>Integrated De-ID Manager/De-Identifier</strong> that internalizes ITI-x3/x7. The Integrated actor can operate standalone — ITI-x1 is Optional (O).
+    </div>
+  </div>
+</div>
+
+<!-- Session 2 -->
+<div class="session">
+  <div class="session-hdr">
+    Session 2: Options &amp; Required Groupings
+    <span class="time">Tue Nov 10 &nbsp;|&nbsp; 8:30–9:00 AM CST (2:30–3:00 PM UTC)</span>
+  </div>
+  <div class="session-body">
+    <div class="scope"><strong>Read:</strong> §1:PXX.2 through §1:PXX.3 &nbsp;|&nbsp; ~2,000 words</div>
+    <div class="hint">
+      Five options: <strong>DIS-FHIR-Payload</strong> (required in Phase 1, structured as option for future DICOM/CDA bindings), <strong>DIS-ASYNC-JOB</strong> and <strong>DIS-ASYNC-TASK</strong> (independent of each other), <strong>DIS-IRREVERSIBLE</strong> and <strong>DIS-REVERSIBLE</strong> (at least one required).
+    </div>
+    <div class="hint">
+      HL7 FHIR R5/R6 payloads flow through the R4 protocol via <strong>version-safe packaging</strong> and <strong>version-conditional path mapping</strong> at execution plan compilation time. Required groupings: ATNA for all actors, IUA for Manager and Integrated actor.
+    </div>
+  </div>
+</div>
+
+<!-- Session 3 -->
+<div class="session">
+  <div class="session-hdr">
+    Session 3: Concepts — Policy, Conformance &amp; Payload Framework
+    <span class="time">Wed Nov 11 &nbsp;|&nbsp; 9:00–9:30 AM CST (3:00–3:30 PM UTC)</span>
+  </div>
+  <div class="session-body">
+    <div class="scope"><strong>Read:</strong> §1:PXX.4.1 Concepts &nbsp;|&nbsp; ~1,700 words (dense — use extra time for discussion)</div>
+    <div class="hint">
+      <strong>Policy model:</strong> Trust is anchored in the policy's digital signature. Four policy variants: inline policy, by-reference, registered policy identifier, and named execution plan. Registered policies are format-neutral and need compilation; named execution plans are format-specific and dispatched directly.
+    </div>
+    <div class="hint">
+      <strong>Two conformance layers:</strong> <em>content conformance</em> (output + evidence conform to a content module) is the foundation; <em>transaction conformance</em> layers on top when actors communicate over the wire. Phase 1 scope is record-level actions only — dataset-level statistical disclosure control is deferred.
+    </div>
+  </div>
+</div>
+
+<!-- Session 4 -->
+<div class="session">
+  <div class="session-hdr">
+    Session 4: Use Cases
+    <span class="time">Thu Nov 12 &nbsp;|&nbsp; 8:30–9:00 AM CST (2:30–3:00 PM UTC)</span>
+  </div>
+  <div class="session-body">
+    <div class="scope"><strong>Read:</strong> §1:PXX.4.2 Use Cases (all five) &nbsp;|&nbsp; ~2,300 words</div>
+    <div class="hint">
+      Five use cases spanning async cohort (UC-1, UC-2), sync single-patient (UC-3, UC-4), and standalone content-only export (UC-5). UC-2 illustrates cross-format consistency scope reuse (HL7 FHIR + future DICOM). UC-4 shows trust-boundary separation between hospital and cloud AI.
+    </div>
+    <div class="hint" style="border-left-color: #e67e22;">
+      <strong>Open issue (UC-5):</strong> The standalone Integrated actor has no wire-testable transaction. The spec asks whether a <strong>Data Recipient</strong> actor and push-delivery transaction should be added to Phase 1.
+    </div>
+  </div>
+</div>
+
+<p style="margin-top: 18px; font-size: 10pt; color: #444;"><strong>Offline review (comments welcome via issue tracker):</strong> §1:PXX.5 Security Considerations (~750 words) and §1:PXX.6 Cross-Profile Considerations (~300 words) are not covered in the F2F sessions. These sections are available for asynchronous review.</p>
+
+<div class="footer">
+  IHE De-Identification Services (DIS) Profile — Volume 1 Review Guidelines — ITI F2F November 2026<br>
+  Prepared for the IHE IT Infrastructure Technical Committee
+</div>
+
+</body>
+</html>
