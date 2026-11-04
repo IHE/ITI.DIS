@@ -5,7 +5,7 @@ DIS is a **Workflow** profile. It defines four actors, four transactions, a base
 
 DIS separates the mandatory HL7 FHIR R4 **protocol binding** from the processing **payload binding**. These are DIS-defined terms: the protocol binding is the HL7 FHIR version used for transaction APIs and workflow resources; the payload binding is the format-specific content model for the data being de-identified. The protocol binding uses HL7 FHIR R4 APIs and resources exclusively for job submission, task dispatch, and status reporting; it is content-neutral and can orchestrate any payload type for which a corresponding payload binding is declared. DIS-FHIR-Payload is the HL7 FHIR payload binding, supporting independently versioned HL7 FHIR R4, R5, and R6 processing payloads (R6 support is based on the current ballot draft and will be confirmed upon final publication); support for R5 or R6 payloads does not require an R5 or R6 version of the DIS protocol binding. Additional payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be defined independently to support non-FHIR data formats within the same HL7 FHIR R4 protocol layer.
 
-Each processing payload explicitly identifies its format and version. De-Identifiers declare supported payload bindings and versions, and the Manager verifies compatibility before dispatch. Payloads whose version differs from the R4 protocol binding are carried or referenced using the payload binding's packaging rules rather than embedded as native resources in the R4 transaction envelope. Detailed version identification, packaging rules, and normative requirements are specified in the applicable actor, option, and transaction sections.
+Each processing payload explicitly identifies its format and version. De-Identifiers declare supported payload bindings and versions, and the Manager verifies compatibility before dispatch. Payloads whose version differs from the HL7 FHIR R4 protocol binding are carried or referenced using the payload binding's packaging rules rather than embedded as native resources in the HL7 FHIR R4 transaction envelope. Detailed version identification, packaging rules, and normative requirements are specified in the applicable actor, option, and transaction sections.
 
 <a name="actors-and-transactions"> </a>
 
@@ -226,14 +226,14 @@ The execution plan model is payload-specific. Each payload binding defines its o
 
 #### 1:PXX.2.3.2 Cross-Version Payload Support
 
-DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. An R5 or R6 resource can be de-identified through R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on four design properties:
+DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. An HL7 FHIR R5 or R6 resource can be de-identified through HL7 FHIR R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on four design properties:
 
 - **Version identification** -- each processing payload SHALL explicitly identify its HL7 FHIR version. De-Identifiers SHALL declare which payload versions they support, and the Manager SHALL verify compatibility before dispatch. HL7 FHIR payloads SHALL be validated against their declared version.
-- **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the R4 transaction envelope. Packaging patterns are specified in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module).
+- **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the HL7 FHIR R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the HL7 FHIR R4 transaction envelope. Packaging patterns are specified in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module).
 - **Version-neutral addressing** -- FHIRPath expressions used by execution plans and semantic group mappings resolve consistently across HL7 FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions, after version-conditional path mapping is applied during execution plan compilation (see [Table 3:5.9.1-3](volume-3.html#fhir-payload-content-module)).
-- **Evidence across versions** -- de-identification evidence is represented as R4 HL7 FHIR Provenance (protocol layer, not payload). The evidence model does not depend on the payload's HL7 FHIR version.
+- **Evidence across versions** -- de-identification evidence is represented as HL7 FHIR R4 Provenance (protocol layer, not payload). The evidence model does not depend on the payload's HL7 FHIR version.
 
-R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain R4 regardless of the payload version.
+HL7 FHIR R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain HL7 FHIR R4 regardless of the payload version.
 
 ### 1:PXX.2.4 Asynchronous Job Processing Option
 
@@ -301,7 +301,7 @@ Phase 1 supports four carrier variants in ITI-x1:
 - **Inline policy** -- a signed, format-neutral policy artifact embedded directly in the request. The Manager compiles it into a payload-specific execution plan.
 - **By-reference policy** -- a reference pointing to a signed, format-neutral policy artifact stored externally. The Manager retrieves, validates, and compiles it.
 - **Registered policy identifier** -- a policy identifier and optional version, resolved by the Manager to a specific, signed, format-neutral policy artifact. The resolved artifact undergoes the same four validation checks and compilation as inline or by-reference policies. Resolution MAY use a local registry, administrative configuration, or an external source; Phase 1 does not standardize the provisioning or resolution mechanism.
-- **Named execution plan** -- an identifier referencing a pre-compiled, format-specific execution plan defined by an existing data standard (e.g., DICOM PS 3.15 Basic Profile). The plan is already expressed in the terms of a specific data standard and does not require compilation. The Manager validates the carrier and verifies that the De-Identifier declares native support for the named plan and version before dispatch.
+- **Named execution plan** -- an identifier referencing a pre-compiled, format-specific execution plan defined by an existing data standard (e.g., DICOM PS3.15 Basic Application Level Confidentiality Profile). The plan is already expressed in the terms of a specific data standard and does not require compilation. The Manager validates the carrier and verifies that the De-Identifier declares native support for the named plan and version before dispatch.
 
 A registered policy is described in format-neutral language and can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A named execution plan is already executable for its target data standard. Both undergo the same four-point validation.
 
@@ -313,7 +313,7 @@ Resolution of registered policy identifiers, named execution plans, or by-refere
 
 **Bulk Data Input and Output.** Phase 1 supports both input and output for asynchronous cohort jobs using manifests referencing NDJSON files. The Requester supplies a manifest referencing prepared input files; obtaining those files through source-system export is outside DIS. The Manager returns a manifest referencing de-identified output files together with evidence references. Processing remains limited to the Phase 1 action scope described above.
 
-Each processing payload SHALL explicitly identify its HL7 FHIR version (R4, R5, or R6), independently of the R4 protocol binding. Participating actors SHALL declare supported input/output formats and payload versions, and the Manager SHALL verify compatibility before dispatch. File retrieval SHALL require authorization. Recipient-facing manifests and files SHALL NOT contain seeds or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
+Each processing payload SHALL explicitly identify its HL7 FHIR version (R4, R5, or R6), independently of the HL7 FHIR R4 protocol binding. Participating actors SHALL declare supported input/output formats and payload versions, and the Manager SHALL verify compatibility before dispatch. File retrieval SHALL require authorization. Recipient-facing manifests and files SHALL NOT contain seeds or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
 
 Exact manifest fields, file retrieval and expiry behavior, and evidence/error packaging are to be specified in the payload and transaction bindings. Adoption of Bulk Data file conventions does not by itself establish conformance to the full HL7 Bulk Data API.
 
@@ -340,7 +340,7 @@ A payload binding defines at minimum:
 
 1. **Content model** -- how data elements within the format are identified and addressed (e.g., FHIRPath for HL7 FHIR resources, DICOM tag paths for DICOM objects, XPath or CDA document model paths for CDA documents)
 2. **Transformation action mapping** -- how the DIS core transformation actions (suppression, masking, pseudonymization, generalization, etc.) are applied to the format's data structures and element types
-3. **Data-plane access** -- how the processing payload is retrieved, carried, or referenced within the R4 protocol envelope (e.g., inline by-value, by-reference with authorized retrieval, or format-specific packaging such as DICOM Part 10 files or CDA XML documents)
+3. **Data-plane access** -- how the processing payload is retrieved, carried, or referenced within the HL7 FHIR R4 protocol envelope (e.g., inline by-value, by-reference with authorized retrieval, or format-specific packaging such as DICOM Part 10 files or CDA XML documents)
 4. **Evidence mapping** -- how de-identification evidence and provenance are represented for the format, mapping format-specific outcomes to the DIS evidence baseline
 5. **Version identification** -- how the payload's format version is declared, validated, and matched against De-Identifier capabilities
 6. **Packaging rules** -- how a payload in this format is carried within or referenced from the HL7 FHIR R4 transaction envelope without being embedded as a native HL7 FHIR resource
