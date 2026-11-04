@@ -79,13 +79,12 @@ The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x1.4.1
 | `policy.inline` | 0..1 | Binary | Signed policy artifact embedded directly in the request |
 | `policy.reference` | 0..1 | uri | URI pointing to an externally stored signed policy artifact |
 | `policy.registeredIdentifier` | 0..1 | Identifier | Identifier and optional version of a registered policy |
-| `policy.namedPlan` | 0..1 | Identifier | Identifier and version of a named execution plan |
 | `processingTarget` | 1..* | Reference, uri, or Resource | Reference(s) to the resource(s) to be de-identified, or embedded resource content (see version-safe packaging below) |
 | `payloadBinding` | 1..1 | code | Payload binding identifier (e.g., `DIS-FHIR-Payload`) |
 | `payloadVersion` | 1..1 | code | HL7 FHIR version of the processing payload (e.g., `R4`, `R5`, `R6`) |
 {: .grid}
 
-Exactly one of `policy.inline`, `policy.reference`, `policy.registeredIdentifier`, or `policy.namedPlan` SHALL be present. The `reversibilityMode` and `consistencyKey` are carried inside the signed policy artifact (see [§3:5.10.2](volume-3.html#35102-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. The Requester acts as a courier for the signed policy and does not independently select these values.
+Exactly one of `policy.inline`, `policy.reference`, or `policy.registeredIdentifier` SHALL be present. The `reversibilityMode` and `consistencyKey` are carried inside the signed policy artifact (see [§3:5.10.2](volume-3.html#35102-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. The Requester acts as a courier for the signed policy and does not independently select these values.
 
 `processingTarget` supports three delivery modes: by-reference (a Reference to a resource on a source server), by-value (resource content embedded directly in the request), and by-manifest (a URI referencing an NDJSON manifest for bulk data cohort jobs). By-value delivery is typical for synchronous single-patient workflows where the data volume is small. By-reference delivery is typical when the source data resides on an existing HL7 FHIR server. For bulk data cohort jobs, `processingTarget` SHALL reference an NDJSON manifest URI.
 
@@ -114,7 +113,7 @@ If any point of the four-point validation fails, the Manager SHALL reject the jo
 
 The Manager SHALL verify that each processing target reference in the request is resolvable and that the presented data request authorization covers the target. If a target is not resolvable or not covered, the Manager SHALL reject the job with an OperationOutcome.
 
-When the policy contains a registered policy (a format-neutral policy requiring compilation), the Manager SHALL compile the validated policy into a payload-specific execution plan for the applicable payload binding before dispatching tasks. When the policy identifies a named execution plan (a format-specific plan defined by an existing data standard), the Manager SHALL dispatch it directly without compilation.
+When the policy is authored at the Semantic-Level (using semantic group references), the Manager SHALL compile the validated policy into a payload-specific execution plan for the applicable payload binding before dispatching tasks. When the policy is authored at the Syntax-Level (using concrete element paths for a specific payload family), the Manager SHALL validate that all rule targets are valid paths for the declared payload family and version, then package the rules as an execution plan for dispatch.
 
 The Manager SHALL dispatch de-identification tasks to one or more De-Identifiers via ITI-x3, or execute the plan internally if it is an Integrated De-ID Manager/De-Identifier. The Manager SHALL NOT dispatch a task to a De-Identifier whose declared capabilities are incompatible with the task's payload binding or required transformation actions.
 
@@ -185,7 +184,7 @@ The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manag
 
 ### 2:3.x3.1 Scope
 
-The Submit De-Identification Task transaction is used by the De-ID Manager to dispatch a single-stage de-identification task to a De-Identifier. Each task conveys the compiled execution plan rules for one processing stage, a reference to the processing target, and any scoped seed material required for the assigned transformations. The De-Identifier verifies capability compatibility, applies the execution plan rules to the processing target, produces de-identified output conforming to the declared payload binding and version, and returns the output with provenance evidence. The transaction supports both synchronous and asynchronous response modes. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
+The Submit De-Identification Task transaction is used by the De-ID Manager to dispatch a de-identification task for one ruleSet to a De-Identifier. Each task conveys the compiled execution plan rules for one ruleSet, a reference to the processing target, and any scoped seed material required for the assigned transformations. The De-Identifier verifies capability compatibility, applies the execution plan rules to the processing target, produces de-identified output conforming to the declared payload binding and version, and returns the output with provenance evidence. The transaction supports both synchronous and asynchronous response modes. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
 
 ### 2:3.x3.2 Actors Roles
 
@@ -231,7 +230,7 @@ sequenceDiagram
 
 ##### 2:3.x3.4.1.1 Trigger Events
 
-The De-ID Manager sends a Submit De-Identification Task Request for each processing stage after successfully validating the policy and compiling the execution plan. The Manager SHALL verify the De-Identifier's declared capabilities before dispatching the task and SHALL NOT dispatch a task whose payload binding or required transformation actions fall outside the De-Identifier's declared capabilities.
+The De-ID Manager sends a Submit De-Identification Task Request for each ruleSet after successfully validating the policy and compiling the execution plan. The Manager SHALL verify the De-Identifier's declared capabilities before dispatching the task and SHALL NOT dispatch a task whose payload binding or required transformation actions fall outside the De-Identifier's declared capabilities.
 
 ##### 2:3.x3.4.1.2 Message Semantics
 
@@ -243,9 +242,10 @@ The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x3.4.1
 
 | Parameter | Cardinality | Type | Description |
 |-----------|-------------|------|-------------|
-| `executionPlan` | 1..1 | Reference(Library) | Reference to the Library resource containing the compiled execution plan rules for this stage; rules are carried in `Library.content` |
+| `executionPlan` | 1..1 | Reference(Library) | Reference to the Library resource containing the compiled execution plan rules for this ruleSet; rules are carried in `Library.content` |
 | `processingTarget` | 1..* | Reference or uri | Reference(s) to the data to be transformed |
-| `stage` | 1..1 | code | Stage identifier (e.g., `preliminary`, `advanced`) |
+| `ruleSetId` | 1..1 | string | Identifier of the ruleSet from the source policy that this task executes |
+| `stageId` | 0..1 | string | Stage identifier, when the source policy declares staged execution |
 | `payloadBinding` | 1..1 | code | Payload binding identifier |
 | `payloadVersion` | 1..1 | code | HL7 FHIR version of the processing payload |
 | `seedMaterial` | 0..1 | Binary | Scoped, purpose-specific seed material for deterministic pseudonymization and date shifting |
@@ -296,7 +296,7 @@ The De-Identifier returns one of the HTTP status codes described below.
 
 | Parameter | Cardinality | Type | Description |
 |-----------|-------------|------|-------------|
-| `output` | 1..1 | Resource or Bundle | De-identified resource(s) produced for this stage |
+| `output` | 1..1 | Resource or Bundle | De-identified resource(s) produced for this ruleSet |
 | `evidence` | 1..* | Provenance | HL7 FHIR R4 Provenance resources recording transformation decisions for this task, including the nine baseline evidence elements |
 | `validationStatus` | 1..1 | code | Per-task validation outcome |
 {: .grid}
@@ -321,7 +321,7 @@ In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager S
 
 #### 2:3.x3.4.3 CapabilityStatement Resource
 
-The De-Identifier implementing this transaction SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) indicating that the `$submit-dis-task` operation is implemented. The CapabilityStatement SHALL include the De-Identifier's declared capabilities: supported payload families, supported action families, and any named execution plans natively supported.
+The De-Identifier implementing this transaction SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) indicating that the `$submit-dis-task` operation is implemented. The CapabilityStatement SHALL include the De-Identifier's declared capabilities: supported payload families, supported action families, and supported transformation parameter inputs.
 
 The De-ID Manager implementing this transaction SHALL provide a CapabilityStatement Resource indicating that it can invoke the `$submit-dis-task` operation.
 
@@ -331,7 +331,7 @@ See [DIS Security Considerations](volume-1.html#security-considerations).
 
 #### 2:3.x3.5.1 Security Audit Considerations
 
-The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x3 transaction. The audit event SHALL identify the Manager, the De-Identifier, the stage identifier, the payload binding and version, and the task outcome. The audit event SHALL NOT include seed material or other protected transformation parameters. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
+The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x3 transaction. The audit event SHALL identify the Manager, the De-Identifier, the ruleSet identifier, the payload binding and version, and the task outcome. The stage identifier SHALL also be recorded when the source policy declares staged execution. The audit event SHALL NOT include seed material or other protected transformation parameters. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
 
 <a name="23x4-retrieve-job-output-iti-x4"> </a>
 
