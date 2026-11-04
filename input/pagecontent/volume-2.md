@@ -80,14 +80,12 @@ The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x1.4.1
 | `policy.reference` | 0..1 | uri | URI pointing to an externally stored signed policy artifact |
 | `policy.registeredIdentifier` | 0..1 | Identifier | Identifier and optional version of a registered policy |
 | `policy.namedPlan` | 0..1 | Identifier | Identifier and version of a named execution plan |
-| `policy.reversibilityMode` | 1..1 | code | `irreversible` or `reversible` |
-| `policy.consistencyKey` | 0..1 | string | Authorized linkage scope identifier for cross-job pseudonym consistency |
 | `processingTarget` | 1..* | Reference, uri, or Resource | Reference(s) to the resource(s) to be de-identified, or embedded resource content (see version-safe packaging below) |
 | `payloadBinding` | 1..1 | code | Payload binding identifier (e.g., `DIS-FHIR-Payload`) |
 | `payloadVersion` | 1..1 | code | HL7 FHIR version of the processing payload (e.g., `R4`, `R5`, `R6`) |
 {: .grid}
 
-Exactly one of `policy.inline`, `policy.reference`, `policy.registeredIdentifier`, or `policy.namedPlan` SHALL be present. The `policy.reversibilityMode` and `policy.consistencyKey` are part of the signed `policy` because they are privacy requirements governing de-identification behavior. The Requester acts as a courier for the signed policy and does not independently select these values. The De-ID Manager validates these parameters as part of its four-point policy validation.
+Exactly one of `policy.inline`, `policy.reference`, `policy.registeredIdentifier`, or `policy.namedPlan` SHALL be present. The `reversibilityMode` and `consistencyKey` are carried inside the signed policy artifact (see [§3:5.10.2](volume-3.html#35102-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. The Requester acts as a courier for the signed policy and does not independently select these values.
 
 `processingTarget` supports three delivery modes: by-reference (a Reference to a resource on a source server), by-value (resource content embedded directly in the request), and by-manifest (a URI referencing an NDJSON manifest for bulk data cohort jobs). By-value delivery is typical for synchronous single-patient workflows where the data volume is small. By-reference delivery is typical when the source data resides on an existing HL7 FHIR server. For bulk data cohort jobs, `processingTarget` SHALL reference an NDJSON manifest URI.
 
