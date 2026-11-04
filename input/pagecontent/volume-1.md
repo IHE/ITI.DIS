@@ -60,15 +60,18 @@ Note 1: *ITI-x4 is required when the Asynchronous Job Processing Option (DIS-ASY
 
 Note 2: *The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions (content conformance only). When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester. ITI-x4 is required when both ITI-x1 and DIS-ASYNC-JOB are supported.*
 
-Table 1:PXX.1-2 lists the content modules defined for each actor. Each content module specifies the payload-specific rules for addressing, transformation, evidence, and packaging within a particular data format family.
+Table 1:PXX.1-2 lists the content modules defined for each actor. DIS defines two content modules: DIS-Policy (the format-neutral policy artifact) and DIS-FHIR-Payload (the HL7 FHIR payload binding for addressing, transformation, evidence, and packaging).
 
 <p id="tPXX.1-2" class="tableTitle"><strong>Table 1:PXX.1-2: DIS Profile - Actors and Content Modules</strong></p>
 
 | Actors | Content Modules | Optionality | Reference |
 |--------|----------------|-------------|-----------|
+| De-Identification Requester | DIS-Policy | R | [3:5.10](volume-3.html#policy-content-module) |
 | De-Identification Requester | DIS-FHIR-Payload | R (See Note 1) | [3:5.9](volume-3.html#fhir-payload-content-module) |
+| De-ID Manager | DIS-Policy | R | [3:5.10](volume-3.html#policy-content-module) |
 | De-ID Manager | DIS-FHIR-Payload | R (See Note 1) | [3:5.9](volume-3.html#fhir-payload-content-module) |
 | De-Identifier | DIS-FHIR-Payload | R (See Note 1) | [3:5.9](volume-3.html#fhir-payload-content-module) |
+| Integrated De-ID Manager/De-Identifier | DIS-Policy | R | [3:5.10](volume-3.html#policy-content-module) |
 | Integrated De-ID Manager/De-Identifier | DIS-FHIR-Payload | R (See Note 1) | [3:5.9](volume-3.html#fhir-payload-content-module) |
 {: .grid}
 

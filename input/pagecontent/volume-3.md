@@ -108,7 +108,7 @@ Table 3:5.9.1-2 lists the resources that are part of the HL7 FHIR R4 protocol la
 | `Provenance` | De-identification evidence |
 | `OperationOutcome` | Error and validation reporting |
 | `Bundle` | Workflow packaging (message, result collection) |
-| `Library` | Execution plan carrier |
+| `Library` | Policy artifact ([§3:5.10](#35101-policy-library-resource-structure)) and execution plan carrier ([§3:5.9.4](#3594-execution-plan-format)) |
 | `CapabilityStatement` | Actor capability declaration |
 {: .grid}
 
@@ -680,3 +680,304 @@ Table 3:5.9.6-1 summarizes the delivery modes and their characteristics.
 | By-value | Resource embedded in `Parameters` (native or attachment) | Synchronous single-patient, small data volume | Inline in response |
 | By-manifest | URI referencing NDJSON manifest | Bulk data cohort jobs | Manifest referencing de-identified NDJSON files |
 {: .grid}
+
+<a name="policy-content-module"> </a>
+
+## 3:5.10 DIS-Policy Content Module
+
+The DIS-Policy content module defines the structure, signing envelope, and compilation rules for de-identification policy artifacts. A policy is a format-neutral knowledge artifact that governs what de-identification transformations are applied. The De-ID Manager validates the policy, and when required, compiles it into one or more payload-specific execution plans (see [§3:5.9.4](#3594-execution-plan-format)) before dispatching tasks.
+
+The policy artifact is an HL7 FHIR R4 Library resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
+
+### 3:5.10.1 Policy Library Resource Structure
+
+A DIS policy is carried as an HL7 FHIR R4 `Library` resource. The Library resource provides versioned metadata about the policy; the policy rules are carried as a DIS-specific JSON format within `Library.content`. Policies and execution plans both use Library but are distinguished by `Library.type` coding.
+
+Table 3:5.10.1-1 lists the required Library resource elements for a DIS policy.
+
+<p id="t3.5.10.1-1" class="tableTitle"><strong>Table 3:5.10.1-1: DIS-Policy Library Resource Elements</strong></p>
+
+| Element | Cardinality | Description |
+|---------|-------------|-------------|
+| `Library.url` | 1..1 | Canonical URL identifying this policy |
+| `Library.identifier` | 1..* | Business identifier(s) for the policy; used in `policy.registeredIdentifier` resolution |
+| `Library.version` | 1..1 | Version of the policy |
+| `Library.name` | 1..1 | Machine-readable name |
+| `Library.title` | 0..1 | Human-readable title |
+| `Library.status` | 1..1 | `draft`, `active`, or `retired` |
+| `Library.type` | 1..1 | SHALL use coding `https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type\|dis-policy` |
+| `Library.date` | 1..1 | Date the policy was authored or last revised |
+| `Library.publisher` | 1..1 | Policy authority that authored and signed the policy |
+| `Library.description` | 0..1 | Human-readable description of the policy's purpose |
+| `Library.purpose` | 0..1 | Stated purpose (e.g., research de-identification, clinical pseudonymization) |
+| `Library.useContext` | 0..* | Context of use: purpose codes, applicable jurisdictions, applicable data categories |
+| `Library.jurisdiction` | 0..* | Geographic jurisdictions where the policy is applicable |
+| `Library.effectivePeriod` | 1..1 | Period during which the policy is valid; used for currency validation |
+| `Library.relatedArtifact` | 0..* | References to related artifacts (e.g., pre-compiled execution plans for named plan dispatch) |
+| `Library.content` | 1..1 | Attachment containing the policy rules JSON |
+| `Library.content.contentType` | 1..1 | SHALL be `application/vnd.ihe.dis.policy+json` |
+| `Library.content.data` | 1..1 | Base64-encoded policy rules JSON |
+{: .grid}
+
+Table 3:5.10.1-2 lists the `Library.type` codings used to distinguish DIS Library artifacts.
+
+<p id="t3.5.10.1-2" class="tableTitle"><strong>Table 3:5.10.1-2: DIS Library Type Codings</strong></p>
+
+| Coding | Artifact |
+|--------|----------|
+| `dis-policy` | De-identification policy (format-neutral rules) |
+| `dis-execution-plan` | Execution plan (payload-specific compiled rules, see [§3:5.9.4](#3594-execution-plan-format)) |
+{: .grid}
+
+<div markdown="1" class="stu-note">
+**Editorial Note:** The Library type CodeSystem and profile URLs shown above are illustrative. The formal CodeSystem and StructureDefinition resources will be provided when FSH conformance artifacts are finalized.
+</div>
+
+### 3:5.10.2 Policy Rules JSON Structure
+
+The policy rules JSON carried in `Library.content` defines format-neutral de-identification rules. Rules use semantic group references and action codes rather than payload-specific element paths. The De-ID Manager expands semantic group references and resolves version-conditional path mappings during compilation into a payload-specific execution plan.
+
+Table 3:5.10.2-1 lists the top-level elements of the policy rules JSON.
+
+<p id="t3.5.10.2-1" class="tableTitle"><strong>Table 3:5.10.2-1: Policy Rules JSON — Top-Level Elements</strong></p>
+
+| Element | Cardinality | Type | Description |
+|---------|-------------|------|-------------|
+| `policyVersion` | 1..1 | string | Version of the policy rules schema |
+| `reversibilityMode` | 1..1 | code | `irreversible` or `reversible` |
+| `consistencyKey` | 0..1 | string | Authorized linkage scope identifier for cross-job consistency |
+| `stages` | 1..* | array | Ordered list of processing stages |
+{: .grid}
+
+Each stage in the `stages` array contains the elements listed in Table 3:5.10.2-2.
+
+<p id="t3.5.10.2-2" class="tableTitle"><strong>Table 3:5.10.2-2: Policy Rules JSON — Stage Elements</strong></p>
+
+| Element | Cardinality | Type | Description |
+|---------|-------------|------|-------------|
+| `stageId` | 1..1 | string | Stage identifier (e.g., `preliminary`, `advanced`) |
+| `description` | 0..1 | string | Human-readable description of the stage |
+| `rules` | 1..* | array | Ordered list of rules for this stage |
+{: .grid}
+
+Each rule in the `rules` array contains the elements listed in Table 3:5.10.2-3.
+
+<p id="t3.5.10.2-3" class="tableTitle"><strong>Table 3:5.10.2-3: Policy Rules JSON — Rule Elements</strong></p>
+
+| Element | Cardinality | Type | Description |
+|---------|-------------|------|-------------|
+| `ruleId` | 1..1 | string | Unique identifier for the rule within the policy |
+| `target` | 1..1 | string | Semantic group reference (prefixed with `@`) identifying the target element group |
+| `action` | 1..1 | code | Action code from the core action family (see [§3:5.9.3](#3593-transformation-actions)) |
+| `parameters` | 0..1 | object | Action-specific parameters as key-value pairs |
+{: .grid}
+
+Policy rules use semantic group references (e.g., `@subject-identifiers`) rather than FHIRPath expressions. This keeps the policy format-neutral. The De-ID Manager expands semantic group references to payload-specific element paths during compilation (see [§3:5.10.4](#35104-policy-compilation)).
+
+Rules within a stage are evaluated in order; first-match-wins evaluation applies, consistent with execution plan evaluation (see [§3:5.9.4.2](#35942-execution-plan-json-structure)).
+
+#### 3:5.10.2.1 Policy Rules Example
+
+The following policy rules JSON illustrates a single-stage pseudonymization policy for Use Case 3 (Clinical Pathology Order).
+
+```json
+{
+  "policyVersion": "1.0",
+  "reversibilityMode": "reversible",
+  "consistencyKey": "hospital-lab-project-2026",
+  "stages": [
+    {
+      "stageId": "preliminary",
+      "description": "Pseudonymize direct identifiers for external lab order",
+      "rules": [
+        {
+          "ruleId": "P01",
+          "target": "@subject-identifiers",
+          "action": "pseudonymize",
+          "parameters": {
+            "algorithm": "HMAC-SHA-256"
+          }
+        },
+        {
+          "ruleId": "P02",
+          "target": "@subject-demographics",
+          "action": "suppress"
+        },
+        {
+          "ruleId": "P03",
+          "target": "@dates",
+          "action": "date-shift",
+          "parameters": {
+            "maxOffsetDays": 30
+          }
+        },
+        {
+          "ruleId": "P04",
+          "target": "@contact-information",
+          "action": "suppress"
+        },
+        {
+          "ruleId": "P05",
+          "target": "@narrative",
+          "action": "redact-narrative",
+          "parameters": {
+            "mode": "remove"
+          }
+        },
+        {
+          "ruleId": "P06",
+          "target": "@references",
+          "action": "pseudonymize",
+          "parameters": {
+            "algorithm": "HMAC-SHA-256"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+The following two-stage policy illustrates Use Case 1 (Cross-Border Epidemiological Study), where the preliminary stage pseudonymizes direct identifiers and the advanced stage applies record-level suppression and generalization.
+
+```json
+{
+  "policyVersion": "1.0",
+  "reversibilityMode": "irreversible",
+  "consistencyKey": "epi-study-2026-cohort-a",
+  "stages": [
+    {
+      "stageId": "preliminary",
+      "description": "Irreversible pseudonymization of direct identifiers",
+      "rules": [
+        {
+          "ruleId": "P01",
+          "target": "@subject-identifiers",
+          "action": "pseudonymize",
+          "parameters": {
+            "algorithm": "HMAC-SHA-256"
+          }
+        },
+        {
+          "ruleId": "P02",
+          "target": "@contact-information",
+          "action": "suppress"
+        },
+        {
+          "ruleId": "P03",
+          "target": "@narrative",
+          "action": "redact-narrative",
+          "parameters": {
+            "mode": "remove"
+          }
+        },
+        {
+          "ruleId": "P04",
+          "target": "@references",
+          "action": "pseudonymize",
+          "parameters": {
+            "algorithm": "HMAC-SHA-256"
+          }
+        }
+      ]
+    },
+    {
+      "stageId": "advanced",
+      "description": "Record-level suppression and generalization of quasi-identifiers",
+      "rules": [
+        {
+          "ruleId": "A01",
+          "target": "@dates",
+          "action": "generalize",
+          "parameters": {
+            "precision": "year"
+          }
+        },
+        {
+          "ruleId": "A02",
+          "target": "@subject-demographics",
+          "action": "generalize",
+          "parameters": {
+            "precision": "state"
+          }
+        },
+        {
+          "ruleId": "A03",
+          "target": "@provider-identifiers",
+          "action": "suppress"
+        },
+        {
+          "ruleId": "A04",
+          "target": "@device-identifiers",
+          "action": "suppress"
+        }
+      ]
+    }
+  ]
+}
+```
+
+<div markdown="1" class="stu-note">
+**Editorial Note:** The policy rules JSON structure shown above is illustrative. The formal JSON Schema will be provided when FSH conformance artifacts are finalized.
+</div>
+
+### 3:5.10.3 Signing Envelope
+
+DIS policies are digitally signed using JSON Web Signature (JWS) as defined in [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515). The signed artifact is the serialized HL7 FHIR R4 Library resource containing the policy.
+
+The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
+
+- `alg` — the signing algorithm (e.g., `RS256`, `ES256`)
+- `x5c` or `jwk` — the signing key or certificate chain, enabling the De-ID Manager to verify the signature against a trusted policy authority
+
+The resulting JWS compact serialization is carried in the ITI-x1 `policy` parameter as follows:
+
+- **`policy.inline`** — the `Binary` resource contains the JWS compact serialization as its content. `Binary.contentType` SHALL be `application/jose`.
+- **`policy.reference`** — the URI points to an externally stored JWS compact serialization. The De-ID Manager retrieves, verifies, and extracts the Library.
+- **`policy.registeredIdentifier`** — the De-ID Manager resolves the identifier to a stored, pre-validated policy Library. The Library was signed at provisioning time; the Manager re-verifies currency and authorization consistency at job submission.
+- **`policy.namedPlan`** — the identifier references a named execution plan. No Library is retrieved; the Manager validates the identifier against the De-Identifier's declared capabilities.
+
+The De-ID Manager SHALL perform the four-point validation defined in [§1:PXX.4.1](volume-1.html#1pxx41-concepts) on the extracted Library:
+
+1. **Signature** — verify the JWS signature against the trusted policy authority's public key
+2. **Schema** — verify the Library conforms to the DIS-Policy Library profile and the policy rules JSON conforms to the policy rules schema
+3. **Currency** — verify the current date falls within `Library.effectivePeriod`
+4. **Authorization consistency** — verify the policy's scope, purpose, and use context are consistent with the data request authorization presented in the ITI-x1 request
+
+### 3:5.10.4 Policy Compilation
+
+The De-ID Manager compiles a validated policy Library into one or more payload-specific execution plan Libraries before dispatching tasks via ITI-x3. Compilation translates format-neutral policy rules into the execution plan format defined in [§3:5.9.4](#3594-execution-plan-format).
+
+The compilation process performs the following steps for each stage in the policy:
+
+1. **Semantic group expansion** — each `@` semantic group reference in the policy rules is expanded to the individual element paths defined by the applicable payload binding's semantic groups (see [§3:5.9.2.2](#35922-semantic-groups) for DIS-FHIR-Payload groups).
+
+2. **Version-conditional path mapping** — for HL7 FHIR R5 or R6 payloads, the De-ID Manager applies the version-conditional path mappings defined in [Table 3:5.9.1-3](#35913-version-neutral-element-addressing) to the expanded element paths.
+
+3. **Execution plan assembly** — the expanded and version-resolved rules are assembled into an execution plan JSON (see [§3:5.9.4.2](#35942-execution-plan-json-structure)) and packaged in a Library resource with `Library.type` coding `dis-execution-plan`.
+
+4. **Capability verification** — the De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
+
+Each stage in the policy produces one execution plan Library, dispatched as one ITI-x3 task. A two-stage policy produces two execution plan Libraries and two ITI-x3 tasks.
+
+The compiled execution plan Library MAY reference the source policy Library via `Library.relatedArtifact` with type `derived-from`.
+
+#### 3:5.10.4.1 Named Execution Plan Bypass
+
+When the policy's variant is `policy.namedPlan`, the De-ID Manager bypasses compilation. The named execution plan is already expressed in the terms of a specific data standard and does not require semantic group expansion or version-conditional path mapping. The De-ID Manager validates the policy and verifies that the De-Identifier declares native support for the named plan and version before dispatching it via ITI-x3.
+
+### 3:5.10.5 Policy Lifecycle
+
+The DIS-Policy content module defines the artifact structure and validation requirements. Phase 1 does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
+
+The following lifecycle states are supported through `Library.status`:
+
+- `draft` — the policy is under development and SHALL NOT be accepted by the De-ID Manager for job execution
+- `active` — the policy is approved and valid for use within its `effectivePeriod`
+- `retired` — the policy is no longer valid and SHALL NOT be accepted for new jobs
+
+The De-ID Manager SHALL reject a policy with `Library.status` other than `active`. The De-ID Manager SHALL reject a policy whose `Library.effectivePeriod` does not include the current date.
+
+<div markdown="1" class="stu-note">
+**Editorial Note:** A future phase may introduce a standardized policy management transaction (e.g., ITI-x8) for policy discovery, retrieval, and lifecycle management. Phase 1 relies on implementation-defined mechanisms.
+</div>

@@ -103,7 +103,8 @@ menu:
     "Retrieve Job Output [ITI-x4]": volume-2.html#23x4-retrieve-job-output-iti-x4
     "Retrieve Task Output [ITI-x7]": volume-2.html#23x7-retrieve-task-output-iti-x7
   Volume 3:
-    "DIS-FHIR-Payload Content Module": volume-3.html
+    "DIS-FHIR-Payload Content Module": volume-3.html#fhir-payload-content-module
+    "DIS-Policy Content Module": volume-3.html#policy-content-module
   Artifacts: artifacts.html
   Other:
     Changes to Other IHE Specifications: other.html
