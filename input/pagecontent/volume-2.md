@@ -13,7 +13,7 @@ The following transactions are specified in this volume:
 
 ### 2:3.x1.1 Scope
 
-The Submit De-Identification Job transaction is used by the De-Identification Requester to submit a de-identification job to the De-ID Manager (or Integrated De-ID Manager/De-Identifier). The submission includes a data request authorization, a signed de-identification policy, and references to the processing targets. The De-ID Manager validates the submission, compiles the policy into a payload-specific execution plan, orchestrates task execution via ITI-x3 (or executes internally for the Integrated actor), and returns de-identified output and provenance evidence. The transaction supports both synchronous and asynchronous response modes.
+The Submit De-Identification Job transaction is used by the De-Identification Requester to submit a de-identification job to the De-ID Manager (or Integrated De-ID Manager/De-Identifier). The submission declares the approved de-identification policy by canonical URL and version, presents evidence of the approved data request, and includes references to the processing targets. The Requester may optionally carry the JWS-signed policy content directly. The de-identification policy is a reusable knowledge artifact that may be approved for multiple independent data requests. The De-ID Manager validates the submission, verifies that the presented policy matches the policy approved in the data request authorization, compiles the policy into a payload-specific execution plan, orchestrates task execution via ITI-x3 (or executes internally for the Integrated actor), and returns de-identified output and provenance evidence. The transaction supports both synchronous and asynchronous response modes.
 
 ### 2:3.x1.2 Actors Roles
 
@@ -23,7 +23,7 @@ Table 2:3.x1.2-1 lists the actors and their roles in this transaction.
 
 | Actor | Role |
 |-------|------|
-| [De-Identification Requester](volume-1.html#de-identification-requester) | Initiates the job submission, presenting a data request authorization and a signed policy, and receives de-identified output and evidence |
+| [De-Identification Requester](volume-1.html#de-identification-requester) | Initiates the job submission, declaring the approved policy and presenting evidence of the approved data request, and receives de-identified output and evidence |
 | [De-ID Manager](volume-1.html#de-id-manager) | Receives the job request, validates the authorization and policy, orchestrates execution, and returns de-identified output and evidence |
 | [Integrated De-ID Manager/De-Identifier](volume-1.html#integrated-de-id-manager-de-identifier) | Acts as Responder in place of the De-ID Manager when ITI-x1 is supported (Optional for this actor) |
 {: .grid}
@@ -37,8 +37,8 @@ Table 2:3.x1.2-1 lists the actors and their roles in this transaction.
 - [HL7 FHIR R4 Parameters]({{site.data.fhir.path}}parameters.html) — input/output resource for operations
 - [HL7 FHIR R4 OperationOutcome]({{site.data.fhir.path}}operationoutcome.html) — error reporting
 - [HL7 FHIR R4 Provenance]({{site.data.fhir.path}}provenance.html) — de-identification evidence
-- [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515) — JSON Web Signature (JWS), for policy signature validation
-- [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK), for signing key representation
+- [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515) — JSON Web Signature (JWS), for `policy.content` signature validation
+- [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK), for signing key representation (applicable to `policy.content`)
 
 ### 2:3.x1.4 Messages
 
@@ -62,7 +62,7 @@ sequenceDiagram
 
 ##### 2:3.x1.4.1.1 Trigger Events
 
-The De-Identification Requester sends a Submit De-Identification Job Request when it requires de-identification of one or more processing targets under an authorized policy. The Requester SHALL have obtained a valid data request authorization and a signed policy before initiating this transaction.
+The De-Identification Requester sends a Submit De-Identification Job Request when it requires de-identification of one or more processing targets under an approved data request. The Requester SHALL have obtained an approved data request authorization — which identifies the required de-identification policy — before initiating this transaction.
 
 ##### 2:3.x1.4.1.2 Message Semantics
 
@@ -74,17 +74,25 @@ The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x1.4.1
 
 | Parameter | Cardinality | Type | Description |
 |-----------|-------------|------|-------------|
-| `authorization` | 1..1 | Reference | Reference to the data request authorization governing this job |
-| `policy` | 1..1 | BackboneElement | Signed de-identification policy; exactly one policy variant SHALL be present |
-| `policy.inline` | 0..1 | Binary | Signed policy artifact embedded directly in the request |
-| `policy.reference` | 0..1 | uri | URI pointing to an externally stored signed policy artifact |
-| `policy.registeredIdentifier` | 0..1 | Identifier | Identifier and optional version of a registered policy |
+| `authorization` | 1..1 | BackboneElement | Data request authorization evidence; exactly one variant SHALL be present |
+| `authorization.reference` | 0..1 | Reference | Reference to an externally hosted authorization evidence resource |
+| `authorization.content` | 0..1 | Attachment | Authorization evidence embedded directly; `contentType` declares the format |
+| `policy` | 1..1 | BackboneElement | Identifies the approved de-identification policy for this data request |
+| `policy.url` | 1..1 | uri | Canonical URL of the approved policy (`Library.url`) |
+| `policy.version` | 1..1 | string | Version of the approved policy (`Library.version`) |
+| `policy.content` | 0..1 | Binary | JWS-signed policy artifact, when the Requester carries the policy content directly. `Binary.contentType` SHALL be `application/jose`. |
 | `processingTarget` | 1..* | Reference, uri, or Resource | Reference(s) to the resource(s) to be de-identified, or embedded resource content (see version-safe packaging below) |
 | `payloadBinding` | 1..1 | code | Payload binding identifier (e.g., `DIS-FHIR-Payload`) |
 | `payloadVersion` | 1..1 | code | HL7 FHIR version of the processing payload (e.g., `R4`, `R5`, `R6`) |
 {: .grid}
 
-Exactly one of `policy.inline`, `policy.reference`, or `policy.registeredIdentifier` SHALL be present. The `reversibilityMode` and `consistencyKey` are carried inside the signed policy artifact (see [§3:5.10.2](volume-3.html#35102-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. The Requester acts as a courier for the signed policy and does not independently select these values.
+Exactly one of `authorization.reference` or `authorization.content` SHALL be present. The authorization is evidence that a data governance authority approved a data request, including identification of the approved de-identification policy. DIS does not define the authorization's internal structure — it is determined by the authorization mechanism used in the deployment (e.g., EHDS data permit, institutional governance approval, bilateral agreement). The De-ID Manager is configured to understand the authorization format and extract the approved policy identity from it.
+
+`policy.url` and `policy.version` are always required. They declare the canonical identity of the policy approved for this data request. The De-ID Manager validates these against the data request authorization (see authorization consistency below).
+
+`policy.content` is optional. When present, the Requester carries the JWS-signed policy Library directly in the request, and the Manager SHALL verify the JWS signature and confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager resolves the policy from the declared `policy.url` through its own mechanisms (local policy store, external fetch, etc.).
+
+The `reversibilityMode` and `consistencyKey` are carried inside the policy artifact (see [§3:5.10.2](volume-3.html#35102-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. A de-identification policy is a reusable knowledge artifact: the same policy may be approved for and referenced by multiple independent data requests.
 
 `processingTarget` supports three delivery modes: by-reference (a Reference to a resource on a source server), by-value (resource content embedded directly in the request), and by-manifest (a URI referencing an NDJSON manifest for bulk data cohort jobs). By-value delivery is typical for synchronous single-patient workflows where the data volume is small. By-reference delivery is typical when the source data resides on an existing HL7 FHIR server. For bulk data cohort jobs, `processingTarget` SHALL reference an NDJSON manifest URI.
 
@@ -100,18 +108,21 @@ When the Asynchronous Job Processing Option (DIS-ASYNC-JOB) is supported, the Re
 
 Upon receipt of a Submit De-Identification Job Request, the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL perform the following actions.
 
-The Manager SHALL validate the data request authorization presented in the request. If the authorization is absent, expired, or does not cover the requested processing targets, the Manager SHALL reject the job with an OperationOutcome.
+The Manager SHALL obtain and validate the data request authorization. When `authorization.reference` is present, the Manager resolves the referenced resource. When `authorization.content` is present, the Manager processes the embedded attachment according to the declared `contentType`. The authorization is evidence that a data governance authority approved a data request that specifies the data scope, purpose, and the de-identification policy to be applied. If the authorization is absent, expired, or does not cover the requested processing targets, the Manager SHALL reject the job with an OperationOutcome.
 
-The Manager SHALL perform four-point policy validation:
+The Manager SHALL verify that the declared `policy.url` and `policy.version` identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment). A mismatch indicates the Requester is presenting a policy that was not approved for this data request; the Manager SHALL reject the job with an OperationOutcome.
 
-1. **Signature** — verify the policy's cryptographic signature against the authorizing signing authority.
-2. **Schema** — verify that the policy conforms to the applicable policy schema.
-3. **Currency** — verify that the policy has not expired.
-4. **Authorization consistency** — verify that the scope of the policy is consistent with the data request authorization.
+The Manager SHALL obtain the policy content. When `policy.content` is present, the Manager SHALL verify the JWS signature against the trusted policy authority's public key and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager SHALL resolve the policy from the declared `policy.url` through its own mechanisms (see [§3:5.10.3](volume-3.html#35103-policy-delivery-and-validation)).
+
+The Manager SHALL perform three-point policy content validation:
+
+1. **Schema** — verify that the policy conforms to the applicable policy schema.
+2. **Currency** — verify that the policy has not expired.
+3. **Integrity** — when `policy.content` is present, the JWS signature verification above fulfills this point. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
 
 If any point of the four-point validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
 
-The Manager SHALL verify that each processing target reference in the request is resolvable and that the presented data request authorization covers the target. If a target is not resolvable or not covered, the Manager SHALL reject the job with an OperationOutcome.
+The Manager SHALL verify that each processing target reference in the request is resolvable and that the data request authorization covers the target. If a target is not resolvable or not covered, the Manager SHALL reject the job with an OperationOutcome.
 
 When the policy is authored at the Semantic-Level (using semantic group references), the Manager SHALL compile the validated policy into a payload-specific execution plan for the applicable payload binding before dispatching tasks. When the policy is authored at the Syntax-Level (using concrete element paths for a specific payload family), the Manager SHALL validate that all rule targets are valid paths for the declared payload family and version, then package the rules as an execution plan for dispatch.
 

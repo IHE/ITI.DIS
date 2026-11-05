@@ -108,7 +108,7 @@ Table 3:5.9.1-2 lists the resources that are part of the HL7 FHIR R4 protocol la
 | `Provenance` | De-identification evidence |
 | `OperationOutcome` | Error and validation reporting |
 | `Bundle` | Workflow packaging (message, result collection) |
-| `Library` | Policy artifact ([§3:5.10](#35101-policy-library-resource-structure)) and execution plan carrier ([§3:5.9.4](#3594-execution-plan-format)) |
+| `Library` | Policy artifact ([§3:5.10.1](#35101-policy-library-resource-structure)) and execution plan carrier ([§3:5.9.4](#3594-execution-plan-format)) |
 | `CapabilityStatement` | Actor capability declaration |
 {: .grid}
 
@@ -125,14 +125,16 @@ Most governed element paths are stable across HL7 FHIR R4, R5, and R6:
 
 However, several governed elements were renamed between HL7 FHIR R4 and R5. The De-ID Manager SHALL apply version-conditional path mappings for these elements when compiling execution plans for HL7 FHIR R5 or R6 payloads.
 
+Table 3:5.9.1-3 lists the version-conditional path mappings for elements that changed between HL7 FHIR R4 and R5.
+
 <p id="t3.5.9.1-3" class="tableTitle"><strong>Table 3:5.9.1-3: Version-Conditional Path Mappings (HL7 FHIR R4 to R5)</strong></p>
 
 | Semantic Group | HL7 FHIR R4 Path | HL7 FHIR R5 Path | Affected Element |
 |----------------|-------------------|-------------------|-----------------|
 | `subject.dates` | `Encounter.period` | `Encounter.actualPeriod` | Encounter date/time |
-| `subject.dates` | `Procedure.performed[x]` | `Procedure.occurrence[x]` | Procedure date/time (all choice types: dateTime, Period, string, Age, Range) |
+| `subject.dates` | `Procedure.performed[x]` | `Procedure.occurrence[x]` | Procedure date/time (choice types vary by version; HL7 FHIR R5 adds `Timing`) |
 | `provider.name` | `Encounter.participant.individual` | `Encounter.participant.actor` | Encounter participant reference |
-| `device-identifiers` | `Device.deviceName` | `Device.name` | Device name |
+| `device-identifiers` | `Device.deviceName` | `Device.name` | Device name (sub-element `deviceName.name` in HL7 FHIR R4 becomes `name.value` in HL7 FHIR R5) |
 {: .grid}
 
 The De-ID Manager SHALL resolve these mappings at execution plan compilation time based on the declared payload version. A single governance policy using semantic groups remains version-neutral; the version-conditional mapping is applied during compilation, not by the De-Identifier. The De-Identifier receives resolved paths appropriate for the payload version.
@@ -200,7 +202,7 @@ Table 3:5.9.2-1 defines the Phase 1 semantic groups for DIS-FHIR-Payload.
 | `contact-information` | Contact persons and their identifying elements | `Patient.contact.name`, `Patient.contact.telecom`, `Patient.contact.address`, `Patient.contact.organization`, `RelatedPerson.identifier`, `RelatedPerson.name`, `RelatedPerson.telecom`, `RelatedPerson.address`, `RelatedPerson.photo` |
 | `provider-identifiers` | Identifiers and names of care providers | `Practitioner.identifier`, `Practitioner.name`, `Practitioner.telecom`, `Practitioner.address`, `Practitioner.photo`, `PractitionerRole.identifier` |
 | `dates` | Date and time elements across governed resource types | `Patient.birthDate`, `Patient.deceased[x]` (when dateTime), `Encounter.period`, `Condition.onset[x]`, `Condition.abatement[x]`, `Procedure.performed[x]`, `Observation.effective[x]`, `MedicationRequest.authoredOn`, `DiagnosticReport.effective[x]`, `DocumentReference.date` |
-| `narrative` | Resource narrative content | `Resource.text` (the `Narrative` element on any governed resource type) |
+| `narrative` | Resource narrative content | `DomainResource.text` (the `Narrative` element on any governed resource type) |
 | `references` | Reference elements that could link to identifiable resources | `Observation.subject`, `Condition.subject`, `Encounter.subject`, `Procedure.subject`, `DiagnosticReport.subject`, `MedicationRequest.subject`, `Encounter.participant.individual` (HL7 FHIR R4) / `Encounter.participant.actor` (HL7 FHIR R5), `DocumentReference.subject`, `DocumentReference.author` |
 | `device-identifiers` | Device identifiers and names | `Device.identifier`, `Device.serialNumber`, `Device.deviceName` (HL7 FHIR R4) / `Device.name` (HL7 FHIR R5), `Device.udiCarrier` |
 {: .grid}
@@ -257,9 +259,9 @@ The `suppress` action removes the targeted element and all its children from the
 
 The `pseudonymize` action replaces the targeted element's value with a deterministic pseudonym. The pseudonym is derived from the seed material provided by the De-ID Manager and the original input value using the specified algorithm. Given the same seed and input value, the same pseudonym SHALL be produced. This enables consistent pseudonymization across resources within the same consistency scope.
 
-For `HumanName` elements, the action replaces `family`, `given`, `prefix`, `suffix`, and `text` with pseudonymous values. The `use` and `period` sub-elements are preserved.
+For `HumanName` elements, the action replaces `family`, `given`, `prefix`, `suffix`, and `text` with pseudonymous values. The `use` sub-element is preserved. The `period` sub-element is suppressed because a name-validity period can reveal the timing of legal name changes.
 
-For `Identifier` elements, the action replaces `Identifier.value` with a pseudonymous value. `Identifier.system` SHALL be replaced with a DIS pseudonym system URI (e.g., `urn:oid:dis-pseudonym:<scope>`) to prevent collision with real identifier systems. `Identifier.type`, `Identifier.use`, and `Identifier.period` are preserved.
+For `Identifier` elements, the action replaces `Identifier.value` with a pseudonymous value. `Identifier.system` SHALL be replaced with a DIS pseudonym system URI (e.g., `urn:oid:dis-pseudonym:<scope>`) to prevent collision with real identifier systems. `Identifier.type`, `Identifier.use`, and `Identifier.period` are preserved. `Identifier.assigner` SHALL be suppressed because the referenced Organization could identify the data subject's care context.
 
 For `Reference` elements, the action replaces the reference target with the pseudonymized identifier of the referenced resource, when that resource is within the processing target set. References to resources outside the processing target set are governed by the `references` semantic group rules.
 
@@ -274,8 +276,8 @@ For `date` and `dateTime` elements:
 - `precision: month` — retain year and month (e.g., `1985-03-15` → `1985-03`)
 
 For `Address` elements:
-- `precision: country` — retain only `Address.country`; suppress `Address.line`, `Address.city`, `Address.district`, `Address.state`, `Address.postalCode`
-- `precision: state` — retain `Address.country` and `Address.state`; suppress remaining sub-elements
+- `precision: country` — retain only `Address.country`; suppress `Address.text`, `Address.line`, `Address.city`, `Address.district`, `Address.state`, `Address.postalCode`
+- `precision: state` — retain `Address.country` and `Address.state`; suppress `Address.text` and remaining sub-elements
 
 For `Quantity` and `Age` elements:
 - `precision` specifies a rounding interval (e.g., `precision: 5` rounds `Quantity.value` to the nearest 5)
@@ -295,15 +297,15 @@ For `Period` elements, both `Period.start` and `Period.end` are shifted by the s
 
 The `mask` action replaces the targeted element's displayable content with the value specified by the `maskValue` parameter.
 
-For `HumanName`, each sub-element (`family`, `given`, `text`) is replaced with the mask value. For `Address`, each sub-element (`line`, `city`, `district`, `state`, `postalCode`) is replaced with the mask value; `Address.country` is preserved. For `ContactPoint`, `ContactPoint.value` is replaced with the mask value; `ContactPoint.system` and `ContactPoint.use` are preserved.
+For `HumanName`, each sub-element (`family`, `given`, `text`) is replaced with the mask value. For `Address`, each sub-element (`text`, `line`, `city`, `district`, `state`, `postalCode`) is replaced with the mask value; `Address.country` is preserved. For `ContactPoint`, `ContactPoint.value` is replaced with the mask value; `ContactPoint.system` and `ContactPoint.use` are preserved.
 
 ##### redact-narrative
 
-The `redact-narrative` action governs the `Narrative` element (`Resource.text`) of a resource.
+The `redact-narrative` action governs the `Narrative` element (`DomainResource.text`) of a resource.
 
 In `remove` mode, the De-Identifier SHALL set `Narrative.status` to `empty` and replace `Narrative.div` with an empty XHTML div element (`<div xmlns="http://www.w3.org/1999/xhtml"/>`) conforming to the HL7 FHIR Narrative datatype constraints.
 
-In `sanitize` mode, the De-Identifier SHALL scan the XHTML content for detected PHI patterns (names, identifiers, dates, addresses, contact information) and replace detected values with the corresponding pseudonymized or masked values produced by other rules in the execution plan. `Narrative.status` SHALL be set to `extensions` to indicate the narrative has been modified. Sanitization is best-effort; undetected PHI in narrative is an implementation limitation.
+In `sanitize` mode, the De-Identifier SHALL scan the XHTML content for detected PHI patterns (names, identifiers, dates, addresses, contact information) and replace detected values with the corresponding pseudonymized or masked values produced by other rules in the execution plan. `Narrative.status` SHALL be set to `additional` to indicate that the narrative content has been modified and may no longer fully correspond to the structured data. Sanitization is best-effort; undetected PHI in narrative is an implementation limitation.
 
 ##### cryptographic-hash
 
@@ -341,7 +343,7 @@ Table 3:5.9.4-1 lists the required Library resource elements.
 | `Library.name` | 1..1 | Machine-readable name |
 | `Library.title` | 0..1 | Human-readable title |
 | `Library.status` | 1..1 | `draft`, `active`, or `retired` |
-| `Library.type` | 1..1 | SHALL be `logic-library` |
+| `Library.type` | 1..1 | SHALL use coding `https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type\|dis-execution-plan` |
 | `Library.date` | 1..1 | Date the plan was compiled |
 | `Library.description` | 0..1 | Human-readable description |
 | `Library.content` | 1..1 | Attachment containing the execution plan JSON |
@@ -371,7 +373,7 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 #### 3:5.9.4.3 Execution Plan Example
 
-The following execution plan illustrates a single-ruleSet pseudonymization plan for Use Case 3 (Clinical Pathology Order). The plan pseudonymizes patient identifiers and names, suppresses address and telecom, date-shifts the birth date, and redacts narrative content.
+The following execution plan illustrates a single-ruleSet pseudonymization plan for Use Case 3 (Clinical Pathology Order). The plan pseudonymizes patient identifiers and names, suppresses address and telecom, date-shifts the birth date, redacts narrative content, and pseudonymizes subject references. Semantic group references have been expanded to concrete element paths during policy compilation.
 
 ```json
 {
@@ -421,7 +423,7 @@ The following execution plan illustrates a single-ruleSet pseudonymization plan 
     },
     {
       "ruleId": "R07",
-      "target": "@narrative",
+      "target": "Patient.text",
       "action": "redact-narrative",
       "parameters": {
         "mode": "remove"
@@ -429,7 +431,23 @@ The following execution plan illustrates a single-ruleSet pseudonymization plan 
     },
     {
       "ruleId": "R08",
-      "target": "@references",
+      "target": "Observation.text",
+      "action": "redact-narrative",
+      "parameters": {
+        "mode": "remove"
+      }
+    },
+    {
+      "ruleId": "R09",
+      "target": "Observation.subject",
+      "action": "pseudonymize",
+      "parameters": {
+        "algorithm": "HMAC-SHA-256"
+      }
+    },
+    {
+      "ruleId": "R10",
+      "target": "DiagnosticReport.subject",
       "action": "pseudonymize",
       "parameters": {
         "algorithm": "HMAC-SHA-256"
@@ -685,7 +703,7 @@ Table 3:5.9.6-1 summarizes the delivery modes and their characteristics.
 
 ## 3:5.10 DIS-Policy Content Module
 
-The DIS-Policy content module defines the structure, signing envelope, and compilation rules for de-identification policy artifacts. A policy is a knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Library carrier, signing envelope, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more payload-specific execution plans (see [§3:5.9.4](#3594-execution-plan-format)) before dispatching tasks.
+The DIS-Policy content module defines the structure, delivery modes, validation rules, and compilation rules for de-identification policy artifacts. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Library carrier, delivery modes, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more payload-specific execution plans (see [§3:5.9.4](#3594-execution-plan-format)) before dispatching tasks.
 
 The policy artifact is an HL7 FHIR R4 Library resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
 
@@ -700,7 +718,7 @@ Table 3:5.10.1-1 lists the required Library resource elements for a DIS policy.
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
 | `Library.url` | 1..1 | Canonical URL identifying this policy |
-| `Library.identifier` | 1..* | Business identifier(s) for the policy; used in `policy.registeredIdentifier` resolution |
+| `Library.identifier` | 1..* | Business identifier(s) for the policy |
 | `Library.version` | 1..1 | Version of the policy |
 | `Library.name` | 1..1 | Machine-readable name |
 | `Library.title` | 0..1 | Human-readable title |
@@ -740,7 +758,7 @@ The policy rules JSON carried in `Library.content` defines de-identification rul
 - **Semantic-Level** — rules use semantic group references (prefixed with `@`) and action codes. The policy is format-neutral and requires compilation into a payload-specific execution plan before dispatch. This is the default representation for reusable, cross-format policies.
 - **Syntax-Level** — rules use concrete element paths (e.g., FHIRPath expressions for HL7 FHIR, DICOM tag paths for DICOM) and action codes. The policy is specific to a payload family and version, and is directly executable after validation. A Syntax-Level policy requires `payloadFamily` and `payloadVersion` declarations.
 
-Both levels use the same JSON structure, signing envelope, and four-point validation. The `@` prefix on rule targets is the syntactic marker distinguishing Semantic-Level from Syntax-Level rules. A De-Identifier SHALL never receive rules containing unresolved `@` references — that would indicate a compilation failure.
+Both levels use the same JSON structure, delivery modes, and four-point validation. The `@` prefix on rule targets is the syntactic marker distinguishing Semantic-Level from Syntax-Level rules. A De-Identifier SHALL never receive rules containing unresolved `@` references — that would indicate a compilation failure.
 
 Table 3:5.10.2-1 lists the top-level elements of the policy rules JSON.
 
@@ -1035,27 +1053,36 @@ The following Syntax-Level policy illustrates the same Use Case 3 pseudonymizati
 **Editorial Note:** The policy rules JSON structure shown above is illustrative. The formal JSON Schema will be provided when FSH conformance artifacts are finalized.
 </div>
 
-### 3:5.10.3 Signing Envelope
+### 3:5.10.3 Policy Delivery and Validation
 
-DIS policies are digitally signed using JSON Web Signature (JWS) as defined in [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515). The signed artifact is the serialized HL7 FHIR R4 Library resource containing the policy.
+A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. The ITI-x1 `policy` parameter always declares the approved policy by canonical URL (`policy.url`) and version (`policy.version`). The `authorization` parameter provides evidence that the data request — including approval of that specific policy — was authorized by the data governance authority. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
 
-The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
+#### 3:5.10.3.1 Policy Content Resolution
+
+The `policy.content` parameter is optional. It determines how the De-ID Manager obtains the policy Library:
+
+**When `policy.content` is present (inline delivery):** The Requester carries the JWS-signed policy Library directly in the ITI-x1 request as a `Binary` resource with `Binary.contentType` of `application/jose`. The JWS protects the policy content from tampering by the Requester, who acts as an untrusted courier. The De-ID Manager SHALL verify the JWS signature against the trusted policy authority's public key. The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
 
 - `alg` — the signing algorithm (e.g., `RS256`, `ES256`)
 - `x5c` or `jwk` — the signing key or certificate chain, enabling the De-ID Manager to verify the signature against a trusted policy authority
 
-The resulting JWS compact serialization is carried in the ITI-x1 `policy` parameter as follows:
+The De-ID Manager SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. A mismatch indicates the Requester declared one policy but couriered different content; the Manager SHALL reject the job.
 
-- **`policy.inline`** — the `Binary` resource contains the JWS compact serialization as its content. `Binary.contentType` SHALL be `application/jose`.
-- **`policy.reference`** — the URI points to an externally stored JWS compact serialization. The De-ID Manager retrieves, verifies, and extracts the Library.
-- **`policy.registeredIdentifier`** — the De-ID Manager resolves the identifier to a stored, pre-validated policy Library. The Library was signed at provisioning time; the Manager re-verifies currency and authorization consistency at job submission.
+**When `policy.content` is absent (Manager-resolved):** The ITI-x1 request carries only `policy.url` and `policy.version`. No policy content appears in the ITI-x1 message. The De-ID Manager resolves the policy from the declared canonical URL through its own mechanisms:
 
-The De-ID Manager SHALL perform the four-point validation defined in [§1:PXX.4.1](volume-1.html#1pxx41-concepts) on the extracted Library:
+- When the URL matches a policy managed locally by the De-ID Manager (e.g., provisioned by administrative configuration), the Manager resolves it from its own store.
+- When the URL identifies an externally hosted policy, the Manager retrieves the policy through its implementation-defined trust model (e.g., TLS-protected fetch, mutual TLS, or externally stored JWS artifacts).
 
-1. **Signature** — verify the JWS signature against the trusted policy authority's public key
-2. **Schema** — verify the Library conforms to the DIS-Policy Library profile and the policy rules JSON conforms to the policy rules schema
-3. **Currency** — verify the current date falls within `Library.effectivePeriod`
-4. **Authorization consistency** — verify the policy's scope, purpose, and use context are consistent with the data request authorization presented in the ITI-x1 request
+Locally managed policies are trusted by virtue of their administrative provisioning; the Manager is not required to verify a JWS signature at each job submission.
+
+#### 3:5.10.3.2 Policy Validation
+
+The De-ID Manager SHALL perform the following validation on the resolved policy Library, as defined in [§1:PXX.4.1](volume-1.html#1pxx41-concepts):
+
+1. **Authorization consistency** — verify that `policy.url` and `policy.version` declared in the ITI-x1 request identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
+2. **Integrity** — when `policy.content` is present, verify the JWS signature and confirm that the Library's canonical URL and version match the declared values. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
+3. **Schema** — verify the Library conforms to the DIS-Policy Library profile and the policy rules JSON conforms to the policy rules schema.
+4. **Currency** — verify the current date falls within `Library.effectivePeriod`.
 
 ### 3:5.10.4 Policy Compilation
 

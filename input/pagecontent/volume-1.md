@@ -1,7 +1,7 @@
 
 The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policies and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
 
-DIS is a **Workflow** profile. It defines four actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after data request authorization has been established and a de-identification policy has been authorized. It does not standardize how a data permit or data-request approval is requested, approved, issued, discovered, amended, revoked, or retired.
+DIS is a **Workflow** profile. It defines four actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after a data request has been approved — including approval of the de-identification policy to be applied — and the data request authorization has been issued. It does not standardize how a data request is submitted, reviewed, approved, issued, discovered, amended, revoked, or retired.
 
 DIS separates the mandatory HL7 FHIR R4 **protocol binding** from the processing **payload binding**. These are DIS-defined terms: the protocol binding is the HL7 FHIR version used for transaction APIs and workflow resources; the payload binding is the format-specific content model for the data being de-identified. The protocol binding uses HL7 FHIR R4 APIs and resources exclusively for job submission, task dispatch, and status reporting; it is content-neutral and can orchestrate any payload type for which a corresponding payload binding is declared. DIS-FHIR-Payload is the HL7 FHIR payload binding, supporting independently versioned HL7 FHIR R4, R5, and R6 processing payloads (R6 support is based on the current ballot draft and will be confirmed upon final publication); support for R5 or R6 payloads does not require an R5 or R6 version of the DIS protocol binding. Additional payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be defined independently to support non-FHIR data formats within the same HL7 FHIR R4 protocol layer.
 
@@ -85,7 +85,7 @@ The actors in this profile are described in more detail in the sections below.
 
 #### 1:PXX.1.1.1 De-Identification Requester
 
-The De-Identification Requester submits de-identification jobs to the De-ID Manager, presenting a data request authorization and a signed de-identification policy. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
+The De-Identification Requester submits de-identification jobs to the De-ID Manager, presenting evidence of an approved data request and declaring the canonical URL and version of the approved de-identification policy. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
 
 In Phase 1, the De-Identification Requester is grouped with the De-Identified Data Receiver role -- the Requester receives output directly. No separate push-delivery path is standardized.
 
@@ -95,7 +95,7 @@ Phase 1 does not standardize how the Requester obtains a signed de-identificatio
 
 #### 1:PXX.1.1.2 De-ID Manager
 
-The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and policy, compiles the policy into an execution plan, dispatches tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
+The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that the presented policy matches the policy approved in the authorization, compiles the policy into an execution plan, dispatches tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
 The De-ID Manager is the sole actor authorized to retain identity mappings and reversibility records. Whether these records are persisted depends on the declared reversibility mode (see [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) and [1:PXX.2.6](#1pxx26-irreversible-de-identification-option)). See [1:PXX.4.1](#1pxx41-concepts) for the policy model, four-point validation, and policy variants. See [1:PXX.5.4](#1pxx54-reversibility-material-custody) for custody obligations.
 
@@ -105,7 +105,7 @@ The De-ID Manager is the sole actor authorized to retain identity mappings and r
 
 The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives scoped, purpose-specific seeds as required by the assigned rules, produces transformations and evidence, and retains no identity-linking material after task termination. The De-Identifier derives transformation values, such as pseudonyms or date-shift offsets, according to the execution plan and its declared capabilities. It reports pseudonyms needed for reversibility to the Manager but does not retain the seed-to-identity mapping. The Manager supplies policy, scope, and seed material; it is not required to compute pseudonyms or date-shift offsets.
 
-A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core` — the base set of transformation actions defined in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module), including suppression, pseudonymization, generalization, date shifting, masking, and narrative handling), supported transformation parameter inputs, and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
+A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core` — the base set of transformation actions defined in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module), including suppression, pseudonymization, generalization, date shifting, masking, narrative redaction, cryptographic hashing, and perturbation), supported transformation parameter inputs, and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
 
 <a name="integrated-de-id-manager-de-identifier"> </a>
 
@@ -127,7 +127,7 @@ The transactions in this profile are summarized in the sections below.
 
 #### 1:PXX.1.2.1 Submit De-Identification Job [ITI-x1]
 
-This transaction is used to submit a de-identification job with a data request authorization and signed policy. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
+This transaction is used to submit a de-identification job with evidence of an approved data request and the approved signed policy. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
 
 For more details see the detailed [transaction description](volume-2.html#23x1-submit-de-identification-job-iti-x1).
 
@@ -290,24 +290,23 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 DIS introduces the following key concepts that provide necessary background for understanding the profile.
 
-**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. A Requester submits a signed policy that governs what transformations are applied. The De-ID Manager validates the policy and the De-Identifier executes the plan. Trust is anchored in the policy's digital signature, not in the Requester's identity -- the Requester acts as a courier for the signed policy.
+**Policy-Governed De-Identification.** DIS separates policy definition from policy execution. The Requester declares the canonical URL and version of the approved policy in every ITI-x1 request. The De-ID Manager validates this declaration against the data request authorization and obtains the policy content. When the Requester also carries the policy content directly (`policy.content`), it is JWS-signed because the Requester acts as an untrusted courier. When the Requester does not carry content, the Manager resolves the policy from the declared URL through its own trust model.
 
-The De-ID Manager performs four-point validation on all policies:
+The De-ID Manager validates all policies:
 
-1. **Signature validity** -- the policy's digital signature is cryptographically valid and issued by a trusted authority
-2. **Schema conformance** -- the policy content conforms to the expected schema
-3. **Currency** -- the policy is not expired or revoked
-4. **Authorization consistency** -- the policy is consistent with the data request authorization (scope, purpose, and processing target are compatible)
+1. **Authorization consistency** -- the declared policy URL and version match the policy approved in the data request authorization
+2. **Integrity** -- when the Requester carries policy content, the JWS signature is cryptographically valid and issued by a trusted authority, and the Library's canonical URL and version match the declared values. When the Manager resolves the policy itself, integrity is established by its resolution trust model.
+3. **Schema conformance** -- the policy content conforms to the expected schema
+4. **Currency** -- the policy is not expired or revoked
 
-Phase 1 supports three policy variants in ITI-x1:
+A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. The data request authorization is the per-request evidence that a data governance authority approved a specific data request — including identification of the de-identification policy to be applied. The Requester presents both the authorization (evidence of approval) and the policy artifact (the approved transformation rules). The Manager verifies that the two match.
 
-- **Inline policy** -- a signed policy artifact embedded directly in the request. The policy may be authored at the Semantic-Level (using semantic group references, requiring compilation) or at the Syntax-Level (using concrete element paths for a specific payload family and version, directly executable after validation).
-- **By-reference policy** -- a reference pointing to a signed policy artifact stored externally. The Manager retrieves, validates, and -- for Semantic-Level policies -- compiles it.
-- **Registered policy identifier** -- a policy identifier and optional version, resolved by the Manager to a specific, signed policy artifact. The resolved artifact undergoes the same four validation checks and -- for Semantic-Level policies -- compilation. Resolution MAY use a local registry, administrative configuration, or an external source; Phase 1 does not standardize the provisioning or resolution mechanism.
+Every ITI-x1 request declares the approved policy by canonical URL and version. Optionally, the Requester may also carry the policy content directly:
 
-A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same signing envelope and four-point validation. Both are approved by the joint privacy team.
+- **Policy content carried (`policy.content` present)** -- the JWS-signed policy Library is embedded directly in the request as a `Binary` resource. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. This is used when the Requester has obtained the signed artifact (e.g., from a policy authority) and carries it to the Manager.
+- **Policy content resolved by Manager (`policy.content` absent)** -- the Manager resolves the policy from the declared canonical URL through its own mechanisms: a local policy store, an external fetch, or other trust-model-appropriate resolution. No policy content or signing envelope appears in the ITI-x1 message. Resolution of locally managed policies does not introduce a policy discovery or retrieval transaction into Phase 1.
 
-Resolution of registered policy identifiers or by-reference policies does not introduce a policy discovery or retrieval transaction into Phase 1.
+A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same four-point validation. Both are approved by the joint privacy team.
 
 **RuleSets and Staged Execution.** DIS organizes de-identification rules into ruleSets -- named groups of rules with shared data-semantic character. A policy contains one or more ruleSets. Optionally, a policy may declare stages that reference ruleSet IDs to define execution ordering and trust isolation boundaries. When stages are declared, a preliminary stage typically handles direct identifiers (pseudonymization, suppression), and an advanced stage applies policy-specified record-level rules to quasi-identifiers. The De-ID Manager dispatches one ITI-x3 task per ruleSet, grouped by stage ordering when stages are present. Each De-Identifier sees only its assigned ruleSet(s), enforcing trust isolation between stages.
 
@@ -617,7 +616,7 @@ An authorized clinician exports a de-identified HL7 FHIR document from a clinica
 
 ##### 1:PXX.4.2.5.1 De-Identified Health Data Export Use Case Description
 
-A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier operating standalone. The Integrated actor maps the clinician's local authorization (role and declared purpose) to a configured registered de-identification policy. No external data permit or policy acquisition is needed -- the policy is pre-configured by institutional administration.
+A clinician initiates export of a clinical document (for example, a discharge summary for patient-mediated sharing or a document for external referral). The clinical workstation hosts an Integrated De-ID Manager/De-Identifier operating standalone. The Integrated actor maps the clinician's local authorization (role and declared purpose) to a locally configured de-identification policy. No external data permit or policy acquisition is needed -- the policy is pre-configured by institutional administration and identified by a local URI.
 
 The Integrated De-ID Manager/De-Identifier validates the policy, compiles an execution plan with a single ruleSet, executes identifier handling per the configured policy, and produces the de-identified document Bundle with Provenance evidence. It writes the output to the export destination. An ATNA audit record is emitted recording the policy identifier, ruleSet, outcome, and audit correlation.
 
@@ -649,7 +648,7 @@ sequenceDiagram
 
     CLI->>WS: Initiate document export (local action)
     activate WS
-    Note over WS: Map local authorization (role + purpose) to configured registered policy
+    Note over WS: Map local authorization (role + purpose) to locally configured policy
     Note over WS: Validate authorization and all four policy checks
     Note over WS: Compile execution plan
 
@@ -684,7 +683,7 @@ The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be groupe
 
 ### 1:PXX.5.3 Policy Integrity
 
-De-identification policies are digitally signed. Trust is anchored in the policy's signature, not in the Requester's identity -- the Requester acts as a courier. The De-ID Manager SHALL verify the signature, schema conformance, currency, and authorization consistency of every policy before job execution. Policies with invalid, expired, or untrusted signatures SHALL be rejected.
+The De-ID Manager SHALL verify authorization consistency, integrity, schema conformance, and currency of every policy before job execution. When the Requester carries policy content (`policy.content`), the Manager SHALL verify the JWS signature and confirm the Library's canonical URL and version match the declared `policy.url` and `policy.version` -- the JWS anchors trust because the Requester is an untrusted courier. When the Manager resolves the policy itself, integrity is established by the Manager's resolution trust model (administrative provisioning, mutual TLS, or other mechanisms appropriate to the deployment). Authorization consistency means the declared policy URL and version match the policy approved in the data request authorization. Policies that fail any validation point SHALL be rejected.
 
 ### 1:PXX.5.4 Reversibility Material Custody
 
@@ -730,4 +729,4 @@ SMART Backend Services provides the OAuth 2.0 client credentials flow used for s
 
 ### 1:PXX.6.5 External Data Permit and Data Request Profiles
 
-DIS consumes data request authorizations but does not produce them. The data request authorization presented in ITI-x1 is obtained through mechanisms outside DIS -- including national EHDS infrastructure, institutional governance workflows, bilateral agreements, or integration with external data permit services. DIS validates the authorization but is agnostic to its origin.
+DIS consumes data request authorizations but does not produce them. The data request authorization presented in ITI-x1 is evidence that a data governance authority approved a data request — including what data is needed, the purpose, and the de-identification policy to be applied. This authorization is obtained through mechanisms outside DIS — including national EHDS infrastructure, institutional governance workflows, bilateral agreements, or integration with external data permit services. DIS validates the authorization and verifies that the presented policy matches the policy approved in the authorization, but is agnostic to the authorization's origin.
