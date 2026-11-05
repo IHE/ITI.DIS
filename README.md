@@ -34,7 +34,7 @@ The following use cases motivate the Phase 1 design. Full narratives, pre-condit
 
 Phase 1 processes only HL7 FHIR R4, R5, and R6 data. Its workflow resources and APIs use HL7 FHIR R4, independently of the version of the clinical data being de-identified.
 
-The rules for workflow messages, such as job submission, task dispatch, and status reporting, form the **protocol binding**, which is part of the mandatory baseline. The separate **payload binding** (DIS-FHIR-Payload) specifies how clinical data formats and versions are identified, packaged, and matched to supported capabilities. HL7 FHIR R5 and R6 data are carried as serialized content explicitly labelled with their HL7 FHIR version, not embedded as native resources in an HL7 FHIR R4 envelope.
+The rules for workflow messages, such as job submission, task dispatch, and status reporting, form the **protocol binding**, which is part of the mandatory baseline. The separate **payload binding** (DIS-FHIR-Payload) specifies how clinical data formats and versions are identified, packaged, and matched to supported capabilities. R6 payload support follows the ballot draft identified by Volume 1 and remains subject to confirmation upon final publication. HL7 FHIR R5 and R6 data are carried as serialized content explicitly labelled with their HL7 FHIR version, not embedded as native resources in an HL7 FHIR R4 envelope.
 
 Future payload bindings, such as DIS-DICOM1 and DIS-CDA1, could add non-FHIR formats while retaining the HL7 FHIR R4 workflow. These bindings are outside the current scope.
 
@@ -90,19 +90,18 @@ The outer box represents the Integrated De-ID Manager/De-Identifier, which combi
 
 ## Policy Model
 
-DIS separates policy definition from policy execution. Phase 1 supports four carrier variants in ITI-x1:
+DIS separates policy definition from policy execution. Every ITI-x1 request declares the approved policy by canonical URL and version, alongside the data request authorization that approves that policy. Policy content is obtained in one of two ways:
 
-- **Inline policy / By-reference policy** — a format-neutral policy artifact (embedded or externally stored) that the Manager compiles into a payload-specific execution plan
-- **Registered policy identifier** — an identifier resolved by the Manager to a format-neutral policy artifact, then compiled
-- **Named execution plan** — an identifier referencing a pre-compiled, format-specific plan defined by an existing data standard (e.g., DICOM PS 3.15 Basic Profile), dispatched directly without compilation
+- **Requester-carried content** — optional `policy.content` carries a JWS-signed policy Library as a Binary resource. The Manager verifies the signature and matches the Library's URL and version to the declaration.
+- **Manager-resolved content** — when `policy.content` is absent, the Manager resolves the declared policy through its own trust model, such as an administratively provisioned store or trusted external retrieval. A JWS signature is not required for every locally provisioned policy.
 
-The De-ID Manager validates every carrier for **signature validity**, **schema conformance**, **currency**, and **authorization consistency**. Format-neutral policies require compilation; named execution plans are already executable for their target data standard.
+The Manager validates **authorization consistency**, **integrity**, **schema conformance**, and **currency** before acceptance or dispatch. Semantic-Level policies use format-neutral semantic groups and are compiled into payload-specific execution plans. Syntax-Level policies use concrete paths for a declared payload family and version; the Manager validates and packages them as execution plans. Phase 1 uses flat, ordered rules, with one task per ruleSet and optional stage ordering; full policy composition is deferred.
 
 For full details, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Section 1:PXX.5.3](input/pagecontent/volume-1.md#1pxx53-policy-carrier-integrity).
 
 ## Transformation Actions
 
-Phase 1 requires support for 9 core actions aligned with ISO/IEC 20889:2018: `dis:local-suppression`, `dis:masking`, `dis:retain`, `dis:pseudonymize`, `dis:rounding`, `dis:top-bottom-coding`, `dis:combine-attributes`, `dis:local-generalization`, and `dis:noise-addition`. All actions operate at the record level with policy-specified parameters. Dataset-level statistical disclosure control is deferred to a future phase.
+Phase 1 defines nine operational actions in the `core` action family: `remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`. Actions are classified by ISO/IEC 20889:2018 techniques; technique categories are distinct from executable action codes. All actions operate at the record level with policy-specified parameters. Dataset-level statistical disclosure control is deferred to a future phase.
 
 For transformation scope and exclusions, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts).
 

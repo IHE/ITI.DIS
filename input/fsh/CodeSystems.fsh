@@ -73,7 +73,7 @@ Id: dis-action
 Title: "DIS Transformation Action"
 Description: """
 Transformation action codes from the DIS Phase 1 core action family.
-Each action is a concrete, deterministic (except perturb) function with
+Each action is a concrete, deterministic function with
 well-defined parameters and testable output. Actions are classified by
 their ISO/IEC 20889:2018 de-identification technique via the technique
 property. Action design is informed by RSNA CTP DICOM Anonymizer
@@ -107,9 +107,6 @@ function patterns.
 * #truncate "Keep the first N characters of a string value"
 * #truncate ^property[+].code = #technique
 * #truncate ^property[=].valueCode = #generalization
-* #perturb "Add noise to a numeric value (stochastic)"
-* #perturb ^property[+].code = #technique
-* #perturb ^property[=].valueCode = #noise-addition
 * #redact "Remove the narrative content from a resource"
 * #redact ^property[+].code = #technique
 * #redact ^property[=].valueCode = #local-suppression

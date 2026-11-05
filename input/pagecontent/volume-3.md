@@ -7,7 +7,7 @@ This section defines the DIS-FHIR-Payload content module.
 
 The DIS-FHIR-Payload content module defines format-specific rules for de-identification of HL7 FHIR processing payloads within the DIS workflow. It specifies how HL7 FHIR data elements are identified and addressed, how DIS transformation actions are realized for HL7 FHIR datatypes, how payloads are carried within and retrieved from the HL7 FHIR R4 protocol envelope, and how de-identification evidence is represented using HL7 FHIR Provenance.
 
-DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports processing payloads in HL7 FHIR R4, R5, and R6 without requiring a corresponding version of the protocol binding. This independence is achieved through version identification, version-safe packaging, and version-neutral element addressing.
+DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports processing payloads in HL7 FHIR R4, R5, and R6 without requiring a corresponding version of the protocol binding. This independence is achieved through version identification, version-safe packaging, and version-neutral element addressing. As specified in Volume 1, R6 support is based on the ballot draft and will be confirmed upon final publication.
 
 <a name="cross-version-payload"> </a>
 
@@ -33,7 +33,7 @@ Table 3:5.9.1-1 lists the mechanisms for declaring the payload version.
 | Manifest metadata | Bulk Data | Manifest declares the HL7 FHIR version of referenced NDJSON files |
 {: .grid}
 
-When a processing target omits an explicit version declaration, the De-ID Manager SHALL treat the payload as the same version as the protocol binding (HL7 FHIR R4). Explicit declaration is REQUIRED for HL7 FHIR R5 and R6 payloads.
+An explicit payload version declaration is REQUIRED for R4, R5 and R6 payloads. The De-ID Manager SHALL reject a submission that omits the declaration rather than infer R4 from the protocol binding. Source server capabilities and retrieved content are used to verify the declared version, not to replace the submission declaration.
 
 #### 3:5.9.1.2 Version-Safe Packaging
 
@@ -247,7 +247,6 @@ Table 3:5.9.3-1 lists the Phase 1 core transformation actions.
 | `date-shift` | Shift all dates by a consistent per-patient offset | `date`, `dateTime`, `instant`, `Period` | Yes (given same scope and patient) | `scope` (consistency scope identifier), `maxOffsetDays` (maximum magnitude of the shift in days) |
 | `round` | Bin a numeric value to the nearest multiple of the step | `Quantity`, `Age`, `integer`, `decimal` | Yes | `step` (rounding interval; e.g., `10` bins 57 → 60) |
 | `truncate` | Keep the first N characters of a string value | `string`, `Address.postalCode`, `Identifier.value` | Yes | `length` (number of characters to retain) |
-| `perturb` | Add noise to a numeric value | `Quantity.value`, `integer`, `decimal` | No (stochastic) | `distribution` (`uniform` or `gaussian`), `magnitude` |
 | `redact` | Remove the narrative content from a resource | `Narrative` (`DomainResource.text`) | Yes | None |
 {: .grid}
 
@@ -317,14 +316,6 @@ The `truncate` action retains only the first `length` characters of a string val
 
 - `truncate("02139", length: 3)` → `"021"`
 - `truncate("SW1A 2AA", length: 4)` → `"SW1A"`
-
-##### perturb
-
-The `perturb` action adds noise to a numeric value. The noise is drawn from the specified distribution with the specified magnitude.
-
-For `uniform` distribution, the noise is drawn uniformly from `[-magnitude, +magnitude]`. For `gaussian` distribution, the noise is drawn from a normal distribution with standard deviation equal to `magnitude`.
-
-The `perturb` action is stochastic and does not produce deterministic output. It SHALL NOT be used when cross-job consistency is required for the targeted element.
 
 ##### redact
 
@@ -1081,7 +1072,7 @@ The De-ID Manager SHALL perform the following validation on the resolved policy 
 1. **Authorization consistency** — verify that `policy.url` and `policy.version` declared in the ITI-x1 request identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
 2. **Integrity** — when `policy.content` is present, verify the JWS signature and confirm that the Library's canonical URL and version match the declared values. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
 3. **Schema** — verify the Library conforms to the DIS-Policy Library profile and the policy rules JSON conforms to the policy rules schema.
-4. **Currency** — verify the current date falls within `Library.effectivePeriod`.
+4. **Currency** — verify the current date falls within `Library.effectivePeriod` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
 ### 3:5.10.4 Policy Compilation
 

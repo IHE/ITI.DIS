@@ -96,7 +96,7 @@ The `reversibilityMode` and `consistencyKey` are carried inside the policy artif
 
 `processingTarget` supports three delivery modes: by-reference (a Reference to a resource on a source server), by-value (resource content embedded directly in the request), and by-manifest (a URI referencing an NDJSON manifest for bulk data cohort jobs). By-value delivery is typical for synchronous single-patient workflows where the data volume is small. By-reference delivery is typical when the source data resides on an existing HL7 FHIR server. For bulk data cohort jobs, `processingTarget` SHALL reference an NDJSON manifest URI.
 
-When `payloadVersion` is HL7 FHIR R4, by-value `processingTarget` resources MAY be carried as native HL7 FHIR R4 resources within the `Parameters` envelope. When `payloadVersion` differs from the HL7 FHIR R4 protocol binding (i.e., R5 or R6), by-value resources SHALL NOT be embedded as native resources in the HL7 FHIR R4 transaction envelope. Instead, the content SHALL be packaged according to the version-safe packaging rules defined by the applicable payload binding (see [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module)). By-reference and by-manifest delivery modes are version-neutral — the payload version is identified at retrieval time, not at submission.
+When `payloadVersion` is HL7 FHIR R4, by-value `processingTarget` resources MAY be carried as native HL7 FHIR R4 resources within the `Parameters` envelope. When `payloadVersion` differs from the HL7 FHIR R4 protocol binding (i.e., R5 or R6), by-value resources SHALL NOT be embedded as native resources in the HL7 FHIR R4 transaction envelope. Instead, the content SHALL be packaged according to the version-safe packaging rules defined by the applicable payload binding (see [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module)). By-reference and by-manifest delivery modes are version-neutral — the payload version SHALL be declared at submission and verified against the retrieved content before processing.
 
 When the Asynchronous Job Processing Option (DIS-ASYNC-JOB) is supported, the Requester SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -117,7 +117,7 @@ The Manager SHALL obtain the policy content. When `policy.content` is present, t
 The Manager SHALL perform three-point policy content validation:
 
 1. **Schema** — verify that the policy conforms to the applicable policy schema.
-2. **Currency** — verify that the policy has not expired.
+2. **Currency** — verify that the policy has not expired or been revoked.
 3. **Integrity** — when `policy.content` is present, the JWS signature verification above fulfills this point. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
 
 If any point of the four-point validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
@@ -159,7 +159,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of the
 
 **401 Unauthorized / 403 Forbidden.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the authorization failure.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying which of the four policy validation points (signature, schema, currency, authorization consistency) failed.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying which of the four policy validation points (authorization consistency, integrity, schema conformance, currency) failed.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the server error.
 
