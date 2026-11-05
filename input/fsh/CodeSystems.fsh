@@ -71,18 +71,69 @@ Description: "Per-element outcome codes recorded in the DIS transformation summa
 CodeSystem: DisAction
 Id: dis-action
 Title: "DIS Transformation Action"
-Description: "Transformation action codes from the DIS Phase 1 core action family."
+Description: """
+Transformation action codes from the DIS Phase 1 core action family.
+Each action is a concrete, deterministic (except perturb) function with
+well-defined parameters and testable output. Actions are classified by
+their ISO/IEC 20889:2018 de-identification technique via the technique
+property. Action design is informed by RSNA CTP DICOM Anonymizer
+function patterns.
+"""
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-action"
 * ^status = #active
 * ^experimental = false
-* #suppress "Remove the element entirely from the resource"
-* #pseudonymize "Replace with a deterministic pseudonym derived from seed material and the input value"
-* #generalize "Reduce the precision of the value"
-* #date-shift "Shift all dates by a consistent per-patient offset derived from seed material"
-* #mask "Replace the value with a fixed mask string"
-* #redact-narrative "Remove or sanitize the narrative content"
-* #cryptographic-hash "Replace with a one-way cryptographic hash of the value"
-* #perturb "Add noise to a numeric value"
+* ^property[+].code = #technique
+* ^property[=].description = "ISO/IEC 20889:2018 de-identification technique implemented by this action"
+* ^property[=].type = #code
+* #remove "Remove the element entirely from the resource"
+* #remove ^property[+].code = #technique
+* #remove ^property[=].valueCode = #local-suppression
+* #replace "Replace the element's displayable content with a fixed value"
+* #replace ^property[+].code = #technique
+* #replace ^property[=].valueCode = #masking
+* #keep "Preserve the element unchanged in the de-identified output"
+* #hash "Replace the value with a cryptographic hash digest (keyed HMAC when scope present, unkeyed when absent)"
+* #hash ^property[+].code = #technique
+* #hash ^property[=].valueCode = #hashing
+* #truncate-date "Reduce date precision by truncating to year or year-month"
+* #truncate-date ^property[+].code = #technique
+* #truncate-date ^property[=].valueCode = #rounding
+* #date-shift "Shift all dates by a consistent per-patient offset derived from scope and seed material"
+* #date-shift ^property[+].code = #technique
+* #date-shift ^property[=].valueCode = #noise-addition
+* #round "Bin a numeric value to the nearest multiple of the step parameter"
+* #round ^property[+].code = #technique
+* #round ^property[=].valueCode = #rounding
+* #truncate "Keep the first N characters of a string value"
+* #truncate ^property[+].code = #technique
+* #truncate ^property[=].valueCode = #generalization
+* #perturb "Add noise to a numeric value (stochastic)"
+* #perturb ^property[+].code = #technique
+* #perturb ^property[=].valueCode = #noise-addition
+* #redact "Remove the narrative content from a resource"
+* #redact ^property[+].code = #technique
+* #redact ^property[=].valueCode = #local-suppression
+
+
+CodeSystem: DisIsoTechnique
+Id: dis-iso-technique
+Title: "ISO/IEC 20889 De-Identification Technique"
+Description: """
+De-identification technique codes from ISO/IEC 20889:2018 §9. Used as
+the technique classification for DIS transformation actions. Phase 1
+uses a subset; the full CodeSystem provides vocabulary for future phases.
+"""
+* ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-iso-technique"
+* ^status = #active
+* ^experimental = false
+* #local-suppression "Local suppression (ISO/IEC 20889 §9.3.3)"
+* #masking "Masking (ISO/IEC 20889 §9.3.2)"
+* #hashing "Hashing (ISO/IEC 20889 §9.4.3.3)"
+* #pseudonymization "Pseudonymization — independent of attributes (ISO/IEC 20889 §9.4.3.2)"
+* #generalization "Generalization (ISO/IEC 20889 §9.6)"
+* #rounding "Rounding (ISO/IEC 20889 §9.6.2)"
+* #noise-addition "Noise addition (ISO/IEC 20889 §9.7.2)"
+* #scrubbing "Scrubbing — free-form text de-identification (ISO/IEC 20889 Annex C.4)"
 
 
 // ── ValueSets ────────────────────────────────────────────────────────────────

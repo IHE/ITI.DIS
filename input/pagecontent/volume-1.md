@@ -1,5 +1,5 @@
 
-The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs referencing signed policies and data request authorizations, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
+The De-Identification Services (DIS) Profile defines a standardized, policy-governed workflow for de-identification of HL7 FHIR health data. DIS enables authorized requesters to submit de-identification jobs declaring approved de-identification policies and presenting data request authorization evidence, and to receive de-identified output with auditable provenance evidence. The profile supports both synchronous single-patient workflows (such as clinical pseudonymization before external lab ordering or cloud AI invocation) and asynchronous multi-patient cohort workflows (such as cross-border research studies or AI/ML training dataset preparation).
 
 DIS is a **Workflow** profile. It defines four actors, four transactions, a baseline policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after a data request has been approved — including approval of the de-identification policy to be applied — and the data request authorization has been issued. It does not standardize how a data request is submitted, reviewed, approved, issued, discovered, amended, revoked, or retired.
 
@@ -89,7 +89,7 @@ The De-Identification Requester submits de-identification jobs to the De-ID Mana
 
 In Phase 1, the De-Identification Requester is grouped with the De-Identified Data Receiver role -- the Requester receives output directly. No separate push-delivery path is standardized.
 
-Phase 1 does not standardize how the Requester obtains a signed de-identification policy. The Requester presents the policy in ITI-x1; the mechanism by which it was obtained is an implementation-defined concern. Implementers MAY use any mechanism that produces a valid signed policy, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
+Phase 1 does not standardize how the Requester obtains or discovers a de-identification policy. The Requester declares the approved policy by canonical URL and version in ITI-x1; the mechanism by which the policy was obtained is an implementation-defined concern. Implementers MAY use any mechanism that produces a valid policy, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
 <a name="de-id-manager"> </a>
 
@@ -103,9 +103,9 @@ The De-ID Manager is the sole actor authorized to retain identity mappings and r
 
 #### 1:PXX.1.1.3 De-Identifier
 
-The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives scoped, purpose-specific seeds as required by the assigned rules, produces transformations and evidence, and retains no identity-linking material after task termination. The De-Identifier derives transformation values, such as pseudonyms or date-shift offsets, according to the execution plan and its declared capabilities. It reports pseudonyms needed for reversibility to the Manager but does not retain the seed-to-identity mapping. The Manager supplies policy, scope, and seed material; it is not required to compute pseudonyms or date-shift offsets.
+The De-Identifier executes assigned de-identification tasks received via ITI-x3. It is stateless with respect to reversibility -- it receives scoped, purpose-specific seeds as required by the assigned rules, produces transformations and evidence, and retains no identity-linking material after task termination. The De-Identifier derives transformation values, such as hash-based pseudonyms or date-shift offsets, according to the execution plan and its declared capabilities. It reports pseudonyms needed for reversibility to the Manager but does not retain the seed-to-identity mapping. The Manager supplies policy, scope, and seed material; it is not required to compute pseudonyms or date-shift offsets.
 
-A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core` — the base set of transformation actions defined in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module), including suppression, pseudonymization, generalization, date shifting, masking, narrative redaction, cryptographic hashing, and perturbation), supported transformation parameter inputs, and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
+A Phase 1 De-Identifier SHALL declare its capabilities, including supported payload families (at least `fhir` for DIS-FHIR-Payload), supported action families (`core` — the base set of transformation actions defined in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module) and classified per ISO/IEC 20889:2018, including element removal, value replacement, hashing, date truncation, date shifting, numeric rounding, string truncation, perturbation, and narrative redaction), supported transformation parameter inputs, and derivation methods. Acceptance of precomputed pseudonyms or date-shift offsets is not mandatory. The De-ID Manager SHALL verify compatibility with the De-Identifier's declared capabilities before dispatching tasks via ITI-x3 and SHALL NOT dispatch an incompatible task.
 
 <a name="integrated-de-id-manager-de-identifier"> </a>
 
@@ -127,7 +127,7 @@ The transactions in this profile are summarized in the sections below.
 
 #### 1:PXX.1.2.1 Submit De-Identification Job [ITI-x1]
 
-This transaction is used to submit a de-identification job with evidence of an approved data request and the approved signed policy. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
+This transaction is used to submit a de-identification job with evidence of an approved data request, declaring the approved de-identification policy. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
 
 For more details see the detailed [transaction description](volume-2.html#23x1-submit-de-identification-job-iti-x1).
 
@@ -308,9 +308,29 @@ Every ITI-x1 request declares the approved policy by canonical URL and version. 
 
 A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same four-point validation. Both are approved by the joint privacy team.
 
-**RuleSets and Staged Execution.** DIS organizes de-identification rules into ruleSets -- named groups of rules with shared data-semantic character. A policy contains one or more ruleSets. Optionally, a policy may declare stages that reference ruleSet IDs to define execution ordering and trust isolation boundaries. When stages are declared, a preliminary stage typically handles direct identifiers (pseudonymization, suppression), and an advanced stage applies policy-specified record-level rules to quasi-identifiers. The De-ID Manager dispatches one ITI-x3 task per ruleSet, grouped by stage ordering when stages are present. Each De-Identifier sees only its assigned ruleSet(s), enforcing trust isolation between stages.
+**RuleSets and Staged Execution.** DIS organizes de-identification rules into ruleSets -- named groups of rules with shared data-semantic character. A policy contains one or more ruleSets. Optionally, a policy may declare stages that reference ruleSet IDs to define execution ordering and trust isolation boundaries. When stages are declared, a preliminary stage typically handles direct identifiers (hashing, removal), and an advanced stage applies policy-specified record-level rules to quasi-identifiers. The De-ID Manager dispatches one ITI-x3 task per ruleSet, grouped by stage ordering when stages are present. Each De-Identifier sees only its assigned ruleSet(s), enforcing trust isolation between stages.
 
-**Phase 1 Transformation Scope.** Phase 1 excludes dataset- or database-level de-identification actions, including small-cell handling, frequency-based rare-condition suppression, and generalization or other transformations requiring statistics computed across the cohort. Multi-patient cohort processing remains supported for applying record-level rules with policy-specified parameters. Staged execution does not extend this action scope. Dataset-level statistical disclosure control is deferred to a future phase; completing a Phase 1 workflow does not establish that any separately required dataset-level disclosure criteria have been met.
+**De-Identification Technique Classification.** DIS transformation actions are classified per ISO/IEC 20889:2018 *Privacy enhancing data de-identification terminology and classification of techniques*. Each DIS action code carries an ISO/IEC 20889 `technique` attribute tracing the action to its §9 classification. DIS actions are concrete operational instructions (what the De-Identifier does); ISO techniques are the classification framework. Action design is informed by the RSNA CTP DICOM Anonymizer function patterns. Table 1:PXX.4-2 maps Phase 1 actions to their ISO technique classification.
+
+<p id="tPXX.4-2" class="tableTitle"><strong>Table 1:PXX.4-2: Phase 1 Transformation Actions — ISO/IEC 20889 Classification</strong></p>
+
+| ISO/IEC 20889 §9 Category | ISO Technique | DIS Phase 1 Action | Function |
+|---|---|---|---|
+| §9.3 Suppression | Local suppression (§9.3.3) | `remove` | `(element) → ∅` |
+| §9.3 Suppression | Local suppression (§9.3.3) | `redact` | `(narrative) → ∅` |
+| §9.3 Suppression | Masking (§9.3.2) | `replace` | `(element, value) → value` |
+| §9.4 Pseudonymization | Hashing (§9.4.3.3) | `hash` | `(value, scope?, algorithm) → digest` |
+| §9.6 Generalization | Rounding (§9.6.2) | `truncate-date` | `(date, precision) → truncated` |
+| §9.6 Generalization | Rounding (§9.6.2) | `round` | `(value, step) → binned` |
+| §9.6 Generalization | Generalization (§9.6) | `truncate` | `(value, length) → shortened` |
+| §9.7 Randomization | Noise addition (§9.7.2) | `date-shift` | `(date, scope, maxDays) → shifted` |
+| §9.7 Randomization | Noise addition (§9.7.2) | `perturb` | `(value, dist, magnitude) → noisy` |
+| — | — | `keep` | `(element) → element` |
+{: .grid}
+
+ISO/IEC 20889 categories not covered in Phase 1 include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic/format-preserving/homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is also deferred to a future phase.
+
+**Phase 1 Transformation Scope.** Phase 1 excludes dataset- or database-level de-identification techniques, including small-cell handling, frequency-based rare-condition suppression, and transformations requiring statistics computed across the cohort (ISO/IEC 20889 §9.1 statistical tools, §9.7.4 microaggregation, §10 formal privacy measurement models). Multi-patient cohort processing remains supported for applying record-level rules with policy-specified parameters. Staged execution does not extend this action scope. Dataset-level statistical disclosure control is deferred to a future phase; completing a Phase 1 workflow does not establish that any separately required dataset-level disclosure criteria have been met.
 
 **Bulk Data Input and Output.** Phase 1 supports both input and output for asynchronous cohort jobs using manifests referencing NDJSON files. The Requester supplies a manifest referencing prepared input files; obtaining those files through source-system export is outside DIS. The Manager returns a manifest referencing de-identified output files together with evidence references. Processing remains limited to the Phase 1 action scope described above.
 
@@ -340,7 +360,7 @@ Content conformance is the foundation. An Integrated actor operating standalone 
 A payload binding defines at minimum:
 
 1. **Content model** -- how data elements within the format are identified and addressed (e.g., FHIRPath for HL7 FHIR resources, DICOM tag paths for DICOM objects, XPath or CDA document model paths for CDA documents)
-2. **Transformation action mapping** -- how the DIS core transformation actions (suppression, masking, pseudonymization, generalization, etc.) are applied to the format's data structures and element types
+2. **Transformation action mapping** -- how the DIS core transformation actions (removal, replacement, hashing, rounding, truncation, etc.) are applied to the format's data structures and element types
 3. **Data-plane access** -- how the processing payload is retrieved, carried, or referenced within the HL7 FHIR R4 protocol envelope (e.g., inline by-value, by-reference with authorized retrieval, or format-specific packaging such as DICOM Part 10 files or CDA XML documents)
 4. **Evidence mapping** -- how de-identification evidence and provenance are represented for the format, mapping format-specific outcomes to the DIS evidence baseline
 5. **Version identification** -- how the payload's format version is declared, validated, and matched against De-Identifier capabilities
@@ -699,7 +719,7 @@ Date-shift reference dates, offsets, and other protected transformation paramete
 
 ### 1:PXX.5.5 Trust Isolation Between Stages
 
-When the De-ID Manager compiles a staged execution plan, each De-Identifier receives only the execution plan for its assigned ruleSet(s) within a given stage. A De-Identifier performing the advanced stage (quasi-identifier generalization, suppression) does not have access to the preliminary stage's pseudonym-to-identity mappings. This stage-scoped dispatch provides defense-in-depth: compromise of a single De-Identifier does not expose the complete identity-to-pseudonym chain.
+When the De-ID Manager compiles a staged execution plan, each De-Identifier receives only the execution plan for its assigned ruleSet(s) within a given stage. A De-Identifier performing the advanced stage (quasi-identifier rounding, removal) does not have access to the preliminary stage's pseudonym-to-identity mappings. This stage-scoped dispatch provides defense-in-depth: compromise of a single De-Identifier does not expose the complete identity-to-pseudonym chain.
 
 The Integrated De-ID Manager/De-Identifier executes all ruleSets within a single actor. Inter-stage trust isolation through separate De-Identifiers is not available in this deployment model. Implementations requiring defense-in-depth through stage-level trust boundaries SHALL use the separate De-ID Manager and De-Identifier actors.
 

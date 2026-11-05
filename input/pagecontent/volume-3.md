@@ -239,79 +239,84 @@ Table 3:5.9.3-1 lists the Phase 1 core transformation actions.
 
 | Action Code | Description | Applicable HL7 FHIR Datatypes | Deterministic | Parameters |
 |-------------|-------------|-------------------------------|---------------|------------|
-| `suppress` | Remove the element entirely from the resource | Any element | Yes | None |
-| `pseudonymize` | Replace with a deterministic pseudonym derived from seed material and the input value | `Identifier`, `HumanName`, `string`, `id`, `Reference` | Yes (given same seed and input) | `algorithm` (default: `HMAC-SHA-256`), `outputFormat` |
-| `generalize` | Reduce the precision of the value | `date`, `dateTime`, `Address`, `Quantity`, `Age`, `integer`, `decimal` | Yes | `precision` (e.g., `year`, `month`, `state`, `country`) |
-| `date-shift` | Shift all dates by a consistent per-patient offset derived from seed material | `date`, `dateTime`, `instant`, `Period` | Yes (given same seed) | `maxOffsetDays` (maximum magnitude of the shift in days) |
-| `mask` | Replace the value with a fixed mask string | `string`, `HumanName`, `Address`, `ContactPoint`, `Identifier`, `uri` | Yes | `maskValue` (e.g., `"XXXXX"`, `"REDACTED"`) |
-| `redact-narrative` | Remove or sanitize the narrative content | `Narrative` | Yes | `mode` (`remove` or `sanitize`) |
-| `cryptographic-hash` | Replace with a one-way cryptographic hash of the value | `Identifier.value`, `string`, `id` | Yes | `algorithm` (default: `SHA-256`) |
+| `remove` | Remove the element entirely from the resource | Any element | Yes | None |
+| `replace` | Replace the element's displayable content with a fixed value | `string`, `HumanName`, `Address`, `ContactPoint`, `Identifier`, `uri` | Yes | `value` (replacement string; empty string is permitted) |
+| `keep` | Preserve the element unchanged in the de-identified output | Any element | Yes | None |
+| `hash` | Replace the value with a cryptographic hash digest | `Identifier`, `HumanName`, `string`, `id`, `Reference` | Yes | `scope` (optional — when present, keyed HMAC; when absent, unkeyed hash), `algorithm` (default: `HMAC-SHA-256` when scope present, `SHA-256` when absent), `outputFormat` (optional) |
+| `truncate-date` | Reduce date precision by truncating to the specified level | `date`, `dateTime` | Yes | `precision` (`year` or `year-month`) |
+| `date-shift` | Shift all dates by a consistent per-patient offset | `date`, `dateTime`, `instant`, `Period` | Yes (given same scope and patient) | `scope` (consistency scope identifier), `maxOffsetDays` (maximum magnitude of the shift in days) |
+| `round` | Bin a numeric value to the nearest multiple of the step | `Quantity`, `Age`, `integer`, `decimal` | Yes | `step` (rounding interval; e.g., `10` bins 57 → 60) |
+| `truncate` | Keep the first N characters of a string value | `string`, `Address.postalCode`, `Identifier.value` | Yes | `length` (number of characters to retain) |
 | `perturb` | Add noise to a numeric value | `Quantity.value`, `integer`, `decimal` | No (stochastic) | `distribution` (`uniform` or `gaussian`), `magnitude` |
+| `redact` | Remove the narrative content from a resource | `Narrative` (`DomainResource.text`) | Yes | None |
 {: .grid}
 
 #### 3:5.9.3.2 Action Definitions
 
-##### suppress
+##### remove
 
-The `suppress` action removes the targeted element and all its children from the resource. After suppression, the element SHALL NOT be present in the de-identified output. If the suppressed element is required by the HL7 FHIR base resource definition (cardinality 1..1 or 1..*), the De-Identifier SHALL reject the task with an OperationOutcome. Execution plans SHALL NOT target required elements with the `suppress` action.
+The `remove` action removes the targeted element and all its children from the resource. After removal, the element SHALL NOT be present in the de-identified output. If the targeted element is required by the HL7 FHIR base resource definition (cardinality 1..1 or 1..*), the De-Identifier SHALL reject the task with an OperationOutcome. Execution plans SHALL NOT target required elements with the `remove` action.
 
-##### pseudonymize
+##### replace
 
-The `pseudonymize` action replaces the targeted element's value with a deterministic pseudonym. The pseudonym is derived from the seed material provided by the De-ID Manager and the original input value using the specified algorithm. Given the same seed and input value, the same pseudonym SHALL be produced. This enables consistent pseudonymization across resources within the same consistency scope.
+The `replace` action replaces the targeted element's displayable content with the string specified by the `value` parameter. An empty string is permitted, producing an element that is present but contains no displayable content.
 
-For `HumanName` elements, the action replaces `family`, `given`, `prefix`, `suffix`, and `text` with pseudonymous values. The `use` sub-element is preserved. The `period` sub-element is suppressed because a name-validity period can reveal the timing of legal name changes.
+For `HumanName`, each sub-element (`family`, `given`, `text`) is replaced with the specified value. For `Address`, each sub-element (`text`, `line`, `city`, `district`, `state`, `postalCode`) is replaced with the specified value; `Address.country` is preserved. For `ContactPoint`, `ContactPoint.value` is replaced with the specified value; `ContactPoint.system` and `ContactPoint.use` are preserved.
 
-For `Identifier` elements, the action replaces `Identifier.value` with a pseudonymous value. `Identifier.system` SHALL be replaced with a DIS pseudonym system URI (e.g., `urn:oid:dis-pseudonym:<scope>`) to prevent collision with real identifier systems. `Identifier.type`, `Identifier.use`, and `Identifier.period` are preserved. `Identifier.assigner` SHALL be suppressed because the referenced Organization could identify the data subject's care context.
+##### keep
 
-For `Reference` elements, the action replaces the reference target with the pseudonymized identifier of the referenced resource, when that resource is within the processing target set. References to resources outside the processing target set are governed by the `references` semantic group rules.
+The `keep` action preserves the targeted element unchanged in the de-identified output. In first-match-wins evaluation, `keep` enables execution plans to express exceptions before general rules — for example, preserving a specific identifier before removing all identifiers:
 
-The pseudonym is not reversible from the output alone. Reversal requires access to the De-ID Manager's identity table and pseudonym index (see [§1:PXX.2.2](volume-1.html#1pxx22-reversible-pseudonymization-option)).
+```
+R01: target Patient.identifier[mrn]    action keep
+R02: target Patient.identifier         action remove
+```
 
-##### generalize
+##### hash
 
-The `generalize` action reduces the precision of the targeted element's value to the level specified by the `precision` parameter.
+The `hash` action replaces the targeted element's value with a cryptographic hash digest.
 
-For `date` and `dateTime` elements:
+When `scope` is present, the hash is keyed: the digest is computed using HMAC with the scope-derived seed material and the original value as inputs. Given the same scope and input value, the same digest SHALL be produced. This enables consistent hashing across resources within the same consistency scope.
+
+When `scope` is absent, the hash is unkeyed: the digest is computed directly over the original value using the specified algorithm. The same input value always produces the same digest regardless of context.
+
+The output is hex-encoded. The keyed hash is not reversible from the output alone; reversal requires access to the De-ID Manager's identity table and pseudonym index (see [§1:PXX.2.2](volume-1.html#1pxx22-reversible-pseudonymization-option)). The unkeyed hash is irreversible.
+
+For `HumanName` elements, the action replaces `family`, `given`, `prefix`, `suffix`, and `text` with hashed values. The `use` sub-element is preserved. The `period` sub-element is removed because a name-validity period can reveal the timing of legal name changes.
+
+For `Identifier` elements, the action replaces `Identifier.value` with the hash digest. `Identifier.system` SHALL be replaced with a DIS pseudonym system URI (e.g., `urn:oid:dis-pseudonym:<scope>`) to prevent collision with real identifier systems. `Identifier.type`, `Identifier.use`, and `Identifier.period` are preserved. `Identifier.assigner` SHALL be removed because the referenced Organization could identify the data subject's care context.
+
+For `Reference` elements, the action replaces the reference target with the hashed identifier of the referenced resource, when that resource is within the processing target set. References to resources outside the processing target set are governed by the `references` semantic group rules.
+
+##### truncate-date
+
+The `truncate-date` action reduces the precision of the targeted date value to the level specified by the `precision` parameter.
+
 - `precision: year` — retain only the year (e.g., `1985-03-15` → `1985`)
-- `precision: month` — retain year and month (e.g., `1985-03-15` → `1985-03`)
-
-For `Address` elements:
-- `precision: country` — retain only `Address.country`; suppress `Address.text`, `Address.line`, `Address.city`, `Address.district`, `Address.state`, `Address.postalCode`
-- `precision: state` — retain `Address.country` and `Address.state`; suppress `Address.text` and remaining sub-elements
-
-For `Quantity` and `Age` elements:
-- `precision` specifies a rounding interval (e.g., `precision: 5` rounds `Quantity.value` to the nearest 5)
-
-For `integer` and `decimal` elements:
-- `precision` specifies a rounding interval applied directly to the value
+- `precision: year-month` — retain year and month (e.g., `1985-03-15` → `1985-03`)
 
 ##### date-shift
 
-The `date-shift` action shifts the targeted date or time value by a per-patient offset. The offset is deterministically derived from the seed material and the patient identifier, ensuring that all dates for the same patient within the same consistency scope are shifted by the same offset. The offset magnitude SHALL NOT exceed the `maxOffsetDays` parameter. The direction (forward or backward) is determined by the derivation.
+The `date-shift` action shifts the targeted date or time value by a per-patient offset. The offset is deterministically derived from the scope-derived seed material and the patient identifier, ensuring that all dates for the same patient within the same consistency scope are shifted by the same offset. The offset magnitude SHALL NOT exceed the `maxOffsetDays` parameter. The direction (forward or backward) is determined by the derivation.
 
 Date shifting preserves temporal ordering and intervals between events for the same patient. The De-Identifier SHALL apply the same offset to all `date`, `dateTime`, `instant`, and `Period` elements for a given patient within a single task.
 
 For `Period` elements, both `Period.start` and `Period.end` are shifted by the same offset.
 
-##### mask
+##### round
 
-The `mask` action replaces the targeted element's displayable content with the value specified by the `maskValue` parameter.
+The `round` action bins a numeric value to the nearest multiple of the `step` parameter. The rounding centers at zero.
 
-For `HumanName`, each sub-element (`family`, `given`, `text`) is replaced with the mask value. For `Address`, each sub-element (`text`, `line`, `city`, `district`, `state`, `postalCode`) is replaced with the mask value; `Address.country` is preserved. For `ContactPoint`, `ContactPoint.value` is replaced with the mask value; `ContactPoint.system` and `ContactPoint.use` are preserved.
+- `round(57, step: 10)` → `60`
+- `round(23, step: 5)` → `25`
+- `round(82, step: 10)` → `80`
 
-##### redact-narrative
+##### truncate
 
-The `redact-narrative` action governs the `Narrative` element (`DomainResource.text`) of a resource.
+The `truncate` action retains only the first `length` characters of a string value, discarding the remainder.
 
-In `remove` mode, the De-Identifier SHALL set `Narrative.status` to `empty` and replace `Narrative.div` with an empty XHTML div element (`<div xmlns="http://www.w3.org/1999/xhtml"/>`) conforming to the HL7 FHIR Narrative datatype constraints.
-
-In `sanitize` mode, the De-Identifier SHALL scan the XHTML content for detected PHI patterns (names, identifiers, dates, addresses, contact information) and replace detected values with the corresponding pseudonymized or masked values produced by other rules in the execution plan. `Narrative.status` SHALL be set to `additional` to indicate that the narrative content has been modified and may no longer fully correspond to the structured data. Sanitization is best-effort; undetected PHI in narrative is an implementation limitation.
-
-##### cryptographic-hash
-
-The `cryptographic-hash` action replaces the targeted element's value with a one-way cryptographic hash. The hash is computed over the original value using the specified algorithm. The output is hex-encoded.
-
-Cryptographic hashing is not reversible. It is suitable for elements where deterministic linkage is needed but the original value is never required. The De-ID Manager SHALL NOT use this action when the policy requires reversibility for the targeted element.
+- `truncate("02139", length: 3)` → `"021"`
+- `truncate("SW1A 2AA", length: 4)` → `"SW1A"`
 
 ##### perturb
 
@@ -320,6 +325,10 @@ The `perturb` action adds noise to a numeric value. The noise is drawn from the 
 For `uniform` distribution, the noise is drawn uniformly from `[-magnitude, +magnitude]`. For `gaussian` distribution, the noise is drawn from a normal distribution with standard deviation equal to `magnitude`.
 
 The `perturb` action is stochastic and does not produce deterministic output. It SHALL NOT be used when cross-job consistency is required for the targeted element.
+
+##### redact
+
+The `redact` action removes the narrative content (`DomainResource.text`) from a resource. The De-Identifier SHALL set `Narrative.status` to `empty` and replace `Narrative.div` with an empty XHTML div element (`<div xmlns="http://www.w3.org/1999/xhtml"/>`) conforming to the HL7 FHIR Narrative datatype constraints.
 
 <a name="execution-plan-format"> </a>
 
@@ -367,13 +376,13 @@ Table 3:5.9.4-2 lists the elements of each rule in the execution plan.
 | `parameters` | 0..1 | object | Action-specific parameters as key-value pairs |
 {: .grid}
 
-Rules are evaluated in order. When multiple rules match the same element, the first matching rule applies and subsequent matching rules are skipped. This first-match-wins evaluation enables execution plans to specify exceptions before general rules (e.g., preserve a specific identifier before pseudonymizing all identifiers).
+Rules are evaluated in order. When multiple rules match the same element, the first matching rule applies and subsequent matching rules are skipped. This first-match-wins evaluation enables execution plans to specify exceptions before general rules (e.g., keep a specific identifier before removing all identifiers).
 
 Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths. Semantic group references (`@` prefix) SHALL have been expanded by the De-ID Manager during policy compilation. The presence of an unresolved `@` reference in a dispatched execution plan is a conformance error.
 
 #### 3:5.9.4.3 Execution Plan Example
 
-The following execution plan illustrates a single-ruleSet pseudonymization plan for Use Case 3 (Clinical Pathology Order). The plan pseudonymizes patient identifiers and names, suppresses address and telecom, date-shifts the birth date, redacts narrative content, and pseudonymizes subject references. Semantic group references have been expanded to concrete element paths during policy compilation.
+The following execution plan illustrates a single-ruleSet plan for Use Case 3 (Clinical Pathology Order). The plan hashes patient identifiers and names to scoped pseudonyms, removes address and telecom, date-shifts the birth date, redacts narrative content, and hashes subject references. Semantic group references have been expanded to concrete element paths during policy compilation.
 
 ```json
 {
@@ -384,8 +393,9 @@ The following execution plan illustrates a single-ruleSet pseudonymization plan 
     {
       "ruleId": "R01",
       "target": "Patient.identifier",
-      "action": "pseudonymize",
+      "action": "hash",
       "parameters": {
+        "scope": "${consistencyKey}",
         "algorithm": "HMAC-SHA-256",
         "outputFormat": "urn:oid:dis-pseudonym:${consistencyKey}"
       }
@@ -393,63 +403,61 @@ The following execution plan illustrates a single-ruleSet pseudonymization plan 
     {
       "ruleId": "R02",
       "target": "Patient.name",
-      "action": "pseudonymize",
+      "action": "hash",
       "parameters": {
+        "scope": "${consistencyKey}",
         "algorithm": "HMAC-SHA-256"
       }
     },
     {
       "ruleId": "R03",
       "target": "Patient.address",
-      "action": "suppress"
+      "action": "remove"
     },
     {
       "ruleId": "R04",
       "target": "Patient.telecom",
-      "action": "suppress"
+      "action": "remove"
     },
     {
       "ruleId": "R05",
       "target": "Patient.birthDate",
       "action": "date-shift",
       "parameters": {
+        "scope": "${consistencyKey}",
         "maxOffsetDays": 30
       }
     },
     {
       "ruleId": "R06",
       "target": "Patient.photo",
-      "action": "suppress"
+      "action": "remove"
     },
     {
       "ruleId": "R07",
       "target": "Patient.text",
-      "action": "redact-narrative",
-      "parameters": {
-        "mode": "remove"
-      }
+      "action": "redact"
     },
     {
       "ruleId": "R08",
       "target": "Observation.text",
-      "action": "redact-narrative",
-      "parameters": {
-        "mode": "remove"
-      }
+      "action": "redact"
     },
     {
       "ruleId": "R09",
       "target": "Observation.subject",
-      "action": "pseudonymize",
+      "action": "hash",
       "parameters": {
+        "scope": "${consistencyKey}",
         "algorithm": "HMAC-SHA-256"
       }
     },
     {
       "ruleId": "R10",
       "target": "DiagnosticReport.subject",
-      "action": "pseudonymize",
+      "action": "hash",
       "parameters": {
+        "scope": "${consistencyKey}",
         "algorithm": "HMAC-SHA-256"
       }
     }
@@ -566,7 +574,7 @@ The following Provenance resource illustrates the evidence produced for Use Case
           "url": "entry",
           "extension": [
             { "url": "targetPath", "valueString": "Patient.identifier" },
-            { "url": "action", "valueCode": "pseudonymize" },
+            { "url": "action", "valueCode": "hash" },
             { "url": "outcome", "valueCode": "applied" },
             { "url": "ruleId", "valueString": "R01" }
           ]
@@ -575,7 +583,7 @@ The following Provenance resource illustrates the evidence produced for Use Case
           "url": "entry",
           "extension": [
             { "url": "targetPath", "valueString": "Patient.name" },
-            { "url": "action", "valueCode": "pseudonymize" },
+            { "url": "action", "valueCode": "hash" },
             { "url": "outcome", "valueCode": "applied" },
             { "url": "ruleId", "valueString": "R02" }
           ]
@@ -584,7 +592,7 @@ The following Provenance resource illustrates the evidence produced for Use Case
           "url": "entry",
           "extension": [
             { "url": "targetPath", "valueString": "Patient.address" },
-            { "url": "action", "valueCode": "suppress" },
+            { "url": "action", "valueCode": "remove" },
             { "url": "outcome", "valueCode": "applied" },
             { "url": "ruleId", "valueString": "R03" }
           ]
@@ -593,7 +601,7 @@ The following Provenance resource illustrates the evidence produced for Use Case
           "url": "entry",
           "extension": [
             { "url": "targetPath", "valueString": "Patient.telecom" },
-            { "url": "action", "valueCode": "suppress" },
+            { "url": "action", "valueCode": "remove" },
             { "url": "outcome", "valueCode": "applied" },
             { "url": "ruleId", "valueString": "R04" }
           ]
@@ -611,7 +619,7 @@ The following Provenance resource illustrates the evidence produced for Use Case
           "url": "entry",
           "extension": [
             { "url": "targetPath", "valueString": "Patient.photo" },
-            { "url": "action", "valueCode": "suppress" },
+            { "url": "action", "valueCode": "remove" },
             { "url": "outcome", "valueCode": "applied" },
             { "url": "ruleId", "valueString": "R06" }
           ]
@@ -836,7 +844,7 @@ The following Semantic-Level policy illustrates a single-ruleSet pseudonymizatio
         {
           "ruleId": "P01",
           "target": "@subject-identifiers",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
@@ -844,7 +852,7 @@ The following Semantic-Level policy illustrates a single-ruleSet pseudonymizatio
         {
           "ruleId": "P02",
           "target": "@subject-demographics",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "P03",
@@ -857,20 +865,17 @@ The following Semantic-Level policy illustrates a single-ruleSet pseudonymizatio
         {
           "ruleId": "P04",
           "target": "@contact-information",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "P05",
           "target": "@narrative",
-          "action": "redact-narrative",
-          "parameters": {
-            "mode": "remove"
-          }
+          "action": "redact"
         },
         {
           "ruleId": "P06",
           "target": "@references",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
@@ -881,7 +886,7 @@ The following Semantic-Level policy illustrates a single-ruleSet pseudonymizatio
 }
 ```
 
-The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemiological Study) with two ruleSets organized into two stages. The preliminary stage pseudonymizes direct identifiers; the advanced stage applies record-level suppression and generalization.
+The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemiological Study) with two ruleSets organized into two stages. The preliminary stage hashes direct identifiers to scoped pseudonyms; the advanced stage applies record-level removal, rounding, and truncation of quasi-identifiers.
 
 ```json
 {
@@ -892,12 +897,12 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
   "ruleSets": [
     {
       "ruleSetId": "direct-identifiers",
-      "description": "Irreversible pseudonymization of direct identifiers",
+      "description": "Irreversible hashing of direct identifiers",
       "rules": [
         {
           "ruleId": "P01",
           "target": "@subject-identifiers",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
@@ -905,20 +910,17 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
         {
           "ruleId": "P02",
           "target": "@contact-information",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "P03",
           "target": "@narrative",
-          "action": "redact-narrative",
-          "parameters": {
-            "mode": "remove"
-          }
+          "action": "redact"
         },
         {
           "ruleId": "P04",
           "target": "@references",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
@@ -927,12 +929,12 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
     },
     {
       "ruleSetId": "quasi-identifiers",
-      "description": "Record-level suppression and generalization of quasi-identifiers",
+      "description": "Record-level removal and truncation of quasi-identifiers",
       "rules": [
         {
           "ruleId": "A01",
           "target": "@dates",
-          "action": "generalize",
+          "action": "truncate-date",
           "parameters": {
             "precision": "year"
           }
@@ -940,20 +942,20 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
         {
           "ruleId": "A02",
           "target": "@subject-demographics",
-          "action": "generalize",
+          "action": "truncate",
           "parameters": {
-            "precision": "state"
+            "length": 3
           }
         },
         {
           "ruleId": "A03",
           "target": "@provider-identifiers",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "A04",
           "target": "@device-identifiers",
-          "action": "suppress"
+          "action": "remove"
         }
       ]
     }
@@ -966,7 +968,7 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
     },
     {
       "stageId": "advanced",
-      "description": "Quasi-identifier generalization and suppression",
+      "description": "Quasi-identifier truncation and removal",
       "ruleSetRefs": ["quasi-identifiers"]
     }
   ]
@@ -991,7 +993,7 @@ The following Syntax-Level policy illustrates the same Use Case 3 pseudonymizati
         {
           "ruleId": "P01",
           "target": "Patient.identifier",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
@@ -999,7 +1001,7 @@ The following Syntax-Level policy illustrates the same Use Case 3 pseudonymizati
         {
           "ruleId": "P02",
           "target": "Patient.name",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
@@ -1007,12 +1009,12 @@ The following Syntax-Level policy illustrates the same Use Case 3 pseudonymizati
         {
           "ruleId": "P03",
           "target": "Patient.address",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "P04",
           "target": "Patient.telecom",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "P05",
@@ -1025,20 +1027,17 @@ The following Syntax-Level policy illustrates the same Use Case 3 pseudonymizati
         {
           "ruleId": "P06",
           "target": "Patient.photo",
-          "action": "suppress"
+          "action": "remove"
         },
         {
           "ruleId": "P07",
           "target": "Patient.text",
-          "action": "redact-narrative",
-          "parameters": {
-            "mode": "remove"
-          }
+          "action": "redact"
         },
         {
           "ruleId": "P08",
           "target": "Observation.subject",
-          "action": "pseudonymize",
+          "action": "hash",
           "parameters": {
             "algorithm": "HMAC-SHA-256"
           }
