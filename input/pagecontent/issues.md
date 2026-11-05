@@ -1,26 +1,19 @@
-
 ## Significant Changes
 
-### Significant Changes from Revision x.x
-
-- change 1
-- change 2
-- etc.
+The current drafting baseline is [Volume 1](volume-1.html). Supporting content reflects four actors, four transactions, DIS-Policy and DIS-FHIR-Payload content modules, the nine core transformation actions, and independently versioned R4/R5/R6 payloads over an R4 protocol binding. R6 support remains provisional as described in Volume 1.
 
 ## Issues
 
 ### Submit an Issue
-IHE welcomes [New Issues](https://github.com/IHE/applicable repo.IRA/issues/new/choose) from the GitHub community. 
-For those without GitHub access, issues may be submitted to the [applicable domain Public Comment form](https://www.ihe.net/applicable domain_Public_Comments/).
 
-As issues are submitted they will be managed on the [applicable repo GitHub Issues](https://github.com/IHE/applicable repo./issues), where discussion and workarounds may be found. These issues, when critical, will be processed using the normal [IHE Change Proposal](https://wiki.ihe.net/index.php/Category:CPs) management and balloting. 
-It is important to note that as soon as a Change Proposal is approved, it carries the same weight as a published Implementation Guide (i.e., it is testable at an [IHE Connectathon](https://www.ihe.net/participate/connectathon/) from the time it is approved, even if it will not be integrated until several months later).
-
+Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://github.com/IHE/ITI.DIS/issues). The repository development work plan records drafting packages and dependencies; it does not establish that all bindings or tests are complete.
 
 ### Open Issues
 
-- ToDo_001: this is open issue 1
+- **Data Recipient actor and push delivery:** Volume 1 UC-5 asks the committee whether to add these to Phase 1. The current baseline groups receiving with the Requester and permits standalone Integrated processing without external DIS transactions. The proposal is not an adopted transaction or actor requirement.
+- **Binding completion:** exact Bulk Data manifest fields, retrieval/expiry behavior and evidence/error packaging require completion in the payload and transaction bindings, as identified in Volume 1.
+- **Conformance artifacts:** formal schemas, actor CapabilityStatements and detailed test procedures require completion and validation against the current baseline.
 
 ### Closed Issues
 
-- ToDo_002: this is closed issue 2
+No closed-issue history is recorded on this page. See GitHub for issue state and discussion.

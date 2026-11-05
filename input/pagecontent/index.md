@@ -1,5 +1,7 @@
 
-The De-Identification Services (DIS) Profile provides a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. It defines three actors -- De-ID Manager, De-Identifier, and De-Identification Requester -- four transactions (ITI-x1 Submit Job, ITI-x3 Submit Task, ITI-x4 Retrieve Job Output, and ITI-x7 Retrieve Task Output), a composable policy model, a minimum de-identification evidence baseline, and a FHIR payload binding (DIS-FHIR1).
+The De-Identification Services (DIS) Profile provides a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. It defines four actors -- De-ID Manager, De-Identifier, De-Identification Requester, and Integrated De-ID Manager/De-Identifier -- four transactions (ITI-x1 Submit Job, ITI-x3 Submit Task, ITI-x4 Retrieve Job Output, and ITI-x7 Retrieve Task Output), a baseline policy execution model with flat, ordered rules, a minimum de-identification evidence baseline, and a FHIR payload binding (DIS-FHIR-Payload).
+
+The Integrated actor may operate standalone with content conformance only, or support external jobs through ITI-x1 and, when DIS-ASYNC-JOB is declared, ITI-x4. DIS uses an R4 protocol binding and independently versioned R4/R5/R6 payloads; R6 support is provisional as described in Volume 1. Full composable execution plans are deferred.
 
 DIS addresses the lack of a standard, interoperable workflow for how de-identification is requested, executed, validated, and delivered. It provides a governed, auditable path from authorization to delivery -- reducing reliance on manual processes and local one-off agreements. DIS starts after data request authorization has been established; it does not standardize permit lifecycle or data-request authorization.
 
@@ -23,13 +25,14 @@ This guide is organized into the following sections:
    1. [Security Considerations](volume-1.html#security-considerations)
    1. [Cross Profile Considerations](volume-1.html#other-grouping)
 2. Volume 2: Transaction Detail
-   1. [Submit Job \[ITI-x1\]](ITI-x1.html)
-   1. [Submit Task \[ITI-x3\]](ITI-x3.html)
-   1. [Retrieve Job Output \[ITI-x4\]](ITI-x4.html)
-   1. [Retrieve Task Output \[ITI-x7\]](ITI-x7.html)
+   1. [Submit Job \[ITI-x1\]](volume-2.html#23x1-submit-de-identification-job-iti-x1)
+   1. [Submit Task \[ITI-x3\]](volume-2.html#23x3-submit-de-identification-task-iti-x3)
+   1. [Retrieve Job Output \[ITI-x4\]](volume-2.html#23x4-retrieve-job-output-iti-x4)
+   1. [Retrieve Task Output \[ITI-x7\]](volume-2.html#23x7-retrieve-task-output-iti-x7)
 3. Volume 3: Content Modules
-   1. [DIS-EXE1 Execution Plan](domain-ZZ.html)
-   1. [De-ID Evidence](domain-ZZ.html#de-id-evidence)
+   1. [DIS-FHIR-Payload and Baseline Execution Plan](volume-3.html#fhir-payload-content-module)
+   1. [De-ID Evidence](volume-3.html#3595-evidence-baseline)
+   1. [DIS-Policy](volume-3.html#policy-content-module)
 4. Other
    1. [Changes to Other IHE Specifications](other.html)
    1. [Download and Analysis](download.html)
