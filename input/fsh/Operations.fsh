@@ -139,7 +139,7 @@ Title: "Submit De-Identification Task"
 Description: """
 The Submit De-Identification Task operation is invoked by the De-ID Manager to
 dispatch a single ruleSet execution to a De-Identifier. The Manager provides
-the compiled execution plan, processing targets, seed material, and operational
+the compiled execution plan, processing targets, and operational
 parameters derived from the validated policy.
 """
 Usage: #definition
@@ -159,7 +159,7 @@ Usage: #definition
 * parameter[=].max = "1"
 * parameter[=].documentation = "Reference to the Library resource containing the compiled execution plan rules for this ruleSet."
 * parameter[=].type = #Reference
-// targetProfile would be DIS-ExecutionPlan
+* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
 
 // ── Input: processingTarget ──
 * parameter[+].name = #processingTarget
@@ -210,14 +210,6 @@ Usage: #definition
 * parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
 * parameter[=].documentation = "Reference to an identified DIS Lookup Table DocumentReference. Resolve and pin its version-specific identifier and exact JSON content before processing. For tasks, expose only assigned entries through a protected scoped document. Missing entries fail the job without fallback or partial output."
 
-// ── Input: seedMaterial ──
-* parameter[+].name = #seedMaterial
-* parameter[=].use = #in
-* parameter[=].min = 0
-* parameter[=].max = "1"
-* parameter[=].documentation = "Protected JSON subject/resource context with scope, keyVersion, subjectId associations and optional 32-byte seeds; Volume 3 section 3:PXX.1.3.4. Required for baseline derivation and lookup-backed resource rewriting."
-* parameter[=].type = #Binary
-
 // ── Input: reversibilityMode ──
 * parameter[+].name = #reversibilityMode
 * parameter[=].use = #in
@@ -234,13 +226,14 @@ Usage: #definition
 * parameter[=].documentation = "De-identified resource(s) produced for this ruleSet."
 * parameter[=].type = #Resource
 
-// ── Output: mappingReport (Manager only) ──
-* parameter[+].name = #mappingReport
+// ── Output: generatedLookupTable (Manager only) ──
+* parameter[+].name = #generatedLookupTable
 * parameter[=].use = #out
 * parameter[=].min = 0
 * parameter[=].max = "1"
-* parameter[=].type = #Binary
-* parameter[=].documentation = "Protected generated reverse-mapping associations for the Manager; required for reversible Manager-managed derivation and forbidden for irreversible jobs. Never forwarded to recipients. JSON binding in Volume 3 section 3:PXX.1.3.5."
+* parameter[=].type = #DocumentReference
+* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
+* parameter[=].documentation = "Inline DIS Lookup Table returned for reversible Manager-managed patient identifier hashing. Protected output to the Manager."
 
 // ── Output: evidence ──
 * parameter[+].name = #evidence

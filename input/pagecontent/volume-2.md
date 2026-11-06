@@ -124,6 +124,8 @@ The Manager SHALL verify that each processing target reference in the request is
 
 When the policy is authored at the Semantic-Level (using semantic group references), the Manager SHALL compile the validated policy into a payload-specific execution plan for the applicable payload binding before dispatching tasks. When the policy is authored at the Syntax-Level (using concrete element paths for a specific payload family), the Manager SHALL validate that all rule targets are valid paths for the declared payload family and version, then package the rules as an execution plan for dispatch.
 
+The Manager SHALL verify that the policy's linkage scope is authorized for the job and resolve it before dispatch. For a job-level scope it SHALL bind a unique scope identifier to the job and reuse it on retries. A supplied job-level table may provide that identifier when it can be bound to this job only. The Manager SHALL copy the resolved scope into each salted hash rule and check a supplied table against that scope.
+
 The Manager SHALL dispatch de-identification tasks to one or more De-Identifiers via ITI-x3, or execute the plan internally if it is an Integrated De-ID Manager/De-Identifier. The Manager SHALL NOT dispatch a task to a De-Identifier whose declared capabilities are incompatible with the task's payload binding or required transformation actions.
 
 In synchronous mode, the Manager SHALL return de-identified output and provenance evidence in the response upon completion of all tasks.
@@ -193,7 +195,7 @@ The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manag
 
 ### 2:3.x3.1 Scope
 
-The Submit De-Identification Task transaction is used by the De-ID Manager to dispatch a de-identification task for one ruleSet to a De-Identifier. Each task conveys the compiled execution plan rules for one ruleSet, a reference to the processing target, and any scoped seed material required for the assigned transformations. The De-Identifier verifies capability compatibility, applies the execution plan rules to the processing target, produces de-identified output conforming to the declared payload binding and version, and returns the output with provenance evidence. The transaction supports both synchronous and asynchronous response modes. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
+The Submit De-Identification Task transaction is used by the De-ID Manager to dispatch a de-identification task for one ruleSet to a De-Identifier. Each task conveys the compiled execution plan rules for one ruleSet, a reference to the processing target, and a protected lookup-table reference when the assigned rules require one. The De-Identifier verifies capability compatibility, applies the execution plan rules to the processing target, produces de-identified output conforming to the declared payload binding and version, and returns the output with provenance evidence. The transaction supports both synchronous and asynchronous response modes. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
 
 ### 2:3.x3.2 Actors Roles
 
@@ -203,7 +205,7 @@ Table 2:3.x3.2-1 lists the actors and their roles in this transaction.
 
 | Actor | Role |
 |-------|------|
-| [De-ID Manager](volume-1.html#de-id-manager) | Initiates the task dispatch, providing compiled execution plan rules, a processing target reference, and scoped seed material |
+| [De-ID Manager](volume-1.html#de-id-manager) | Initiates the task dispatch, providing compiled execution plan rules, a processing target reference, and a lookup-table reference when required |
 | [De-Identifier](volume-1.html#de-identifier) | Receives the task, verifies capability compatibility, applies the execution plan rules to the processing target, and returns de-identified output and evidence |
 {: .grid}
 
@@ -248,15 +250,12 @@ The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x3.4.1
 | `payloadBinding` | 1..1 | code | Payload binding identifier |
 | `payloadVersion` | 1..1 | code | HL7 FHIR version of the processing payload |
 | `lookupTable` | 0..1 | Reference(DocumentReference) | Protected identified table restricted to the task; use a derived document for a subset, with its own identifiers and pinned content (Volume 3 §3:PXX.1.7). |
-| `seedMaterial` | 0..1 | Binary | Protected subject/resource context and optional 32-byte derivation seeds; application/json per Volume 3 §3:PXX.1.3.4. Required for baseline patient/resource derivation and lookup-backed resource rewriting. |
 | `reversibilityMode` | 1..1 | code | `irreversible` or `reversible`; derived from the `policy` validated in ITI-x1 |
 {: .grid}
 
 The `reversibilityMode` in ITI-x3 is derived from the `policy` validated in ITI-x1. The De-ID Manager passes the policy-determined mode to the De-Identifier as an operational instruction; the De-Identifier does not independently select the mode.
 
 When using `lookupTable`, the Manager SHALL dispatch only a protected reference to a document with the entries needed for the assigned task. If the source contains additional entries, the Manager SHALL create a [task-scoped lookup document](volume-3.html#3pxx17-reversible-lookup-table) and track its correlation to the pinned source. The De-Identifier's credentials SHALL NOT grant access to the unrestricted table in that case. The Manager SHALL delete derived task artifacts at termination unless retention is explicitly authorized.
-
-When `seedMaterial` is present, it is transmitted over the TLS-protected channel. The De-Identifier SHALL delete all seed material at task termination, regardless of whether the task succeeds or fails.
 
 When the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported, the Manager SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -270,17 +269,17 @@ Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL
 
 The De-Identifier SHALL verify that the task's payload binding and version are within its declared capabilities. If the task specifies a payload binding or version that the De-Identifier does not support, the De-Identifier SHALL reject the task with an OperationOutcome.
 
-The De-Identifier performs clinical-payload pseudonymization: it SHALL generate patient pseudonyms under the declared derivation contract or apply supplied task-scoped mappings and update related references consistently. The Manager controls mappings, authorization and seeds; it does not perform payload transformations in the distributed model. Unknown derivation methods or ambiguous subject-to-seed associations SHALL fail the task.
+The De-Identifier SHALL apply supplied patient mappings or generate patient pseudonyms according to the execution plan. It SHALL verify that the decoded plan conforms to the [execution plan binding](volume-3.html#3pxx142-execution-plan-json-structure) and that its ruleSet, payload binding and payload version agree with the task. It SHALL obtain and validate the deployment-provisioned salt for each salted hash rule before transformation. A missing or invalid salt SHALL fail the task without partial output.
 
 When `lookupTable` is present, the De-Identifier SHALL resolve and validate the assigned protected DocumentReference and pin its exact content as specified in Volume 3 §3:PXX.1.7. Retrieval or pinning failure SHALL fail the task. It SHALL use only its supplied entries for lookup-backed replacement, SHALL fail a task with a missing required entry without returning partial output, and SHALL delete all task-local copies at task termination. It SHALL NOT delete the authoritative source repository document. It SHALL NOT generate fallback mappings. The Manager SHALL withhold all job output on such a task failure.
 
 The De-Identifier SHALL apply the execution plan rules to the processing target in full. Partial execution is not permitted. If any rule cannot be applied, the De-Identifier SHALL reject the task with an OperationOutcome and SHALL NOT produce partial output.
 
-The De-Identifier SHALL produce de-identified output conforming to the declared payload binding and version. Reversible Manager-managed derivation SHALL also return a protected mappingReport as specified in Volume 3 §3:PXX.1.3.5. The Manager SHALL persist these associations before job release and SHALL exclude the report from all recipient-facing responses.
+The De-Identifier SHALL produce de-identified output conforming to the declared payload binding and version. When a reversible Manager-managed task generates patient identifier mappings, the De-Identifier SHALL return a protected `generatedLookupTable` under Volume 3 §3:PXX.1.7. An irreversible task SHALL NOT return a generated lookup table. The Manager SHALL validate and retain generated mappings before job release and exclude them from recipient-facing responses.
 
 The De-Identifier SHALL produce provenance evidence containing at minimum the nine baseline evidence elements defined by the applicable payload binding (e.g., DIS-FHIR-Payload). Evidence SHALL faithfully record the transformation decisions made during task execution.
 
-The De-Identifier SHALL use received seed material only for the assigned task. The De-Identifier SHALL delete all seed material at task termination, regardless of whether the task succeeds or fails. The De-Identifier SHALL NOT retain any identity-linking material after task termination.
+The De-Identifier SHALL delete task-local copies of identity-linking material at termination. Deployment-managed salts follow the authorized scope lifecycle.
 
 In synchronous mode, the De-Identifier SHALL return de-identified output and evidence in the response upon task completion.
 
@@ -303,7 +302,7 @@ The De-Identifier returns one of the HTTP status codes described below.
 | Parameter | Cardinality | Type | Description |
 |-----------|-------------|------|-------------|
 | `output` | 1..1 | Resource or Bundle | De-identified resource(s) produced for this ruleSet |
-| `mappingReport` | 0..1 | Binary | Protected reverse-mapping associations; required for reversible Manager-managed derivation, forbidden for irreversible jobs. Never forwarded to recipients. |
+| `generatedLookupTable` | 0..1 | DocumentReference | Inline DIS-LookupTable with generated patient identifier mappings. Required when reversible Manager-managed hashing generates patient mappings. Protected output to the Manager. |
 | `evidence` | 1..* | Provenance | HL7 FHIR R4 Provenance resources recording transformation decisions for this task, including the nine baseline evidence elements |
 | `validationStatus` | 1..1 | code | Per-task validation outcome |
 {: .grid}
@@ -322,7 +321,7 @@ The De-Identifier returns one of the HTTP status codes described below.
 
 Upon receipt of a Submit De-Identification Task Response, the De-ID Manager SHALL inspect the response status.
 
-In synchronous mode, on a successful response, the Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester. On an error response, the Manager SHALL inspect the OperationOutcome, SHALL NOT incorporate partial output into the job result, and SHALL report the failure to the Requester via the ITI-x1 response.
+In synchronous mode, on a successful response, the Manager SHALL validate and retain any required protected mapping output before release. The Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester. On an error response, the Manager SHALL inspect the OperationOutcome, SHALL NOT incorporate partial output into the job result, and SHALL report the failure to the Requester via the ITI-x1 response.
 
 In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager SHALL retain the task handle and SHALL proceed to retrieve output using ITI-x7.
 
@@ -338,7 +337,7 @@ See [DIS Security Considerations](volume-1.html#security-considerations).
 
 #### 2:3.x3.6.1 Security Audit Considerations
 
-The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x3 transaction. The audit event SHALL identify the Manager, the De-Identifier, the ruleSet identifier, the payload binding and version, and the task outcome. The stage identifier SHALL also be recorded when the source policy declares staged execution. The audit event SHALL NOT include seed material or other protected transformation parameters. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
+The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x3 transaction. The audit event SHALL identify the Manager, the De-Identifier, the ruleSet identifier, the payload binding and version, and the task outcome. The stage identifier SHALL also be recorded when the source policy declares staged execution. The audit event SHALL NOT include confidential salts or other protected transformation material. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
 
 <a name="23x4-retrieve-job-output-iti-x4"> </a>
 
@@ -498,11 +497,9 @@ Upon receipt of a Retrieve Task Output Request, the De-Identifier SHALL return t
 
 When the task is still in progress, the De-Identifier SHALL indicate in-progress status and SHOULD include retry-after guidance.
 
-When the task is complete, the De-Identifier SHALL return the de-identified output and provenance evidence, plus a protected mappingReport when required for reversible Manager-managed derivation. The report is for the Manager only and SHALL NOT be forwarded in job output.
+When the task is complete, the De-Identifier SHALL return the de-identified output and provenance evidence, and, when required by the ITI-x3 output rules, the protected `generatedLookupTable` for the Manager.
 
 When the task has failed, the De-Identifier SHALL return error information via OperationOutcome. The De-Identifier SHALL NOT release partial output.
-
-The De-Identifier SHALL delete all seed material at task termination, regardless of whether the task completes successfully or fails.
 
 #### 2:3.x7.4.2 Retrieve Task Output Response Message
 
@@ -516,7 +513,7 @@ The De-Identifier returns one of three HTTP status codes per the HL7 FHIR R4 Asy
 
 **202 Accepted — Task in progress.** The `Retry-After` response header contains the recommended polling interval in seconds. The response body is empty.
 
-**200 OK — Task complete.** The response body is an HL7 FHIR R4 `Parameters` resource containing an `output` parameter (de-identified resources for the completed task) and one or more `evidence` parameters (HL7 FHIR R4 `Provenance` resources). The De-Identifier SHALL have deleted all seed and lookup material before returning this response. When required by reversible Manager-managed derivation, the Parameters response also carries mappingReport, excluded from recipient-facing job output.
+**200 OK — Task complete.** The response body is an HL7 FHIR R4 `Parameters` resource containing an `output` parameter (de-identified resources for the completed task) and one or more `evidence` parameters (HL7 FHIR R4 `Provenance` resources). The response SHALL also carry the protected `generatedLookupTable` when required by the ITI-x3 output rules. The De-Identifier SHALL delete temporary input lookup copies at termination. The Manager SHALL exclude the generated lookup table from recipient-facing job output.
 
 **4xx/5xx — Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the failure. No partial output is returned.
 
@@ -526,7 +523,7 @@ Upon receipt of a Retrieve Task Output Response, the De-ID Manager SHALL inspect
 
 On an in-progress response, the Manager SHOULD wait for the indicated retry-after period before issuing another poll request.
 
-On a complete response, the Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester. The Manager SHALL NOT expose partial output to the Requester.
+On a complete response, the Manager SHALL validate and retain any required protected mapping output before release. The Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester. The Manager SHALL NOT expose partial output to the Requester.
 
 On an error response, the Manager SHALL inspect the OperationOutcome and SHALL NOT incorporate the failed task's output into the job result. The Manager SHALL report the failure to the Requester via the ITI-x1 or ITI-x4 response, as applicable.
 
@@ -542,4 +539,4 @@ See [DIS Security Considerations](volume-1.html#security-considerations).
 
 #### 2:3.x7.6.1 Security Audit Considerations
 
-The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x7 poll that returns a completed task. Polling requests that return in-progress status SHOULD be logged but MAY be recorded at a reduced frequency. The audit event SHALL NOT include seed material or other protected transformation parameters. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
+The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x7 poll that returns a completed task. Polling requests that return in-progress status SHOULD be logged but MAY be recorded at a reduced frequency. The audit event SHALL NOT include confidential salts or other protected transformation material. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.

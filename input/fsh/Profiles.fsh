@@ -97,7 +97,7 @@ Profile: DISLookupTable
 Parent: DocumentReference
 Id: DIS-LookupTable
 Title: "DIS Lookup Table"
-Description: "Persistent identified metadata for a protected reversible mapping table. JSON content is inline or retrieved from a Binary. Exact content is pinned per job; Manager persistence of Requester-supplied mappings is not required."
+Description: "Identified metadata for a protected reversible mapping table. Requester-supplied tables carry inline JSON or reference a protected Binary. Task-generated tables carry inline JSON and are returned to the Manager for retention."
 * ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
 * ^status = #active
 * ^experimental = false

@@ -7,11 +7,16 @@ You can also download:
 
 The [IHE ITI.DIS repository](https://github.com/IHE/ITI.DIS) contains the source for this guide.
 
-The embedded JSON formats in [Volume 3](volume-3.html) have separate content schemas:
+#### JSON Schema Artifacts
 
-- [Lookup table](schemas/dis-lookup-table.schema.json)
-- [Task subject and seed context](schemas/dis-seed-material.schema.json)
-- [Protected mapping report](schemas/dis-mapping-report.schema.json)
+These schemas describe the structure of the decoded JSON payloads used by DIS. Volume 3 defines the additional content and semantic requirements for each payload.
+
+| JSON Schema | Purpose | Volume 3 binding |
+|---|---|---|
+| [De-identification policy rules](schemas/dis-policy.schema.json) | Defines policy version, representation, ordered ruleSets, optional stages, and action parameters. | [Policy Rules JSON Structure](volume-3.html#3pxx22-policy-rules-json-structure) |
+| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3.html#3pxx17-reversible-lookup-table) |
+| [Execution plan](schemas/dis-execution-plan.schema.json) | Defines resolved, ordered rules for one task. | [Execution Plan JSON Structure](volume-3.html#3pxx142-execution-plan-json-structure) |
+{: .grid}
 
 #### Cross Version Analysis
 

@@ -94,13 +94,13 @@ function patterns.
 * #replace ^property[+].code = #technique
 * #replace ^property[=].valueCode = #pseudonymization
 * #keep "Preserve the element unchanged in the de-identified output"
-* #hash "Keyed baseline derivation for patient pseudonyms; keyed or unkeyed digest for other values under the execution plan"
+* #hash "Salted or unsalted digest under the execution plan."
 * #hash ^property[+].code = #technique
 * #hash ^property[=].valueCode = #hashing
 * #truncate-date "Reduce date precision by truncating to year or year-month"
 * #truncate-date ^property[+].code = #technique
 * #truncate-date ^property[=].valueCode = #rounding
-* #date-shift "Shift all dates by a consistent per-patient offset derived from scope and seed material"
+* #date-shift "Shift dates by a consistent per-patient offset under the declared date-shift capability"
 * #date-shift ^property[+].code = #technique
 * #date-shift ^property[=].valueCode = #noise-addition
 * #round "Bin a numeric value to the nearest multiple of the step parameter"
@@ -194,3 +194,21 @@ Description: "Document types for identified DIS operational artifacts."
 * ^status = #active
 * ^experimental = false
 * #lookup-table "DIS reversible lookup table"
+
+CodeSystem: DisLinkageScopeType
+Id: dis-linkage-scope-type
+Title: "DIS Linkage Scope Type"
+Description: "Authorized boundaries for consistent DIS pseudonyms."
+* ^status = #draft
+* ^caseSensitive = true
+* ^content = #complete
+* #job "Job"
+* #source-institution "Source institution"
+* #cross-community "Cross-community"
+
+ValueSet: DisLinkageScopeTypeVS
+Id: dis-linkage-scope-type-vs
+Title: "DIS Linkage Scope Types"
+Description: "Scope types for DIS policies and lookup tables."
+* ^status = #draft
+* include codes from system DisLinkageScopeType

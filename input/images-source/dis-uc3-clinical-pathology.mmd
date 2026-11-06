@@ -11,8 +11,8 @@ sequenceDiagram
 
     MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
     activate DI
-    Note over DI: Replace identifiers with scoped pseudonyms using seed
-    DI-->>MGR: Pseudonymized resources + evidence
+    Note over DI: Hash patient identifiers using the provisioned scope salt
+    DI-->>MGR: Pseudonymized resources + evidence + generated lookup table
     deactivate DI
 
     Note over MGR: Retain identity table + pseudonym index

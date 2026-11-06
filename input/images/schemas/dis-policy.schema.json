@@ -1,0 +1,635 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profiles.ihe.net/ITI/DIS/schemas/dis-policy.schema.json",
+  "title": "DIS Policy Rules",
+  "description": "Draft structural schema for the decoded policy rules in a DIS-Policy Library attachment. Volume 3 defines the accompanying semantic validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policyVersion",
+    "representationLevel",
+    "reversibilityMode",
+    "ruleSets"
+  ],
+  "properties": {
+    "policyVersion": {
+      "const": "1.0",
+      "description": "Policy rules JSON format version. The Library version identifies the policy revision."
+    },
+    "representationLevel": {
+      "enum": [
+        "semantic",
+        "syntax"
+      ]
+    },
+    "reversibilityMode": {
+      "enum": [
+        "reversible",
+        "irreversible"
+      ]
+    },
+    "identity-linkage-scope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/scope"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "job"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "identifier": false
+            }
+          },
+          "else": {
+            "required": [
+              "identifier"
+            ]
+          }
+        }
+      ],
+      "description": "Authorized linkage scope. The Manager resolves a stable scope identifier for each job-level policy."
+    },
+    "payloadFamily": {
+      "const": "fhir"
+    },
+    "payloadVersion": {
+      "enum": [
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "description": "R6 support is provisional under the profile's payload version rules."
+    },
+    "ruleSets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ruleSet"
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/stage"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "representationLevel": {
+            "const": "syntax"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "payloadFamily",
+          "payloadVersion"
+        ],
+        "properties": {
+          "ruleSets": {
+            "items": {
+              "$ref": "#/$defs/syntaxRuleSet"
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "payloadFamily": false,
+          "payloadVersion": false,
+          "ruleSets": {
+            "items": {
+              "$ref": "#/$defs/semanticRuleSet"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ruleSets": {
+            "contains": {
+              "properties": {
+                "rules": {
+                  "contains": {
+                    "$ref": "#/$defs/lookupRule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "identity-linkage-scope"
+        ],
+        "properties": {
+          "reversibilityMode": {
+            "const": "reversible"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ruleSets": {
+            "contains": {
+              "properties": {
+                "rules": {
+                  "contains": {
+                    "$ref": "#/$defs/ruleRequiringPolicyScope"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "identity-linkage-scope"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "nonBlankString": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "ruleSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleSetId",
+        "rules"
+      ],
+      "properties": {
+        "ruleSetId": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "description": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/policyRule"
+          }
+        }
+      }
+    },
+    "semanticRuleSet": {
+      "properties": {
+        "rules": {
+          "items": {
+            "properties": {
+              "target": {
+                "pattern": "^@[^@\\s]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "syntaxRuleSet": {
+      "properties": {
+        "rules": {
+          "items": {
+            "properties": {
+              "target": {
+                "not": {
+                  "pattern": "^\\s*@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stageId",
+        "ruleSetRefs"
+      ],
+      "properties": {
+        "stageId": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "description": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "ruleSetRefs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonBlankString"
+          }
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "target",
+        "action"
+      ],
+      "properties": {
+        "ruleId": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "target": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "action": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object"
+        },
+        "sourceRuleId": {
+          "$ref": "#/$defs/nonBlankString"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "action": {
+              "enum": [
+                "remove",
+                "keep",
+                "redact"
+              ]
+            },
+            "parameters": false
+          }
+        },
+        {
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "action": {
+              "const": "replace"
+            },
+            "parameters": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/fixedReplacement"
+                },
+                {
+                  "$ref": "#/$defs/lookupReplacement"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "action": {
+              "const": "hash"
+            },
+            "parameters": {
+              "$ref": "#/$defs/valueHash"
+            }
+          }
+        },
+        {
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "action": {
+              "const": "truncate-date"
+            },
+            "parameters": {
+              "additionalProperties": false,
+              "required": [
+                "precision"
+              ],
+              "properties": {
+                "precision": {
+                  "enum": [
+                    "year",
+                    "year-month"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "action": {
+              "const": "date-shift"
+            },
+            "parameters": {
+              "additionalProperties": false,
+              "required": [
+                "maxOffsetDays"
+              ],
+              "properties": {
+                "maxOffsetDays": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "scope": {
+                  "$ref": "#/$defs/nonBlankString"
+                }
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "action": {
+              "const": "round"
+            },
+            "parameters": {
+              "additionalProperties": false,
+              "required": [
+                "step"
+              ],
+              "properties": {
+                "step": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "action": {
+              "const": "truncate"
+            },
+            "parameters": {
+              "additionalProperties": false,
+              "required": [
+                "length"
+              ],
+              "properties": {
+                "length": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "hash"
+              },
+              "target": {
+                "enum": [
+                  "Patient.identifier",
+                  "@subject-business-identifiers"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "parameters"
+            ],
+            "properties": {
+              "parameters": {
+                "required": [
+                  "mode",
+                  "pseudonymSystem"
+                ],
+                "properties": {
+                  "mode": {
+                    "const": "salted"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fixedReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "lookupReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "const": "lookupTable"
+        }
+      }
+    },
+    "valueHash": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "salted",
+            "unsalted"
+          ]
+        },
+        "algorithm": {
+          "const": "SHA-256"
+        },
+        "pseudonymSystem": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "identity-linkage-scope": {
+          "$ref": "#/$defs/resolvedScope"
+        }
+      },
+      "required": [
+        "mode",
+        "algorithm"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "unsalted"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "identity-linkage-scope": false
+            }
+          }
+        }
+      ]
+    },
+    "lookupRule": {
+      "required": [
+        "action",
+        "parameters"
+      ],
+      "properties": {
+        "action": {
+          "const": "replace"
+        },
+        "parameters": {
+          "$ref": "#/$defs/lookupReplacement"
+        }
+      }
+    },
+    "ruleRequiringPolicyScope": {
+      "required": [
+        "action",
+        "parameters"
+      ],
+      "anyOf": [
+        {
+          "properties": {
+            "action": {
+              "const": "hash"
+            },
+            "parameters": {
+              "required": [
+                "mode"
+              ],
+              "properties": {
+                "mode": {
+                  "const": "salted"
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "date-shift"
+            },
+            "parameters": {
+              "not": {
+                "required": [
+                  "scope"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "scopeIdentifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "system": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
+        "value": {
+          "$ref": "#/$defs/nonBlankString"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "job",
+            "source-institution",
+            "cross-community"
+          ]
+        },
+        "identifier": {
+          "$ref": "#/$defs/scopeIdentifier"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "resolvedScope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/scope"
+        },
+        {
+          "required": [
+            "identifier"
+          ]
+        }
+      ]
+    },
+    "policyRule": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/rule"
+        },
+        {
+          "properties": {
+            "sourceRuleId": false,
+            "parameters": {
+              "properties": {
+                "identity-linkage-scope": false
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

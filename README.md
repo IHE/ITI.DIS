@@ -45,7 +45,7 @@ DIS applies the following processing and security requirements to these asynchro
 - **Capability check:** Before dispatching work, the De-ID Manager checks that the participating actors support the required input/output formats and HL7 FHIR versions.
 - **Access control:** Input and output file retrieval must be authorized. The payload and transaction bindings will specify the file-access authorization mechanism.
 - **All-or-nothing output:** If a job fails, no partial output dataset is released.
-- **No protected material:** Manifests and files delivered to recipients never contain seeds or other protected transformation material.
+- **No protected material:** Manifests and files delivered to recipients exclude confidential salts and other protected transformation material.
 
 ### Actors
 
@@ -54,7 +54,7 @@ The following table defines the four DIS actors and their responsibilities.
 | Actor | Responsibility |
 |-------|---------------|
 | **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Persists mappings for reversible jobs without a supplied lookup table; uses authoritative Requester-supplied tables without mandatory persistence. |
-| **De-Identifier** | Executes assigned de-identification tasks. Stateless with respect to reversibility — receives scoped, purpose-specific seeds as needed, derives transformation values according to declared capabilities, produces transformations and evidence, and retains no seeds or identity-linking material after task termination. |
+| **De-Identifier** | Executes assigned tasks, applies supplied mappings or generates salted patient pseudonyms, and returns output and evidence. Its deployment manages the scope salts. For reversible patient hashing it returns a protected generated lookup table to the Manager. |
 | **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Grouped with the De-Identified Data Receiver in Phase 1. |
 | **Integrated De-ID Manager/De-Identifier** | Combines the functionality of the De-ID Manager and De-Identifier into a single actor. Validates policy, compiles execution plans, executes de-identification internally, and produces output and evidence. May operate standalone (content conformance only) or accept external jobs via ITI-x1 with optional async polling via ITI-x4. Does not initiate nor accept ITI-x3. Persists mappings for reversible jobs without a supplied lookup table; uses authoritative Requester-supplied tables without mandatory persistence. |
 
@@ -149,11 +149,9 @@ Compatibility with Phase 1 is a design objective, supported by explicit versioni
 
 DIS-REVERSIBLE supports Manager-managed and Requester-supplied mappings. Without a supplied table, the Manager creates or maintains and persists the mapping needed for reversal. With a supplied table, it uses that table for direct identifiers and need not persist it. Missing required entries cause rejection before acceptance or terminal failure afterward; no generated fallback or partial output is permitted. Lookup-backed `replace` retains the nine-action vocabulary. See Volume 1 §1:PXX.2.2 and Volume 3 §3:PXX.1.7.
 
-Cross-community pseudonym consistency requires identity resolution, shared-scope authorization and coordinated derivation/seed lifecycle arrangements established by the deployment outside DIS. DIS does not standardize those arrangements, and a shared identity-linkage-scope alone does not establish cross-community consistency. See Volume 1 §1:PXX.4.1.
+The approved policy declares the linkage scope. The Manager validates the scope and copies it into salted execution rules. The De-Identifier’s deployment manages the confidential 16-byte salt and its version. Cross-community identity resolution and salt coordination remain deployment prerequisites. See Volume 1 §1:PXX.4.1 and Volume 3 §3:PXX.1.3.3.
 
-The De-Identifier performs pseudonym generation or lookup-backed replacement and reference updates; the Manager controls mappings and derivation material. Supplied tables must be authorized by approved lookup-backed rules and never override a hash/fixed-value policy. Irreversible mode maintains no reverse-mapping table; retained secrets for authorized cross-job consistency remain a reproduction/linkage risk governed by policy. The baseline patient derivation contract is in Volume 3 §3:PXX.1.3.3; the task subject/seed carrier, separate resource-ID derivation and worked examples are defined in Volume 3 §§3:PXX.1.3.4–5 and §3:PXX.1.8.
-
-Lookup tables are persistent identified DIS-LookupTable DocumentReference resources. Their JSON content is inline or in a protected Binary. Job/task submissions carry references, and the Manager pins exact metadata/content for each job. Requester repository persistence does not require Manager persistence of supplied-table copies. See Volume 3 §3:PXX.1.7.
+Requester-supplied and generated patient lookup tables share the DIS-LookupTable DocumentReference profile and four-field mapping entry. The Manager pins supplied content per job and retains generated mappings before release when authorized reversal is required. The guide requires valid references in the de-identified FHIR output. See Volume 3 §3:PXX.1.7.
 
 ## Build the draft guide
 

@@ -250,9 +250,9 @@ Table 3:PXX.1.3-1 lists the Phase 1 core transformation actions.
 | Action Code | Description | Applicable HL7 FHIR Datatypes | Deterministic | Parameters |
 |-------------|-------------|-------------------------------|---------------|------------|
 | `remove` | Remove the element entirely from the resource | Any element | Yes | None |
-| `replace` | Fixed-value or reversible lookup-backed replacement | Fixed mode: `string`, `HumanName`, `Address`, `ContactPoint`, `Identifier`, `uri`; lookup mode: `Identifier`, `id`, `Reference`, namespaced direct-identifier strings | Yes | Fixed mode: `value`; lookup mode: `source: lookupTable` (mutually exclusive) |
+| `replace` | Fixed-value or reversible lookup-backed replacement | Fixed mode: `string`, `HumanName`, `Address`, `ContactPoint`, `Identifier`, `uri`; lookup mode: patient business identifiers (`Patient.identifier`) | Yes | Fixed mode: `value`; lookup mode: `source: lookupTable` (mutually exclusive) |
 | `keep` | Preserve the element unchanged in the de-identified output | Any element | Yes | None |
-| `hash` | Replace the value with a cryptographic hash digest | `Identifier`, `HumanName`, `string`, `id`, `Reference` | Yes | Patient/resource derivation: `derivationMethod`, `scope`, `keyVersion`, `outputSystem`; other values: approved `algorithm` and optional `scope` |
+| `hash` | Replace the value with a cryptographic hash digest | `Identifier`, `HumanName`, `string` | Yes | `mode` (`salted` or `unsalted`), `algorithm` (`SHA-256`), and output namespace when required. |
 | `truncate-date` | Reduce date precision by truncating to the specified level | `date`, `dateTime` | Yes | `precision` (`year` or `year-month`) |
 | `date-shift` | Shift all dates by a consistent per-patient offset | `date`, `dateTime`, `instant`, `Period` | Yes (given same scope and patient) | `scope` (consistency scope identifier), `maxOffsetDays` (maximum magnitude of the shift in days) |
 | `round` | Bin a numeric value to the nearest multiple of the step | `Quantity`, `Age`, `integer`, `decimal` | Yes | `step` (rounding interval; e.g., `10` bins 57 → 60) |
@@ -268,9 +268,9 @@ The `remove` action removes the targeted element and all its children from the r
 
 ##### replace
 
-With `parameters.source` set to `lookupTable`, `replace` performs reversible direct-identifier mapping using the job/task lookup table described in §3:PXX.1.7. This mode is mutually exclusive with a fixed `value`. It SHALL preserve identifier/reference consistency and SHALL NOT fall back to fixed replacement or hashing when an entry is absent. The following fixed-value behavior applies only when lookup mode is not selected.
+With `parameters.source` set to `lookupTable`, `replace` replaces patient business identifiers in `Patient.identifier` using the job/task lookup table described in §3:PXX.1.7. This mode is mutually exclusive with a fixed `value`. It SHALL preserve identifier/reference consistency and SHALL NOT fall back to fixed replacement or hashing when an entry is absent. The following fixed-value behavior applies only when lookup mode is not selected.
 
-The `replace` action replaces the targeted element's displayable content with the string specified by the `value` parameter. An empty string is permitted, producing an element that is present but contains no displayable content.
+The `replace` action replaces the targeted element's displayable content with the nonempty string specified by the `value` parameter.
 
 For `HumanName`, each sub-element (`family`, `given`, `text`) is replaced with the specified value. For `Address`, each sub-element (`text`, `line`, `city`, `district`, `state`, `postalCode`) is replaced with the specified value; `Address.country` is preserved. For `ContactPoint`, `ContactPoint.value` is replaced with the specified value; `ContactPoint.system` and `ContactPoint.use` are preserved.
 
@@ -285,21 +285,13 @@ R02: target Patient.identifier         action remove
 
 ##### hash
 
-The `hash` action replaces the targeted element's value with a cryptographic hash digest.
+The `hash` action computes a SHA-256 digest. The `algorithm` parameter uses the `SHA-256` code from HL7's [IntegrityCheckAlgorithm CodeSystem](https://terminology.hl7.org/CodeSystem-v3-IntegrityCheckAlgorithm.html). The `mode` parameter selects `salted` or `unsalted`.
 
-For patient pseudonymization with patient-and-scope-specific seed material, the baseline derivation contract in §3:PXX.1.3.3 applies instead of hashing local identifier values.
+For patient business identifiers, the rule SHALL use `salted` and declare `pseudonymSystem`. Apply the patient identifier recipe in [§3:PXX.1.3.3](#3pxx133-baseline-patient-pseudonym-derivation). Generic value rules hash the exact original string, including a selected displayable string sub-element where applicable. The unsalted message is the UTF-8 serialization of `["DIS-value-digest-v1", value]`. The salted message is the UTF-8 serialization of `["DIS-value-digest-v1", scope.type, scope.identifier.system, scope.identifier.value, value]` followed by the raw scope salt. Both modes use the serialization and output rules in §3:PXX.1.3.3. An unsalted rule is unsuitable for patient business identifiers because an observer can test guesses against the digest.
 
-For other value-level hashing, when `scope` is present, the hash is keyed: the digest is computed using HMAC with the scope-derived seed material and the original value as inputs. Given the same scope and input value, the same digest SHALL be produced. This enables consistent hashing across resources within the same consistency scope.
+For `HumanName`, hash `family`, `given`, `prefix`, `suffix` and `text` individually. Preserve `use` and remove `period`. For an `Identifier` governed by a generic hash rule, replace `value` with the digest and set `system` to the rule's required `pseudonymSystem`. Preserve `type`, `use` and `period`, and remove `assigner`.
 
-When `scope` is absent, the hash is unkeyed: the digest is computed directly over the original value using the specified algorithm. The same input value always produces the same digest regardless of context.
-
-The output is hex-encoded. Keyed hashing is not inverted to recover the input; authorized reversal uses retained mapping records. Unkeyed hashes of predictable identifiers may be matched by enumerating candidate values. Direct patient pseudonym generation SHALL use the keyed baseline contract below; unkeyed hashing SHALL NOT be used for that purpose.
-
-For `HumanName` elements, the action replaces `family`, `given`, `prefix`, `suffix`, and `text` with hashed values. The `use` sub-element is preserved. The `period` sub-element is removed because a name-validity period can reveal the timing of legal name changes.
-
-For `Identifier` elements, the action replaces `Identifier.value` with the hash digest. `Identifier.system` SHALL be replaced with a DIS pseudonym system URI (e.g., `urn:oid:dis-pseudonym:<scope>`) to prevent collision with real identifier systems. `Identifier.type`, `Identifier.use`, and `Identifier.period` are preserved. `Identifier.assigner` SHALL be removed because the referenced Organization could identify the data subject's care context.
-
-For `Reference` elements, the action replaces the reference target with the hashed identifier of the referenced resource, when that resource is within the processing target set. References to resources outside the processing target set are governed by the `references` semantic group rules.
+Unsalted test vector. The exact UTF-8 message is `["DIS-value-digest-v1","example"]` and the digest is `7a5d5b43b1725c76debaedcb17ccfb99d6bd99299593c8b18eab0b4d0e4643b9`.
 
 ##### truncate-date
 
@@ -310,7 +302,7 @@ The `truncate-date` action reduces the precision of the targeted date value to t
 
 ##### date-shift
 
-The patient/resource pseudonym contracts below do not define date-shift derivation. Date shifting requires its separately declared, purpose-specific parameter/derivation capability; patient/resource pseudonym seeds SHALL NOT be repurposed for it. The `date-shift` action shifts the targeted date or time value by a per-patient offset. The offset is deterministically derived from the scope-derived seed material and the patient identifier, ensuring that all dates for the same patient within the same consistency scope are shifted by the same offset. The offset magnitude SHALL NOT exceed the `maxOffsetDays` parameter. The direction (forward or backward) is determined by the derivation.
+Date shifting requires a separately declared, purpose-specific derivation capability. The De-Identifier SHALL use patient hashing salts only for the authorized hash rules. The `date-shift` action shifts the targeted date or time value by a per-patient offset. The offset is deterministically derived from the scope-derived seed material and the patient identifier, ensuring that all dates for the same patient within the same consistency scope are shifted by the same offset. The offset magnitude SHALL NOT exceed the `maxOffsetDays` parameter. The direction (forward or backward) is determined by the derivation.
 
 Date shifting preserves temporal ordering and intervals between events for the same patient. The De-Identifier SHALL apply the same offset to all `date`, `dateTime`, `instant`, and `Period` elements for a given patient within a single task.
 
@@ -337,42 +329,23 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 #### 3:PXX.1.3.3 Baseline Patient Pseudonym Derivation
 
-The method identifier is `dis-patient-hmac-sha256-v1`. The Manager SHALL resolve the same patient within an authorized scope to consistent 32-byte secret seed material. Seeds SHALL be cryptographically generated or derived through a protected key-management arrangement; local patient identifiers alone SHALL NOT be seeds. Cross-job seed retention and regeneration follow Volume 1 §1:PXX.2.6. Cross-community identity resolution and coordination remain external deployment prerequisites.
+The Manager SHALL copy the resolved policy `identity-linkage-scope` into each compiled salted `hash` rule. The De-Identifier SHALL obtain the confidential salt for the resolved scope through its deployment. The deployment SHALL generate or derive a distinct effective salt of exactly **16 bytes** for each scope and salt version using cryptographically secure material. Authorized workers that need matching pseudonyms SHALL use the same effective salt and version. The deployment SHALL keep the selected version consistent across all tasks and retries of a job. For example, a deployment can coordinate rotation after the jobs using a version finish. Rotating the salt changes the pseudonym derivation context. The De-Identifier SHALL fail the task if it cannot obtain the applicable salt or if the decoded salt length differs from 16 bytes.
 
-The execution plan's patient `hash` rule SHALL declare `derivationMethod`, `scope`, `keyVersion` and `outputSystem`. The execution parameter `scope` SHALL be the exact validated policy `identity-linkage-scope` value; it is not an independently selectable scope. For the baseline method, all are non-empty strings and `derivationMethod` is `dis-patient-hmac-sha256-v1`. The task's protected seed material SHALL unambiguously associate each processing subject with its patient-and-scope-specific seed. This association is task-local and SHALL NOT be exposed in recipient-facing artifacts. The `seedMaterial` Binary binding in §3:PXX.1.3.4 supplies these task-local associations for single- and multi-patient tasks.
+For each `Patient.identifier` targeted by the rule, require a nonempty source `system` and `value`. Construct this ordered array of strings using the exact scope and source identifier values:
 
-The De-Identifier SHALL compute HMAC-SHA-256 using the 32-byte patient seed as key and the UTF-8 bytes of the JSON array `["DIS-patient-pseudonym-v1", scope, keyVersion]` as message. Serialize the array without whitespace, escape quotation marks, backslashes and control characters as required by JSON, emit other Unicode characters directly, do not escape forward slashes, use \b/\t/\n/\f/\r for their corresponding controls and lowercase \u00xx escapes for other U+0000–U+001F controls, and perform no Unicode normalization. Unpaired surrogates SHALL be rejected. UTF-8 SHALL have no byte-order mark. The pseudonym is the complete 32-byte digest encoded as 64 lowercase hexadecimal characters, without truncation. `outputSystem` identifies the resulting pseudonym namespace and SHALL be consistent across participants claiming matching identifiers. Local patient IDs, resource IDs, element paths and worker identifiers SHALL NOT be added to this message. For patient business identifiers, Identifier.system SHALL be the declared outputSystem and Identifier.value SHALL be this digest; the generic value-level hash namespace rule does not override this baseline method.
+```text
+["DIS-patient-identifier-v1", scope.type, scope.identifier.system, scope.identifier.value, source.system, source.value]
+```
 
-For a synthetic test vector, seed bytes are hexadecimal `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f`, scope is `job-example`, and keyVersion is `1`. The message is exactly `["DIS-patient-pseudonym-v1","job-example","1"]`; the expected pseudonym is `4b2fd4a29e41f8afe0be9565eda9f4709f00966bd9bd2f27a070ef8a8c40ab70`. These are public test values, never production secrets.
+Serialize the array without whitespace, escape quotation marks, backslashes and control characters as required by JSON, emit other Unicode characters directly, preserve forward slashes, use the short JSON escapes for backspace, tab, newline, form feed and carriage return, and use lowercase Unicode escapes for the remaining control characters U+0000–U+001F. Perform no Unicode normalization and reject unpaired surrogates. Encode the resulting text as UTF-8 without a byte-order mark. Append the 16 raw salt bytes to the UTF-8 bytes, then compute SHA-256 over the concatenation. Set `Identifier.system` to the rule's `pseudonymSystem` and `Identifier.value` to the complete 32-byte digest as 64 lowercase hexadecimal characters. Scope and identifier values use exact string matching. Cross-community identity resolution and salt coordination remain deployment prerequisites. On detecting a digest collision between distinct source identifier pairs within the job, fail the job without partial output.
 
-Different local identifiers resolved to the same patient therefore produce the same patient pseudonym when the seed, scope, keyVersion and method are identical. References SHALL be updated to the corresponding transformed resource IDs; the same patient pseudonym SHALL NOT be assigned indiscriminately to unrelated clinical-resource IDs. Resource-ID rewriting follows §3:PXX.1.3.5 and uses separate resource seeds; it does not reuse a patient pseudonym as every clinical resource ID. Unknown methods, ambiguous subject-to-seed associations or incompatible parameters SHALL fail the task. Detected pseudonym collisions between distinct resolved subjects SHALL fail the job without release; implementations SHALL NOT silently choose worker-specific suffixes. A key-version change defines a new derivation context and does not promise continuity with earlier pseudonyms.
+Salted test vector. The exact UTF-8 message is `["DIS-patient-identifier-v1","source-institution","https://hospital.example.org/identifiers/linkage-scope","lab-project-2026","https://hospital.example.org/identifiers/mrn","A123"]`. Append the 16 public test bytes `000102030405060708090a0b0c0d0e0f` (hexadecimal). The expected digest is `8162610a149e7b6700513fa3f0ceff46328e2b584fd3d351e4d5c2775a42ff0c`. Deployments generate their own confidential salts.
 
-#### 3:PXX.1.3.4 Task Subject and Seed Context
+#### 3:PXX.1.3.4 FHIR Reference Integrity
 
-`seedMaterial` is an R4 `Binary` with `contentType` `application/json` and base64-encoded UTF-8 JSON conforming to [dis-seed-material.schema.json](schemas/dis-seed-material.schema.json). Its fields are:
+The De-Identifier SHALL ensure that references between retained resources resolve correctly in the de-identified output. In a Bundle, this includes keeping `Bundle.entry.fullUrl` values and internal references consistent with the resource identities in the output. Handle references to removed resources and external references according to the approved policy. The De-Identifier SHALL fail the task without partial output if it cannot produce a valid result under the declared FHIR version and policy.
 
-| Field | Meaning |
-|---|---|
-| `version` | Binding version, `1`. |
-| `identity-linkage-scope`, `keyVersion` | Exact validated scope and execution-plan key version. |
-| `subjects` | Entries with a task-local `subjectId` and, when patient derivation is required, a base64 `patientSeed` decoding to exactly 32 bytes. |
-| `resources` | Original resource identity bindings: `source`, `aliases`, `resourceType`, `subjectId`, `sourceSystem`, `sourceId` and, when resource derivation is required, base64 `resourceSeed` decoding to exactly 32 bytes. |
-
-`subjectId` is a task-local opaque association token, not a patient pseudonym. It SHALL be unique within the context. Every resource's subjectId SHALL resolve to one entry. The Manager establishes subject associations through authorized identity resolution; the De-Identifier SHALL NOT infer that two different tokens identify the same patient. Each source and alias SHALL resolve unambiguously to one resource. `sourceSystem` identifies the resource-type namespace (for example, `https://source.example/fhir/Patient`) and `sourceId` is the original id; `source` is its absolute identity or Bundle fullUrl. Aliases explicitly list other accepted forms such as `Patient/p1` or a Bundle URN. Missing, ambiguous or conflicting bindings SHALL fail processing. Resources lacking an approved subject association require an explicit separate plan; they SHALL NOT be silently assigned a patient's seed.
-
-Seed strings SHALL use canonical padded base64 and decode to 32 bytes. Distinct resolved patients SHALL NOT be assigned the same patient seed in a scope; distinct resource identities SHALL NOT share a resource seed. Patient and resource seeds SHALL be purpose-separated. The Manager controls consistent regeneration or protected reuse across tasks according to the authorized scope and lifecycle; independent worker randomness SHALL NOT replace assigned seeds. The context may omit seed fields for lookup-only tasks, but subject and resource associations remain required for lookup-backed resource rewriting. It SHALL contain only associations required by the task, remain protected and be deleted by the De-Identifier at task termination. This carrier SHALL NOT include patient names or identifying attributes as substitute seeds.
-
-#### 3:PXX.1.3.5 Resource Identity and Reference Rewriting
-
-For Manager-managed resource-ID derivation, an approved `hash` rule targeting resource `id` SHALL declare `derivationMethod: dis-resource-hmac-sha256-v1`, `scope`, `keyVersion` and `outputSystem`. The De-Identifier SHALL use the assigned resourceSeed as HMAC-SHA-256 key and the UTF-8 JSON array `["DIS-resource-id-v1", scope, keyVersion]` as message, with the serialization rules of §3:PXX.1.3.3. The output id is the full lowercase 64-character digest, distinct from patient business-identifier pseudonyms. `outputSystem` is an absolute output FHIR base URL without a trailing slash; the resulting resource URI is `outputSystem/resourceType/outputId`. Both methods require exact agreement with context scope/keyVersion. A method applied to the wrong target (patient method to a clinical resource id, for example) SHALL fail validation.
-
-For supplied tables, approved resource-id `replace` rules SHALL provide `source: lookupTable` and `sourceSystem` equal to the resource's context namespace. The table's `resource-id` entry supplies the new id and target namespace; the namespace SHALL end in the unchanged resourceType and the id SHALL satisfy FHIR id syntax. Business-identifier entries are not resource-id entries and SHALL NOT be used to rewrite resource IDs.
-
-Before mutation, resolve references against the original source/alias graph. The De-Identifier SHALL build a complete old-to-new resource identity map and apply it to resource `id`, Bundle entry `fullUrl`, and all governed internal Reference.reference values, including references to resources transformed in other assigned stages. Internal references SHALL become the mapped absolute target URI, not a hash of the reference text. Reference.display containing source identity SHALL be removed; Reference.identifier is processed by its own approved identifier rule. Graph fixup is a required consequence of approved identity transformations, even when a reference path has a `keep` rule; it does not authorize transforming additional identifiers. Unsupported external, version-specific or contained references SHALL be handled by an explicit approved rule or fail the job; they SHALL NOT be silently guessed or left dangling. If the target map is incomplete, the Manager SHALL schedule a combined task or supply an approved lookup-backed map; successful earlier tasks alone do not authorize partial release.
-
-Validate the entire output graph before release, including references from retained resources, unique output resource identities and format constraints. If multiple local identifiers for one patient share a business pseudonym, the Patient resource remains one resource with its own id. Distinct clinical resources SHALL retain distinct output identities. Collisions, missing mappings or inconsistent aliases SHALL fail the job without partial output.
-
-For a reversible Manager-managed job, ITI-x3 (or ITI-x7 on completion) SHALL return a protected `mappingReport` Binary to the Manager alongside the task result. It contains version `1`, `subjects` with subjectId/system/value for generated patient pseudonyms, and `resources` with source/subjectId/target for rewritten resources. The Manager SHALL bind these task-local tokens to its authorized identity records and persist the reverse mapping before releasing the job. This report is protected operational material, not Provenance evidence, and SHALL NOT be forwarded in ITI-x1/ITI-x4 output, manifests, logs or recipient evidence. No report SHALL be returned for irreversible jobs. Supplied-table jobs do not require a generated report; the supplied table remains authoritative. The schema is [dis-mapping-report.schema.json](schemas/dis-mapping-report.schema.json).
+Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. The lookup-table and hash bindings define that transformation. The output packaging rules govern FHIR resource identities and references.
 
 <a name="execution-plan-format"> </a>
 
@@ -406,7 +379,7 @@ Table 3:PXX.1.4-1 lists the required Library resource elements.
 
 #### 3:PXX.1.4.2 Execution Plan JSON Structure
 
-The execution plan JSON contains `planVersion`, `payloadBinding`, `payloadVersion` and an ordered `rules` array. Each rule specifies a target, an action, and action-specific parameters.
+The [DIS execution plan JSON Schema](schemas/dis-execution-plan.schema.json) defines the decoded attachment. It contains `planVersion`, `ruleSetId`, `payloadBinding`, `payloadVersion` and an ordered `rules` array. The `ruleSetId`, `payloadBinding` and `payloadVersion` SHALL match the ITI-x3 parameters. Each compiled rule identifies the source policy rule and specifies a target, an action, and action-specific parameters.
 
 Table 3:PXX.1.4-2 lists the elements of each rule in the execution plan.
 
@@ -414,7 +387,8 @@ Table 3:PXX.1.4-2 lists the elements of each rule in the execution plan.
 
 | Element | Cardinality | Type | Description |
 |---------|-------------|------|-------------|
-| `ruleId` | 1..1 | string | Unique identifier for the rule within the plan |
+| `ruleId` | 1..1 | string | Unique identifier for the compiled rule within the plan |
+| `sourceRuleId` | 1..1 | string | Identifier of the approved policy rule from which this rule was compiled |
 | `target` | 1..1 | string | FHIRPath expression identifying the target element(s). Semantic group references (`@`) SHALL have been expanded during compilation; they SHALL NOT appear in dispatched execution plans. |
 | `action` | 1..1 | code | Action code from the core action family (see [§3:PXX.1.3](#3pxx13-transformation-actions)) |
 | `parameters` | 0..1 | object | Action-specific parameters as key-value pairs |
@@ -426,81 +400,42 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 #### 3:PXX.1.4.3 Execution Plan Example
 
-The decoded execution plan below illustrates a single-ruleSet plan for Use Case 3 (Clinical Pathology Order). It derives patient business pseudonyms, removes names, address and telecom, shifts the birth date and redacts narrative content. Semantic group references have been expanded to concrete element paths. Reference `keep` rules still follow the [resource identity and reference rewriting requirements](#3pxx135-resource-identity-and-reference-rewriting). The [evidence example](Provenance-dis-evidence-uc3-001.html) shows how the task reports selected applied rules.
+This decoded execution plan compiles the clinical pathology [policy example](#3pxx221-policy-rules-examples). The Manager copies the resolved institutional scope into the salted `hash` rule and expands the semantic targets to concrete paths. See the corresponding [evidence example](Provenance-dis-evidence-uc3-001.html) and [generated lookup table](DocumentReference-generated-lookup-uc3.html).
 
 ```json
 {
   "planVersion": "1.0",
+  "ruleSetId": "direct-identifiers",
   "payloadBinding": "DIS-FHIR-Payload",
   "payloadVersion": "R4",
   "rules": [
     {
       "ruleId": "R01",
+      "sourceRuleId": "P01",
       "target": "Patient.identifier",
       "action": "hash",
       "parameters": {
-        "derivationMethod": "dis-patient-hmac-sha256-v1",
-        "scope": "hospital-lab-project-2026",
-        "keyVersion": "1",
-        "outputSystem": "urn:example:subject"
+        "mode": "salted",
+        "algorithm": "SHA-256",
+        "pseudonymSystem": "https://hospital.example.org/identifiers/pseudonym",
+        "identity-linkage-scope": {
+          "type": "source-institution",
+          "identifier": {
+            "system": "https://hospital.example.org/identifiers/linkage-scope",
+            "value": "lab-project-2026"
+          }
+        }
       }
     },
     {
       "ruleId": "R02",
+      "sourceRuleId": "P02",
       "target": "Patient.name",
       "action": "remove"
-    },
-    {
-      "ruleId": "R03",
-      "target": "Patient.address",
-      "action": "remove"
-    },
-    {
-      "ruleId": "R04",
-      "target": "Patient.telecom",
-      "action": "remove"
-    },
-    {
-      "ruleId": "R05",
-      "target": "Patient.birthDate",
-      "action": "date-shift",
-      "parameters": {
-        "scope": "${identity-linkage-scope}",
-        "maxOffsetDays": 30
-      }
-    },
-    {
-      "ruleId": "R06",
-      "target": "Patient.photo",
-      "action": "remove"
-    },
-    {
-      "ruleId": "R07",
-      "target": "Patient.text",
-      "action": "redact"
-    },
-    {
-      "ruleId": "R08",
-      "target": "Observation.text",
-      "action": "redact"
-    },
-    {
-      "ruleId": "R09",
-      "target": "Observation.subject",
-      "action": "keep"
-    },
-    {
-      "ruleId": "R10",
-      "target": "DiagnosticReport.subject",
-      "action": "keep"
     }
   ]
 }
 ```
-
-<div markdown="1" class="stu-note">
-**Editorial Note:** The execution plan JSON structure shown above is illustrative. The formal JSON Schema will be provided when FSH conformance artifacts are finalized.
-</div>
 
 <a name="evidence-baseline"> </a>
 
@@ -601,7 +536,7 @@ The manifest follows the conventions of the [HL7 Bulk Data Access IG](https://hl
 
 The De-Identifier SHALL present authorization credentials when retrieving manifest files and NDJSON data files. File retrieval SHALL use TLS.
 
-De-identified output in by-manifest mode is returned as a manifest referencing de-identified NDJSON output files together with evidence references. Recipient-facing manifests and files SHALL NOT contain seeds or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
+De-identified output in by-manifest mode is returned as a manifest referencing de-identified NDJSON output files together with evidence references. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
 
 Table 3:PXX.1.6-1 summarizes the delivery modes and their characteristics.
 
@@ -616,32 +551,24 @@ Table 3:PXX.1.6-1 summarizes the delivery modes and their characteristics.
 
 ### 3:PXX.1.7 Reversible Lookup Table
 
-The optional ITI-x1 and ITI-x3 `lookupTable` parameter is a `Reference(DocumentReference)` targeting [DIS-LookupTable](StructureDefinition-DIS-LookupTable.html), a persistent identified R4 document reference. It describes protected JSON mapping content, supplied inline in its attachment or through an authorized retrieval of [DIS-LookupTableContent](StructureDefinition-DIS-LookupTableContent.html) Binary. The table is operational input, not recipient-facing evidence. Managers and Integrated actors declaring DIS-REVERSIBLE SHALL support both supplied and Manager-managed mappings.
+[DIS-LookupTable](StructureDefinition-DIS-LookupTable.html) is a protected, identified R4 DocumentReference. The `lookupTable` input to ITI-x1 or ITI-x3 is a reference to a supplied table. The `generatedLookupTable` output in ITI-x3 or ITI-x7 is a task-generated instance carried inline as a resource in `Parameters`. Both use the [DIS patient lookup table JSON Schema](schemas/dis-lookup-table.schema.json) for patient identifier mappings. The generated table carries its JSON inline. A supplied table may carry JSON inline or reference a protected [DIS-LookupTableContent](StructureDefinition-DIS-LookupTableContent.html) Binary.
 
 | DocumentReference element | DIS requirement |
 |---|---|
-| `identifier` | One or more stable business identifiers. At least one value SHALL equal the decoded JSON tableId, with an explicitly declared identifier system. |
-| `masterIdentifier` | Required system/value identifying this exact immutable content version, distinct from a server's resource id or meta.versionId. Any change to JSON bytes SHALL receive a new masterIdentifier. |
-| `status` | `current` when selected for a new job. A superseded or entered-in-error document SHALL NOT be admitted as a new supplied table. |
+| `identifier` | Stable business identifiers. At least one value SHALL equal the decoded JSON `tableId`. |
+| `masterIdentifier` | A system and value identifying this immutable content version. A change to the JSON bytes requires a new `masterIdentifier`. |
+| `status` | `current` when used for a new job or returned as generated output. |
 | `type` | DIS document-type code `lookup-table`. |
-| `extension[dis-identity-linkage-scope]` | Required non-secret scope, exactly matching both the approved policy and decoded JSON scope. |
-| `content` | Exactly one attachment with contentType `application/json` and exactly one of inline base64 data or a protected Binary URL. Both delivery forms SHALL be supported. |
+| `extension[dis-identity-linkage-scope]` | Resolved scope type and identifier. Both SHALL match the authorized job scope and decoded JSON. |
+| `content` | Exactly one `application/json` attachment. It carries either inline Base64 data or a protected Binary URL. |
 
-A literal reference may identify `DocumentReference/id` or a version-specific history URL on an authorized repository. Reference.identifier may be used only if the deployment can resolve it unambiguously to one exact document/content version; ambiguous or unresolvable identifiers SHALL be rejected. Identifier resolution, repository provisioning and table lifecycle administration remain deployment concerns; DIS adds no table-management transaction.
+The decoded JSON contains `tableId`, format `version` of `1`, a resolved `identity-linkage-scope`, and a nonempty `entries` array. A patient mapping has exactly four fields. `sourceSystem` and `sourceValue` are the original `Identifier.system` and `Identifier.value`. `targetSystem` and `targetValue` are the pseudonym identifier pair. The De-Identifier SHALL match both source fields exactly, without implicit normalization, and replace both target fields. A supplied table may map multiple approved source identifiers to one assigned pseudonym for the same patient. The table authority and Manager SHALL ensure that a shared target pair is authorized for the same patient. A missing or conflicting source mapping SHALL fail the job without partial output.
 
-A task-scoped derivative has its own business identifier and `masterIdentifier`, retains the authorized scope, and links to the pinned source through `relatesTo` with code `transforms`. Its business identifier matches the derivative JSON `tableId`.
+Source identifier pairs SHALL be unique within a table.
 
-[ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines admission, authorization and content pinning. [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3) defines restricted dispatch, task validation and cleanup. Manager-managed reversible tables may use the same representation. Metadata identifiers and lookup URLs SHALL be excluded from recipient-facing output and logs where they would expose or grant access to protected mapping material.
+A task-scoped subset has its own business identifier and `masterIdentifier`, retains the authorized scope, and links to the pinned source with `relatesTo` code `transforms`. A reference may use a literal, version-specific history URL or an identifier that resolves unambiguously to an exact version. Repository provisioning and table lifecycle remain deployment concerns. ITI-x1 defines admission and pinning, and ITI-x3 defines restricted dispatch and cleanup.
 
-The JSON contains `tableId` (non-empty string), `version` (JSON format version `1`, not the document content-version identifier), `identity-linkage-scope` (the exact approved scope), and `entries` (non-empty array). Each entry contains `sourceSystem`, `sourceValue`, `targetSystem`, and `targetValue`, all non-empty strings. Keys are exact, case-sensitive `(sourceSystem, sourceValue)` pairs. Each entry additionally requires `subjectId` and `kind` (`identifier`, `resource-id`, or `value`). Matching keys are exact `(kind, sourceSystem, sourceValue)` triples and SHALL be unique. A repeated `(kind, targetSystem, targetValue)` is permitted for different identifiers belonging to the same subjectId, but SHALL be rejected when it links different subjectIds. Resource-id targets SHALL be unique even within one subject. SubjectIds SHALL match the task context. Multiple identifiers may resolve to one patient pseudonym; authorized reversal may return that subject's set of source identifiers rather than pretend there is one original value. Source systems identify the identifier namespace, including a declared namespace for resource IDs; a bare value alone is insufficient. Values SHALL NOT be normalized implicitly.
-
-The [worked mapping examples](#3pxx18-worked-mapping-examples) use the same lookup table in two forms. To inspect the decoded JSON, Base64-decode `Binary.data` in the [Binary example](Binary-lookup-content-example.html) or `content.attachment.data` in the [inline DocumentReference example](DocumentReference-lookup-inline-example.html). The table shows two source identifiers for one subject mapping to the same business pseudonym, alongside separate resource ID mappings.
-
-The validated reversible policy uses `replace` with `parameters: {"source": "lookupTable"}` for direct identifiers. `Identifier` mappings replace both `system` and `value`; resource IDs and References use the same assigned target identity consistently. Type and reference-integrity validation SHALL precede release. Each approved lookup-backed rule requires an applicable entry. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines how the Manager handles missing entries or policy and table incompatibility. The supplied table does not authorize changing a `hash` or fixed-value rule to lookup-backed `replace`. Hashing remains available for Manager-managed derivation; it SHALL NOT override supplied direct-identifier mappings.
-
-The Manager SHALL verify authorization to use the supplied table for the job's purpose and scope. Only entries needed for an assigned task may be carried to its De-Identifier. Tables SHALL be protected in transit and at rest, excluded from recipient-facing artifacts and logs, and deleted from temporary processing storage at termination. The Requester may retain its original table; Manager persistence of supplied mappings is not mandatory. Without a supplied table, the Manager SHALL create or maintain and persist an equivalent mapping for authorized reversal. In standalone Integrated processing, locally supplied tables follow the same rules.
-
-The structural contract is [dis-lookup-table.schema.json](schemas/dis-lookup-table.schema.json). Schema validation does not establish authorization, coverage or graph consistency; the semantic checks above are also mandatory. `Identifier` matching uses its original system/value and kind `identifier`. Lookup-backed strings require an explicit policy `sourceSystem` and kind `value`; implicit name matching and normalization are not supported. Resource IDs use kind `resource-id`. Unsupported targets SHALL be rejected rather than inferred.
+When a reversible Manager-managed task generates patient identifier pseudonyms, the De-Identifier SHALL return one `generatedLookupTable` containing the resulting patient mappings and the resolved scope. The Manager SHALL validate the table against the task and retain the mappings before job release. Repeated identical pairs across tasks or retries are idempotent. If a source pair maps to conflicting targets in the same job or a target is assigned to distinct patients, the Manager SHALL fail the job without partial release. A task applying supplied patient mappings or executing an irreversible policy SHALL NOT return a generated patient lookup table. Generated and supplied tables are protected operational material and SHALL be excluded from recipient-facing output, evidence, logs and errors.
 
 ### 3:PXX.1.8 Worked Mapping Examples
 
@@ -652,7 +579,8 @@ These synthetic, informative FHIR R4 examples accompany the [lookup table bindin
 | [Lookup table with Binary content](DocumentReference-lookup-document-example.html) | A persistent DocumentReference with a business identifier, a content version identifier, and a reference to the JSON attachment. |
 | [Lookup table JSON content](Binary-lookup-content-example.html) | The Binary carrying the lookup table JSON for the DocumentReference above. |
 | [Lookup table with inline content](DocumentReference-lookup-inline-example.html) | The same lookup table content carried directly in a DocumentReference attachment. |
-| [Task-scoped lookup table](DocumentReference-lookup-task-s1.html) | A derived table restricted to one subject, with its own identifiers and a `transforms` relationship to the version of the source DocumentReference. |
+| [Task-scoped lookup table](DocumentReference-lookup-task-s1.html) | A supplied table subset with its own identifiers and a `transforms` relationship to the version of the source DocumentReference. |
+| [Generated lookup table](DocumentReference-generated-lookup-uc3.html) | The patient identifier mapping generated by the clinical pathology salted hash example and returned to the Manager. |
 {: .grid}
 
 <a name="policy-content-module"> </a>
@@ -711,7 +639,7 @@ The draft [DIS Policy](StructureDefinition-DIS-Policy.html) and [DIS Execution P
 
 ### 3:PXX.2.2 Policy Rules JSON Structure
 
-The policy rules JSON carried in `Library.content` defines de-identification rules at one of two representation levels:
+The [DIS policy JSON Schema](schemas/dis-policy.schema.json) defines the structure of the decoded JSON in `Library.content.data`. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines the structure of the enclosing FHIR Library. The policy rules use one of two representation levels:
 
 - **Semantic-Level** — rules use semantic group references (prefixed with `@`) and action codes. The policy is format-neutral and requires compilation into a payload-specific execution plan before dispatch. This is the default representation for reusable, cross-format policies.
 - **Syntax-Level** — rules use concrete element paths (e.g., FHIRPath expressions for HL7 FHIR, DICOM tag paths for DICOM) and action codes. The policy is specific to a payload family and version, and is directly executable after validation. A Syntax-Level policy requires `payloadFamily` and `payloadVersion` declarations.
@@ -724,14 +652,14 @@ Table 3:PXX.2.2-1 lists the top-level elements of the policy rules JSON.
 
 | Element | Cardinality | Type | Description |
 |---------|-------------|------|-------------|
-| `policyVersion` | 1..1 | string | Version of the policy rules schema |
+| `policyVersion` | 1..1 | string | Policy rules JSON format version. Use `1.0` for this schema. `Library.version` identifies the policy revision. |
 | `representationLevel` | 1..1 | code | `semantic` or `syntax` |
 | `reversibilityMode` | 1..1 | code | `irreversible` or `reversible` |
-| `identity-linkage-scope` | 0..1 | string | Non-secret identifier of the authorized job, institutional or cross-community linkage scope; not a patient identifier, key or seed. Required when consistent patient pseudonyms are requested. |
-| `payloadFamily` | 0..1 | string | Required when `representationLevel` is `syntax`. Payload family (e.g., `fhir`, `dicom`) |
-| `payloadVersion` | 0..1 | string | Required when `representationLevel` is `syntax`. Payload version (e.g., `R4`, `R5`) |
+| `identity-linkage-scope` | 0..1 | object | Authorized scope for lookup-backed replacement or salted hashing. Required when either is used. A `job` scope declares only `type`. A `source-institution` or `cross-community` scope declares `type` and an `identifier` with `system` and `value`. |
+| `payloadFamily` | 0..1 | string | Required for Syntax-Level policies. Phase 1 uses `fhir`. Semantic-Level policies omit this field. |
+| `payloadVersion` | 0..1 | string | Required for Syntax-Level policies. Use `R4`, `R5`, or provisional `R6` under the payload version rules. Semantic-Level policies omit this field. |
 | `ruleSets` | 1..* | array | Named groups of de-identification rules |
-| `stages` | 0..* | array | Optional ordered list of execution stages referencing ruleSet IDs |
+| `stages` | 0..* | array | Optional ordered list of execution stages referencing ruleSet IDs. If present, the list contains at least one stage. |
 {: .grid}
 
 Each ruleSet in the `ruleSets` array contains the elements listed in Table 3:PXX.2.2-2.
@@ -763,6 +691,8 @@ Syntax-Level policy rules use concrete element paths appropriate to the declared
 
 Rules within a ruleSet are evaluated in order; first-match-wins evaluation applies, consistent with execution plan evaluation (see [§3:PXX.1.4.2](#3pxx142-execution-plan-json-structure)).
 
+The schema checks which parameters an action accepts. Lookup-backed `replace` requires reversible mode and is mutually exclusive with fixed replacement. A salted `hash` rule uses the policy scope. For a patient business identifier target, the Manager SHALL require `mode` of `salted` and a `pseudonymSystem`, including when a target is expressed as a FHIRPath selector. The Manager SHALL validate its authorization and resolve a `job` scope to a stable scope identifier for the job and its retries. For other scope types, the Manager SHALL copy the authorized `system` and `value` as supplied in the approved policy. The scope level and identifier SHALL be copied into each applicable compiled rule. Date-shift derivation and its protected inputs remain a separate capability contract.
+
 Each stage in the optional `stages` array contains the elements listed in Table 3:PXX.2.2-4.
 
 <p id="tPXX.2.2-4" class="tableTitle"><strong>Table 3:PXX.2.2-4: Policy Rules JSON — Stage Elements</strong></p>
@@ -778,62 +708,38 @@ When `stages` is present, the De-ID Manager dispatches ruleSets in stage order. 
 
 #### 3:PXX.2.2.1 Policy Rules Examples
 
-The following decoded Semantic-Level policy illustrates a single-ruleSet pseudonymization policy for Use Case 3 (Clinical Pathology Order). The [execution plan example](#3pxx143-execution-plan-example) illustrates concrete element paths for the same use case.
+This decoded Semantic-Level policy illustrates reversible pseudonymization for Use Case 3 (Clinical Pathology Order). See the [compiled execution plan](#3pxx143-execution-plan-example) for the resolved scope and concrete targets.
 
 ```json
 {
   "policyVersion": "1.0",
   "representationLevel": "semantic",
   "reversibilityMode": "reversible",
-  "identity-linkage-scope": "hospital-lab-project-2026",
+  "identity-linkage-scope": {
+    "type": "source-institution",
+    "identifier": {
+      "system": "https://hospital.example.org/identifiers/linkage-scope",
+      "value": "lab-project-2026"
+    }
+  },
   "ruleSets": [
     {
       "ruleSetId": "direct-identifiers",
-      "description": "Pseudonymize direct identifiers for external lab order",
       "rules": [
         {
           "ruleId": "P01",
           "target": "@subject-business-identifiers",
           "action": "hash",
           "parameters": {
-            "derivationMethod": "dis-patient-hmac-sha256-v1",
-            "scope": "hospital-lab-project-2026",
-            "keyVersion": "1",
-            "outputSystem": "urn:example:subject"
+            "mode": "salted",
+            "algorithm": "SHA-256",
+            "pseudonymSystem": "https://hospital.example.org/identifiers/pseudonym"
           }
-        },
-        {
-          "ruleId": "P01N",
-          "target": "@subject-names",
-          "action": "remove"
         },
         {
           "ruleId": "P02",
-          "target": "@subject-demographics",
+          "target": "@subject-names",
           "action": "remove"
-        },
-        {
-          "ruleId": "P03",
-          "target": "@dates",
-          "action": "date-shift",
-          "parameters": {
-            "maxOffsetDays": 30
-          }
-        },
-        {
-          "ruleId": "P04",
-          "target": "@contact-information",
-          "action": "remove"
-        },
-        {
-          "ruleId": "P05",
-          "target": "@narrative",
-          "action": "redact"
-        },
-        {
-          "ruleId": "P06",
-          "target": "@references",
-          "action": "keep"
         }
       ]
     }
@@ -841,14 +747,20 @@ The following decoded Semantic-Level policy illustrates a single-ruleSet pseudon
 }
 ```
 
-The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemiological Study) with two ruleSets organized into two stages. The preliminary stage hashes direct identifiers to scoped pseudonyms; the advanced stage applies record-level removal, rounding, and truncation of quasi-identifiers.
+This Semantic-Level policy illustrates staged irreversible pseudonymization for Use Case 1 (Cross-Border Epidemiological Study).
 
 ```json
 {
   "policyVersion": "1.0",
   "representationLevel": "semantic",
   "reversibilityMode": "irreversible",
-  "identity-linkage-scope": "epi-study-2026-cohort-a",
+  "identity-linkage-scope": {
+    "type": "cross-community",
+    "identifier": {
+      "system": "https://study.example/identifiers/linkage-scope",
+      "value": "epi-study-2026-cohort-a"
+    }
+  },
   "ruleSets": [
     {
       "ruleSetId": "direct-identifiers",
@@ -859,10 +771,9 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
           "target": "@subject-business-identifiers",
           "action": "hash",
           "parameters": {
-            "derivationMethod": "dis-patient-hmac-sha256-v1",
-            "scope": "epi-study-2026-cohort-a",
-            "keyVersion": "1",
-            "outputSystem": "urn:example:subject"
+            "mode": "salted",
+            "algorithm": "SHA-256",
+            "pseudonymSystem": "https://study.example/identifiers/pseudonym"
           }
         },
         {
@@ -902,10 +813,7 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
         {
           "ruleId": "A02",
           "target": "@subject-demographics",
-          "action": "truncate",
-          "parameters": {
-            "length": 3
-          }
+          "action": "remove"
         },
         {
           "ruleId": "A03",
@@ -939,69 +847,40 @@ The following Semantic-Level policy illustrates Use Case 1 (Cross-Border Epidemi
 }
 ```
 
-The following Syntax-Level policy illustrates the same Use Case 3 pseudonymization, authored with concrete FHIRPath targets for HL7 FHIR R4.
+This Syntax-Level policy illustrates the same Use Case 3 rules with concrete FHIR R4 targets.
 
 ```json
 {
   "policyVersion": "1.0",
   "representationLevel": "syntax",
+  "reversibilityMode": "reversible",
+  "identity-linkage-scope": {
+    "type": "source-institution",
+    "identifier": {
+      "system": "https://hospital.example.org/identifiers/linkage-scope",
+      "value": "lab-project-2026"
+    }
+  },
   "payloadFamily": "fhir",
   "payloadVersion": "R4",
-  "reversibilityMode": "reversible",
-  "identity-linkage-scope": "hospital-lab-project-2026",
   "ruleSets": [
     {
       "ruleSetId": "direct-identifiers",
-      "description": "Pseudonymize direct identifiers for external lab order",
       "rules": [
         {
           "ruleId": "P01",
           "target": "Patient.identifier",
           "action": "hash",
           "parameters": {
-            "derivationMethod": "dis-patient-hmac-sha256-v1",
-            "scope": "hospital-lab-project-2026",
-            "keyVersion": "1",
-            "outputSystem": "urn:example:subject"
+            "mode": "salted",
+            "algorithm": "SHA-256",
+            "pseudonymSystem": "https://hospital.example.org/identifiers/pseudonym"
           }
         },
         {
           "ruleId": "P02",
           "target": "Patient.name",
           "action": "remove"
-        },
-        {
-          "ruleId": "P03",
-          "target": "Patient.address",
-          "action": "remove"
-        },
-        {
-          "ruleId": "P04",
-          "target": "Patient.telecom",
-          "action": "remove"
-        },
-        {
-          "ruleId": "P05",
-          "target": "Patient.birthDate",
-          "action": "date-shift",
-          "parameters": {
-            "maxOffsetDays": 30
-          }
-        },
-        {
-          "ruleId": "P06",
-          "target": "Patient.photo",
-          "action": "remove"
-        },
-        {
-          "ruleId": "P07",
-          "target": "Patient.text",
-          "action": "redact"
-        },
-        {
-          "ruleId": "P08",
-          "target": "Observation.subject",
-          "action": "keep"
         }
       ]
     }
@@ -1010,7 +889,7 @@ The following Syntax-Level policy illustrates the same Use Case 3 pseudonymizati
 ```
 
 <div markdown="1" class="stu-note">
-**Editorial Note:** The policy rules JSON structure shown above is illustrative. The formal JSON Schema will be provided when FSH conformance artifacts are finalized.
+**Editorial Note:** The examples illustrate policy structure. The date-shift derivation contract and how concurrent ruleSet outputs combine remain open.
 </div>
 
 ### 3:PXX.2.3 Policy Delivery and Validation
@@ -1041,7 +920,7 @@ The De-ID Manager SHALL perform the following validation on the resolved policy 
 
 1. **Authorization consistency** — verify that `policy.url` and `policy.version` declared in the ITI-x1 request identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
 2. **Integrity** — when `policy.content` is present, verify the JWS signature and confirm that the Library's canonical URL and version match the declared values. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
-3. **Schema** — verify the Library conforms to the DIS-Policy Library profile and the policy rules JSON conforms to the policy rules schema.
+3. **Schema** — verify the Library conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS policy JSON Schema](schemas/dis-policy.schema.json). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Library.effectivePeriod` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
 ### 3:PXX.2.4 Policy Compilation
@@ -1056,7 +935,7 @@ When the policy's `representationLevel` is `semantic`, the De-ID Manager compile
 
 2. **Version-conditional path mapping** — for HL7 FHIR R5 or R6 payloads, the De-ID Manager applies the version-conditional path mappings defined in [Table 3:PXX.1.1-3](#3pxx113-version-neutral-element-addressing) to the expanded element paths.
 
-3. **Execution plan assembly** — the expanded and version-resolved rules are assembled into an execution plan JSON (see [§3:PXX.1.4.2](#3pxx142-execution-plan-json-structure)) and packaged in a Library resource with `Library.type` coding `dis-execution-plan`.
+3. **Execution plan assembly** — the Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The expanded and version-resolved rules are assembled into an execution plan JSON (see [§3:PXX.1.4.2](#3pxx142-execution-plan-json-structure)) and packaged in a Library resource with `Library.type` coding `dis-execution-plan`.
 
 4. **Capability verification** — the De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
 
@@ -1070,7 +949,7 @@ When the policy's `representationLevel` is `syntax`, the De-ID Manager validates
 
 2. **Consistency check** — the De-ID Manager verifies that the policy's declared `payloadFamily` and `payloadVersion` are consistent with the `payloadBinding` and `payloadVersion` in the ITI-x1 request.
 
-3. **Execution plan assembly** — the validated rules are packaged in a Library resource with `Library.type` coding `dis-execution-plan`. No semantic group expansion is performed; rule targets are already concrete paths.
+3. **Execution plan assembly** — preserve rule order and source rule IDs, add the resolved scope to salted rules, and package the validated rules in a Library resource with `Library.type` coding `dis-execution-plan`. The existing concrete paths are preserved.
 
 4. **Capability verification** — same as for Semantic-Level compilation.
 

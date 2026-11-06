@@ -18,7 +18,7 @@ sequenceDiagram
 
     MGR->>DI_P: ITI-x3 Submit Task (preliminary: irreversible pseudonymization)
     activate DI_P
-    Note over DI_P: Pseudonymize using scoped seed<br/>and agreed derivation parameters
+    Note over DI_P: Pseudonymize using the authorized scope<br/>and provisioned salt
     DI_P-->>MGR: 202 Accepted + Content-Location: task-polling-url
     deactivate DI_P
 

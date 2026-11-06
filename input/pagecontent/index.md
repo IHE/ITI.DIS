@@ -37,6 +37,7 @@ This guide is organized into the following sections:
 4. Other
    1. [Changes to Other IHE Specifications](other.html)
    1. [Download and Analysis](download.html)
+   1. [JSON Schema Artifacts](download.html#json-schema-artifacts)
    1. [Test Plan](testplan.html)
 
 See also the [Table of Contents](toc.html) and the index of [Artifacts](artifacts.html) defined as part of this implementation guide.

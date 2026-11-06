@@ -17,10 +17,6 @@ Description: "Evidence for a completed synchronous pseudonymization task in Use 
 * extension[auditCorrelation].valueIdentifier.value = "audit-corr-20261104-001"
 * insert EvidenceExampleEntry(Patient.identifier, hash, R01)
 * insert EvidenceExampleEntry(Patient.name, remove, R02)
-* insert EvidenceExampleEntry(Patient.address, remove, R03)
-* insert EvidenceExampleEntry(Patient.telecom, remove, R04)
-* insert EvidenceExampleEntry(Patient.birthDate, date-shift, R05)
-* insert EvidenceExampleEntry(Patient.photo, remove, R06)
 * target[0] = Reference(pseudonym-abc123)
 * recorded = "2026-11-04T10:30:00Z"
 * policy[0] = "https://hospital.example.org/dis/policies/hospital-lab-pseudonymization/1.0"
@@ -34,7 +30,6 @@ InstanceOf: Patient
 Usage: #example
 Title: "Pseudonymized patient for the evidence example"
 Description: "Synthetic output Patient referenced by the Use Case 3 Provenance example."
-* identifier[0].system = "urn:example:subject"
-// Derived with the public seed in Volume 3, scope hospital-lab-project-2026 and key version 1.
-* identifier[0].value = "fec7ac7f9887a63b789b201fbe41fdd153c6438838179c2ac7f82b3f2c6bd4ab"
-* birthDate = "1985-04-23"
+* identifier[0].system = "https://hospital.example.org/identifiers/pseudonym"
+// Derived with the public salted SHA-256 test vector in Volume 3.
+* identifier[0].value = "8162610a149e7b6700513fa3f0ceff46328e2b584fd3d351e4d5c2775a42ff0c"

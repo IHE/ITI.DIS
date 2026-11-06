@@ -96,10 +96,17 @@ Description: "Summary of per-element transformation actions applied during the d
 Extension: DisIdentityLinkageScopeExt
 Id: dis-identity-linkage-scope
 Title: "DIS Identity Linkage Scope"
-Description: "Non-secret identifier of the authorized linkage scope; not a patient identifier, seed or cryptographic key."
+Description: "Type and non-secret identifier of the authorized linkage scope."
 * ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-identity-linkage-scope"
 * ^status = #active
 * ^context[+].type = #element
 * ^context[=].expression = "DocumentReference"
-* value[x] 1..1
-* value[x] only string
+* value[x] 0..0
+* extension contains scopeType 1..1 and scopeIdentifier 1..1
+* extension[scopeType].value[x] 1..1
+* extension[scopeType].value[x] only code
+* extension[scopeType].valueCode from DisLinkageScopeTypeVS (required)
+* extension[scopeIdentifier].value[x] 1..1
+* extension[scopeIdentifier].value[x] only Identifier
+* extension[scopeIdentifier].valueIdentifier.system 1..1
+* extension[scopeIdentifier].valueIdentifier.value 1..1

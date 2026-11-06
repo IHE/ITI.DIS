@@ -25,7 +25,7 @@ For each core action, specify valid and invalid parameters, applicable data type
 
 `remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`.
 
-Use the action definitions in [Volume 3](volume-3.html#3pxx13-transformation-actions). Cover scope/seed compatibility, date-shift consistency, derivation versions, rotation, collision handling and capability matching. Test protected parameter return/reuse only when an explicit capability contract permits it.
+Use the action definitions in [Volume 3](volume-3.html#3pxx13-transformation-actions). Cover scope and salt compatibility, date-shift consistency, derivation versions, rotation, collision handling and capability matching. Test protected parameter return/reuse only when an explicit capability contract permits it.
 
 ### Payload, Evidence and Release
 
@@ -35,19 +35,21 @@ Cover synchronous inline output, asynchronous polling, both Bulk Data manifest d
 
 Inspect all nine evidence elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, ruleSet identifier, reversibility state, validation status and audit correlation identifier. Verify reference integrity and handling of narratives, extensions, contained resources and attachments.
 
-Check Manager custody of mappings/reversibility records, mode-dependent retention, task-terminal seed deletion and exclusion of protected transformation material from recipient-facing output, evidence and logs. Patient association in UC-3/4 remains implementation-defined and outside standardized DIS transactions.
+Check Manager custody of mappings/reversibility records, mode-dependent retention, deletion of temporary mapping copies at task termination and exclusion of protected transformation material from recipient-facing output, evidence and logs. Patient association in UC-3/4 remains implementation-defined and outside standardized DIS transactions.
 
 ### Reversible Lookup Mapping
 
-Cover both mandatory DIS-REVERSIBLE arrangements: absent table causes Manager mapping creation/maintenance and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent identifiers/references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
+Cover both mandatory DIS-REVERSIBLE arrangements: absent table causes Manager mapping creation/maintenance and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent patient identifier replacement and valid output references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
 
 ### Cross-Community Consistency Prerequisites
 
-For a deployment claiming cross-community pseudonym consistency, inspect evidence of externally established patient identity resolution, shared-scope authorization and coordinated seed/derivation/version/lifecycle arrangements. Verify that different local identifiers resolved to the same patient yield matching pseudonyms under the agreed contract. Without these prerequisites, no cross-community consistency claim is permitted. This inspection does not test or standardize an external identity-resolution protocol; successful DIS transactions alone do not establish the prerequisites.
+For deployments claiming cross-community pseudonym consistency, inspect externally established identity resolution, shared-scope authorization and coordination of salt versions. For matching source identifier pairs, the same scope and salt version SHALL produce the same pseudonym across participating De-Identifiers. Cross-community prerequisites remain outside the DIS transaction test.
 
 ### Pseudonym Derivation and Policy Compatibility
 
-Verify that De-Identifiers, rather than distributed Managers, transform payloads. Exercise the baseline patient derivation method using equal patient seeds and scope/keyVersion across different local IDs and workers; expect identical complete lowercase digests. Changed scopes/key versions must use their declared derivation context. Reject unknown methods, ambiguous subject/seed associations, detected collisions and supplied tables incompatible with approved hash/fixed replacement rules. Inspect irreversible-mode absence of reverse-mapping tables, destruction of job-scoped material and policy-controlled lifecycle of cross-job derivation secrets. Do not interpret this as proof against re-identification. See [Volume 3](volume-3.html#fhir-payload-content-module) for the task carrier.
+Exercise the published salted and unsalted test vectors. Verify matching output across workers and retries using the same source identifier, scope and effective salt. Verify different salted scopes, rejection of an unauthorized scope, missing or incorrectly sized salts, and incompatible execution plan parameters. For patient identifier hashing, verify the replacement system and full digest. Verify that retained internal FHIR references resolve in the output.
+
+For reversible patient hashing, verify the inline `generatedLookupTable` in synchronous ITI-x3 and asynchronous ITI-x7 completion. Validate the original-to-pseudonym pairs, resolved scope and Manager retention before release. Check that the supplied-table and irreversible patient workflows do not return a generated patient table. Verify that mapping artifacts and confidential salts stay out of recipient output, evidence, logs and errors.
 
 ### Persistent Lookup Table References
 
@@ -61,4 +63,4 @@ The Data Recipient and push-delivery proposal in UC-5 remains an open committee 
 
 ### Published Lookup Table Examples
 
-Validate the [published lookup table examples](volume-3.html#3pxx18-worked-mapping-examples) against their declared FHIR profiles. Decode the Binary and inline attachments and check that they carry the same table. Check that the task-scoped example references the source version and contains only the mappings for the selected subject.
+Validate the [published lookup table examples](volume-3.html#3pxx18-worked-mapping-examples) against their declared FHIR profiles. Decode the Binary and inline attachments and check that they carry the same table. Check that the task-scoped example references the source version and contains only the assigned mappings. Validate the generated table and confirm that its pseudonym matches the salted test vector and the published Patient example.
