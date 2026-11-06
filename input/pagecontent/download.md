@@ -7,6 +7,13 @@ You can also download:
 
 The [IHE ITI.DIS repository](https://github.com/IHE/ITI.DIS) contains the source for this guide.
 
+#### FHIR Semantic Group Binding
+
+Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3.html#3pxx122-semantic-groups). The following informative resources support policy authoring.
+
+- [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv)
+- [FHIR PII classification and semantic group guide](fhir-semantic-group-guide.html)
+
 #### JSON Schema Artifacts
 
 These schemas describe the structure of the decoded JSON payloads used by DIS. Volume 3 defines the additional content and semantic requirements for each payload.

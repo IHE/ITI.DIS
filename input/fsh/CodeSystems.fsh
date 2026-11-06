@@ -212,3 +212,24 @@ Title: "DIS Linkage Scope Types"
 Description: "Scope types for DIS policies and lookup tables."
 * ^status = #draft
 * include codes from system DisLinkageScopeType
+
+
+CodeSystem: DisSemanticGroup
+Id: dis-semantic-group
+Title: "DIS Semantic Group"
+Description: "Codes for groups of elements that Semantic-Level DIS policies can target."
+* ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-semantic-group"
+* ^status = #draft
+* ^experimental = false
+* ^caseSensitive = true
+* #subject-identifiers "Direct identifiers of the data subject"
+* #subject-business-identifiers "Patient business identifiers used by baseline patient pseudonym derivation"
+* #subject-names "Patient names governed separately from business pseudonyms"
+* #subject-demographics "Demographic elements of the data subject"
+* #contact-information "Contact persons and their identifying elements"
+* #provider-identifiers "Identifiers and names of care providers"
+* #birth-dates "Birth dates of data subjects"
+* #dates "Event dates and times across governed resource types"
+* #narrative "Resource narrative content"
+* #references "Reference elements that could link to identifiable resources"
+* #device-identifiers "Device identifiers and names"

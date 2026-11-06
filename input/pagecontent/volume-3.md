@@ -23,85 +23,31 @@ This section specifies how DIS-FHIR-Payload enables de-identification of HL7 FHI
 
 #### 3:PXX.1.1.1 Version Identification
 
-Each processing payload SHALL explicitly declare its HL7 FHIR version. The version declaration enables the De-ID Manager to verify De-Identifier compatibility before task dispatch and ensures that de-identified output is validated against the correct HL7 FHIR version.
-
-A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the HL7 FHIR payload versions it supports in its capability declaration. The De-ID Manager SHALL verify that the processing payload's declared version is included in the assigned De-Identifier's supported versions before dispatching a task via ITI-x3. The De-ID Manager SHALL reject a job when no available De-Identifier supports the payload's declared HL7 FHIR version.
-
-Table 3:PXX.1.1-1 lists the mechanisms for declaring the payload version.
-
-<p id="tPXX.1.1-1" class="tableTitle"><strong>Table 3:PXX.1.1-1: Payload Version Declaration Mechanisms</strong></p>
-
-| Mechanism | Context | Example |
-|-----------|---------|---------|
-| Processing target `fhirVersion` field | ITI-x1 job submission and ITI-x3 task dispatch | `{ "family": "fhir", "fhirVersion": "5.0.0", "reference": "Patient/123" }` |
-| Content type parameter | Inline attachment | `application/fhir+json; fhirVersion=5.0.0` |
-| Source server capability | By-reference retrieval | De-Identifier reads `CapabilityStatement.fhirVersion` from the source HL7 FHIR server |
-| Manifest metadata | Bulk Data | Manifest declares the HL7 FHIR version of referenced NDJSON files |
-{: .grid}
-
-An explicit payload version declaration is REQUIRED for R4, R5 and R6 payloads. The De-ID Manager SHALL reject a submission that omits the declaration rather than infer R4 from the protocol binding. Source server capabilities and retrieved content are used to verify the declared version, not to replace the submission declaration.
+For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request that omits it and SHALL use the same declaration in ITI-x3. A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
 
 #### 3:PXX.1.1.2 Version-Safe Packaging
 
-An HL7 FHIR payload whose version differs from the HL7 FHIR R4 protocol binding SHALL NOT be embedded as a native resource in the HL7 FHIR R4 transaction envelope. Embedding a non-R4 resource directly in HL7 FHIR R4 `Parameters`, `Task`, or `Bundle` structures would produce invalid HL7 FHIR R4 content and conflate the protocol and payload version boundaries.
+The DIS transaction envelope uses HL7 FHIR R4. A payload in the same release may be carried as a native resource where the transaction permits it. For ungrouped ITI-x1 submissions, inline R5 and R6 payloads SHALL be serialized as FHIR JSON or XML and carried in `Parameters.parameter.valueAttachment`. Grouped submissions and results use the [manifest packaging rules](#resource-manifest-resolution). The attachment SHALL contain the serialized bytes in `data` and declare the corresponding FHIR media type in `contentType`. If the standard [FHIR media-type version parameter](https://hl7.org/fhir/R4/http.html#version-parameter) is present, it SHALL agree with `payloadVersion`. For example, an R5 JSON attachment uses `application/fhir+json; fhirVersion=5.0` when the parameter is included.
 
-The following packaging patterns are permitted for cross-version payloads:
-
-##### By-Reference
-
-The processing target identifies the resource by HL7 FHIR reference or URL. The De-Identifier retrieves it from a source HL7 FHIR server that supports the payload version. The HL7 FHIR R4 transaction envelope carries only the reference, not the resource content.
+For an inline R5 input in ITI-x1, the R4 `Parameters` resource contains entries of this form. The attachment data shown is a placeholder for the base64-encoded R5 resource.
 
 ```json
-{
-  "family": "fhir",
-  "fhirVersion": "5.0.0",
-  "reference": "Patient/123",
-  "sourceBaseUrl": "https://source.example.org/fhir/r5"
-}
-```
-
-The De-Identifier SHALL use the declared `fhirVersion` and `sourceBaseUrl` to interact with the source server. The source server is expected to return resources conforming to the declared version.
-
-##### Inline Attachment
-
-The payload is serialized as JSON or XML and carried as a `valueAttachment` in the HL7 FHIR R4 task input. The HL7 FHIR R4 envelope treats the attachment content as opaque bytes.
-
-```json
-{
-  "type": {
-    "coding": [
-      {
-        "system": "https://dis.ihe.net/CodeSystem/task-input",
-        "code": "processingTarget"
-      }
-    ]
+[
+  {
+    "name": "payloadVersion",
+    "valueCode": "R5"
   },
-  "valueAttachment": {
-    "contentType": "application/fhir+json; fhirVersion=5.0.0",
-    "data": "<base64-encoded HL7 FHIR R5 resource>"
+  {
+    "name": "processingTarget",
+    "valueAttachment": {
+      "contentType": "application/fhir+json; fhirVersion=5.0",
+      "data": "<base64-encoded FHIR R5 resource>"
+    }
   }
-}
+]
 ```
 
-The content type parameter `fhirVersion` is a DIS-defined convention for declaring the payload version within inline attachments; it is not a registered HL7 FHIR MIME type parameter. The De-Identifier SHALL parse the attachment content according to the declared version.
-
-##### Bulk Data Manifest
-
-NDJSON files referenced by a Bulk Data manifest contain serialized resources in the declared payload version. The manifest metadata declares the HL7 FHIR version; each NDJSON line is a complete serialized resource.
-
-```json
-{
-  "family": "fhir",
-  "fhirVersion": "5.0.0",
-  "bulkManifest": "https://manager.example.org/dis-jobs/job-001/source-manifest"
-}
-```
-
-##### De-Identified Output Packaging
-
-De-identified output SHALL be returned or persisted using the same packaging patterns. Output resources retain the payload's HL7 FHIR version -- the De-Identifier does not convert output to HL7 FHIR R4. When output is returned inline, it SHALL be carried as a `valueAttachment` or serialized in a multipart response, not embedded as a native resource in the HL7 FHIR R4 response envelope.
-
-When output is persisted by reference (e.g., to an output HL7 FHIR server or as NDJSON files), the output server or files operate at the payload version. The HL7 FHIR R4 protocol response carries only the output references.
+For references and bulk file manifests, the R4 envelope carries the resource reference or manifest URI. The referenced content uses the release declared in `payloadVersion`. See [Obtaining Processing Targets](#obtaining-processing-targets) for retrieval and authorization requirements.
 
 ##### Protocol Resources Remain HL7 FHIR R4
 
@@ -122,38 +68,13 @@ Table 3:PXX.1.1-2 lists the resources that are part of the HL7 FHIR R4 protocol 
 
 #### 3:PXX.1.1.3 Version-Neutral Element Addressing
 
-DIS-FHIR-Payload uses FHIRPath-compatible path expressions to address data elements within the processing payload (see [§1:PXX.2.3](volume-1.html#1pxx23-hl7-fhir-payload-option)). The path expressions used by DIS execution plans, semantic group mappings, and Provenance transformation summaries are version-neutral: they resolve consistently across HL7 FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions.
-
-Most governed element paths are stable across HL7 FHIR R4, R5, and R6:
-
-- `Patient` direct-identifier and demographic elements (`Patient.name`, `Patient.identifier`, `Patient.birthDate`, `Patient.address`, `Patient.telecom`, `Patient.photo`, `Patient.gender`, `Patient.maritalStatus`) retain identical paths across all three versions.
-- HL7 FHIR datatypes used by DIS transformation actions (`HumanName`, `Identifier`, `Address`, `ContactPoint`, `Narrative`, `date`, `dateTime`, `instant`, `Period`, `Quantity`) have stable structures across these versions.
-- DIS semantic groups for subject identifiers, demographics, contact information, references, and narrative map to stable paths.
-- Resource types commonly governed by DIS (`Patient`, `Practitioner`, `Encounter`, `Condition`, `Observation`, `DiagnosticReport`, `Procedure`, `MedicationRequest`, `DocumentReference`, `ImagingStudy`) exist in all three versions.
-
-However, several governed elements were renamed between HL7 FHIR R4 and R5. The De-ID Manager SHALL apply version-conditional path mappings for these elements when compiling execution plans for HL7 FHIR R5 or R6 payloads.
-
-Table 3:PXX.1.1-3 lists the version-conditional path mappings for elements that changed between HL7 FHIR R4 and R5.
-
-<p id="tPXX.1.1-3" class="tableTitle"><strong>Table 3:PXX.1.1-3: Version-Conditional Path Mappings (HL7 FHIR R4 to R5)</strong></p>
-
-| Semantic Group | HL7 FHIR R4 Path | HL7 FHIR R5 Path | Affected Element |
-|----------------|-------------------|-------------------|-----------------|
-| `subject.dates` | `Encounter.period` | `Encounter.actualPeriod` | Encounter date/time |
-| `subject.dates` | `Procedure.performed[x]` | `Procedure.occurrence[x]` | Procedure date/time (choice types vary by version; HL7 FHIR R5 adds `Timing`) |
-| `provider.name` | `Encounter.participant.individual` | `Encounter.participant.actor` | Encounter participant reference |
-| `device-identifiers` | `Device.deviceName` | `Device.name` | Device name (sub-element `deviceName.name` in HL7 FHIR R4 becomes `name.value` in HL7 FHIR R5) |
-{: .grid}
-
-The De-ID Manager SHALL resolve these mappings at execution plan compilation time based on the declared payload version. A single governance policy using semantic groups remains version-neutral; the version-conditional mapping is applied during compilation, not by the De-Identifier. The De-Identifier receives resolved paths appropriate for the payload version.
-
-For elements not listed in Table 3:PXX.1.1-3, a single execution plan can govern payloads of different HL7 FHIR versions without requiring version-specific rule variants. When future HL7 FHIR versions introduce additional structural changes to governed elements, this table SHALL be extended.
+DIS-FHIR-Payload uses FHIRPath selectors to address elements within the declared processing payload release. Semantic-Level policies use the same group codes across releases. The [Semantic Group Binding](#3pxx122-semantic-groups) supplies release-specific selectors during compilation. For example, `@dates` selects the encounter period through `Encounter.period` in R4 and `Encounter.actualPeriod` in R5.
 
 #### 3:PXX.1.1.4 Evidence Representation Across Versions
 
 De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. Evidence does not depend on the payload's HL7 FHIR version because:
 
-- `Provenance.target` references de-identified output by resource URI or identifier, not by embedding the output resource. A URI reference to an HL7 FHIR R5 Patient is syntactically identical to a reference to an HL7 FHIR R4 Patient.
+- `Provenance.target` identifies the de-identified result. For grouped FHIR R5 and R6 results, it identifies the R4 wrapper carrying or locating that result. Use a literal R4 reference for a hosted wrapper. For a bundled wrapper, use a logical reference whose identifier matches a unique `DocumentReference.identifier` in the result package. Ungrouped FHIR exchanges use the declared payload release to interpret any direct cross-release target URI under the DIS binding.
 - Transformation summary entries use version-neutral FHIRPath target paths (e.g., `Patient.name`, `Patient.birthDate`). These paths describe what was transformed, not the version of the resource that was transformed.
 - Policy references, ruleSet identifiers, reversibility state, validation status, and audit correlation identifiers are version-independent metadata.
 
@@ -188,41 +109,52 @@ DIS-FHIR-Payload uses FHIRPath expressions as the element addressing language. E
 
 An element path SHALL be one of the following forms:
 
-- **Resource-rooted path** -- a FHIRPath expression starting with a resource type (e.g., `Patient.name`, `Observation.value[x]`). The path identifies one or more elements within a single resource instance.
+- **Resource-rooted path** -- a FHIRPath expression starting with a resource type (e.g., `Patient.name`, `Observation.value`). The path identifies one or more elements within a single resource instance.
 - **Semantic group reference** -- a reference to a named semantic group (e.g., `@subject-identifiers`). The `@` prefix distinguishes a semantic group reference from a FHIRPath expression. The group expands to its member paths at policy compilation time (see [§3:PXX.2.4](#3pxx24-policy-compilation)).
 
 When a path targets an element with child elements (e.g., `Patient.name` which contains `HumanName.family`, `HumanName.given`, `HumanName.prefix`, `HumanName.suffix`, `HumanName.text`, `HumanName.period`), the action applies to the targeted element and all its children unless the execution plan specifies a more specific child path.
 
-Choice-type elements use the `[x]` notation (e.g., `Observation.value[x]`). The De-Identifier SHALL apply the rule to whichever concrete type is present in the resource instance.
+Choice-type elements use the `[x]` notation (e.g., `Observation.value`). The De-Identifier SHALL apply the rule to whichever concrete type is present in the resource instance.
 
 #### 3:PXX.1.2.2 Semantic Groups
 
 Semantic groups categorize HL7 FHIR elements by privacy sensitivity. Semantic-Level policies reference semantic groups instead of individual element paths. The De-ID Manager expands semantic group references to individual element paths during policy compilation (see [§3:PXX.2.4](#3pxx24-policy-compilation)).
 
-Table 3:PXX.1.2-1 defines the Phase 1 semantic groups for DIS-FHIR-Payload.
+The [DIS Semantic Group CodeSystem](CodeSystem-dis-semantic-group.html) defines the group codes and their meanings. Table 3:PXX.1.2-1 is the authoritative FHIR Semantic Group Binding for selector membership and order by payload release. The table defines binding version 0.2.0 independently of the FHIR payload version.
 
-<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.1.2-1: DIS-FHIR-Payload Semantic Groups</strong></p>
+The [R4/R5 PII path catalog](bindings/dis-fhir-pii-path-catalog-0.2.0.csv) and [classification and semantic group guide](fhir-semantic-group-guide.html) are informative. They help policy authors identify candidate FHIRPath selectors for syntax-level policies. Catalog groups and paths do not extend the selector membership defined in the table.
 
-| Semantic Group | Description | Example Member Paths |
-|----------------|-------------|----------------------|
-| `subject-identifiers` | Direct identifiers of the data subject | `Patient.identifier`, `Patient.name`, `Patient.identifier.value`, `Patient.name.family`, `Patient.name.given` |
-| `subject-business-identifiers` | Patient business identifiers used by baseline patient pseudonym derivation | `Patient.identifier` |
-| `subject-names` | Patient names governed separately from business pseudonyms | `Patient.name` |
-| `subject-demographics` | Demographic elements of the data subject | `Patient.birthDate`, `Patient.gender`, `Patient.address`, `Patient.telecom`, `Patient.photo`, `Patient.maritalStatus`, `Patient.communication`, `Patient.multipleBirth[x]`, `Patient.deceased[x]` |
-| `contact-information` | Contact persons and their identifying elements | `Patient.contact.name`, `Patient.contact.telecom`, `Patient.contact.address`, `Patient.contact.organization`, `RelatedPerson.identifier`, `RelatedPerson.name`, `RelatedPerson.telecom`, `RelatedPerson.address`, `RelatedPerson.photo` |
-| `provider-identifiers` | Identifiers and names of care providers | `Practitioner.identifier`, `Practitioner.name`, `Practitioner.telecom`, `Practitioner.address`, `Practitioner.photo`, `PractitionerRole.identifier` |
-| `dates` | Date and time elements across governed resource types | `Patient.birthDate`, `Patient.deceased[x]` (when dateTime), `Encounter.period`, `Condition.onset[x]`, `Condition.abatement[x]`, `Procedure.performed[x]`, `Observation.effective[x]`, `MedicationRequest.authoredOn`, `DiagnosticReport.effective[x]`, `DocumentReference.date` |
-| `narrative` | Resource narrative content | `DomainResource.text` (the `Narrative` element on any governed resource type) |
-| `references` | Reference elements that could link to identifiable resources | `Observation.subject`, `Condition.subject`, `Encounter.subject`, `Procedure.subject`, `DiagnosticReport.subject`, `MedicationRequest.subject`, `Encounter.participant.individual` (HL7 FHIR R4) / `Encounter.participant.actor` (HL7 FHIR R5), `DocumentReference.subject`, `DocumentReference.author` |
-| `device-identifiers` | Device identifiers and names | `Device.identifier`, `Device.serialNumber`, `Device.deviceName` (HL7 FHIR R4) / `Device.name` (HL7 FHIR R5), `Device.udiCarrier` |
+Binding version 0.2.0 assigns `Patient.birthDate` to `birth-dates` in both R4 and R5. When migrating a policy from version 0.1.0, review rules targeting `@dates` or `@subject-demographics` and add an explicit `@birth-dates` rule if the policy still governs birth date. If both older groups targeted birth date, resolve the intended action during migration.
+
+Policies may use the applicable date actions or remove the birth date. If the policy needs to preserve age relative to a shifted event, use the same date-shift scope for both. Deriving an age band is a separate transformation that requires a reference event or date, band boundaries, handling for partial birth dates, and an output destination. The Phase 1 core action family does not define age-band derivation.
+
+<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.1.2-1: DIS FHIR Semantic Group Binding</strong></p>
+
+| Semantic group | FHIR R4 (4.0.1) | FHIR R5 (5.0.0) |
+| --- | --- | --- |
+| `subject-identifiers` | `Patient.identifier`, `Patient.name` | `Patient.identifier`, `Patient.name` |
+| `subject-business-identifiers` | `Patient.identifier` | `Patient.identifier` |
+| `subject-names` | `Patient.name` | `Patient.name` |
+| `subject-demographics` | `Patient.gender`, `Patient.address`, `Patient.telecom`, `Patient.photo`, `Patient.maritalStatus`, `Patient.communication`, `Patient.multipleBirth`, `Patient.deceased` | `Patient.gender`, `Patient.address`, `Patient.telecom`, `Patient.photo`, `Patient.maritalStatus`, `Patient.communication`, `Patient.multipleBirth`, `Patient.deceased` |
+| `contact-information` | `Patient.contact.name`, `Patient.contact.telecom`, `Patient.contact.address`, `Patient.contact.organization`, `RelatedPerson.identifier`, `RelatedPerson.name`, `RelatedPerson.telecom`, `RelatedPerson.address`, `RelatedPerson.photo` | `Patient.contact.name`, `Patient.contact.telecom`, `Patient.contact.address`, `Patient.contact.organization`, `RelatedPerson.identifier`, `RelatedPerson.name`, `RelatedPerson.telecom`, `RelatedPerson.address`, `RelatedPerson.photo` |
+| `provider-identifiers` | `Practitioner.identifier`, `Practitioner.name`, `Practitioner.telecom`, `Practitioner.address`, `Practitioner.photo`, `PractitionerRole.identifier` | `Practitioner.identifier`, `Practitioner.name`, `Practitioner.telecom`, `Practitioner.address`, `Practitioner.photo`, `PractitionerRole.identifier` |
+| `birth-dates` | `Patient.birthDate` | `Patient.birthDate` |
+| `dates` | `Patient.deceased.ofType(dateTime)`, `Encounter.period`, `Condition.onset.ofType(dateTime)`, `Condition.onset.ofType(Period)`, `Condition.abatement.ofType(dateTime)`, `Condition.abatement.ofType(Period)`, `Procedure.performed.ofType(dateTime)`, `Procedure.performed.ofType(Period)`, `Observation.effective.ofType(dateTime)`, `Observation.effective.ofType(Period)`, `Observation.effective.ofType(instant)`, `MedicationRequest.authoredOn`, `DiagnosticReport.effective.ofType(dateTime)`, `DiagnosticReport.effective.ofType(Period)`, `DocumentReference.date` | `Patient.deceased.ofType(dateTime)`, `Encounter.actualPeriod`, `Condition.onset.ofType(dateTime)`, `Condition.onset.ofType(Period)`, `Condition.abatement.ofType(dateTime)`, `Condition.abatement.ofType(Period)`, `Procedure.occurrence.ofType(dateTime)`, `Procedure.occurrence.ofType(Period)`, `Observation.effective.ofType(dateTime)`, `Observation.effective.ofType(Period)`, `Observation.effective.ofType(instant)`, `MedicationRequest.authoredOn`, `DiagnosticReport.effective.ofType(dateTime)`, `DiagnosticReport.effective.ofType(Period)`, `DocumentReference.date` |
+| `narrative` | `DomainResource.text` | `DomainResource.text` |
+| `references` | `Observation.subject`, `Condition.subject`, `Encounter.subject`, `Procedure.subject`, `DiagnosticReport.subject`, `MedicationRequest.subject`, `Encounter.participant.individual`, `DocumentReference.subject`, `DocumentReference.author` | `Observation.subject`, `Condition.subject`, `Encounter.subject`, `Procedure.subject`, `DiagnosticReport.subject`, `MedicationRequest.subject`, `Encounter.participant.actor`, `DocumentReference.subject`, `DocumentReference.author` |
+| `device-identifiers` | `Device.identifier`, `Device.serialNumber`, `Device.deviceName`, `Device.udiCarrier` | `Device.identifier`, `Device.serialNumber`, `Device.name`, `Device.udiCarrier` |
 {: .grid}
 
-A semantic group MAY include elements from multiple resource types. Semantic group membership is defined by the content module and is not configurable by the policy. Policies select which groups to govern and which action to apply; they do not add or remove elements from a group.
+For the declared FHIR payload release, the Manager SHALL expand each semantic group using the selectors in the corresponding release column of Table 3:PXX.1.2-1. The Manager SHALL preserve the listed selector order and the order of source policy rules. A selector with a concrete resource root applies to resources of that type. `DomainResource.text` applies to the narrative element on each governed resource derived from `DomainResource`.
+
+Group membership is defined by the content module. A policy selects groups and actions. It cannot change the group's selectors. The `subject-identifiers` group intentionally shares its two selectors with `subject-business-identifiers` and `subject-names`. Use the narrower groups when applying different actions to identifiers and names. A group containing a composite element selects the element as a whole. The separate action applicability rules still apply to every expanded target.
+
+The `dates` group covers the listed structured temporal values. Its choice selectors constrain the selected FHIR types using `ofType()`. Free-text dates, ages, ranges, and schedules expressed as `Timing` are outside this binding. Other paths, including extensions and other references, require separate policy coverage as applicable. The binding does not establish that a policy covers all identifying content in a payload.
 
 Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.1.2-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the Phase 1 groups.
 
 <div markdown="1" class="stu-note">
-**Editorial Note:** The semantic group definitions in Table 3:PXX.1.2-1 are illustrative. The formal CodeSystem and membership definitions will be provided when FSH conformance artifacts are finalized.
+**Editorial Note:** This draft defines the proposed Phase 1 membership for R4 and R5. An R6 Semantic Group Binding remains pending.
 </div>
 
 #### 3:PXX.1.2.3 Resource Traversal
@@ -505,49 +437,61 @@ The transformation summary enables audit and review of the specific actions appl
 The [evidence example](Provenance-dis-evidence-uc3-001.html) illustrates the Provenance produced for a completed synchronous pseudonymization task in Use Case 3 (Clinical Pathology Order). It conforms to the [DIS Evidence profile](StructureDefinition-DIS-Evidence.html) and references a synthetic [pseudonymized Patient](Patient-pseudonym-abc123.html).
 
 <a name="data-plane-access"> </a>
+<a name="obtaining-processing-targets"> </a>
 
-### 3:PXX.1.6 Data-Plane Access
+### 3:PXX.1.6 Obtaining Processing Targets
 
-This section defines how DIS-FHIR-Payload processing targets are retrieved by the De-Identifier and how de-identified output is returned. Three delivery modes are supported: by-reference, by-value, and by-manifest.
+DIS-FHIR-Payload supports inline and referenced inputs. Grouped exchanges use the [common manifest contract](#payload-set-delivery). The ungrouped FHIR forms below also support inline submission, direct resource references, and bulk file manifests. The job request identifies the proposed processing targets. The task request identifies the data that the assigned De-Identifier is to retrieve.
 
-#### 3:PXX.1.6.1 By-Reference
+#### 3:PXX.1.6.1 Inline Submission
 
-In by-reference delivery mode, the processing target is identified by an HL7 FHIR reference (e.g., `Patient/123`) and an optional source base URL. The De-Identifier retrieves the resource from the source HL7 FHIR server using HL7 FHIR REST read interactions.
+The Requester supplies resource content in ITI-x1 using the [version-safe packaging rules](#3pxx112-version-safe-packaging). An Integrated De-ID Manager/De-Identifier can process the submitted content directly. When dispatching to a separate De-Identifier, the Manager SHALL make the submitted content available through authorized task input references. The references SHALL resolve to the submitted content in its declared FHIR release.
 
-The De-Identifier SHALL present authorization credentials when retrieving resources from the source server. The De-ID Manager provides the necessary authorization context in the ITI-x3 task dispatch.
+#### 3:PXX.1.6.2 FHIR Resource References
 
-De-identified output in by-reference mode MAY be:
-- Returned inline in the ITI-x3 response (synchronous mode) as HL7 FHIR R4 resources (for HL7 FHIR R4 payloads) or as attachments (for cross-version payloads)
-- Persisted to an output HL7 FHIR server designated by the De-ID Manager, with output references returned in the response
+The Requester can enumerate resources using repeated `processingTarget` parameters. The actor that retrieves a referenced resource uses a FHIR REST read, or a version-specific read when the reference identifies a resource version. An absolute HTTPS reference identifies the source directly. The Manager MAY accept a relative reference in ITI-x1 when the applicable source base URL is unambiguously established by deployment configuration. The Manager SHALL reject a relative reference with no unambiguous source and SHALL dispatch absolute HTTPS references in ITI-x3.
 
-#### 3:PXX.1.6.2 By-Value
+<a name="resource-manifest"> </a>
 
-In by-value delivery mode, the processing target resource content is embedded directly in the ITI-x1 request `Parameters` resource. This mode is typical for synchronous single-patient workflows where the data volume is small.
+##### Resource Manifest
 
-For HL7 FHIR R4 payloads, by-value resources are carried as native HL7 FHIR R4 resources within the `Parameters` envelope. For HL7 FHIR R5 or R6 payloads, by-value resources SHALL be carried as attachments using the inline attachment packaging pattern defined in [§3:PXX.1.1.2](#3pxx112-version-safe-packaging).
+A [DIS Resource Manifest](StructureDefinition-DIS-ResourceManifest.html) is a profiled FHIR R4 [List](https://hl7.org/fhir/R4/list.html). In an ungrouped exchange, each `List.entry.item.reference` is an absolute HTTPS FHIR REST reference. In a grouped exchange, the List may also use bundle-local references under the [manifest package rules](#manifest-package). The manifest belongs to one payload set. The selected binding and version determine whether an entry identifies a payload resource, an R4 payload wrapper, or an R4 index. See [Resource Manifest Resolution](#resource-manifest-resolution) for the mapping by binding.
 
-De-identified output in by-value mode is returned inline in the response using the same packaging pattern as the input.
-
-#### 3:PXX.1.6.3 By-Manifest
-
-In by-manifest delivery mode, the processing target is identified by a URI referencing an NDJSON manifest. This mode is used for bulk data cohort jobs.
-
-The manifest follows the conventions of the [HL7 Bulk Data Access IG](https://hl7.org/fhir/uv/bulkdata/). Each line of a referenced NDJSON file contains a complete serialized HL7 FHIR resource in the declared payload version.
-
-The De-Identifier SHALL present authorization credentials when retrieving manifest files and NDJSON data files. File retrieval SHALL use TLS.
-
-De-identified output in by-manifest mode is returned as a manifest referencing de-identified NDJSON output files together with evidence references. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
-
-Table 3:PXX.1.6-1 summarizes the delivery modes and their characteristics.
-
-<p id="tPXX.1.6-1" class="tableTitle"><strong>Table 3:PXX.1.6-1: DIS-FHIR-Payload Delivery Modes</strong></p>
-
-| Delivery Mode | Input Mechanism | Typical Use | Output Mechanism |
-|---------------|-----------------|-------------|------------------|
-| By-reference | HL7 FHIR reference + source base URL | Source data on an HL7 FHIR server | Inline in response or persisted to output server |
-| By-value | Resource embedded in `Parameters` (native or attachment) | Synchronous single-patient, small data volume | Inline in response |
-| By-manifest | URI referencing NDJSON manifest | Bulk data cohort jobs | Manifest referencing de-identified NDJSON files |
+| Use | Ungrouped FHIR carrier | Grouped carrier |
+|-----|------------------------|-----------------|
+| Input | `resourceManifest.valueReference` in ITI-x1 or ITI-x3 | `payload.manifest` with format `dis-resource-list` |
+| Result | `output.resource` in ITI-x1, ITI-x4, ITI-x3, or ITI-x7 | `payloadResult.manifest` with format `dis-resource-list` |
 {: .grid}
+
+The Manager SHALL establish the manifest's entry set before dispatch and verify that authorization covers every entry and the corresponding native content. It SHALL ensure the job and its retries resolve to the same target set. The Manager can use version-specific references or a protected snapshot of the manifest and any index resources used to resolve the targets. The Manager SHALL give the De-Identifier access only to the manifest, indexes, and payloads authorized for its task. The Integrated De-ID Manager/De-Identifier applies the same rules when processing directly.
+
+For existing ungrouped FHIR exchanges, resolution of an absolute HTTPS manifest entry in the declared R5 or R6 release is a DIS-specific rule. FHIR R4 leaves cross-release reference resolution undefined. In the ungrouped FHIR form, `resourceManifest` referencing `List/42` selects the resources listed in `List/42`. A direct `processingTarget` referencing `List/42` selects the List resource itself.
+
+#### 3:PXX.1.6.3 Bulk File Manifests
+
+For an asynchronous cohort job, the Requester supplies an HTTPS URI identifying a JSON manifest that lists prepared input files. Each line of a listed NDJSON file contains one complete resource in the declared payload release. [Volume 1](volume-1.html) defines the Phase 1 boundary for bulk data input and output.
+
+DIS uses the file listing conventions of the [HL7 Bulk Data Access IG STU 3](https://hl7.org/fhir/uv/bulkdata/STU3/en/export.html#response---output-manifest). For a manifest prepared for DIS, the required fields are `requiresAccessToken` (boolean) and `output` (array of file entries). Each entry SHALL identify the resource type in `type` and the file location in `url` as an absolute HTTPS URL. The manifest SHALL enumerate the complete dataset in one file listing. It may omit export-specific metadata such as `request` and `transactionTime`. The job's `payloadVersion` applies to all listed input files. A manifest with continuation links or reported export errors SHALL be rejected for processing under this binding.
+
+<a name="referenced-input-authorization"> </a>
+
+#### 3:PXX.1.6.4 Authorization for Referenced Inputs
+
+The Manager SHALL verify that the approved data request covers the processing target set, including every resource identified by a resource manifest and the dataset described by a bulk file manifest. It SHALL dispatch only references within the authorized scope. Retrieval of a resource or manifest SHALL NOT expand that scope. The data request authorization governs the full target set.
+
+The actor making the retrieval request SHALL use HTTPS and obtain credentials valid for the specific resource or file service. For automated FHIR REST reads, the retrieving actor SHOULD use [SMART Backend Services](https://hl7.org/fhir/smart-app-launch/STU2.2/backend-services.html) with its registered client identity to obtain an access token. The source service enforces the applicable resource access restrictions. The data request authorization in ITI-x1 is evidence of approval for the job. The retrieving actor obtains credentials through the source service's access mechanism.
+
+Authorization SHALL cover retrieval of each manifest and each resource or file listed in it. If `requiresAccessToken` is true, the retrieving actor SHALL present an access token valid at the file endpoint. When the file endpoint uses a signed URL as the access credential, the retrieving actor SHALL use the URL without forwarding a bearer token. The signed URL SHALL be limited to the specific file and have a bounded lifetime. A signed URL SHALL be handled as a credential. The retrieving actor SHALL send credentials only to the service for which they are valid.
+
+The Manager SHALL reject the job if it cannot establish that the identified dataset is authorized. If a required input is missing, inaccessible, invalid or outside the authorized scope, the Manager SHALL reject the job before acceptance or fail the accepted job and withhold all job output. A De-Identifier that detects such a failure SHALL report it to the Manager using the applicable task transaction.
+
+#### 3:PXX.1.6.5 Delivery of De-Identified Results
+
+The De-Identifier returns task results to the Manager in ITI-x3 or ITI-x7. The Manager returns job results to the Requester in ITI-x1 or ITI-x4. Result resources retain the input FHIR release. Inline results use the [version-safe packaging rules](#3pxx112-version-safe-packaging). Jobs submitted with inline content return the job result inline. For jobs submitted with FHIR resource references or a resource manifest, results MAY be returned inline or persisted to an output service designated by the Manager. Where results are delivered by reference, the receiving actor retrieves them from that service using its authorized access.
+
+For ungrouped FHIR results delivered as a resource manifest, the producing actor SHALL place the profiled R4 List in `Parameters.parameter.resource` for the `output` parameter. An output List that declares the DIS Resource Manifest profile is interpreted as a manifest. To return such a List as a de-identified payload resource, place it in a result Bundle. Manifest entries SHALL identify only de-identified resources in the result set available to the receiving actor. The producing actor SHALL ensure that each reference resolves to the corresponding authorized result before returning the manifest and remains bound to that result while available for retrieval. Recipient-facing manifest metadata SHALL exclude source identifiers and protected transformation material. Associated Provenance is carried in the transaction's `evidence` parameters.
+
+For asynchronous cohort jobs, the Manager returns a bulk file manifest for the de-identified NDJSON files and supplies the associated evidence with the job result. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset. The Manager SHALL report the failure through job status for an accepted asynchronous job.
 
 ### 3:PXX.1.7 Reversible Lookup Table
 
@@ -687,7 +631,7 @@ Each rule in the `rules` array contains the elements listed in Table 3:PXX.2.2-3
 
 Semantic-Level policy rules use semantic group references (e.g., `@subject-identifiers`) rather than element paths. This keeps the policy format-neutral. The De-ID Manager expands semantic group references to payload-specific element paths during compilation (see [§3:PXX.2.4](#3pxx24-policy-compilation)).
 
-Syntax-Level policy rules use concrete element paths appropriate to the declared `payloadFamily`. For HL7 FHIR payloads, these are FHIRPath expressions (e.g., `Patient.identifier`, `Patient.name`). For future DICOM payloads, these would be DICOM tag paths. The De-ID Manager validates that all rule targets are valid paths for the declared payload family and version.
+Syntax-Level policy rules use concrete element paths appropriate to the declared `payloadFamily`. For HL7 FHIR payloads, these are FHIRPath expressions (e.g., `Patient.identifier`, `Patient.name`). The De-ID Manager validates that all rule targets are valid paths for the declared payload family and version.
 
 Rules within a ruleSet are evaluated in order; first-match-wins evaluation applies, consistent with execution plan evaluation (see [§3:PXX.1.4.2](#3pxx142-execution-plan-json-structure)).
 
@@ -800,15 +744,12 @@ This Semantic-Level policy illustrates staged irreversible pseudonymization for 
     },
     {
       "ruleSetId": "quasi-identifiers",
-      "description": "Record-level removal and truncation of quasi-identifiers",
+      "description": "Record-level removal of quasi-identifiers",
       "rules": [
         {
           "ruleId": "A01",
           "target": "@dates",
-          "action": "truncate-date",
-          "parameters": {
-            "precision": "year"
-          }
+          "action": "remove"
         },
         {
           "ruleId": "A02",
@@ -823,6 +764,11 @@ This Semantic-Level policy illustrates staged irreversible pseudonymization for 
         {
           "ruleId": "A04",
           "target": "@device-identifiers",
+          "action": "remove"
+        },
+        {
+          "ruleId": "A05",
+          "target": "@birth-dates",
           "action": "remove"
         }
       ]
@@ -894,7 +840,7 @@ This Syntax-Level policy illustrates the same Use Case 3 rules with concrete FHI
 
 ### 3:PXX.2.3 Policy Delivery and Validation
 
-A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. The ITI-x1 `policy` parameter always declares the approved policy by canonical URL (`policy.url`) and version (`policy.version`). The `authorization` parameter provides evidence that the data request — including approval of that specific policy — was authorized by the data governance authority. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
+A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. The ITI-x1 `policy` group, at the top level for ungrouped jobs or within each `payload` for grouped jobs, declares the approved policy by canonical URL (`policy.url`) and version (`policy.version`). The `authorization` parameter provides evidence that the data request — including approval of that specific policy — was authorized by the data governance authority. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
 
 #### 3:PXX.2.3.1 Policy Content Resolution
 
@@ -929,17 +875,15 @@ The De-ID Manager processes a validated policy Library before dispatching tasks 
 
 #### 3:PXX.2.4.1 Semantic-Level Compilation
 
-When the policy's `representationLevel` is `semantic`, the De-ID Manager compiles each ruleSet into a payload-specific execution plan Library. The compilation process performs the following steps for each ruleSet:
+When the policy's `representationLevel` is `semantic`, the De-ID Manager compiles each ruleSet into a payload-specific execution plan Library for the assigned set. The compilation process performs the following steps for each ruleSet:
 
-1. **Semantic group expansion** — each `@` semantic group reference in the ruleSet's rules is expanded to the individual element paths defined by the applicable payload binding's semantic groups (see [§3:PXX.1.2.2](#3pxx122-semantic-groups) for DIS-FHIR-Payload groups).
+1. **Semantic group expansion** — the De-ID Manager SHALL resolve each `@` group reference using the [Semantic Group Binding](#3pxx122-semantic-groups) for the declared payload family and release. If a referenced group has no binding for that release, the Manager SHALL fail compilation before dispatch.
 
-2. **Version-conditional path mapping** — for HL7 FHIR R5 or R6 payloads, the De-ID Manager applies the version-conditional path mappings defined in [Table 3:PXX.1.1-3](#3pxx113-version-neutral-element-addressing) to the expanded element paths.
+2. **Execution plan assembly** — the Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The expanded and version-resolved rules are assembled into an execution plan JSON (see [§3:PXX.1.4.2](#3pxx142-execution-plan-json-structure)) and packaged in a Library resource with `Library.type` coding `dis-execution-plan`.
 
-3. **Execution plan assembly** — the Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The expanded and version-resolved rules are assembled into an execution plan JSON (see [§3:PXX.1.4.2](#3pxx142-execution-plan-json-structure)) and packaged in a Library resource with `Library.type` coding `dis-execution-plan`.
+3. **Capability verification** — the De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
 
-4. **Capability verification** — the De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
-
-Each ruleSet in the policy produces one execution plan Library, dispatched as one ITI-x3 task. When stages are declared, the Manager dispatches in stage order. The compiled execution plan Library MAY reference the source policy Library via `Library.relatedArtifact` with type `derived-from`.
+For each applicable payload set, each ruleSet produces one execution plan Library, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. The compiled execution plan Library MAY reference the source policy Library via `Library.relatedArtifact` with type `derived-from`.
 
 #### 3:PXX.2.4.2 Syntax-Level Validation
 
@@ -951,7 +895,7 @@ When the policy's `representationLevel` is `syntax`, the De-ID Manager validates
 
 3. **Execution plan assembly** — preserve rule order and source rule IDs, add the resolved scope to salted rules, and package the validated rules in a Library resource with `Library.type` coding `dis-execution-plan`. The existing concrete paths are preserved.
 
-4. **Capability verification** — same as for Semantic-Level compilation.
+3. **Capability verification** — same as for Semantic-Level compilation.
 
 ### 3:PXX.2.5 Policy Lifecycle
 
@@ -965,6 +909,119 @@ The following lifecycle states are supported through `Library.status`:
 
 The De-ID Manager SHALL reject a policy with `Library.status` other than `active`. The De-ID Manager SHALL reject a policy whose `Library.effectivePeriod` does not include the current date.
 
-<div markdown="1" class="stu-note">
-**Editorial Note:** A future phase may introduce a standardized policy management transaction (e.g., ITI-x8) for policy discovery, retrieval, and lifecycle management. Phase 1 relies on implementation-defined mechanisms.
-</div>
+<a name="payload-set-delivery"> </a>
+
+## 3:PXX.3 Common Payload Set Delivery
+
+A grouped job can contain multiple payload sets. Each set uses one binding and version and carries one manifest at each exchange. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The selected binding defines the native data, retrieval rules, execution plan, validation, and evidence mapping.
+
+The [shared grouped payload parameters](volume-2.html#grouped-payload-parameters) define how the transactions carry a payload set.
+
+### 3:PXX.3.1 Manifest Formats
+
+The `dis-resource-list` format carries an R4 DIS Resource Manifest as a standalone List or in an R4 [DIS Manifest Package](StructureDefinition-DIS-ManifestPackage.html). Serialize either as FHIR JSON or XML and declare the corresponding FHIR media type in the `manifest` attachment. The same format applies to task and job inputs and results.
+
+The `fhir-bulk-data` format uses the JSON [bulk file manifest](#3pxx163-bulk-file-manifests) of DIS-FHIR-Payload. It enumerates NDJSON files.
+
+<a name="manifest-package"> </a>
+
+#### Manifest Package
+
+Use an R4 `Bundle` of type `collection` when the manifest and its targets or indexes travel together. It SHALL contain exactly one List declaring the DIS Resource Manifest profile. Each entry in that List SHALL use either an absolute HTTPS FHIR REST reference to an R4 resource or a `urn:uuid` reference matching exactly one `Bundle.entry.fullUrl` in the same package. A standalone List SHALL use absolute HTTPS references. Only the List's selected entries determine the payload set. Other Bundle entries may support resolution under the selected binding.
+
+A bundled R4 resource can be the target itself or a wrapper or index. The package SHALL carry non-R4 bytes inside the attachment of an R4 resource. It SHALL NOT embed a native R5 or R6 resource as a Bundle entry.
+
+<a name="resource-manifest-resolution"> </a>
+
+#### Resource Manifest Resolution
+
+| Binding and version | Resource selected by a List entry | Payload selected |
+|---------------------|------------------------------------|------------------|
+| DIS-FHIR-Payload R4 | An R4 resource, or an R4 [DIS Payload Wrapper](StructureDefinition-DIS-PayloadWrapper.html) | The resource itself or, for a wrapper, the R4 content carried or located by its attachment |
+| DIS-FHIR-Payload R5 or R6 | R4 DIS Payload Wrapper | The serialized R5 or R6 resource carried or located by the wrapper's attachment |
+{: .grid}
+
+**Payload wrapper.** The wrapper is a profiled R4 DocumentReference with one attachment. Its `data` carries the payload bytes inline, or its `url` locates the payload at an authorized HTTPS endpoint. Exactly one SHALL be present. A FHIR wrapper SHALL use `application/fhir+json` or `application/fhir+xml`. The receiving actor SHALL retrieve or decode the payload and validate it against the containing set's binding and version. If the FHIR media-type release parameter is present, it SHALL agree with `payloadVersion`. Any HTTP negotiation for R5 or R6 occurs on retrieval of the attachment content. The manifest, package, and wrapper exchanges use R4.
+
+In a grouped FHIR set, the receiving actor SHALL follow the attachment only when the DocumentReference declares and conforms to the DIS Payload Wrapper profile. A DocumentReference claiming that profile but failing validation SHALL cause a set failure. To deliver a resource that itself declares the wrapper profile as a FHIR payload, serialize it inside a separate wrapper. An inline R5 DocumentReference is therefore carried as R5 bytes in the R4 wrapper, just like any other R5 resource.
+
+**Results.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence stays in the result's `evidence` parts.
+
+### 3:PXX.3.2 Authorization and Stable Retrieval
+
+The Manager SHALL verify that the job authorization covers every set, including the indexes, native objects, or files reached through its references or manifests. The retrieving actor SHALL use HTTPS and obtain credentials accepted by each endpoint. For automated FHIR REST retrieval of manifests, indexes, or payloads, apply the [FHIR retrieval authorization rules](#referenced-input-authorization). Other bindings define the access mechanism for their endpoints. The job authorization and credentials for reading the source serve separate purposes.
+
+The Manager SHALL establish the authorized target set before dispatch and ensure retries use that same set, including any expansion of a reference that selects multiple objects. When publishing results by reference or manifest, the producing actor SHALL ensure the locators resolve to the intended de-identified objects and are accessible only to authorized recipients. A failed or inaccessible required set SHALL cause job failure without release of any set to the Requester.
+
+### 3:PXX.3.3 FHIR Payload Delivery
+
+| Binding | Version | Inline content in a manifest package | Hosted content selected through a manifest |
+|---------|---------|-----------------------|------------------------------------------------|
+| DIS-FHIR-Payload | `R4`, `R5`, provisional `R6` | Native R4 resource or FHIR JSON/XML in a wrapper | R4 resource URL or wrapper whose attachment URL retrieves the declared FHIR release. Use the validation rules in [DIS-FHIR-Payload](#fhir-payload-content-module) |
+{: .grid}
+
+See [Draft DICOM and CDA Payload Bindings](draft-native-payload-bindings.html) for proposed extensions.
+
+<a name="mixed-payload-walkthrough"> </a>
+
+See the [informative mixed R5 and DICOM job walkthrough](examples-mixed-r5-dicom.html) for an example of manifest submission, task dispatch, and result release across transactions.
+
+<a name="inline-r5-manifest-package"></a>
+
+### 3:PXX.3.4 Inline R5 Manifest Package Example
+
+For inline submission, carry the following R4 collection as the serialized `payload.manifest.valueAttachment.data` with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The inner attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
+
+```json
+{
+  "resourceType": "Bundle",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ManifestPackage"
+    ]
+  },
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:64385609-ea68-4315-b178-b70ee276061c",
+      "resource": {
+        "resourceType": "List",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+          ]
+        },
+        "status": "current",
+        "mode": "snapshot",
+        "entry": [
+          {
+            "item": {
+              "reference": "urn:uuid:5adb0ea3-d321-496b-8685-63529cbe90e1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5adb0ea3-d321-496b-8685-63529cbe90e1",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-PayloadWrapper"
+          ]
+        },
+        "status": "current",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/fhir+json; fhirVersion=5.0",
+              "data": "eyJyZXNvdXJjZVR5cGUiOiJQYXRpZW50IiwiaWQiOiJleGFtcGxlIn0="
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```

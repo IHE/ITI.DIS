@@ -1,0 +1,259 @@
+{
+  "resourceType": "Bundle",
+  "id": "grouped-fhir-hosted-artifacts",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input",
+      "resource": {
+        "resourceType": "List",
+        "id": "grouped-fhir-r4-input",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+          ],
+          "versionId": "1"
+        },
+        "status": "current",
+        "mode": "snapshot",
+        "entry": [
+          {
+            "item": {
+              "reference": "https://source.example.org/fhir/r4/Patient/grouped-fhir-patient-input/_history/1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://source.example.org/fhir/r4/Patient/grouped-fhir-patient-input",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "grouped-fhir-patient-input",
+        "meta": {
+          "versionId": "1"
+        },
+        "active": true,
+        "name": [
+          {
+            "family": "Example"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://results.example.org/fhir/r4/List/grouped-fhir-r4-output",
+      "resource": {
+        "resourceType": "List",
+        "id": "grouped-fhir-r4-output",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+          ],
+          "versionId": "1"
+        },
+        "status": "current",
+        "mode": "snapshot",
+        "entry": [
+          {
+            "item": {
+              "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "grouped-fhir-patient-output",
+        "meta": {
+          "versionId": "1"
+        },
+        "active": true
+      }
+    },
+    {
+      "fullUrl": "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4",
+      "resource": {
+        "resourceType": "Library",
+        "id": "grouped-fhir-policy-patient-r4",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Policy"
+          ],
+          "versionId": "1"
+        },
+        "url": "https://governance.example.org/policies/patient-name-removal",
+        "version": "1.0",
+        "name": "GroupedFHIRPolicyR4",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
+              "code": "dis-policy"
+            }
+          ]
+        },
+        "date": "2026-11-06T03:00:00Z",
+        "content": [
+          {
+            "contentType": "application/vnd.ihe.dis.policy+json",
+            "data": "eyJwb2xpY3lWZXJzaW9uIjoiMS4wIiwicmVwcmVzZW50YXRpb25MZXZlbCI6InN5bnRheCIsInJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwicGF5bG9hZEZhbWlseSI6ImZoaXIiLCJwYXlsb2FkVmVyc2lvbiI6IlI0IiwicnVsZVNldHMiOlt7InJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInJ1bGVzIjpbeyJydWxlSWQiOiJyZW1vdmUtMDEiLCJ0YXJnZXQiOiJQYXRpZW50Lm5hbWUiLCJhY3Rpb24iOiJyZW1vdmUifV19XX0="
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://governance.example.org/identifiers/policy",
+            "value": "grouped-fhir-policy-patient-r4"
+          }
+        ],
+        "publisher": "Example governance authority",
+        "effectivePeriod": {
+          "start": "2026-01-01",
+          "end": "2026-12-31"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://dis.example.org/fhir/Library/grouped-fhir-plan-patient-r4",
+      "resource": {
+        "resourceType": "Library",
+        "id": "grouped-fhir-plan-patient-r4",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
+          ],
+          "versionId": "1"
+        },
+        "url": "https://dis.example.org/fhir/plans/patient-r4",
+        "version": "1.0",
+        "name": "GroupedFHIRPlanR4",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
+              "code": "dis-execution-plan"
+            }
+          ]
+        },
+        "date": "2026-11-06T03:00:00Z",
+        "content": [
+          {
+            "contentType": "application/vnd.ihe.dis.execution-plan+json",
+            "data": "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInBheWxvYWRCaW5kaW5nIjoiRElTLUZISVItUGF5bG9hZCIsInBheWxvYWRWZXJzaW9uIjoiUjQiLCJydWxlcyI6W3sicnVsZUlkIjoicmVtb3ZlLTAxIiwidGFyZ2V0IjoiUGF0aWVudC5uYW1lIiwiYWN0aW9uIjoicmVtb3ZlIiwic291cmNlUnVsZUlkIjoicmVtb3ZlLTAxIn1dfQ=="
+          }
+        ],
+        "relatedArtifact": [
+          {
+            "type": "derived-from",
+            "resource": "https://governance.example.org/policies/patient-name-removal|1.0"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://governance.example.org/fhir/Library/grouped-fhir-policy-encounter-r5",
+      "resource": {
+        "resourceType": "Library",
+        "id": "grouped-fhir-policy-encounter-r5",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Policy"
+          ],
+          "versionId": "1"
+        },
+        "url": "https://governance.example.org/policies/encounter-subject-removal",
+        "version": "1.0",
+        "name": "GroupedFHIRPolicyR5",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
+              "code": "dis-policy"
+            }
+          ]
+        },
+        "date": "2026-11-06T03:00:00Z",
+        "content": [
+          {
+            "contentType": "application/vnd.ihe.dis.policy+json",
+            "data": "eyJwb2xpY3lWZXJzaW9uIjoiMS4wIiwicmVwcmVzZW50YXRpb25MZXZlbCI6InN5bnRheCIsInJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwicGF5bG9hZEZhbWlseSI6ImZoaXIiLCJwYXlsb2FkVmVyc2lvbiI6IlI1IiwicnVsZVNldHMiOlt7InJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInJ1bGVzIjpbeyJydWxlSWQiOiJyZW1vdmUtMDEiLCJ0YXJnZXQiOiJFbmNvdW50ZXIuc3ViamVjdCIsImFjdGlvbiI6InJlbW92ZSJ9XX1dfQ=="
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://governance.example.org/identifiers/policy",
+            "value": "grouped-fhir-policy-encounter-r5"
+          }
+        ],
+        "publisher": "Example governance authority",
+        "effectivePeriod": {
+          "start": "2026-01-01",
+          "end": "2026-12-31"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://dis.example.org/fhir/Library/grouped-fhir-plan-encounter-r5",
+      "resource": {
+        "resourceType": "Library",
+        "id": "grouped-fhir-plan-encounter-r5",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
+          ],
+          "versionId": "1"
+        },
+        "url": "https://dis.example.org/fhir/plans/encounter-r5",
+        "version": "1.0",
+        "name": "GroupedFHIRPlanR5",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
+              "code": "dis-execution-plan"
+            }
+          ]
+        },
+        "date": "2026-11-06T03:00:00Z",
+        "content": [
+          {
+            "contentType": "application/vnd.ihe.dis.execution-plan+json",
+            "data": "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInBheWxvYWRCaW5kaW5nIjoiRElTLUZISVItUGF5bG9hZCIsInBheWxvYWRWZXJzaW9uIjoiUjUiLCJydWxlcyI6W3sicnVsZUlkIjoicmVtb3ZlLTAxIiwidGFyZ2V0IjoiRW5jb3VudGVyLnN1YmplY3QiLCJhY3Rpb24iOiJyZW1vdmUiLCJzb3VyY2VSdWxlSWQiOiJyZW1vdmUtMDEifV19"
+          }
+        ],
+        "relatedArtifact": [
+          {
+            "type": "derived-from",
+            "resource": "https://governance.example.org/policies/encounter-subject-removal|1.0"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://governance.example.org/fhir/DocumentReference/grouped-fhir-permit",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "grouped-fhir-permit",
+        "meta": {
+          "versionId": "1"
+        },
+        "status": "current",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/json",
+              "data": "eyJleGFtcGxlT25seSI6dHJ1ZSwicmVxdWVzdGVyIjoiZXhhbXBsZS1yZXF1ZXN0ZXIiLCJwdXJwb3NlIjoiRXhhbXBsZSB3b3JrZmxvdyByZXZpZXciLCJwYXlsb2FkcyI6W3sic2V0SWQiOiJwYXRpZW50LXI0Iiwic291cmNlIjoiaHR0cHM6Ly9zb3VyY2UuZXhhbXBsZS5vcmcvZmhpci9yNC9QYXRpZW50L2dyb3VwZWQtZmhpci1wYXRpZW50LWlucHV0L19oaXN0b3J5LzEiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwiLCJwb2xpY3lWZXJzaW9uIjoiMS4wIn0seyJzZXRJZCI6ImVuY291bnRlci1yNSIsInNvdXJjZSI6IkJ1bmRsZS9ncm91cGVkLWZoaXItcjUtaW5wdXQvRW5jb3VudGVyL2dyb3VwZWQtZmhpci1lbmNvdW50ZXItaW5wdXQiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvZW5jb3VudGVyLXN1YmplY3QtcmVtb3ZhbCIsInBvbGljeVZlcnNpb24iOiIxLjAifV19"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

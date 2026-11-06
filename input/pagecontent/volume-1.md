@@ -171,7 +171,7 @@ Table 1:PXX.2-2 summarizes all Phase 1 options and their applicability per actor
 
 | Option | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
 |--------|-----------|---------|---------------|-----------------------------------|-------------------------|
-| DIS-FHIR-Payload | Required (Note 1) | Required (Note 1) | Required (Note 1) | Required (Note 1) | HL7 FHIR payload binding — content model, baseline execution plan, and data-plane access for independently versioned HL7 FHIR R4, R5, and R6 processing payloads. |
+| DIS-FHIR-Payload | Required (Note 1) | Required (Note 1) | Required (Note 1) | Required (Note 1) | HL7 FHIR payload binding — content model, baseline execution plan, and rules for obtaining inputs and delivering results for independently versioned HL7 FHIR R4, R5, and R6 processing payloads. |
 | DIS-ASYNC-JOB | Optional | Optional | Not applicable | Optional | Asynchronous job processing. Both participating Requester and Manager (or Integrated actor) declare support; ITI-x4 required. For the Integrated actor, DIS-ASYNC-JOB requires ITI-x1. |
 | DIS-ASYNC-TASK | Not applicable | Optional | Optional | Not applicable | Asynchronous task processing. Both participating Manager and De-Identifier declare support; ITI-x7 required. Not applicable to the Integrated actor. |
 | DIS-IRREVERSIBLE | Not applicable | Optional | Optional | Optional | No Manager mapping retention after job completion; incompatible with a supplied reversible lookup table. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
@@ -202,9 +202,9 @@ UC-3 and UC-4 illustrate authorized, implementation-defined access to the Manage
 
 ### 1:PXX.2.3 HL7 FHIR Payload Option
 
-The HL7 FHIR Payload Option (DIS-FHIR-Payload) defines the content model, baseline execution plan, and data-plane access for HL7 FHIR processing payloads. This includes FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence, and HL7 FHIR REST read/write or inline by-value data-plane access. DIS-FHIR-Payload covers independently versioned HL7 FHIR R4, R5, and R6 processing payloads. HL7 FHIR R6 is in ballot at the time of this publication; R6 payload support is based on the current ballot draft and will be confirmed upon final R6 publication. Version-conditional path mappings (see [§1:PXX.2.3.2](#1pxx232-cross-version-payload-support)) that depend on R6 element definitions may require updates when R6 is finalized. The processing payload's HL7 FHIR version is independent of the R4 protocol binding version.
+The HL7 FHIR Payload Option (DIS-FHIR-Payload) defines the content model and baseline execution plan for HL7 FHIR processing payloads. It specifies FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence, inline submission, authorized retrieval of referenced inputs, and result delivery. DIS-FHIR-Payload covers independently versioned HL7 FHIR R4, R5, and R6 processing payloads. HL7 FHIR R6 is in ballot at the time of this publication; R6 payload support is based on the current ballot draft and will be confirmed upon final R6 publication. Version-conditional path mappings (see [§1:PXX.2.3.2](#1pxx232-cross-version-payload-support)) that depend on R6 element definitions may require updates when R6 is finalized. The processing payload's HL7 FHIR version is independent of the R4 protocol binding version.
 
-DIS-FHIR-Payload is one of potentially several payload binding options. Each payload binding defines format-specific content models, addressing, execution plan structure, and data-plane access for a particular data format family. Future payload bindings (e.g., DIS-DICOM1 for DICOM, DIS-CDA1 for CDA) are developed independently and can be carried within the same HL7 FHIR R4 protocol layer. An actor MAY declare multiple payload bindings to support de-identification of different data formats.
+DIS-FHIR-Payload is one of potentially several payload binding options. Each payload binding defines format-specific content models, addressing, execution plan structure, and rules for obtaining inputs and delivering results for a particular data format family. Future payload bindings (e.g., DIS-DICOM1 for DICOM, DIS-CDA1 for CDA) are developed independently and can be carried within the same HL7 FHIR R4 protocol layer. An actor MAY declare multiple payload bindings to support de-identification of different data formats.
 
 In Phase 1, DIS-FHIR-Payload is required for all actors since it is the only available payload binding.
 
@@ -222,7 +222,7 @@ DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs fro
 
 - **Version identification** -- each processing payload SHALL explicitly identify its HL7 FHIR version. De-Identifiers SHALL declare which payload versions they support, and the Manager SHALL verify compatibility before dispatch. HL7 FHIR payloads SHALL be validated against their declared version.
 - **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the HL7 FHIR R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the HL7 FHIR R4 transaction envelope. Packaging patterns are specified in the [DIS-FHIR-Payload content module](volume-3.html#fhir-payload-content-module).
-- **Version-neutral addressing** -- FHIRPath expressions used by execution plans and semantic group mappings resolve consistently across HL7 FHIR R4, R5, and R6 for the resource types and elements governed by DIS transformation actions, after version-conditional path mapping is applied during execution plan compilation (see [Table 3:PXX.1.1-3](volume-3.html#fhir-payload-content-module)).
+- **Version-neutral policy targets** -- Semantic-Level policies use common semantic group codes. The Manager resolves each code to FHIRPath selectors for the declared payload release during compilation. Volume 3 defines the [Semantic Group Binding](volume-3.html#3pxx122-semantic-groups).
 - **Evidence across versions** -- de-identification evidence is represented as HL7 FHIR R4 Provenance (protocol layer, not payload). The evidence model does not depend on the payload's HL7 FHIR version.
 
 HL7 FHIR R4 protocol resources (`Parameters`, `Task`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain HL7 FHIR R4 regardless of the payload version.
@@ -322,11 +322,13 @@ ISO/IEC 20889 categories not covered in Phase 1 include statistical tools (§9.1
 
 **Phase 1 Transformation Scope.** Phase 1 excludes dataset- or database-level de-identification techniques, including small-cell handling, frequency-based rare-condition suppression, and transformations requiring statistics computed across the cohort (ISO/IEC 20889 §9.1 statistical tools, §9.7.4 microaggregation, §10 formal privacy measurement models). Multi-patient cohort processing remains supported for applying record-level rules with policy-specified parameters. Staged execution does not extend this action scope. Dataset-level statistical disclosure control is deferred to a future phase; completing a Phase 1 workflow does not establish that any separately required dataset-level disclosure criteria have been met.
 
+**Resource Manifest Input and Output.** A [DIS Resource Manifest](volume-3.html#resource-manifest) uses an R4 List to enumerate targets for one payload set. For FHIR the entries reference the target resources. For DICOM and CDA the entries reference R4 indexes to the native content. A manifest can identify inputs or de-identified results.
+
 **Bulk Data Input and Output.** Phase 1 supports both input and output for asynchronous cohort jobs using manifests referencing NDJSON files. The Requester supplies a manifest referencing prepared input files; obtaining those files through source-system export is outside DIS. The Manager returns a manifest referencing de-identified output files together with evidence references. Processing remains limited to the Phase 1 action scope described above.
 
 Each processing payload SHALL explicitly identify its HL7 FHIR version (R4, R5, or R6), independently of the HL7 FHIR R4 protocol binding. Participating actors SHALL declare supported input/output formats and payload versions, and the Manager SHALL verify compatibility before dispatch. File retrieval SHALL require authorization. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
 
-Exact manifest fields, file retrieval and expiry behavior, and evidence/error packaging are to be specified in the payload and transaction bindings. Adoption of Bulk Data file conventions does not by itself establish conformance to the full HL7 Bulk Data API.
+Volume 3 specifies [input manifest fields and retrieval authorization](volume-3.html#obtaining-processing-targets). Volume 2 defines the DIS transactions for returning task and job results.
 
 **Reversibility Custody.** When reversible pseudonymization is selected without a supplied lookup table, the De-ID Manager retains the mapping needed for reversal. With a Requester-supplied table, the Manager uses that table without mandatory persistent retention. The De-Identifier is stateless with respect to reversibility. Manager-managed persistent mappings remain within the Manager's trust boundary; task-scoped entries may be shared as specified in §1:PXX.2.2.
 
@@ -349,28 +351,22 @@ Content conformance is the foundation. An Integrated actor operating standalone 
 
 **Payload Binding Framework (Informative).** DIS separates the mandatory HL7 FHIR R4 protocol binding from the payload binding so that additional data formats can be supported without changing the protocol layer. The protocol binding defines how transactions are initiated, dispatched, and polled -- it is content-neutral and carries or references payloads of any format. Each payload binding defines the format-specific rules for a particular data format family. Phase 1 defines DIS-FHIR-Payload as the initial payload binding; additional payload bindings are expected to follow the same architectural pattern.
 
+**Jobs with multiple payload sets.** A job can include several sets under one data request authorization, for example two FHIR sets with different releases or approved policies. Each set has a job-local identifier and declares its own payload binding, version, manifest, and approved policy. The Manager dispatches tasks for individual sets and returns the validated results together. Where outputs depend on consistent identifiers across sets, the selected bindings and policies must define the linkage and validation contract before the Manager accepts the job.
+
+In a grouped job, each set uses the [common manifest contract](volume-3.html#payload-set-delivery) for bundled or hosted content. Each binding defines how manifest entries resolve to native payloads. Existing ungrouped FHIR exchanges retain their inline and reference encodings.
+
 A payload binding defines at minimum:
 
 1. **Content model** -- how data elements within the format are identified and addressed (e.g., FHIRPath for HL7 FHIR resources, DICOM tag paths for DICOM objects, XPath or CDA document model paths for CDA documents)
 2. **Transformation action mapping** -- how the DIS core transformation actions (removal, replacement, hashing, rounding, truncation, etc.) are applied to the format's data structures and element types
-3. **Data-plane access** -- how the processing payload is retrieved, carried, or referenced within the HL7 FHIR R4 protocol envelope (e.g., inline by-value, by-reference with authorized retrieval, or format-specific packaging such as DICOM Part 10 files or CDA XML documents)
+3. **Processing targets and results** -- how actors obtain processing inputs and deliver results, including inline content and authorized retrieval of referenced resources or files
 4. **Evidence mapping** -- how de-identification evidence and provenance are represented for the format, mapping format-specific outcomes to the DIS evidence baseline
 5. **Version identification** -- how the payload's format version is declared, validated, and matched against De-Identifier capabilities
 6. **Packaging rules** -- how a payload in this format is carried within or referenced from the HL7 FHIR R4 transaction envelope without being embedded as a native HL7 FHIR resource
 
-The following table illustrates how future payload bindings could extend DIS to additional data formats. These bindings are not defined in Phase 1 and are provided for informational purposes only.
+See [Draft DICOM and CDA Payload Bindings](draft-native-payload-bindings.html) for examples of how additional formats can use the payload binding framework.
 
-<p id="tPXX.4-1" class="tableTitle"><strong>Table 1:PXX.4-1: Illustrative Future Payload Bindings (Informational)</strong></p>
-
-| Payload Binding | Data Format | Content Model | Example Processing Targets | Packaging Approach |
-|-----------------|-------------|---------------|----------------------------|-------------------|
-| DIS-FHIR-Payload (Phase 1) | HL7 FHIR R4, R5, R6 | FHIRPath addressing, resource traversal, narrative handling | Patient, Bundle, Bulk Data NDJSON | Inline HL7 FHIR resources or by-reference via HL7 FHIR REST / Bulk Data manifests |
-| DIS-DICOM1 (future) | DICOM | DICOM tag paths, sequence item traversal, pixel data handling | DICOM Part 10 objects, studies, series | By-reference via DICOMweb WADO-RS or as DICOM Part 10 binary attachments |
-| DIS-CDA1 (future) | HL7 CDA R2 | XPath / CDA document model, section and entry traversal, narrative block handling | CDA documents (Continuity of Care, Discharge Summary, etc.) | Inline XML or by-reference as document attachments |
-| DIS-V2-1 (future) | HL7 v2.x | Segment/field/component paths (e.g., PID-5, OBX-5) | HL7 v2 messages (ADT, ORU, ORM, etc.) | By-reference or inline as ER7/XML-encoded messages |
-{: .grid}
-
-An actor declares which payload bindings it supports. The De-ID Manager verifies payload binding compatibility between the Requester's job and the De-Identifier's declared capabilities before dispatching tasks. A single job uses one payload binding; the Manager does not perform cross-format transformation. An actor MAY declare multiple payload bindings to support de-identification workflows across different data format families.
+An actor declares which payload bindings it supports. The De-ID Manager verifies payload binding compatibility between the Requester's job and the De-Identifier's declared capabilities before dispatching tasks. Each payload set uses one binding and version. The Manager dispatches and validates each set under its declared binding. An actor MAY declare multiple payload bindings to support de-identification workflows across different data format families.
 
 Each future payload binding is developed as a self-contained specification, independent of other payload bindings. A new payload binding does not require changes to the HL7 FHIR R4 protocol binding or to previously defined payload bindings. This independence enables parallel development by different IHE domains or working groups, and allows implementations to adopt additional payload support incrementally.
 
@@ -470,22 +466,7 @@ The Integrated De-ID Manager/De-Identifier validates the policy, compiles an exe
 
 This use case demonstrates the Integrated De-ID Manager/De-Identifier in content-conformance-only mode: no DIS transactions appear on the wire. The Integrated actor claims content conformance -- its de-identified output, policy validation, and evidence conform to the declared content module (DIS-FHIR-Payload) -- but does not claim transaction conformance.
 
-<div markdown="1" class="stu-note">
-
-**Open Issue: Data Recipient Actor and Push Delivery**
-
-In this use case, the Integrated actor produces conformant de-identified output but has no DIS transaction on the wire. Output delivery occurs outside DIS through implementation-defined mechanisms. This means the Integrated actor in standalone mode cannot be tested against another DIS actor at connectathon -- content conformance can only be validated by inspecting output artifacts, not by exercising a standardized transaction.
-
-An alternative design would introduce a **Data Recipient** actor and an optional push-delivery transaction initiated by the Integrated actor (or De-ID Manager) to deliver de-identified output directly to the recipient. This would:
-
-- Give the content-conformance-only Integrated actor a wire-testable transaction, enabling connectathon testing with a test partner
-- Standardize the output delivery step that UC-1, UC-2, and UC-5 currently describe as outside DIS
-- Separate the job-initiation role (Requester) from the output-consumption role (Data Recipient), reflecting deployments where the exporting system and the downstream consumer are different systems
-
-Considerations include Phase 1 scope, overlap with MHD Document Source grouping (see [1:PXX.6.3](#1pxx63-ihe-mhd---mobile-access-to-health-documents)), additional specification and testing surface, and whether a content-only connectathon test is sufficient for the standalone Integrated actor.
-
-**The committee is asked to discuss whether a Data Recipient actor and push-delivery transaction should be included in Phase 1.**
-</div>
+See the [open issue on Data Recipient and push delivery](issues.html#data-recipient-and-push-delivery).
 
 ##### 1:PXX.4.2.5.2 De-Identified Health Data Export Process Flow
 

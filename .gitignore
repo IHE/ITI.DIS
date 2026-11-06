@@ -14,5 +14,6 @@
 /.claude
 /docs
 /decisions
-/scripts/
+/scripts/*
+!/scripts/check_semantic_group_binding.py
 .DS_Store

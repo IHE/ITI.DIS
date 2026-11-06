@@ -16,29 +16,34 @@ DIS addresses the lack of a standard, interoperable workflow for how de-identifi
 
 This guide is organized into the following sections:
 
-1. Volume 1: Profiles
-   1. [Introduction](volume-1.html)
-   1. [Actors, Transactions, and Content Modules](volume-1.html#actors-and-transactions)
-   1. [Actor Options](volume-1.html#actor-options)
-   1. [Required Actor Groupings](volume-1.html#required-groupings)
-   1. [Overview](volume-1.html#overview)
-   1. [Security Considerations](volume-1.html#security-considerations)
-   1. [Cross Profile Considerations](volume-1.html#other-grouping)
-2. Volume 2: Transaction Detail
-   1. [Submit Job \[ITI-x1\]](volume-2.html#23x1-submit-de-identification-job-iti-x1)
-   1. [Submit Task \[ITI-x3\]](volume-2.html#23x3-submit-de-identification-task-iti-x3)
-   1. [Retrieve Job Output \[ITI-x4\]](volume-2.html#23x4-retrieve-job-output-iti-x4)
-   1. [Retrieve Task Output \[ITI-x7\]](volume-2.html#23x7-retrieve-task-output-iti-x7)
-3. Volume 3: Content Modules
-   1. [DIS-FHIR-Payload and Baseline Execution Plan](volume-3.html#fhir-payload-content-module)
-   1. [De-ID Evidence](volume-3.html#3pxx15-evidence-baseline)
-   1. [DIS-Policy](volume-3.html#policy-content-module)
-   1. [Lookup table examples](volume-3.html#3pxx18-worked-mapping-examples)
-4. Other
-   1. [Changes to Other IHE Specifications](other.html)
-   1. [Download and Analysis](download.html)
-   1. [JSON Schema Artifacts](download.html#json-schema-artifacts)
-   1. [Test Plan](testplan.html)
+- Volume 1: Profiles
+  - [Introduction](volume-1.html)
+  - [Actors, Transactions, and Content Modules](volume-1.html#actors-and-transactions)
+  - [Actor Options](volume-1.html#actor-options)
+  - [Required Actor Groupings](volume-1.html#required-groupings)
+  - [Overview](volume-1.html#overview)
+  - [Security Considerations](volume-1.html#security-considerations)
+  - [Cross Profile Considerations](volume-1.html#other-grouping)
+- Volume 2: Transaction Detail
+  - [Submit Job \[ITI-x1\]](volume-2.html#23x1-submit-de-identification-job-iti-x1)
+  - [Submit Task \[ITI-x3\]](volume-2.html#23x3-submit-de-identification-task-iti-x3)
+  - [Retrieve Job Output \[ITI-x4\]](volume-2.html#23x4-retrieve-job-output-iti-x4)
+  - [Retrieve Task Output \[ITI-x7\]](volume-2.html#23x7-retrieve-task-output-iti-x7)
+- Volume 3: Content Modules
+  - [DIS-FHIR-Payload and Baseline Execution Plan](volume-3.html#fhir-payload-content-module)
+  - [De-ID Evidence](volume-3.html#3pxx15-evidence-baseline)
+  - [DIS-Policy](volume-3.html#policy-content-module)
+  - [Lookup table examples](volume-3.html#3pxx18-worked-mapping-examples)
+- Examples
+  - [Grouped R4 and R5 FHIR Job](examples-grouped-fhir-job.html)
+  - [Reversible Clinical Pathology Order](examples-reversible-pathology.html)
+  - [Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
+  - [Standalone Clinical Export](examples-standalone-export.html)
+- Other
+  - [Changes to Other IHE Specifications](other.html)
+  - [Download and Analysis](download.html)
+  - [JSON Schema Artifacts](download.html#json-schema-artifacts)
+  - [Test Plan](testplan.html)
 
 See also the [Table of Contents](toc.html) and the index of [Artifacts](artifacts.html) defined as part of this implementation guide.
 

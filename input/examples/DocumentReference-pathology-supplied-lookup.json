@@ -1,0 +1,55 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "pathology-supplied-lookup",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
+    ],
+    "versionId": "1"
+  },
+  "status": "current",
+  "masterIdentifier": {
+    "system": "urn:example:lookup-content-version",
+    "value": "pathology-supplied-lookup-v1"
+  },
+  "identifier": [
+    {
+      "system": "urn:example:lookup-table",
+      "value": "pathology-supplied-lookup"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type",
+        "code": "lookup-table"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-identity-linkage-scope",
+      "extension": [
+        {
+          "url": "scopeType",
+          "valueCode": "source-institution"
+        },
+        {
+          "url": "scopeIdentifier",
+          "valueIdentifier": {
+            "system": "https://hospital.example.org/identifiers/linkage-scope",
+            "value": "lab-project-2026"
+          }
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "attachment": {
+        "contentType": "application/json",
+        "data": "eyJ0YWJsZUlkIjoicGF0aG9sb2d5LXN1cHBsaWVkLWxvb2t1cCIsInZlcnNpb24iOiIxIiwiaWRlbnRpdHktbGlua2FnZS1zY29wZSI6eyJ0eXBlIjoic291cmNlLWluc3RpdHV0aW9uIiwiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2xpbmthZ2Utc2NvcGUiLCJ2YWx1ZSI6ImxhYi1wcm9qZWN0LTIwMjYifX0sImVudHJpZXMiOlt7InNvdXJjZVN5c3RlbSI6Imh0dHBzOi8vaG9zcGl0YWwuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvbXJuIiwic291cmNlVmFsdWUiOiJBMTIzIiwidGFyZ2V0U3lzdGVtIjoiaHR0cHM6Ly9ob3NwaXRhbC5leGFtcGxlLm9yZy9pZGVudGlmaWVycy9wc2V1ZG9ueW0iLCJ0YXJnZXRWYWx1ZSI6ImxhYi1zdXBwbGllZC0wMDQyIn0seyJzb3VyY2VTeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL21ybiIsInNvdXJjZVZhbHVlIjoiQjQ1NiIsInRhcmdldFN5c3RlbSI6Imh0dHBzOi8vaG9zcGl0YWwuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvcHNldWRvbnltIiwidGFyZ2V0VmFsdWUiOiJsYWItc3VwcGxpZWQtMDA0MyJ9XX0="
+      }
+    }
+  ]
+}

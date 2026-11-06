@@ -10,10 +10,34 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 
 ### Open Issues
 
-- **Data Recipient actor and push delivery:** Volume 1 UC-5 asks the committee whether to add these to Phase 1. The current baseline groups receiving with the Requester and permits standalone Integrated processing without external DIS transactions. The proposal is not an adopted transaction or actor requirement.
-- **Operation parameters:** align the FHIR R4 `processingTarget` encoding in the ITI-x1 and ITI-x3 OperationDefinitions with the delivery modes in [Volume 2](volume-2.html).
-- **Binding completion:** specify the Bulk Data manifest fields, retrieval and expiry behavior, and evidence and error packaging in the payload and transaction bindings, as identified in Volume 1.
+- [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
+- **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
+- [Future policy management transaction](#future-policy-management-transaction)
+- **Operation parameters:** align the FHIR R4 OperationDefinitions with the alternate `processingTarget` encodings specified in [Volume 2](volume-2.html).
+- **Result encoding:** align the output parameters in ITI-x1/x4 and ITI-x3/x7 for attachments and references, including bulk result manifests and their evidence association.
 - **Conformance artifacts:** complete the remaining schemas, actor CapabilityStatements and detailed test procedures, then validate them against the current baseline.
+
+<a name="data-recipient-and-push-delivery"> </a>
+
+#### Data Recipient Actor and Push Delivery
+
+In [UC-5](volume-1.html#1pxx425-use-case-5-de-identified-health-data-export-content-conformance), the standalone Integrated actor produces de-identified output through local invocation and delivers it through an implementation-defined mechanism. A Connectathon can assess content conformance by inspecting the output artifacts.
+
+An alternative design would introduce a **Data Recipient** actor and an optional push-delivery transaction initiated by the Integrated actor (or De-ID Manager) to deliver de-identified output directly to the recipient. The proposal would have these effects.
+
+- Give the content-conformance-only Integrated actor a wire-testable transaction, enabling connectathon testing with a test partner
+- Standardize the output delivery step that UC-1, UC-2, and UC-5 currently describe as outside DIS
+- Separate the job-initiation role (Requester) from the output-consumption role (Data Recipient), reflecting deployments where the exporting system and the downstream consumer are different systems
+
+Considerations include Phase 1 scope, overlap with MHD Document Source grouping (see [Volume 1 MHD grouping](volume-1.html#1pxx63-ihe-mhd---mobile-access-to-health-documents)), additional specification and testing surface, and whether a content-only connectathon test is sufficient for the standalone Integrated actor.
+
+**The committee is asked to discuss whether a Data Recipient actor and push-delivery transaction should be included in Phase 1.**
+
+<a name="future-policy-management-transaction"> </a>
+
+#### Future Policy Management Transaction
+
+A future phase could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. Phase 1 uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3.html#3pxx25-policy-lifecycle).
 
 ### Closed Issues
 

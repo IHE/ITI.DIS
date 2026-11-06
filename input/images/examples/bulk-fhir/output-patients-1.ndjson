@@ -1,0 +1,1 @@
+{"resourceType":"Patient","active":true,"id":"result-01","identifier":[{"system":"https://results.example.org/identifiers/cohort-result","value":"result-01"}]}

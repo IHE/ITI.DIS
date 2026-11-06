@@ -1,5 +1,38 @@
 // DIS OperationDefinitions
 
+// Shared parts of grouped payload input and output.
+RuleSet: DISPayloadDeliveryParts(direction)
+* parameter[=].part[+].name = #setId
+* parameter[=].part[=].use = #{direction}
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #string
+* parameter[=].part[=].documentation = "Job-local payload set identifier."
+* parameter[=].part[+].name = #payloadBinding
+* parameter[=].part[=].use = #{direction}
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #code
+* parameter[=].part[=].documentation = "Binding that governs this payload set."
+* parameter[=].part[+].name = #payloadVersion
+* parameter[=].part[=].use = #{direction}
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #code
+* parameter[=].part[=].documentation = "Version defined by the selected binding."
+* parameter[=].part[+].name = #manifest
+* parameter[=].part[=].use = #{direction}
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #Attachment
+* parameter[=].part[=].documentation = "Serialized manifest or manifest package, carried inline or located by HTTPS URL."
+* parameter[=].part[+].name = #manifestFormat
+* parameter[=].part[=].use = #{direction}
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #code
+* parameter[=].part[=].documentation = "Use dis-resource-list or fhir-bulk-data."
+
 // ── ITI-x1 Submit De-Identification Job ─────────────────────────────────────
 
 Instance: submit-dis-job
@@ -21,6 +54,44 @@ Usage: #definition
 * system = true
 * type = false
 * instance = false
+
+// ── Grouped in: payload ──
+* parameter[+].name = #payload
+* parameter[=].use = #in
+* parameter[=].min = 0
+* parameter[=].max = "*"
+* parameter[=].documentation = "Payload set with one manifest. Use the grouped form in place of the ungrouped payload parameters."
+* insert DISPayloadDeliveryParts(in)
+* parameter[=].part[+].name = #policy
+* parameter[=].part[=].use = #in
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].documentation = "Identifies the approved de-identification policy for this data request."
+* parameter[=].part[=].part[+].name = #url
+* parameter[=].part[=].part[=].use = #in
+* parameter[=].part[=].part[=].min = 1
+* parameter[=].part[=].part[=].max = "1"
+* parameter[=].part[=].part[=].documentation = "Canonical URL of the approved policy (Library.url)."
+* parameter[=].part[=].part[=].type = #uri
+* parameter[=].part[=].part[+].name = #version
+* parameter[=].part[=].part[=].use = #in
+* parameter[=].part[=].part[=].min = 1
+* parameter[=].part[=].part[=].max = "1"
+* parameter[=].part[=].part[=].documentation = "Version of the approved policy (Library.version)."
+* parameter[=].part[=].part[=].type = #string
+* parameter[=].part[=].part[+].name = #content
+* parameter[=].part[=].part[=].use = #in
+* parameter[=].part[=].part[=].min = 0
+* parameter[=].part[=].part[=].max = "1"
+* parameter[=].part[=].part[=].documentation = "JWS-signed policy artifact, when the Requester carries the policy content directly. Binary.contentType SHALL be application/jose."
+* parameter[=].part[=].part[=].type = #Binary
+* parameter[=].part[+].name = #lookupTable
+* parameter[=].part[=].use = #in
+* parameter[=].part[=].min = 0
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #Reference
+* parameter[=].part[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
+* parameter[=].part[=].documentation = "Reference to an identified DIS Lookup Table DocumentReference. Resolve and pin its version-specific identifier and exact JSON content before processing. For tasks, expose only assigned entries through a protected scoped document. Missing entries fail the job without fallback or partial output."
 
 // ── Input: authorization ──
 * parameter[+].name = #authorization
@@ -47,7 +118,7 @@ Usage: #definition
 // ── Input: policy ──
 * parameter[+].name = #policy
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].documentation = "Identifies the approved de-identification policy for this data request."
 * parameter[=].type = #BackboneElement
@@ -85,15 +156,24 @@ Usage: #definition
 // ── Input: processingTarget ──
 * parameter[+].name = #processingTarget
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "*"
-* parameter[=].documentation = "Reference(s) to the resource(s) to be de-identified, or embedded resource content. Supports by-reference, by-value, and by-manifest delivery modes."
+* parameter[=].documentation = "Reference(s) to the resource(s) to be de-identified, or embedded resource content. Supports by-reference, by-value, and by-manifest delivery modes. Supply one or more entries when resourceManifest is absent."
 * parameter[=].type = #Resource
+
+// ── Input: resourceManifest ──
+* parameter[+].name = #resourceManifest
+* parameter[=].use = #in
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].type = #Reference
+* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+* parameter[=].documentation = "Absolute HTTPS reference to a DIS Resource Manifest enumerating input resources. Mutually exclusive with processingTarget."
 
 // ── Input: payloadBinding ──
 * parameter[+].name = #payloadBinding
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].documentation = "Payload binding identifier (e.g., DIS-FHIR-Payload)."
 * parameter[=].type = #code
@@ -101,23 +181,36 @@ Usage: #definition
 // ── Input: payloadVersion ──
 * parameter[+].name = #payloadVersion
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].documentation = "HL7 FHIR version of the processing payload (e.g., R4, R5, R6)."
 * parameter[=].type = #code
 
+// ── Grouped out: payloadResult ──
+* parameter[+].name = #payloadResult
+* parameter[=].use = #out
+* parameter[=].min = 0
+* parameter[=].max = "*"
+* parameter[=].documentation = "Payload set with one manifest. Use the grouped form in place of the ungrouped payload parameters."
+* insert DISPayloadDeliveryParts(out)
+* parameter[=].part[+].name = #evidence
+* parameter[=].part[=].use = #out
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "*"
+* parameter[=].part[=].type = #Provenance
+
 // ── Output: output ──
 * parameter[+].name = #output
 * parameter[=].use = #out
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
-* parameter[=].documentation = "De-identified resource(s) produced by the job."
+* parameter[=].documentation = "De-identified resource(s) produced by the job, or an inline DIS Resource Manifest listing the de-identified resources."
 * parameter[=].type = #Resource
 
 // ── Output: evidence ──
 * parameter[+].name = #evidence
 * parameter[=].use = #out
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "*"
 * parameter[=].documentation = "HL7 FHIR R4 Provenance resources recording transformation decisions."
 * parameter[=].type = #Provenance
@@ -152,6 +245,14 @@ Usage: #definition
 * type = false
 * instance = false
 
+// ── Grouped in: payload ──
+* parameter[+].name = #payload
+* parameter[=].use = #in
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].documentation = "Payload set with one manifest. Use the grouped form in place of the ungrouped payload parameters."
+* insert DISPayloadDeliveryParts(in)
+
 // ── Input: executionPlan ──
 * parameter[+].name = #executionPlan
 * parameter[=].use = #in
@@ -164,10 +265,19 @@ Usage: #definition
 // ── Input: processingTarget ──
 * parameter[+].name = #processingTarget
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "*"
-* parameter[=].documentation = "Reference(s) to the data to be transformed."
+* parameter[=].documentation = "Reference(s) to the data to be transformed. Supply one or more entries when resourceManifest is absent."
 * parameter[=].type = #Reference
+
+// ── Input: resourceManifest ──
+* parameter[+].name = #resourceManifest
+* parameter[=].use = #in
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].type = #Reference
+* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+* parameter[=].documentation = "Absolute HTTPS reference to a DIS Resource Manifest enumerating input resources. Mutually exclusive with processingTarget."
 
 // ── Input: ruleSetId ──
 * parameter[+].name = #ruleSetId
@@ -188,7 +298,7 @@ Usage: #definition
 // ── Input: payloadBinding ──
 * parameter[+].name = #payloadBinding
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].documentation = "Payload binding identifier."
 * parameter[=].type = #code
@@ -196,7 +306,7 @@ Usage: #definition
 // ── Input: payloadVersion ──
 * parameter[+].name = #payloadVersion
 * parameter[=].use = #in
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].documentation = "HL7 FHIR version of the processing payload."
 * parameter[=].type = #code
@@ -218,12 +328,25 @@ Usage: #definition
 * parameter[=].documentation = "Reversibility mode (irreversible or reversible); derived from the policy validated in ITI-x1."
 * parameter[=].type = #code
 
+// ── Grouped out: payloadResult ──
+* parameter[+].name = #payloadResult
+* parameter[=].use = #out
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].documentation = "Payload set with one manifest. Use the grouped form in place of the ungrouped payload parameters."
+* insert DISPayloadDeliveryParts(out)
+* parameter[=].part[+].name = #evidence
+* parameter[=].part[=].use = #out
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "*"
+* parameter[=].part[=].type = #Provenance
+
 // ── Output: output ──
 * parameter[+].name = #output
 * parameter[=].use = #out
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "1"
-* parameter[=].documentation = "De-identified resource(s) produced for this ruleSet."
+* parameter[=].documentation = "De-identified resource(s) produced for this ruleSet, or an inline DIS Resource Manifest listing the de-identified resources."
 * parameter[=].type = #Resource
 
 // ── Output: generatedLookupTable (Manager only) ──
@@ -238,7 +361,7 @@ Usage: #definition
 // ── Output: evidence ──
 * parameter[+].name = #evidence
 * parameter[=].use = #out
-* parameter[=].min = 1
+* parameter[=].min = 0
 * parameter[=].max = "*"
 * parameter[=].documentation = "HL7 FHIR R4 Provenance resources recording transformation decisions for this task."
 * parameter[=].type = #Provenance

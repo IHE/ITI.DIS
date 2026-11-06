@@ -1,0 +1,13 @@
+{
+  "requiresAccessToken": true,
+  "output": [
+    {
+      "type": "Patient",
+      "url": "https://results.example.org/bulk/output-patients-1.ndjson"
+    },
+    {
+      "type": "Patient",
+      "url": "https://results.example.org/bulk/output-patients-2.ndjson"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "resourceType": "Parameters",
+  "id": "grouped-fhir-job-result",
+  "parameter": [
+    {
+      "name": "payloadResult",
+      "part": [
+        {
+          "name": "setId",
+          "valueString": "patient-r4"
+        },
+        {
+          "name": "payloadBinding",
+          "valueCode": "DIS-FHIR-Payload"
+        },
+        {
+          "name": "payloadVersion",
+          "valueCode": "R4"
+        },
+        {
+          "name": "manifestFormat",
+          "valueCode": "dis-resource-list"
+        },
+        {
+          "name": "manifest",
+          "valueAttachment": {
+            "contentType": "application/fhir+json",
+            "url": "https://results.example.org/fhir/r4/List/grouped-fhir-r4-output/_history/1"
+          }
+        },
+        {
+          "name": "evidence",
+          "resource": {
+            "resourceType": "Provenance",
+            "id": "grouped-fhir-evidence-patient-r4",
+            "meta": {
+              "profile": [
+                "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
+              ]
+            },
+            "target": [
+              {
+                "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
+              }
+            ],
+            "recorded": "2026-11-06T03:00:00Z",
+            "activity": {
+              "coding": [
+                {
+                  "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity",
+                  "code": "dis-task"
+                }
+              ]
+            },
+            "policy": [
+              "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+            ],
+            "agent": [
+              {
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                      "code": "performer"
+                    }
+                  ]
+                },
+                "who": {
+                  "identifier": {
+                    "system": "https://dis.example.org/identifiers/worker",
+                    "value": "example-worker"
+                  }
+                }
+              }
+            ],
+            "extension": [
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-outcome-status",
+                "valueCode": "complete"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-ruleset",
+                "valueString": "remove-direct-link"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-reversibility",
+                "valueCode": "irreversible"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validation-status",
+                "valueCode": "valid"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
+                "valueIdentifier": {
+                  "system": "https://dis.example.org/identifiers/audit",
+                  "value": "job-51-patient-r4"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "payloadResult",
+      "part": [
+        {
+          "name": "setId",
+          "valueString": "encounter-r5"
+        },
+        {
+          "name": "payloadBinding",
+          "valueCode": "DIS-FHIR-Payload"
+        },
+        {
+          "name": "payloadVersion",
+          "valueCode": "R5"
+        },
+        {
+          "name": "manifestFormat",
+          "valueCode": "dis-resource-list"
+        },
+        {
+          "name": "manifest",
+          "valueAttachment": {
+            "contentType": "application/fhir+json",
+            "data": "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6Imdyb3VwZWQtZmhpci1yNS1vdXRwdXQiLCJtZXRhIjp7InByb2ZpbGUiOlsiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9ESVMtTWFuaWZlc3RQYWNrYWdlIl19LCJ0eXBlIjoiY29sbGVjdGlvbiIsImVudHJ5IjpbeyJmdWxsVXJsIjoidXJuOnV1aWQ6MGYxYzY5ZjQtYjE1NS01MWYxLTk3ZDAtNTE3YjQ3NzExYmIxIiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiTGlzdCIsImlkIjoiZ3JvdXBlZC1maGlyLXI1LW91dHB1dC1saXN0IiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc291cmNlTWFuaWZlc3QiXX0sInN0YXR1cyI6ImN1cnJlbnQiLCJtb2RlIjoic25hcHNob3QiLCJlbnRyeSI6W3siaXRlbSI6eyJyZWZlcmVuY2UiOiJ1cm46dXVpZDozMTNiZDJlZS1lNzgyLTUyYzMtYjljYi1hZDMwMDhhYTk5ODIifX1dfX0seyJmdWxsVXJsIjoidXJuOnV1aWQ6MzEzYmQyZWUtZTc4Mi01MmMzLWI5Y2ItYWQzMDA4YWE5OTgyIiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiRG9jdW1lbnRSZWZlcmVuY2UiLCJpZCI6Imdyb3VwZWQtZmhpci1yNS1vdXRwdXQtd3JhcHBlciIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1QYXlsb2FkV3JhcHBlciJdfSwic3RhdHVzIjoiY3VycmVudCIsImNvbnRlbnQiOlt7ImF0dGFjaG1lbnQiOnsiY29udGVudFR5cGUiOiJhcHBsaWNhdGlvbi9maGlyK2pzb247IGZoaXJWZXJzaW9uPTUuMCIsImRhdGEiOiJleUp5WlhOdmRYSmpaVlI1Y0dVaU9pSkZibU52ZFc1MFpYSWlMQ0pwWkNJNkltZHliM1Z3WldRdFptaHBjaTFsYm1OdmRXNTBaWEl0YjNWMGNIVjBJaXdpYzNSaGRIVnpJam9pWTI5dGNHeGxkR1ZrSWl3aVlXTjBkV0ZzVUdWeWFXOWtJanA3SW5OMFlYSjBJam9pTWpBeU5pMHdPQ0o5ZlE9PSJ9fV0sImlkZW50aWZpZXIiOlt7InN5c3RlbSI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2V4YW1wbGUtcmVzdWx0IiwidmFsdWUiOiJleGFtcGxlLTUxLWVuY291bnRlciJ9XX19XX0="
+          }
+        },
+        {
+          "name": "evidence",
+          "resource": {
+            "resourceType": "Provenance",
+            "id": "grouped-fhir-evidence-encounter-r5",
+            "meta": {
+              "profile": [
+                "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
+              ]
+            },
+            "target": [
+              {
+                "identifier": {
+                  "system": "https://dis.example.org/identifiers/example-result",
+                  "value": "example-51-encounter"
+                }
+              }
+            ],
+            "recorded": "2026-11-06T03:00:00Z",
+            "activity": {
+              "coding": [
+                {
+                  "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity",
+                  "code": "dis-task"
+                }
+              ]
+            },
+            "policy": [
+              "https://governance.example.org/fhir/Library/grouped-fhir-policy-encounter-r5/_history/1"
+            ],
+            "agent": [
+              {
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                      "code": "performer"
+                    }
+                  ]
+                },
+                "who": {
+                  "identifier": {
+                    "system": "https://dis.example.org/identifiers/worker",
+                    "value": "example-worker"
+                  }
+                }
+              }
+            ],
+            "extension": [
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-outcome-status",
+                "valueCode": "complete"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-ruleset",
+                "valueString": "remove-direct-link"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-reversibility",
+                "valueCode": "irreversible"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validation-status",
+                "valueCode": "valid"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
+                "valueIdentifier": {
+                  "system": "https://dis.example.org/identifiers/audit",
+                  "value": "job-51-encounter-r5"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

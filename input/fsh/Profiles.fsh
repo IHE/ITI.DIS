@@ -133,3 +133,78 @@ Description: "Protected JSON mapping content for a DIS Lookup Table DocumentRefe
 * ^experimental = false
 * contentType = #"application/json"
 * data 1..1
+
+// ── DIS Resource Manifest ────────────────────────────────────────────────────
+
+Profile: DISResourceManifest
+Parent: List
+Id: DIS-ResourceManifest
+Title: "DIS Resource Manifest"
+Description: """
+An explicit snapshot of references for one DIS payload set. A FHIR set lists
+R4 payload resources or wrappers that carry or locate FHIR payload bytes.
+DICOM and CDA sets list R4 indexes or wrappers for the native objects. A manifest can enumerate inputs or results.
+"""
+* ^status = #active
+* ^experimental = false
+* meta 1..1
+* meta.profile 1..*
+* meta obeys dis-resource-manifest-profile
+* status = #current
+* mode = #snapshot
+* entry 1..*
+* entry.deleted = false
+* entry.item.reference 1..1
+* entry.item obeys dis-resource-manifest-entry-reference
+
+Invariant: dis-resource-manifest-profile
+Description: "A DIS Resource Manifest SHALL declare its profile in meta.profile."
+Severity: #error
+Expression: "profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest|')).exists()"
+
+Invariant: dis-resource-manifest-entry-reference
+Description: "Each manifest item SHALL contain an absolute HTTPS reference or a bundle-local UUID reference."
+Severity: #error
+Expression: "reference.startsWith('https://') or reference.matches('^urn:uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$')"
+
+// ── Manifest package and cross-release wrapper ──────────────────────────────
+
+Profile: DISManifestPackage
+Parent: Bundle
+Id: DIS-ManifestPackage
+Title: "DIS Manifest Package"
+Description: "FHIR R4 collection carrying one DIS Resource Manifest and any bundled payload resources, wrappers, or indexes needed to resolve that manifest."
+* ^status = #draft
+* type = #collection
+* entry 1..*
+* entry.fullUrl 1..1
+* obeys dis-package-one-manifest
+
+Invariant: dis-package-one-manifest
+Description: "The package SHALL contain exactly one List declaring the DIS Resource Manifest profile."
+Severity: #error
+Expression: "entry.resource.ofType(List).where(meta.profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest|')).exists()).count() = 1"
+
+Profile: DISPayloadWrapper
+Parent: DocumentReference
+Id: DIS-PayloadWrapper
+Title: "DIS Payload Wrapper"
+Description: "FHIR R4 carrier of one native payload object in an attachment. The set's binding and version govern the attachment content."
+* ^status = #draft
+* meta 1..1
+* meta.profile 1..*
+* meta obeys dis-payload-wrapper-profile
+* status = #current
+* content 1..1
+* content.attachment.contentType 1..1
+* content.attachment obeys dis-payload-attachment-source
+
+Invariant: dis-payload-wrapper-profile
+Description: "A DIS Payload Wrapper SHALL declare its profile in meta.profile."
+Severity: #error
+Expression: "profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-PayloadWrapper' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-PayloadWrapper|')).exists()"
+
+Invariant: dis-payload-attachment-source
+Description: "The attachment SHALL contain exactly one of inline data or an absolute HTTPS URL."
+Severity: #error
+Expression: "(data.exists() xor url.exists()) and (url.empty() or url.startsWith('https://'))"

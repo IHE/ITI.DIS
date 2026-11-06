@@ -6,6 +6,8 @@ if [[ ! -f ig.ini || ! -f sushi-config.yaml ]]; then
   exit 1
 fi
 
+python3 scripts/check_semantic_group_binding.py
+
 publisher_jar=${PUBLISHER_JAR:-input-cache/publisher.jar}
 if [[ $publisher_jar != /* ]]; then
   publisher_jar="$PWD/$publisher_jar"

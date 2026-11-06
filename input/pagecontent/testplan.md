@@ -19,6 +19,8 @@ Cover canonical policy URL/version declarations and their match to data request 
 
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside Phase 1.
 
+Compile a policy targeting `@dates` against R4 and R5 Encounter payloads. Verify that the plan uses `Encounter.period` for R4 and `Encounter.actualPeriod` for R5, that the plans preserve source rule and selector order, and that no semantic group references remain. Use an unknown group or a release with no binding and verify that the Manager fails compilation before dispatch. For a choice selector, verify that a dateTime or Period value is selected and a free-text value is outside the selection. Compile separate rules for `@birth-dates`, `@dates`, and `@subject-demographics` using binding version 0.2.0 for R4 and R5. Verify that only the `@birth-dates` rule emits a selector for `Patient.birthDate`.
+
 ### Transformation Actions
 
 For each core action, specify valid and invalid parameters, applicable data types, expected transformed values and failure outcomes:
@@ -31,11 +33,28 @@ Use the action definitions in [Volume 3](volume-3.html#3pxx13-transformation-act
 
 Cover R4 workflow resources with independently versioned R4/R5/R6 payloads. R6 coverage is provisional, following the ballot-draft qualification in Volume 1. Verify declared-version validation and version-safe packaging; R5/R6 resources must not be embedded as native resources in R4 envelopes.
 
-Cover synchronous inline output, asynchronous polling, both Bulk Data manifest directions, authorized file retrieval, expiry, missing files and failed-job output withholding. A failed job must release no partial dataset. Detailed manifest contracts remain subject to the payload and transaction bindings.
+Exercise inline R4 and cross-version submissions, including dispatch to a separate De-Identifier using an authorized reference to the submitted content. Reject a relative reference with no unambiguous source base and a payload whose version metadata conflicts with `payloadVersion`. Submit a resource manifest and verify processing of its listed resources. Submit the same List as a direct `processingTarget` and verify that its entry references do not expand the target set. Reject a submission that supplies both `resourceManifest` and `processingTarget` or includes an unauthorized entry. Verify that a retry uses the same manifest entry set. Inspect task and job result manifests and verify that their entries resolve to authorized de-identified resources. For bulk input, exercise a complete authorized manifest, a dataset outside the job's approved scope, and missing files or expired access. Verify failure reporting and withholding of job output on any required input failure. Cover synchronous inline output, asynchronous polling, and authorized bulk result retrieval once the result encodings are defined.
 
 Inspect all nine evidence elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, ruleSet identifier, reversibility state, validation status and audit correlation identifier. Verify reference integrity and handling of narratives, extensions, contained resources and attachments.
 
 Check Manager custody of mappings/reversibility records, mode-dependent retention, deletion of temporary mapping copies at task termination and exclusion of protected transformation material from recipient-facing output, evidence and logs. Patient association in UC-3/4 remains implementation-defined and outside standardized DIS transactions.
+
+### Jobs with Multiple Payload Sets
+
+Submit a grouped job containing two distinct set identifiers and approved policies. When the DICOM option is available, exercise one FHIR set and one DICOM set whose Resource Manifest points to an R4 ImagingStudy. Verify that only the enumerated SOP instances are retrieved. When the CDA option is available, verify that the manifest resolves a DocumentReference to one CDA document. Reject a manifest with the wrong index type, an ambiguous imaging endpoint, or an unauthorized native object. Verify that result manifests use result indexes and that their native content is de-identified. Verify dispatch and plan selection per set, including a handoff from bundled to hosted content that preserves the target set. Compare bundled and externally hosted manifest entries for each supported binding. For R5 and provisional R6, exercise an R4 wrapper with inline bytes and with an HTTPS attachment URL. Reject direct cross-release List references, unresolved bundle-local references, wrappers with both data and URL, a mismatched payload release, duplicate set identifiers, mixed grouped and ungrouped forms, and unauthorized manifest entries. Verify correlation of each result and its evidence to the submitted set. Fail one task after another set succeeds and verify that the Requester receives no output for either set.
+
+#### Mixed R5 and DICOM Job Procedure
+
+Use the [mixed payload walkthrough](examples-mixed-r5-dicom.html) once the DICOM binding is available for testing. Configure an R5-capable De-Identifier, a DICOM-capable De-Identifier, and an imaging endpoint with two authorized instances and an additional instance outside the manifest. Use one permit covering both sets and their approved policies.
+
+| Step | Action | Expected result |
+|------|--------|-----------------|
+| 1 | Submit the inline R5 package and the version-specific imaging List in ITI-x1 with `Prefer: respond-async`. | The Manager returns `202 Accepted` and a polling URL. Both set-to-policy assignments are recorded under the job. |
+| 2 | Inspect the two ITI-x3 requests and observe source retrieval. Repeat the imaging retrieval against the same job selection. | The clinical task receives the submitted R5 bytes. The imaging task uses the assigned endpoint and the same two SOP Instance UIDs on each attempt. The worker does not retrieve the unlisted instance. |
+| 3 | Complete the clinical task while the imaging task remains in progress. Poll ITI-x4 with the Requester's credentials. | The Manager returns in-progress status and no payload results. The Requester cannot retrieve intermediate output through the result service. |
+| 4 | Complete imaging and poll ITI-x4 again. | One successful response contains two `payloadResult` groups with the original set IDs. Verify that the clinical evidence resolves to the R4 wrapper, the draft imaging evidence resolves to the result index, and the manifest selects only the two de-identified DICOM instances. |
+| 5 | Repeat with one imaging instance unavailable after acceptance and the clinical task successful. | The imaging task reports failure. ITI-x4 returns an `OperationOutcome`. Neither set is made available to the Requester. |
+{: .grid}
 
 ### Reversible Lookup Mapping
 
@@ -59,7 +78,7 @@ Check the DIS-LookupTable DocumentReference and DIS-LookupTableContent Binary pr
 
 Use synthetic fixtures. Validate available FHIR artifacts and examples, compile FSH, check links and diagrams, and build the guide. Record actor, declared options, preconditions, inputs, observable expected behavior and pass/fail criteria for each procedure. Standalone Integrated actor review includes pipeline behavior as well as output/evidence inspection. Artifact validity alone does not demonstrate operational interoperability or de-identification adequacy.
 
-The Data Recipient and push-delivery proposal in UC-5 remains an open committee question; it is not an adopted Phase 1 test requirement.
+The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-push-delivery) remains open. Phase 1 assesses the standalone UC-5 case through content conformance.
 
 ### Published Lookup Table Examples
 

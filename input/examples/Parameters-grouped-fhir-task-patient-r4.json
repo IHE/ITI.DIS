@@ -1,0 +1,48 @@
+{
+  "resourceType": "Parameters",
+  "id": "grouped-fhir-task-patient-r4",
+  "parameter": [
+    {
+      "name": "payload",
+      "part": [
+        {
+          "name": "setId",
+          "valueString": "patient-r4"
+        },
+        {
+          "name": "payloadBinding",
+          "valueCode": "DIS-FHIR-Payload"
+        },
+        {
+          "name": "payloadVersion",
+          "valueCode": "R4"
+        },
+        {
+          "name": "manifestFormat",
+          "valueCode": "dis-resource-list"
+        },
+        {
+          "name": "manifest",
+          "valueAttachment": {
+            "contentType": "application/fhir+json",
+            "url": "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input/_history/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "executionPlan",
+      "valueReference": {
+        "reference": "https://dis.example.org/fhir/Library/grouped-fhir-plan-patient-r4/_history/1"
+      }
+    },
+    {
+      "name": "ruleSetId",
+      "valueString": "remove-direct-link"
+    },
+    {
+      "name": "reversibilityMode",
+      "valueCode": "irreversible"
+    }
+  ]
+}

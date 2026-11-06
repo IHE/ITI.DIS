@@ -1,0 +1,68 @@
+{
+  "resourceType": "Bundle",
+  "id": "standalone-export-output",
+  "type": "document",
+  "timestamp": "2026-11-06T03:00:00Z",
+  "identifier": {
+    "system": "https://export.example.org/identifiers/document",
+    "value": "standalone-export-output"
+  },
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:915a9497-df67-5353-a77f-8999a37835be",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "standalone-export-output-composition",
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18842-5"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:0f97978f-263d-52d1-9843-bce384c4c27c"
+        },
+        "date": "2026-11-06T03:00:00Z",
+        "author": [
+          {
+            "reference": "urn:uuid:db6cf0c2-4854-5930-a564-1d16875fd148"
+          }
+        ],
+        "title": "Synthetic discharge summary",
+        "section": [
+          {
+            "title": "Patient summary",
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Synthetic patient summary.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:0f97978f-263d-52d1-9843-bce384c4c27c"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0f97978f-263d-52d1-9843-bce384c4c27c",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "standalone-export-output-patient",
+        "active": true
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:db6cf0c2-4854-5930-a564-1d16875fd148",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "standalone-export-output-author",
+        "name": "Example Clinical Service"
+      }
+    }
+  ]
+}

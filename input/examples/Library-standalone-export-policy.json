@@ -1,0 +1,40 @@
+{
+  "resourceType": "Library",
+  "id": "standalone-export-policy",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Policy"
+    ],
+    "versionId": "1"
+  },
+  "url": "https://export.example.org/fhir/Library/standalone-export-policy",
+  "version": "1.0",
+  "name": "StandaloneExportPolicy",
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
+        "code": "dis-policy"
+      }
+    ]
+  },
+  "date": "2026-11-06T03:00:00Z",
+  "publisher": "Example Clinical Service",
+  "effectivePeriod": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "identifier": [
+    {
+      "system": "https://export.example.org/identifiers/policy",
+      "value": "standalone-export-policy"
+    }
+  ],
+  "content": [
+    {
+      "contentType": "application/vnd.ihe.dis.policy+json",
+      "data": "eyJwb2xpY3lWZXJzaW9uIjoiMS4wIiwicmVwcmVzZW50YXRpb25MZXZlbCI6InN5bnRheCIsInJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwicGF5bG9hZEZhbWlseSI6ImZoaXIiLCJwYXlsb2FkVmVyc2lvbiI6IlI0IiwicnVsZVNldHMiOlt7InJ1bGVTZXRJZCI6ImxvY2FsLW5hbWUtcmVtb3ZhbCIsInJ1bGVzIjpbeyJydWxlSWQiOiJyZW1vdmUtbmFtZSIsInRhcmdldCI6IlBhdGllbnQubmFtZSIsImFjdGlvbiI6InJlbW92ZSJ9XX1dfQ=="
+    }
+  ]
+}

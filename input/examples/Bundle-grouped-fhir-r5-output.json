@@ -1,0 +1,60 @@
+{
+  "resourceType": "Bundle",
+  "id": "grouped-fhir-r5-output",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ManifestPackage"
+    ]
+  },
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:0f1c69f4-b155-51f1-97d0-517b47711bb1",
+      "resource": {
+        "resourceType": "List",
+        "id": "grouped-fhir-r5-output-list",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+          ]
+        },
+        "status": "current",
+        "mode": "snapshot",
+        "entry": [
+          {
+            "item": {
+              "reference": "urn:uuid:313bd2ee-e782-52c3-b9cb-ad3008aa9982"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:313bd2ee-e782-52c3-b9cb-ad3008aa9982",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "grouped-fhir-r5-output-wrapper",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-PayloadWrapper"
+          ]
+        },
+        "status": "current",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/fhir+json; fhirVersion=5.0",
+              "data": "eyJyZXNvdXJjZVR5cGUiOiJFbmNvdW50ZXIiLCJpZCI6Imdyb3VwZWQtZmhpci1lbmNvdW50ZXItb3V0cHV0Iiwic3RhdHVzIjoiY29tcGxldGVkIiwiYWN0dWFsUGVyaW9kIjp7InN0YXJ0IjoiMjAyNi0wOCJ9fQ=="
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://dis.example.org/identifiers/example-result",
+            "value": "example-51-encounter"
+          }
+        ]
+      }
+    }
+  ]
+}

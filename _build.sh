@@ -109,6 +109,7 @@ function update_scripts_prompt() {
 function run_publisher() {
   local extra_flags=("$@")
   if [ "$jar_location" != "not_found" ]; then
+    python3 scripts/check_semantic_group_binding.py
     echo "jar_location is: $jar_location"
     if [[ "$JAVA_TOOL_OPTIONS" != *"-Dfile.encoding=UTF-8"* ]]; then
       export JAVA_TOOL_OPTIONS+=" -Dfile.encoding=UTF-8"
