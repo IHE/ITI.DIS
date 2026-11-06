@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant CLI as Clinician
+    participant WS as Clinical Workstation<br/>(Integrated De-ID<br/>Manager/De-Identifier,<br/>standalone)
+
+    CLI->>WS: Initiate document export (local action)
+    activate WS
+    Note over WS: Map local authorization (role + purpose) to locally configured policy
+    Note over WS: Validate authorization and all four policy checks
+    Note over WS: Compile execution plan
+
+    Note over WS: Execute de-identification internally
+    Note over WS: Produce de-identified document Bundle + evidence
+
+    Note over WS: Write de-identified output + Provenance to export destination
+    Note over WS: Emit ATNA audit record
+    WS-->>CLI: Export complete
+    deactivate WS

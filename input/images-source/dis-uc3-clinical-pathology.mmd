@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant EHR as De-Identification Requester<br/>(EHR)
+    participant MGR as De-ID Manager
+    participant DI as De-Identifier
+
+    Note over EHR,MGR: Care-context authorization and pseudonymization policy exist
+
+    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync, Patient + ServiceRequest)
+    activate MGR
+    Note over MGR: Validate policy, compile execution plan
+
+    MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
+    activate DI
+    Note over DI: Replace identifiers with scoped pseudonyms using seed
+    DI-->>MGR: Pseudonymized resources + evidence
+    deactivate DI
+
+    Note over MGR: Retain identity table + pseudonym index
+    MGR-->>EHR: ITI-x1 Response (pseudonymized payload + evidence)
+    deactivate MGR
+
+    Note over EHR: Send pseudonymized order to external lab
+    Note over EHR: Receive lab result referencing pseudonym
+    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS Phase 1)
+    MGR-->>EHR: Resolution result needed for patient association (no mapping-table export)
+    Note over EHR: File lab result to patient chart

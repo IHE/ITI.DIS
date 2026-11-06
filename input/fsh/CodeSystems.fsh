@@ -41,7 +41,7 @@ Description: "Reversibility state of de-identification transformations applied i
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-reversibility"
 * ^status = #active
 * ^experimental = false
-* #irreversible "Transformation cannot be reversed"
+* #irreversible "No DIS-maintained reverse-mapping capability; does not guarantee prevention of identification"
 * #reversible "Transformation can be reversed with access to the identity table"
 
 
@@ -88,11 +88,13 @@ function patterns.
 * #remove "Remove the element entirely from the resource"
 * #remove ^property[+].code = #technique
 * #remove ^property[=].valueCode = #local-suppression
-* #replace "Replace the element's displayable content with a fixed value"
+* #replace "Replace content with a fixed value or apply an authoritative reversible lookup mapping"
 * #replace ^property[+].code = #technique
 * #replace ^property[=].valueCode = #masking
+* #replace ^property[+].code = #technique
+* #replace ^property[=].valueCode = #pseudonymization
 * #keep "Preserve the element unchanged in the de-identified output"
-* #hash "Replace the value with a cryptographic hash digest (keyed HMAC when scope present, unkeyed when absent)"
+* #hash "Keyed baseline derivation for patient pseudonyms; keyed or unkeyed digest for other values under the execution plan"
 * #hash ^property[+].code = #technique
 * #hash ^property[=].valueCode = #hashing
 * #truncate-date "Reduce date precision by truncating to year or year-month"
@@ -183,3 +185,12 @@ Description: "Transformation action codes from the DIS core action family."
 * ^status = #active
 * ^experimental = false
 * include codes from system DisAction
+
+CodeSystem: DisDocumentType
+Id: dis-document-type
+Title: "DIS Document Type"
+Description: "Document types for identified DIS operational artifacts."
+* ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type"
+* ^status = #active
+* ^experimental = false
+* #lookup-table "DIS reversible lookup table"

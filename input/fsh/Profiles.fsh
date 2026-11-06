@@ -91,3 +91,45 @@ Library.type coding dis-execution-plan.
 * content.contentType 1..1
 * content.contentType = #"application/vnd.ihe.dis.execution-plan+json"
 * content.data 1..1
+
+// ── Persistent, referenceable lookup table ──────────────────────────────────
+Profile: DISLookupTable
+Parent: DocumentReference
+Id: DIS-LookupTable
+Title: "DIS Lookup Table"
+Description: "Persistent identified metadata for a protected reversible mapping table. JSON content is inline or retrieved from a Binary. Exact content is pinned per job; Manager persistence of Requester-supplied mappings is not required."
+* ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
+* ^status = #active
+* ^experimental = false
+* masterIdentifier 1..1
+* masterIdentifier.system 1..1
+* masterIdentifier.value 1..1
+* identifier 1..*
+* identifier.system 1..1
+* identifier.value 1..1
+* status 1..1
+* status ^comment = "Only current documents may be selected for new jobs; superseded and entered-in-error states remain available for repository lifecycle management."
+* type 1..1
+* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type#lookup-table "DIS reversible lookup table"
+* extension contains DisIdentityLinkageScopeExt named identityLinkageScope 1..1
+* content 1..1
+* content.attachment.contentType 1..1
+* content.attachment.contentType = #"application/json"
+* content.attachment obeys dis-lookup-content-choice
+* content.attachment.url ^comment = "If present, resolves to a protected Binary conforming to DIS-LookupTableContent. Pin metadata and exact content bytes before processing."
+
+Invariant: dis-lookup-content-choice
+Description: "Lookup table content SHALL have exactly one of inline data or a Binary URL."
+Severity: #error
+Expression: "data.exists() xor url.exists()"
+
+Profile: DISLookupTableContent
+Parent: Binary
+Id: DIS-LookupTableContent
+Title: "DIS Lookup Table Content"
+Description: "Protected JSON mapping content for a DIS Lookup Table DocumentReference. JSON conforms to the DIS lookup-table schema and semantic validation rules."
+* ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTableContent"
+* ^status = #active
+* ^experimental = false
+* contentType = #"application/json"
+* data 1..1

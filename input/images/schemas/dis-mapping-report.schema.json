@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profiles.ihe.net/ITI/DIS/schemas/dis-mapping-report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "subjects",
+    "resources"
+  ],
+  "properties": {
+    "version": {
+      "const": "1"
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subjectId",
+          "system",
+          "value"
+        ],
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "system": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "subjectId",
+          "target"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "subjectId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

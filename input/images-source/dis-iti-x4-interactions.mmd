@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant REQ as De-Identification Requester
+    participant MGR as De-ID Manager
+
+    REQ->>MGR: Retrieve Job Output Request (job handle)
+    activate MGR
+    alt Job in progress
+        MGR-->>REQ: Retrieve Job Output Response (in-progress + retry guidance)
+    else Job complete
+        MGR-->>REQ: Retrieve Job Output Response (output + evidence)
+    else Job failed
+        MGR-->>REQ: Retrieve Job Output Response (OperationOutcome)
+    end
+    deactivate MGR

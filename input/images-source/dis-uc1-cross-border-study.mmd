@@ -1,0 +1,50 @@
+sequenceDiagram
+    participant DAC as De-Identification Requester<br/>(DAC)
+    participant MGR as De-ID Manager
+    participant DI_P as De-Identifier<br/>(Preliminary)
+    participant DI_A as De-Identifier<br/>(Advanced)
+
+    Note over DAC,MGR: Data request authorization and signed policy exist
+
+    DAC->>MGR: ITI-x1 Submit De-Identification Job (async)
+    activate MGR
+    Note over MGR: Validate authorization and all four policy checks
+    Note over DAC,MGR: If validation fails or cannot complete: synchronous error, no acceptance or dispatch
+    MGR-->>DAC: 202 Accepted + Content-Location: polling-url (validation succeeded)
+    deactivate MGR
+
+    activate MGR
+    Note over MGR: Compile staged execution plan (two ruleSets)
+
+    MGR->>DI_P: ITI-x3 Submit Task (preliminary: irreversible pseudonymization)
+    activate DI_P
+    DI_P-->>MGR: 202 Accepted + Content-Location: task-polling-url
+    deactivate DI_P
+
+    MGR->>DI_P: ITI-x7 Retrieve Task Output (GET task-polling-url)
+    activate DI_P
+    DI_P-->>MGR: 200 OK (transformed output + evidence)
+    deactivate DI_P
+
+    MGR->>DI_A: ITI-x3 Submit Task (advanced: record-level suppression, fixed generalization)
+    activate DI_A
+    DI_A-->>MGR: 202 Accepted + Content-Location: task-polling-url
+    deactivate DI_A
+
+    MGR->>DI_A: ITI-x7 Retrieve Task Output (GET task-polling-url)
+    activate DI_A
+    DI_A-->>MGR: 200 OK (transformed output + evidence)
+    deactivate DI_A
+
+    Note over MGR: No reversibility material retained (DIS-IRREVERSIBLE)
+    deactivate MGR
+
+    DAC->>MGR: ITI-x4 GET polling-url
+    activate MGR
+    MGR-->>DAC: 202 Accepted + Retry-After (in-progress)
+    deactivate MGR
+
+    DAC->>MGR: ITI-x4 GET polling-url
+    activate MGR
+    MGR-->>DAC: 200 OK (de-identified output + evidence)
+    deactivate MGR

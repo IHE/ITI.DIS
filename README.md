@@ -53,10 +53,10 @@ The following table defines the four DIS actors and their responsibilities.
 
 | Actor | Responsibility |
 |-------|---------------|
-| **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Sole persistent custodian of identity mappings and reversibility records. |
+| **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Persists mappings for reversible jobs without a supplied lookup table; uses authoritative Requester-supplied tables without mandatory persistence. |
 | **De-Identifier** | Executes assigned de-identification tasks. Stateless with respect to reversibility — receives scoped, purpose-specific seeds as needed, derives transformation values according to declared capabilities, produces transformations and evidence, and retains no seeds or identity-linking material after task termination. |
 | **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Grouped with the De-Identified Data Receiver in Phase 1. |
-| **Integrated De-ID Manager/De-Identifier** | Combines the functionality of the De-ID Manager and De-Identifier into a single actor. Validates policy, compiles execution plans, executes de-identification internally, and produces output and evidence. May operate standalone (content conformance only) or accept external jobs via ITI-x1 with optional async polling via ITI-x4. Does not initiate nor accept ITI-x3. Sole persistent custodian of identity mappings and reversibility records. |
+| **Integrated De-ID Manager/De-Identifier** | Combines the functionality of the De-ID Manager and De-Identifier into a single actor. Validates policy, compiles execution plans, executes de-identification internally, and produces output and evidence. May operate standalone (content conformance only) or accept external jobs via ITI-x1 with optional async polling via ITI-x4. Does not initiate nor accept ITI-x3. Persists mappings for reversible jobs without a supplied lookup table; uses authoritative Requester-supplied tables without mandatory persistence. |
 
 ### Transactions
 
@@ -127,7 +127,7 @@ For the full declaration definitions, conformance layers, actor-option matrix, a
 
 DIS separates the protocol binding from the payload binding. Phase 1 defines DIS-FHIR-Payload as the initial payload binding, covering HL7 FHIR R4, R5, and R6 processing payloads. Future payload bindings (e.g., DIS-DICOM1, DIS-CDA1, DIS-V2-1) can be developed independently without changes to the HL7 FHIR R4 protocol binding.
 
-For the payload binding architecture, extension model, and illustrative future bindings, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Volume 3 Section 3:5.9](input/pagecontent/volume-3.md#359-dis-fhir-payload-content-module).
+For the payload binding architecture, extension model, and illustrative future bindings, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Volume 3 Section 3:PXX.1](input/pagecontent/volume-3.md#3pxx1-dis-fhir-payload-content-module).
 
 ## Phase 1 Expansion Path
 
@@ -144,3 +144,23 @@ Compatibility with Phase 1 is a design objective, supported by explicit versioni
 **Profile Editors:** Alan Zhang, Lori Fourquet
 
 **IHE Domain:** IT Infrastructure (lead), with QRPH and PCC coordination
+
+## Reversible Mapping Arrangements
+
+DIS-REVERSIBLE supports Manager-managed and Requester-supplied mappings. Without a supplied table, the Manager creates or maintains and persists the mapping needed for reversal. With a supplied table, it uses that table for direct identifiers and need not persist it. Missing required entries cause rejection before acceptance or terminal failure afterward; no generated fallback or partial output is permitted. Lookup-backed `replace` retains the nine-action vocabulary. See Volume 1 §1:PXX.2.2 and Volume 3 §3:PXX.1.7.
+
+Cross-community pseudonym consistency requires identity resolution, shared-scope authorization and coordinated derivation/seed lifecycle arrangements established by the deployment outside DIS. DIS does not standardize those arrangements, and a shared identity-linkage-scope alone does not establish cross-community consistency. See Volume 1 §1:PXX.4.1.
+
+The De-Identifier performs pseudonym generation or lookup-backed replacement and reference updates; the Manager controls mappings and derivation material. Supplied tables must be authorized by approved lookup-backed rules and never override a hash/fixed-value policy. Irreversible mode maintains no reverse-mapping table; retained secrets for authorized cross-job consistency remain a reproduction/linkage risk governed by policy. The baseline patient derivation contract is in Volume 3 §3:PXX.1.3.3; the task subject/seed carrier, separate resource-ID derivation and worked examples are defined in Volume 3 §§3:PXX.1.3.4–5 and §3:PXX.1.8.
+
+Lookup tables are persistent identified DIS-LookupTable DocumentReference resources. Their JSON content is inline or in a protected Binary. Job/task submissions carry references, and the Manager pins exact metadata/content for each job. Requester repository persistence does not require Manager persistence of supplied-table copies. See Volume 3 §3:PXX.1.7.
+
+## Build the draft guide
+
+Run `./_build.sh` for the local Publisher workflow. With Docker, use `./ig-run` from the repository root. The Docker workflow uses local SUSHI, a Publisher jar at `input-cache/publisher.jar` or `PUBLISHER_JAR`, and a local `hl7fhir/ig-publisher-base:latest` image. Set `PUBLISHER_IMAGE` for a different installed image. Set `ONLINE_TX=1` to enable remote terminology validation.
+
+Read `output/qa.html` for validation and link diagnostics. The draft source includes narrative in `input/pagecontent`, conformance definitions in `input/fsh`, and downloadable content schemas in `input/images/schemas`.
+
+**Published FHIR examples** appear in the guide's artifact index and FHIR example downloads. The [lookup table](input/fsh/LookupTableExamples.fsh) and [evidence](input/fsh/EvidenceExamples.fsh) examples are authored in FSH. SUSHI generates their JSON during the build.
+
+Editable Mermaid figures are in `input/images-source` and the guide uses the matching PNG files in `input/images`. After editing a figure, render it again with Mermaid CLI using the same filename, a white background, and 2× scale.

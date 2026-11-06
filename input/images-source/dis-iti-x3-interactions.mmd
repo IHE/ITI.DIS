@@ -1,0 +1,9 @@
+sequenceDiagram
+    participant MGR as De-ID Manager
+    participant DI as De-Identifier
+
+    MGR->>DI: Submit De-Identification Task Request
+    activate DI
+    Note over DI: Verify capabilities<br/>Apply execution plan rules<br/>Produce output and evidence
+    DI-->>MGR: Submit De-Identification Task Response
+    deactivate DI

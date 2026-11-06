@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant EHR as De-Identification Requester<br/>(EHR)
+    participant MGR as De-ID Manager<br/>(on-premise)
+    participant DI as De-Identifier<br/>(on-premise)
+    participant AI as Cloud AI Service<br/>(external)
+
+    Note over EHR,DI: All DIS actors within hospital trust boundary
+
+    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync, clinical resources)
+    activate MGR
+    Note over MGR: Validate policy, compile execution plan
+
+    MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
+    activate DI
+    Note over DI: Pseudonymize within trust boundary
+    DI-->>MGR: Pseudonymized resources + evidence
+    deactivate DI
+
+    Note over MGR: Retain identity table + pseudonym index on-premise
+    MGR-->>EHR: ITI-x1 Response (pseudonymized payload + evidence)
+    deactivate MGR
+
+    EHR->>AI: Transmit pseudonymized data (outside DIS)
+    activate AI
+    AI-->>EHR: AI recommendation referencing pseudonym (outside DIS)
+    deactivate AI
+
+    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS Phase 1)
+    MGR-->>EHR: Resolution result needed for patient association (no mapping-table export)
+    Note over EHR: File AI result to patient chart

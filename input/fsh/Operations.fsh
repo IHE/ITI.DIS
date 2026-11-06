@@ -73,6 +73,15 @@ Usage: #definition
 * parameter[=].part[=].documentation = "JWS-signed policy artifact, when the Requester carries the policy content directly. Binary.contentType SHALL be application/jose."
 * parameter[=].part[=].type = #Binary
 
+// ── Input: lookupTable ──
+* parameter[+].name = #lookupTable
+* parameter[=].use = #in
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].type = #Reference
+* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
+* parameter[=].documentation = "Reference to an identified DIS Lookup Table DocumentReference. Resolve and pin its version-specific identifier and exact JSON content before processing. For tasks, expose only assigned entries through a protected scoped document. Missing entries fail the job without fallback or partial output."
+
 // ── Input: processingTarget ──
 * parameter[+].name = #processingTarget
 * parameter[=].use = #in
@@ -192,12 +201,21 @@ Usage: #definition
 * parameter[=].documentation = "HL7 FHIR version of the processing payload."
 * parameter[=].type = #code
 
+// ── Input: lookupTable ──
+* parameter[+].name = #lookupTable
+* parameter[=].use = #in
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].type = #Reference
+* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
+* parameter[=].documentation = "Reference to an identified DIS Lookup Table DocumentReference. Resolve and pin its version-specific identifier and exact JSON content before processing. For tasks, expose only assigned entries through a protected scoped document. Missing entries fail the job without fallback or partial output."
+
 // ── Input: seedMaterial ──
 * parameter[+].name = #seedMaterial
 * parameter[=].use = #in
 * parameter[=].min = 0
 * parameter[=].max = "1"
-* parameter[=].documentation = "Scoped, purpose-specific seed material for deterministic pseudonymization and date shifting."
+* parameter[=].documentation = "Protected JSON subject/resource context with scope, keyVersion, subjectId associations and optional 32-byte seeds; Volume 3 section 3:PXX.1.3.4. Required for baseline derivation and lookup-backed resource rewriting."
 * parameter[=].type = #Binary
 
 // ── Input: reversibilityMode ──
@@ -215,6 +233,14 @@ Usage: #definition
 * parameter[=].max = "1"
 * parameter[=].documentation = "De-identified resource(s) produced for this ruleSet."
 * parameter[=].type = #Resource
+
+// ── Output: mappingReport (Manager only) ──
+* parameter[+].name = #mappingReport
+* parameter[=].use = #out
+* parameter[=].min = 0
+* parameter[=].max = "1"
+* parameter[=].type = #Binary
+* parameter[=].documentation = "Protected generated reverse-mapping associations for the Manager; required for reversible Manager-managed derivation and forbidden for irreversible jobs. Never forwarded to recipients. JSON binding in Volume 3 section 3:PXX.1.3.5."
 
 // ── Output: evidence ──
 * parameter[+].name = #evidence

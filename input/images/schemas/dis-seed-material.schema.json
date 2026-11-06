@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profiles.ihe.net/ITI/DIS/schemas/dis-seed-material.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "1"
+    },
+    "identity-linkage-scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "keyVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subjects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "patientSeed": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]{43}=$"
+          }
+        },
+        "required": [
+          "subjectId"
+        ]
+      }
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "resourceType": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Za-z0-9]+$"
+          },
+          "subjectId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resourceSeed": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]{43}=$"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9\\-.]{1,64}$"
+          }
+        },
+        "required": [
+          "source",
+          "aliases",
+          "resourceType",
+          "subjectId",
+          "sourceSystem",
+          "sourceId"
+        ]
+      }
+    }
+  },
+  "required": [
+    "version",
+    "identity-linkage-scope",
+    "keyVersion",
+    "subjects",
+    "resources"
+  ]
+}

@@ -1,5 +1,5 @@
 
-The De-Identification Services (DIS) Profile provides a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. It defines four actors -- De-ID Manager, De-Identifier, De-Identification Requester, and Integrated De-ID Manager/De-Identifier -- four transactions (ITI-x1 Submit Job, ITI-x3 Submit Task, ITI-x4 Retrieve Job Output, and ITI-x7 Retrieve Task Output), a baseline policy execution model with flat, ordered rules, a minimum de-identification evidence baseline, and a FHIR payload binding (DIS-FHIR-Payload).
+The De-Identification Services (DIS) Profile defines interoperability requirements for policy-governed de-identification of HL7 FHIR health data. It defines four actors -- De-ID Manager, De-Identifier, De-Identification Requester, and Integrated De-ID Manager/De-Identifier -- four transactions (ITI-x1 Submit Job, ITI-x3 Submit Task, ITI-x4 Retrieve Job Output, and ITI-x7 Retrieve Task Output), a baseline policy execution model with flat, ordered rules, a minimum de-identification evidence baseline, and a FHIR payload binding (DIS-FHIR-Payload).
 
 The Integrated actor may operate standalone with content conformance only, or support external jobs through ITI-x1 and, when DIS-ASYNC-JOB is declared, ITI-x4. DIS uses an R4 protocol binding and independently versioned R4/R5/R6 payloads; R6 support is provisional as described in Volume 1. Full composable execution plans are deferred.
 
@@ -31,8 +31,9 @@ This guide is organized into the following sections:
    1. [Retrieve Task Output \[ITI-x7\]](volume-2.html#23x7-retrieve-task-output-iti-x7)
 3. Volume 3: Content Modules
    1. [DIS-FHIR-Payload and Baseline Execution Plan](volume-3.html#fhir-payload-content-module)
-   1. [De-ID Evidence](volume-3.html#3595-evidence-baseline)
+   1. [De-ID Evidence](volume-3.html#3pxx15-evidence-baseline)
    1. [DIS-Policy](volume-3.html#policy-content-module)
+   1. [Lookup table examples](volume-3.html#3pxx18-worked-mapping-examples)
 4. Other
    1. [Changes to Other IHE Specifications](other.html)
    1. [Download and Analysis](download.html)

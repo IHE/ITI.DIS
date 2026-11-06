@@ -1,90 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Resource controls
-CPUS="${CPUS:-4}"
-MEMORY="${MEMORY:-8g}"
-MEMORY_SWAP="${MEMORY_SWAP:-10g}"
-JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:-"-Xmx6g -Xms1g -Dfile.encoding=UTF-8"}
-# Docker image for FHIR IG Publisher
-PUBLISHER_IMAGE="${PUBLISHER_IMAGE:-fhir-ig-publisher:latest}"
-
-# Persist FHIR package cache across runs
-FHIR_PACKAGE_CACHE_DIR="${FHIR_PACKAGE_CACHE_DIR:-$HOME/.fhir}"
-mkdir -p "$FHIR_PACKAGE_CACHE_DIR"
-
-# Terminology mode
-FORCE_OFFLINE="${FORCE_OFFLINE:-}"
-ONLINE_TX="${ONLINE_TX:-}"
-TX_ARG=""
-if [[ -n "$ONLINE_TX" ]]; then
-  TX_ARG=""
-  echo "TX mode: ONLINE (override)"
-elif [[ -n "$FORCE_OFFLINE" ]]; then
-  TX_ARG="-tx n/a"
-  echo "TX mode: OFFLINE (override)"
-else
-  TX_ARG="-tx n/a"
-  echo "TX mode: OFFLINE (default)"
-fi
-
-# Must be run from repo root so _genonce.sh exists
-if [[ ! -x "./_genonce.sh" ]]; then
-  echo "Error: _genonce.sh not found in current directory. Run from the IG repo root." >&2
+if [[ ! -f ig.ini || ! -f sushi-config.yaml ]]; then
+  echo 'Run ig-run from the guide directory.' >&2
   exit 1
 fi
 
-# Run publisher via Docker
-exec docker run --rm \
-  --cpus "$CPUS" \
-  --memory "$MEMORY" \
-  --memory-swap "$MEMORY_SWAP" \
-  -e JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS" \
-  -v "$PWD:/workspace" \
-  -v "$FHIR_PACKAGE_CACHE_DIR:/root/.fhir" \
-  -v "$FHIR_PACKAGE_CACHE_DIR:/home/publisher/.fhir" \
-  -w /workspace \
-  "$PUBLISHER_IMAGE" \
-  bash -lc "./_genonce.sh $TX_ARG $*"
-MEMORY_SWAP="${MEMORY_SWAP:-10g}"
-JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:-"-Xmx6g -Xms1g -Dfile.encoding=UTF-8"}
-# Docker image for FHIR IG Publisher
-PUBLISHER_IMAGE="${PUBLISHER_IMAGE:-fhir-ig-publisher:latest}"
-
-# Persist FHIR package cache across runs
-FHIR_PACKAGE_CACHE_DIR="${FHIR_PACKAGE_CACHE_DIR:-$HOME/.fhir}"
-mkdir -p "$FHIR_PACKAGE_CACHE_DIR"
-
-# Terminology mode
-FORCE_OFFLINE="${FORCE_OFFLINE:-}"
-ONLINE_TX="${ONLINE_TX:-}"
-TX_ARG=""
-if [[ -n "$ONLINE_TX" ]]; then
-  TX_ARG=""
-  echo "TX mode: ONLINE (override)"
-elif [[ -n "$FORCE_OFFLINE" ]]; then
-  TX_ARG="-tx n/a"
-  echo "TX mode: OFFLINE (override)"
-else
-  TX_ARG="-tx n/a"
-  echo "TX mode: OFFLINE (default)"
+publisher_jar=${PUBLISHER_JAR:-input-cache/publisher.jar}
+if [[ $publisher_jar != /* ]]; then
+  publisher_jar="$PWD/$publisher_jar"
 fi
-
-# Must be run from repo root so _genonce.sh exists
-if [[ ! -x "./_genonce.sh" ]]; then
-  echo "Error: _genonce.sh not found in current directory. Run from the IG repo root." >&2
+if [[ ! -s $publisher_jar ]]; then
+  echo 'Set PUBLISHER_JAR to an installed IG Publisher jar or place it in input-cache/publisher.jar.' >&2
   exit 1
 fi
 
-# Run publisher via Docker
-exec docker run --rm \
-  --cpus "$CPUS" \
-  --memory "$MEMORY" \
-  --memory-swap "$MEMORY_SWAP" \
-  -e JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS" \
+sushi_command=${SUSHI_COMMAND:-sushi}
+if ! command -v "$sushi_command" >/dev/null; then
+  echo 'Install SUSHI or set SUSHI_COMMAND to its executable path.' >&2
+  exit 1
+fi
+"$sushi_command" build .
+
+package_cache=${FHIR_PACKAGE_CACHE_DIR:-$HOME/.fhir}
+mkdir -p "$package_cache/packages"
+terminology=()
+if [[ -z ${ONLINE_TX:-} ]]; then
+  terminology=(-tx n/a)
+fi
+
+exec docker run --rm --pull=never \
+  --cpus "${CPUS:-4}" \
+  --memory "${MEMORY:-8g}" \
+  --memory-swap "${MEMORY_SWAP:-10g}" \
+  -e "JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--Xmx6g -Xms1g -Dfile.encoding=UTF-8}" \
   -v "$PWD:/workspace" \
-  -v "$FHIR_PACKAGE_CACHE_DIR:/root/.fhir" \
-  -v "$FHIR_PACKAGE_CACHE_DIR:/home/publisher/.fhir" \
+  -v "$publisher_jar:/publisher.jar:ro" \
+  -v "$package_cache/packages:/root/.fhir/packages" \
   -w /workspace \
-  "$PUBLISHER_IMAGE" \
-  bash -lc "./_genonce.sh $TX_ARG $*"
+  --entrypoint java \
+  "${PUBLISHER_IMAGE:-hl7fhir/ig-publisher-base:latest}" \
+  -jar /publisher.jar -ig . -no-sushi "${terminology[@]}" "$@"

@@ -1,0 +1,9 @@
+sequenceDiagram
+    participant REQ as De-Identification Requester
+    participant MGR as De-ID Manager
+
+    REQ->>MGR: Submit De-Identification Job Request
+    activate MGR
+    Note over MGR: Validate authorization and policy<br/>Compile execution plan<br/>Orchestrate task execution
+    MGR-->>REQ: Submit De-Identification Job Response
+    deactivate MGR

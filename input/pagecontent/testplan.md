@@ -2,6 +2,8 @@
 
 This draft checklist follows [Volume 1](volume-1.html), the authoritative profile baseline. Detailed procedures, fixtures and expected messages remain drafting work. This page does not report executed interoperability tests.
 
+## Actor and Transaction Conformance
+
 ### Actor and Option Coverage
 
 - De-Identification Requester: ITI-x1; ITI-x4 when DIS-ASYNC-JOB is declared.
@@ -23,7 +25,7 @@ For each core action, specify valid and invalid parameters, applicable data type
 
 `remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`.
 
-Use the action definitions in [Volume 3](volume-3.html#3593-transformation-actions). Cover scope/seed compatibility, date-shift consistency, derivation versions, rotation, collision handling and capability matching. Test protected parameter return/reuse only when an explicit capability contract permits it.
+Use the action definitions in [Volume 3](volume-3.html#3pxx13-transformation-actions). Cover scope/seed compatibility, date-shift consistency, derivation versions, rotation, collision handling and capability matching. Test protected parameter return/reuse only when an explicit capability contract permits it.
 
 ### Payload, Evidence and Release
 
@@ -35,8 +37,28 @@ Inspect all nine evidence elements: evidence identifier, outcome status, workflo
 
 Check Manager custody of mappings/reversibility records, mode-dependent retention, task-terminal seed deletion and exclusion of protected transformation material from recipient-facing output, evidence and logs. Patient association in UC-3/4 remains implementation-defined and outside standardized DIS transactions.
 
-### Validation and Reporting
+### Reversible Lookup Mapping
+
+Cover both mandatory DIS-REVERSIBLE arrangements: absent table causes Manager mapping creation/maintenance and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent identifiers/references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
+
+### Cross-Community Consistency Prerequisites
+
+For a deployment claiming cross-community pseudonym consistency, inspect evidence of externally established patient identity resolution, shared-scope authorization and coordinated seed/derivation/version/lifecycle arrangements. Verify that different local identifiers resolved to the same patient yield matching pseudonyms under the agreed contract. Without these prerequisites, no cross-community consistency claim is permitted. This inspection does not test or standardize an external identity-resolution protocol; successful DIS transactions alone do not establish the prerequisites.
+
+### Pseudonym Derivation and Policy Compatibility
+
+Verify that De-Identifiers, rather than distributed Managers, transform payloads. Exercise the baseline patient derivation method using equal patient seeds and scope/keyVersion across different local IDs and workers; expect identical complete lowercase digests. Changed scopes/key versions must use their declared derivation context. Reject unknown methods, ambiguous subject/seed associations, detected collisions and supplied tables incompatible with approved hash/fixed replacement rules. Inspect irreversible-mode absence of reverse-mapping tables, destruction of job-scoped material and policy-controlled lifecycle of cross-job derivation secrets. Do not interpret this as proof against re-identification. See [Volume 3](volume-3.html#fhir-payload-content-module) for the task carrier.
+
+### Persistent Lookup Table References
+
+Check the DIS-LookupTable DocumentReference and DIS-LookupTableContent Binary profiles. Exercise literal and version-specific references, exact-version identifier resolution, inline JSON and Binary attachments, stable business identifiers and content-version masterIdentifier, policy/content scope agreement, current-status admission, unavailable or unauthorized retrieval, ambiguous identifiers, and changed bytes under a pinned identifier. Verify a job/retry uses one pinned snapshot and task subsets use distinct derived document identifiers with transforms provenance. Delete temporary snapshots and derived task artifacts without deleting the Requester's authoritative repository.
+
+## Artifact Validation and Reporting
 
 Use synthetic fixtures. Validate available FHIR artifacts and examples, compile FSH, check links and diagrams, and build the guide. Record actor, declared options, preconditions, inputs, observable expected behavior and pass/fail criteria for each procedure. Standalone Integrated actor review includes pipeline behavior as well as output/evidence inspection. Artifact validity alone does not demonstrate operational interoperability or de-identification adequacy.
 
 The Data Recipient and push-delivery proposal in UC-5 remains an open committee question; it is not an adopted Phase 1 test requirement.
+
+### Published Lookup Table Examples
+
+Validate the [published lookup table examples](volume-3.html#3pxx18-worked-mapping-examples) against their declared FHIR profiles. Decode the Binary and inline attachments and check that they carry the same table. Check that the task-scoped example references the source version and contains only the mappings for the selected subject.

@@ -91,3 +91,15 @@ Description: "Summary of per-element transformation actions applied during the d
 * extension[entry].extension[outcome] ^short = "Outcome of the action for this element"
 * extension[entry].extension[ruleId].value[x] only string
 * extension[entry].extension[ruleId] ^short = "Execution plan rule identifier that triggered this action"
+
+// Non-secret scope metadata for protected lookup-table documents.
+Extension: DisIdentityLinkageScopeExt
+Id: dis-identity-linkage-scope
+Title: "DIS Identity Linkage Scope"
+Description: "Non-secret identifier of the authorized linkage scope; not a patient identifier, seed or cryptographic key."
+* ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-identity-linkage-scope"
+* ^status = #active
+* ^context[+].type = #element
+* ^context[=].expression = "DocumentReference"
+* value[x] 1..1
+* value[x] only string

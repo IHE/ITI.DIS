@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant MGR as De-ID Manager
+    participant DI as De-Identifier
+
+    MGR->>DI: Retrieve Task Output Request (task handle)
+    activate DI
+    alt Task in progress
+        DI-->>MGR: Retrieve Task Output Response (in-progress status)
+    else Task complete
+        DI-->>MGR: Retrieve Task Output Response (output + evidence)
+    else Task failed
+        DI-->>MGR: Retrieve Task Output Response (OperationOutcome)
+    end
+    deactivate DI

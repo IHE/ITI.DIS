@@ -1,0 +1,12 @@
+flowchart TB
+    REQ["De-Identification Requester"]
+
+    subgraph INT ["Integrated De-ID Manager / De-Identifier"]
+        MGR["De-ID Manager"]
+        DI["De-Identifier"]
+    end
+
+    REQ -->|"ITI-x1 Submit De-Identification Job"| MGR
+    REQ -->|"ITI-x4 Retrieve Job Output"| MGR
+    MGR -->|"ITI-x3 Submit De-Identification Task"| DI
+    MGR -->|"ITI-x7 Retrieve Task Output"| DI
