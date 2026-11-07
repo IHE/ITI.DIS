@@ -9,7 +9,7 @@ The following transactions are specified in this volume:
 
 <a name="grouped-payload-parameters"> </a>
 
-## Shared Payload Set Parameters
+## 2:PXX.1 Shared Payload Set Parameters
 
 Every job uses the same payload set encoding, including jobs with only one set. The POST requests and successful HTTP 200 responses use R4 `Parameters`. The polling GET requests have no body.
 
