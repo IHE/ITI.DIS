@@ -1,4 +1,4 @@
-This informative guide accompanies the [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv). The [Volume 3 binding table](volume-3.html#3pxx122-semantic-groups) defines the authoritative selectors for DIS semantic-level policies. The catalog helps authors identify candidate paths for syntax-level policies.
+This informative guide accompanies the [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv). The [Volume 3 binding table](volume-3.html#3pxx3213-semantic-group-bindings) defines the authoritative selectors for DIS semantic-level policies. The catalog helps authors identify candidate paths for syntax-level policies.
 
 The companion CSV contains 8,489 unique declaration and value-type rows. It covers all 146 concrete FHIR R4 (4.0.1) resource types and all 158 concrete FHIR R5 (5.0.0) resource types, their base types, and reusable complex datatypes. Each row identifies a path, allowed value type, screening classification, semantic group, source StructureDefinition and element ID, and any recursive expansion rule. Deployment profiles, custom extensions, and actual instances require separate review. [HL7 R4 definitions](https://hl7.org/fhir/R4/downloads.html) · [HL7 R5 definitions](https://hl7.org/fhir/R5/downloads.html)
 
@@ -33,7 +33,7 @@ Every row other than `Non-PII` has a semantic group. The group describes the kin
 
 For fields that require inspection, groups such as `free-text`, `attachment`, and `extension-content` describe the carrier. The actual content may resolve to a more specific group. A `Non-PII` parent can still contain classified children. For example, `Organization.contact` is a container and the applicable name declaration belongs to `person-name`.
 
-`Patient.birthDate` belongs to the dedicated `birth-dates` group in both versions and remains QI. Event dates and recorded ages retain their separate groups. [DIS Volume 3](volume-3.html#3pxx122-semantic-groups)
+`Patient.birthDate` belongs to the dedicated `birth-dates` group in both versions and remains QI. Event dates and recorded ages retain their separate groups. [DIS Volume 3](volume-3.html#3pxx3213-semantic-group-bindings)
 
 ## Device and care-provider identifiers
 

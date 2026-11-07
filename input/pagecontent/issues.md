@@ -1,6 +1,6 @@
 ## Significant Changes
 
-The current drafting baseline is [Volume 1](volume-1.html). Supporting content reflects four actors, four transactions, DIS-Policy and DIS-FHIR-Payload content modules, the nine core transformation actions, and independently versioned R4/R5/R6 payloads over an R4 protocol binding. R6 support remains provisional as described in Volume 1.
+The current drafting baseline is [Volume 1](volume-1.html). Supporting content reflects four actors, four transactions, policy, execution plan, FHIR payload, evidence, and lookup table specifications, the nine core transformation actions, and independently versioned R4/R5/R6 payloads over an R4 protocol binding. R6 support remains provisional as described in Volume 1.
 
 ## Issues
 
@@ -13,9 +13,7 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
 - [Future policy management transaction](#future-policy-management-transaction)
-- **Operation parameters:** align the FHIR R4 OperationDefinitions with the alternate `processingTarget` encodings specified in [Volume 2](volume-2.html).
-- **Result encoding:** align the output parameters in ITI-x1/x4 and ITI-x3/x7 for attachments and references, including bulk result manifests and their evidence association.
-- **Conformance artifacts:** complete the remaining schemas, actor CapabilityStatements and detailed test procedures, then validate them against the current baseline.
+- **Draft contract review:** confirm the payload set transaction contract, capability declarations, stage ordering, and release authorization. Complete detailed conformance procedures and validate them against the agreed baseline.
 
 <a name="data-recipient-and-push-delivery"> </a>
 
@@ -37,7 +35,7 @@ Considerations include Phase 1 scope, overlap with MHD Document Source grouping 
 
 #### Future Policy Management Transaction
 
-A future phase could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. Phase 1 uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3.html#3pxx25-policy-lifecycle).
+A future phase could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. Phase 1 uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3.html#3pxx16-policy-lifecycle).
 
 ### Closed Issues
 

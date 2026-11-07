@@ -9,7 +9,7 @@ The [IHE ITI.DIS repository](https://github.com/IHE/ITI.DIS) contains the source
 
 #### FHIR Semantic Group Binding
 
-Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3.html#3pxx122-semantic-groups). The following informative resources support policy authoring.
+Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3.html#3pxx3213-semantic-group-bindings). The following informative resources support policy authoring.
 
 - [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv)
 - [FHIR PII classification and semantic group guide](fhir-semantic-group-guide.html)
@@ -20,9 +20,9 @@ These schemas describe the structure of the decoded JSON payloads used by DIS. V
 
 | JSON Schema | Purpose | Volume 3 binding |
 |---|---|---|
-| [De-identification policy rules](schemas/dis-policy.schema.json) | Defines policy version, representation, ordered ruleSets, optional stages, and action parameters. | [Policy Rules JSON Structure](volume-3.html#3pxx22-policy-rules-json-structure) |
-| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3.html#3pxx17-reversible-lookup-table) |
-| [Execution plan](schemas/dis-execution-plan.schema.json) | Defines resolved, ordered rules for one task. | [Execution Plan JSON Structure](volume-3.html#3pxx142-execution-plan-json-structure) |
+| [De-identification policy rules](schemas/dis-policy.schema.json) | Defines policy version, representation, ordered ruleSets, optional stages, and action parameters. | [Policy Rules JSON Structure](volume-3.html#3pxx13-policy-rules-json-structure) |
+| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3.html#3pxx5-reversible-lookup-table) |
+| [Execution plan](schemas/dis-execution-plan.schema.json) | Defines resolved, ordered rules for one task. | [Execution Plan JSON Structure](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation) |
 {: .grid}
 
 #### Cross Version Analysis

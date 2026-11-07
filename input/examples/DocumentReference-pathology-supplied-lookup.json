@@ -22,7 +22,8 @@
     "coding": [
       {
         "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type",
-        "code": "lookup-table"
+        "code": "lookup-table",
+        "display": "DIS reversible lookup table"
       }
     ]
   },

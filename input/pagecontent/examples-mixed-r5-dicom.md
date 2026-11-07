@@ -1,10 +1,10 @@
 <div markdown="1" class="stu-note">
-**Informative example.** The DICOM task, validation, and evidence illustrate the proposed DIS-DICOM1 binding. The execution-plan format, capability declaration, and evidence mapping remain under development. See the [draft binding notes](draft-native-payload-bindings.html).
+**Illustrative example only.** This walkthrough shows how the DIS workflow could be extended to de-identify payloads with different formats or syntaxes, such as HL7 FHIR and DICOM, within a single job. The current version of DIS does not formally define a DICOM payload option. The DICOM binding identifier, task, validation, and evidence in this example illustrate a proposed extension and carry no conformance requirements. See the [draft binding notes](draft-native-payload-bindings.html).
 </div>
 
 This draft walkthrough exercises ITI-x1, ITI-x3, and ITI-x4. The job is asynchronous and the two task exchanges are synchronous. The authorized recipient needs a clinical resource and an imaging set for separate analyses. Neither approved policy requires the recipient to join them by a shared pseudonym. The Manager uses `setId` to correlate work and results within the job. A `setId` identifies a payload set, rather than a patient.
 
-The tables describe the R4 wire parameters. Example artifact URLs denote the contents described in the walkthrough.
+The tables describe the R4 wire parameters. Each successful task and job response carries top-level `validationStatus = valid`. Example artifact URLs denote the contents described in the walkthrough.
 
 <a name="job-submission"> </a>
 
@@ -76,7 +76,7 @@ Each successful synchronous task returns `200 OK` with one R4 `payloadResult` gr
 | `payloadResult.evidence.resource.target` | `target.identifier` uses system `https://dis.example.org/identifiers/result-wrapper` and value `job-42-clinical`, matching the result wrapper's identifier | Draft mapping using `target.reference = https://results.example.org/fhir/ImagingStudy/images-result-42/_history/1`. The index enumerates the exact DICOM outputs |
 {: .grid}
 
-For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched `ruleSetId`, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3.html#3pxx15-evidence-baseline).
+For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched `ruleSetId`, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3.html#3pxx4-de-identification-evidence).
 
 The Manager correlates both results by `setId` and checks that the result manifests, objects, and evidence agree. It keeps the hosted imaging output accessible only to authorized processing actors until the job is ready to release. Once both sets pass, the Requester polls `GET https://dis.example.org/jobs/job-42` with authorized credentials. The Manager returns `200 OK` with both `payloadResult` groups in one R4 `Parameters` response. The Requester can decode the clinical result immediately and use its authorized access to retrieve the imaging result. The result index enumerates only the replacement UIDs, and the result manifests and evidence exclude source identifiers and protected transformation material.
 

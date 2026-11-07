@@ -15,7 +15,8 @@
     "coding": [
       {
         "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
-        "code": "dis-policy"
+        "code": "dis-policy",
+        "display": "De-identification policy (Semantic-Level or Syntax-Level rules)"
       }
     ]
   },

@@ -1,6 +1,6 @@
 # ITI.DIS Phase 1 profile drafting work plan
 
-Status: aligned with the current Volume 1 on 5 November 2026. Volume 1 is the authoritative content baseline. D01–D11 retain review traceability; their follow-up below uses current terminology and scope. Contributor assignments and schedule remain proposals; this plan does not establish external assignments.
+Status: updated for the payload set wire contract on 7 November 2026. Volume 1 is the authoritative content baseline. D01–D11 retain review traceability; their follow-up below uses current terminology and scope. Contributor assignments and schedule remain proposals; this plan does not establish external assignments.
 
 ## 1. Purpose and review baseline
 
@@ -26,6 +26,10 @@ The original review covered [README.md](README.md), [Volume 1](input/pagecontent
 | D10 | README promises expansion without modification or breaking changes. | **Agreed:** additive compatibility is a design objective supported by explicit versioning and regression tests. Preserve existing contracts where possible; incompatible changes must identify affected contracts, implementation/conformance impact and migration requirements. README updated to remove unconditional future-compatibility promises. | Profile lead |
 
 D01–D11 are agreed. The findings above record the original review baseline; agreement and prose alignment do not imply completed schemas, examples, or conformance test specifications. Bulk Data scope is agreed in D11 below; detailed binding contracts remain to be completed.
+
+### Payload set wire format
+
+The next Phase 1 draft uses one payload set encoding for every job and task. ITI-x1 carries one or more sets under one authorization, ITI-x3 carries exactly one assigned set, and successful responses use `payloadResult`. The draft wire contract uses `payload` and `payloadResult` for input and result data. To migrate, place the approved policy and any supplied lookup reference inside the job payload group. Put input and result selections in manifests, and correlate them by set ID. The published draft must call out this wire change for implementers. Committee disposition is pending. The [transaction matrix](input/pagecontent/volume-2.md#grouped-payload-parameters) and [one-Patient example](input/pagecontent/examples-single-r4-patient.md) define the editorial baseline for updating examples and procedures.
 
 ### Agreed Bulk Data scope and binding follow-up
 
@@ -60,7 +64,7 @@ Paths not already in the repository are proposed additions. Agree page names bef
 
 | Package | Accountable owner / reviewers | Deliverables and surfaces | Dependencies | Draft acceptance criteria |
 |---|---|---|---|---|
-| WP01 — Consolidate agreed baseline | Profile / section owners | README, Volume 1, issues page, proposed decision log and conformance matrix | D01–D11 | Agreed decisions reflected consistently; every declaration is mapped to actors, initiating/responding transactions, required/optional status and dependencies, including the mandatory R4 protocol binding, DIS-Policy and DIS-FHIR-Payload content modules, and all five current options. Distinguish job admission, task execution and standalone Integrated actor obligations. Align README and Volume 1; remaining binding questions have owners and deadlines. |
+| WP01 — Consolidate agreed baseline | Profile / section owners | README, Volume 1, issues page, proposed decision log and conformance matrix | D01–D11 | Agreed decisions reflected consistently; every declaration is mapped to actors, initiating/responding transactions, required/optional status and dependencies, including the mandatory R4 protocol binding, the policy specification and FHIR payload binding, and all five current options. Distinguish job admission, task execution and standalone Integrated actor obligations. Align README and Volume 1; remaining binding questions have owners and deadlines. |
 | WP02 — Establish IG drafting structure | Build/editorial / FHIR | `sushi-config.yaml`, navigation, `input/fsh/`, build instructions | Start immediately; page names from WP01 | Template artifacts inventoried and replaced as drafts arrive; reproducible IG build; four transaction pages linked by final review; diagnostics reviewed. |
 | WP03 — Draft synchronous transactions | Transaction / FHIR, conformance | Proposed `input/pagecontent/ITI-x1.md`, `ITI-x3.md`; sequence diagrams and message examples | WP01; agreed security boundaries; WP04/05 envelope coordination | Methods, endpoints, inputs, responses, identifiers, capability checks, admission rejection and execution failure behavior specified without ambiguity. |
 | WP04 — Draft policy and execution baseline | Policy / transaction, FHIR | Policy/execution content, applicable schemas/FSH, positive and negative examples | WP01 and D01/D06/D07/D08 | Canonical URL/version declarations, both policy-content delivery modes, both representation levels and all nine core actions have explicit semantics, parameters, applicability, ordering and failure rules; cohort-statistics-dependent actions excluded. Use the Volume 1 action codes: `remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`. Date shifting is explicitly included; complete its parameter/derivation contract, temporal applicability, consistency behavior, failure cases and worked examples before functional contract freeze. |
@@ -97,7 +101,7 @@ Draft procedures with actor/option, preconditions, input, observable expected be
 - Both Bulk Data directions, R4/R5/R6 version identification over R4 workflow resources, unsupported formats/versions, unauthorized or expired retrieval, missing files and no partial dataset release.
 - Missing, invalid, expired or scope-inconsistent authorization/policies, unresolved or ambiguous canonical URL/version resolution and unavailable references; rejection before acceptance or dispatch.
 - Each core action's valid/invalid parameters, selectors, ordering and applicability; fixed record-level rules rather than cohort-statistics-based processing. Include date-shift cases tied to the approved action mapping, parameters and derivation rules.
-- Every declaration's actor-specific obligations and required artifacts, including De-Identifier task obligations, the mandatory protocol binding, content modules and async option dependencies.
+- Every declaration's actor-specific obligations and required artifacts, including De-Identifier task obligations, the mandatory protocol binding, content requirements and async option dependencies.
 - FHIR reference integrity and treatment of narrative, extensions, contained resources and attachments.
 - Nine evidence elements, audience separation, audit correlation and failed-validation output withholding.
 - Polling ownership, retries, expiry, interrupted processing, stage failure and independent async/deferred declarations.

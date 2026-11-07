@@ -55,7 +55,7 @@ The following table defines the four DIS actors and their responsibilities.
 |-------|---------------|
 | **De-ID Manager** | Receives jobs (ITI-x1), validates the de-identification policy carrier, compiles policy into execution plans, dispatches tasks to De-Identifiers (ITI-x3), returns output and evidence. Persists mappings for reversible jobs without a supplied lookup table; uses authoritative Requester-supplied tables without mandatory persistence. |
 | **De-Identifier** | Executes assigned tasks, applies supplied mappings or generates salted patient pseudonyms, and returns output and evidence. Its deployment manages the scope salts. For reversible patient hashing it returns a protected generated lookup table to the Manager. |
-| **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Grouped with the De-Identified Data Receiver in Phase 1. |
+| **De-Identification Requester** | Submits job with data request authorization and policy carrier; receives output inline (sync) or via ITI-x4 polling (async). Receives the job result in the Requester role. |
 | **Integrated De-ID Manager/De-Identifier** | Combines the functionality of the De-ID Manager and De-Identifier into a single actor. Validates policy, compiles execution plans, executes de-identification internally, and produces output and evidence. May operate standalone (content conformance only) or accept external jobs via ITI-x1 with optional async polling via ITI-x4. Does not initiate nor accept ITI-x3. Persists mappings for reversible jobs without a supplied lookup table; uses authoritative Requester-supplied tables without mandatory persistence. |
 
 ### Transactions
@@ -87,6 +87,8 @@ flowchart TB
 ```
 
 The outer box represents the Integrated De-ID Manager/De-Identifier, which combines both roles into a single actor. When integrated, ITI-x3 and ITI-x7 are internal and not externalized as transactions.
+
+Each ITI-x1 request uses one or more payload groups under one job authorization. The same manifest-based wire format applies to single-set and multi-set jobs. See the [transaction matrix](input/pagecontent/volume-2.md#grouped-payload-parameters).
 
 ## Policy Model
 
@@ -127,7 +129,7 @@ For the full declaration definitions, conformance layers, actor-option matrix, a
 
 DIS separates the protocol binding from the payload binding. Phase 1 defines DIS-FHIR-Payload as the initial payload binding, covering HL7 FHIR R4, R5, and R6 processing payloads. Future payload bindings (e.g., DIS-DICOM1, DIS-CDA1, DIS-V2-1) can be developed independently without changes to the HL7 FHIR R4 protocol binding.
 
-For the payload binding architecture, extension model, and illustrative future bindings, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Volume 3 Section 3:PXX.1](input/pagecontent/volume-3.md#3pxx1-dis-fhir-payload-content-module).
+For the payload binding architecture, extension model, and illustrative future bindings, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Volume 3 FHIR Payload Binding](input/pagecontent/volume-3.md#fhir-payload-binding).
 
 ## Phase 1 Expansion Path
 

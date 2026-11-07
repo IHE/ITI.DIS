@@ -58,7 +58,7 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 
 groups:
   grouped-fhir-job-examples:
-    name: "Grouped R4 and R5 FHIR Job Examples"
+    name: "Examples for a Job with R4 and R5 Payload Sets"
     description: "Informative artifacts for a Phase 1 FHIR-only job."
     resources:
       - Bundle/grouped-fhir-hosted-artifacts
@@ -101,13 +101,19 @@ pages:
     title: 2:3.x DIS Transactions
     generation: markdown
   volume-3.md:
-    title: 3:PXX DIS Content Modules
+    title: 3:PXX DIS Content Specifications
     generation: markdown
   fhir-semantic-group-guide.md:
     title: "FHIR PII Classification and Semantic Group Guide (Informative)"
     generation: markdown
+  examples-policy-rules.md:
+    title: "Policy Rules Examples (Informative)"
+    generation: markdown
+  examples-single-r4-patient.md:
+    title: "Synchronous Single R4 Patient (Informative)"
+    generation: markdown
   examples-grouped-fhir-job.md:
-    title: "Grouped R4 and R5 FHIR Job (Informative)"
+    title: "Job with R4 and R5 Payload Sets (Informative)"
     generation: markdown
   examples-reversible-pathology.md:
     title: "Reversible Clinical Pathology Order (Informative)"
@@ -148,17 +154,21 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    Shared Grouped Payload Parameters: volume-2.html#grouped-payload-parameters
+    Shared Payload Set Parameters: volume-2.html#grouped-payload-parameters
     "Submit De-Identification Job [ITI-x1]": volume-2.html#23x1-submit-de-identification-job-iti-x1
     "Submit De-Identification Task [ITI-x3]": volume-2.html#23x3-submit-de-identification-task-iti-x3
     "Retrieve Job Output [ITI-x4]": volume-2.html#23x4-retrieve-job-output-iti-x4
     "Retrieve Task Output [ITI-x7]": volume-2.html#23x7-retrieve-task-output-iti-x7
   Volume 3:
-    "DIS-FHIR-Payload Content Module": volume-3.html#fhir-payload-content-module
-    "DIS-Policy Content Module": volume-3.html#policy-content-module
-    Lookup Table Examples: volume-3.html#3pxx18-worked-mapping-examples
+    De-Identification Policy: volume-3.html#de-identification-policy
+    De-Identification Execution Plan: volume-3.html#execution-plan-content
+    Payload Bindings: volume-3.html#payload-bindings
+    De-Identification Evidence: volume-3.html#evidence-baseline
+    Reversible Lookup Table and Examples: volume-3.html#3pxx5-reversible-lookup-table
   Examples:
-    Grouped R4 and R5 FHIR Job: examples-grouped-fhir-job.html
+    Policy Rules Examples: examples-policy-rules.html
+    Synchronous Single R4 Patient: examples-single-r4-patient.html
+    Job with R4 and R5 Payload Sets: examples-grouped-fhir-job.html
     Reversible Clinical Pathology Order: examples-reversible-pathology.html
     Bulk FHIR Cohort Job: examples-bulk-fhir-cohort.html
     Standalone Clinical Export: examples-standalone-export.html

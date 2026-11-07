@@ -1,0 +1,110 @@
+{
+  "resourceType": "Parameters",
+  "id": "single-r4-patient-task-result",
+  "parameter": [
+    {
+      "name": "payloadResult",
+      "part": [
+        {
+          "name": "setId",
+          "valueString": "patient-r4"
+        },
+        {
+          "name": "payloadBinding",
+          "valueCode": "DIS-FHIR-Payload"
+        },
+        {
+          "name": "payloadVersion",
+          "valueCode": "R4"
+        },
+        {
+          "name": "manifestFormat",
+          "valueCode": "dis-resource-list"
+        },
+        {
+          "name": "manifest",
+          "valueAttachment": {
+            "contentType": "application/fhir+json",
+            "url": "https://results.example.org/fhir/r4/List/grouped-fhir-r4-output/_history/1"
+          }
+        },
+        {
+          "name": "evidence",
+          "resource": {
+            "resourceType": "Provenance",
+            "id": "grouped-fhir-evidence-patient-r4",
+            "meta": {
+              "profile": [
+                "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
+              ]
+            },
+            "target": [
+              {
+                "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
+              }
+            ],
+            "recorded": "2026-11-06T03:00:00Z",
+            "activity": {
+              "coding": [
+                {
+                  "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity",
+                  "code": "dis-task"
+                }
+              ]
+            },
+            "policy": [
+              "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+            ],
+            "agent": [
+              {
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                      "code": "performer"
+                    }
+                  ]
+                },
+                "who": {
+                  "identifier": {
+                    "system": "https://dis.example.org/identifiers/worker",
+                    "value": "example-worker"
+                  }
+                }
+              }
+            ],
+            "extension": [
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-outcome-status",
+                "valueCode": "complete"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-ruleset",
+                "valueString": "remove-direct-link"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-reversibility",
+                "valueCode": "irreversible"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validation-status",
+                "valueCode": "valid"
+              },
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
+                "valueIdentifier": {
+                  "system": "https://dis.example.org/identifiers/audit",
+                  "value": "job-51-patient-r4"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "validationStatus",
+      "valueCode": "valid"
+    }
+  ]
+}

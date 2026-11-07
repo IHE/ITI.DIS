@@ -22,12 +22,18 @@ transformation summary records the per-element actions applied.
     DisValidationStatusExt named validationStatus 1..1 and
     DisAuditCorrelationExt named auditCorrelation 1..1 and
     DisTransformationSummaryExt named transformationSummary 0..1
+* id 1..1
 * target 1..*
 * recorded 1..1
 * policy 1..*
 * activity 1..1
 * agent 1..*
-* agent ^comment = "At least one agent entry SHALL use type coding http://terminology.hl7.org/CodeSystem/provenance-participant-type#performer to identify the De-Identifier that executed the task."
+* obeys dis-evidence-one-performer
+
+Invariant: dis-evidence-one-performer
+Description: "Exactly one agent identifies the performer of the de-identification task."
+Severity: #error
+Expression: "agent.where(type.coding.where(system = 'http://terminology.hl7.org/CodeSystem/provenance-participant-type' and code = 'performer').exists()).count() = 1"
 
 
 // ── DIS-Policy ───────────────────────────────────────────────────────────────

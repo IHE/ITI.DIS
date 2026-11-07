@@ -93,7 +93,8 @@
           "coding": [
             {
               "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
-              "code": "dis-policy"
+              "code": "dis-policy",
+              "display": "De-identification policy (Semantic-Level or Syntax-Level rules)"
             }
           ]
         },
@@ -136,7 +137,8 @@
           "coding": [
             {
               "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
-              "code": "dis-execution-plan"
+              "code": "dis-execution-plan",
+              "display": "Execution plan (payload-specific compiled rules)"
             }
           ]
         },
@@ -174,7 +176,8 @@
           "coding": [
             {
               "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
-              "code": "dis-policy"
+              "code": "dis-policy",
+              "display": "De-identification policy (Semantic-Level or Syntax-Level rules)"
             }
           ]
         },
@@ -217,7 +220,8 @@
           "coding": [
             {
               "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
-              "code": "dis-execution-plan"
+              "code": "dis-execution-plan",
+              "display": "Execution plan (payload-specific compiled rules)"
             }
           ]
         },

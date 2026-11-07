@@ -18,7 +18,7 @@ This guide is organized into the following sections:
 
 - Volume 1: Profiles
   - [Introduction](volume-1.html)
-  - [Actors, Transactions, and Content Modules](volume-1.html#actors-and-transactions)
+  - [Actors, Transactions, and Content Responsibilities](volume-1.html#actors-and-transactions)
   - [Actor Options](volume-1.html#actor-options)
   - [Required Actor Groupings](volume-1.html#required-groupings)
   - [Overview](volume-1.html#overview)
@@ -29,13 +29,15 @@ This guide is organized into the following sections:
   - [Submit Task \[ITI-x3\]](volume-2.html#23x3-submit-de-identification-task-iti-x3)
   - [Retrieve Job Output \[ITI-x4\]](volume-2.html#23x4-retrieve-job-output-iti-x4)
   - [Retrieve Task Output \[ITI-x7\]](volume-2.html#23x7-retrieve-task-output-iti-x7)
-- Volume 3: Content Modules
-  - [DIS-FHIR-Payload and Baseline Execution Plan](volume-3.html#fhir-payload-content-module)
-  - [De-ID Evidence](volume-3.html#3pxx15-evidence-baseline)
-  - [DIS-Policy](volume-3.html#policy-content-module)
-  - [Lookup table examples](volume-3.html#3pxx18-worked-mapping-examples)
+- Volume 3: Content Specifications
+  - [De-Identification Policy](volume-3.html#de-identification-policy)
+  - [De-Identification Execution Plan](volume-3.html#execution-plan-content)
+  - [Payload Bindings](volume-3.html#payload-bindings)
+  - [De-Identification Evidence](volume-3.html#evidence-baseline)
+  - [Reversible Lookup Table and Examples](volume-3.html#3pxx5-reversible-lookup-table)
 - Examples
-  - [Grouped R4 and R5 FHIR Job](examples-grouped-fhir-job.html)
+  - [Policy Rules Examples](examples-policy-rules.html)
+  - [Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)
   - [Reversible Clinical Pathology Order](examples-reversible-pathology.html)
   - [Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
   - [Standalone Clinical Export](examples-standalone-export.html)
