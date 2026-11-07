@@ -34,7 +34,7 @@ Encode each `payload` or `payloadResult` as a named `Parameters.parameter` with 
 | `manifestFormat` | 1..1 | `valueCode` | Use `dis-resource-list` or `fhir-bulk-data` |
 | `policy` | 1..1 in ITI-x1 only | Nested `part` | One `url` as `valueUri`, one `version` as `valueString`, and optional JWS `content` as a Binary resource with `contentType = application/jose` |
 | `lookupTable` | 0..1 | `valueReference` | Optional in ITI-x1 when the binding supports a supplied lookup table |
-| `evidence` | 0..* | `resource` (R4 Provenance) | Required in `payloadResult` with at least one entry. Omitted in `payload` |
+| `evidence` | 0..* | `resource` (R4 Provenance) | Required with at least one entry for hosted, mixed-delivery, or bulk results. Omit for fully inline FHIR results, where evidence is carried in the manifest package, and for all `payload` groups. See [evidence placement](volume-3.html#result-evidence-placement). |
 {: .grid}
 
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.

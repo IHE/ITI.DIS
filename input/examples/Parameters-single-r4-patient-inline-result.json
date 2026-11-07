@@ -1,0 +1,38 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "payloadResult",
+      "part": [
+        {
+          "name": "setId",
+          "valueString": "patient-r4"
+        },
+        {
+          "name": "payloadBinding",
+          "valueCode": "DIS-FHIR-Payload"
+        },
+        {
+          "name": "payloadVersion",
+          "valueCode": "R4"
+        },
+        {
+          "name": "manifestFormat",
+          "valueCode": "dis-resource-list"
+        },
+        {
+          "name": "manifest",
+          "valueAttachment": {
+            "contentType": "application/fhir+json",
+            "data": "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJtZXRhIjp7InByb2ZpbGUiOlsiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9ESVMtTWFuaWZlc3RQYWNrYWdlIl19LCJ0eXBlIjoiY29sbGVjdGlvbiIsImVudHJ5IjpbeyJmdWxsVXJsIjoidXJuOnV1aWQ6OTdmODVjMWUtZWE5OC00MDQyLWE2MTQtMGY0ZjFkNTVhNjU4IiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiTGlzdCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1SZXNvdXJjZU1hbmlmZXN0Il19LCJzdGF0dXMiOiJjdXJyZW50IiwibW9kZSI6InNuYXBzaG90IiwiZW50cnkiOlt7Iml0ZW0iOnsicmVmZXJlbmNlIjoidXJuOnV1aWQ6MjNiOGQwZmMtZGFjZC00MDc2LWEyZGEtYmFkMWM0OTI5ODgwIn19XX19LHsiZnVsbFVybCI6InVybjp1dWlkOjIzYjhkMGZjLWRhY2QtNDA3Ni1hMmRhLWJhZDFjNDkyOTg4MCIsInJlc291cmNlIjp7InJlc291cmNlVHlwZSI6IlBhdGllbnQiLCJpZCI6IjIzYjhkMGZjLWRhY2QtNDA3Ni1hMmRhLWJhZDFjNDkyOTg4MCIsImFjdGl2ZSI6dHJ1ZX19LHsiZnVsbFVybCI6InVybjp1dWlkOjY2N2IxOGExLTNjZjUtNTliNy04MzJjLTlhNjg1ZjkwZDI5NSIsInJlc291cmNlIjp7InJlc291cmNlVHlwZSI6IlByb3ZlbmFuY2UiLCJpZCI6InNpbmdsZS1yNC1wYXRpZW50LWlubGluZS1ldmlkZW5jZSIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1FdmlkZW5jZSJdfSwidGFyZ2V0IjpbeyJyZWZlcmVuY2UiOiJ1cm46dXVpZDoyM2I4ZDBmYy1kYWNkLTQwNzYtYTJkYS1iYWQxYzQ5Mjk4ODAifV0sInJlY29yZGVkIjoiMjAyNi0xMS0wNlQwMzowMDowMFoiLCJhY3Rpdml0eSI6eyJjb2RpbmciOlt7InN5c3RlbSI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL0NvZGVTeXN0ZW0vZGlzLWFjdGl2aXR5IiwiY29kZSI6ImRpcy10YXNrIn1dfSwicG9saWN5IjpbImh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9maGlyL0xpYnJhcnkvZ3JvdXBlZC1maGlyLXBvbGljeS1wYXRpZW50LXI0L19oaXN0b3J5LzEiXSwiYWdlbnQiOlt7InR5cGUiOnsiY29kaW5nIjpbeyJzeXN0ZW0iOiJodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL3Byb3ZlbmFuY2UtcGFydGljaXBhbnQtdHlwZSIsImNvZGUiOiJwZXJmb3JtZXIifV19LCJ3aG8iOnsiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9pZGVudGlmaWVycy93b3JrZXIiLCJ2YWx1ZSI6ImludGVncmF0ZWQtZml4dHVyZSJ9fX1dLCJleHRlbnNpb24iOlt7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLW91dGNvbWUtc3RhdHVzIiwidmFsdWVDb2RlIjoiY29tcGxldGUifSx7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLXJ1bGVzZXQiLCJ2YWx1ZVN0cmluZyI6InJlbW92ZS1kaXJlY3QtbGluayJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtcmV2ZXJzaWJpbGl0eSIsInZhbHVlQ29kZSI6ImlycmV2ZXJzaWJsZSJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtdmFsaWRhdGlvbi1zdGF0dXMiLCJ2YWx1ZUNvZGUiOiJ2YWxpZCJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtYXVkaXQtY29ycmVsYXRpb24iLCJ2YWx1ZUlkZW50aWZpZXIiOnsic3lzdGVtIjoiaHR0cHM6Ly9kaXMuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvYXVkaXQiLCJ2YWx1ZSI6ImpvYi1zaW5nbGUtcjQtaW5saW5lIn19XX19XSwiaWQiOiJzaW5nbGUtcjQtcGF0aWVudC1pbmxpbmUtb3V0cHV0In0="
+          }
+        }
+      ]
+    },
+    {
+      "name": "validationStatus",
+      "valueCode": "valid"
+    }
+  ],
+  "id": "single-r4-patient-inline-result"
+}

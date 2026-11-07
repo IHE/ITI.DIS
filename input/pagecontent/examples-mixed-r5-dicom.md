@@ -68,12 +68,12 @@ The imaging De-Identifier uses credentials accepted by the index server to read 
 
 ## ITI-x3 Task Results and ITI-x4 Release
 
-Each successful synchronous task returns `200 OK` with one R4 `payloadResult` group and `validationStatus.valueCode = valid`. Each group repeats its dispatched set identifier, binding and version and uses `manifestFormat.valueCode = dis-resource-list`. Its `evidence` part carries an R4 Provenance resource with the policy, ruleSet, validation status and audit correlation for that task.
+Each successful synchronous task returns `200 OK` with one R4 `payloadResult` group and `validationStatus.valueCode = valid`. Each group repeats its dispatched set identifier, binding and version and uses `manifestFormat.valueCode = dis-resource-list`. The clinical result carries R4 Provenance in the manifest package. The hosted imaging result carries its draft evidence in the outer `evidence` part.
 
 | Result field | Clinical task | Imaging task |
 |--------------|---------------|--------------|
 | `payloadResult.manifest.valueAttachment` | Inline R4 package whose List selects a wrapper with the de-identified R5 Patient bytes | `url = https://results.example.org/fhir/List/images-result-42/_history/1`. Its entry selects the result ImagingStudy at the authorized output endpoint |
-| `payloadResult.evidence.resource.target` | `target.identifier` uses system `https://dis.example.org/identifiers/result-wrapper` and value `job-42-clinical`, matching the result wrapper's identifier | Draft mapping using `target.reference = https://results.example.org/fhir/ImagingStudy/images-result-42/_history/1`. The index enumerates the exact DICOM outputs |
+| `Provenance.target` | Bundled `target.reference` equals the `fullUrl` of the selected R4 wrapper | Draft mapping using `target.reference = https://results.example.org/fhir/ImagingStudy/images-result-42/_history/1`. The index enumerates the exact DICOM outputs |
 {: .grid}
 
 For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched `ruleSetId`, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3.html#3pxx4-de-identification-evidence).

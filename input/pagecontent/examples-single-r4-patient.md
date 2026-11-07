@@ -12,4 +12,6 @@ A Requester submits one inline R4 Patient using a single payload set. The set's 
 | 4 | The Manager returns HTTP 200 with the [ITI-x1 result](Parameters-single-r4-patient-job-result.html). | The result preserves `patient-r4` and its evidence. The Manager has checked the result and authorized retrieval from the result service. |
 {: .grid}
 
+The [fully inline ITI-x1 result alternative](Parameters-single-r4-patient-inline-result.html) carries a [manifest package](Bundle-single-r4-patient-inline-output.html) whose List selects the native R4 Patient. The same Bundle contains the Provenance, which targets the selected Patient by its entry URL. The result omits the outer evidence part.
+
 See the [transaction matrix](volume-2.html#grouped-payload-parameters) and [manifest resolution rules](volume-3.html#resource-manifest-resolution).

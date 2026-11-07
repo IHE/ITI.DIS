@@ -123,9 +123,10 @@ Usage: #definition
 * insert DISPayloadDeliveryParts(out)
 * parameter[=].part[+].name = #evidence
 * parameter[=].part[=].use = #out
-* parameter[=].part[=].min = 1
+* parameter[=].part[=].min = 0
 * parameter[=].part[=].max = "*"
 * parameter[=].part[=].type = #Provenance
+* parameter[=].part[=].documentation = "Required for hosted, mixed-delivery, or bulk results. Omit for fully inline FHIR results, which carry DIS Evidence Provenance in the manifest package."
 
 // ── Output: validationStatus ──
 * parameter[+].name = #validationStatus
@@ -216,9 +217,10 @@ Usage: #definition
 * insert DISPayloadDeliveryParts(out)
 * parameter[=].part[+].name = #evidence
 * parameter[=].part[=].use = #out
-* parameter[=].part[=].min = 1
+* parameter[=].part[=].min = 0
 * parameter[=].part[=].max = "*"
 * parameter[=].part[=].type = #Provenance
+* parameter[=].part[=].documentation = "Required for hosted, mixed-delivery, or bulk results. Omit for fully inline FHIR results, which carry DIS Evidence Provenance in the manifest package."
 
 // ── Output: generatedLookupTable (Manager only) ──
 * parameter[+].name = #generatedLookupTable

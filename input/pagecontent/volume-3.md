@@ -736,7 +736,13 @@ Table 3:PXX.3.2.2-2 shows how a List entry identifies the payload.
 
 The receiving actor SHALL follow the attachment only when the DocumentReference declares and conforms to the DIS Payload Wrapper profile. A DocumentReference claiming that profile but failing validation SHALL cause a set failure. To deliver a resource that itself declares the wrapper profile as a FHIR payload, serialize it inside a separate wrapper. An inline R5 DocumentReference is therefore carried as R5 bytes in the R4 wrapper, just like any other R5 resource.
 
-**Results.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence stays in the result's `evidence` parts.
+**Results.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence follows the rules below.
+
+<a name="result-evidence-placement"> </a>
+
+**Result evidence placement.** A fully inline FHIR result has a `dis-resource-list` manifest carried in `manifest.data` as an R4 DIS Manifest Package. Every List item resolves to an entry in that package, and any selected wrapper contains its clinical payload bytes in its attachment's `data`. The producer SHALL include at least one DIS Evidence Provenance entry in the package and SHALL omit the outer `payloadResult.evidence` parts. Evidence entries support validation of the result. The manifest List SHALL NOT select them as clinical output.
+
+For any other result, including a hosted manifest, a package with hosted targets or wrapper content, or a bulk manifest, the producer SHALL carry evidence in `payloadResult.evidence` and SHALL NOT carry result evidence in the manifest package. These placement rules apply independently to each set and to both job and task results. If the Manager changes the delivery form during result assembly, it SHALL apply the evidence placement and target rules for the resulting delivery form before release.
 
 <a name="3pxx112-version-safe-packaging"> </a>
 
@@ -927,7 +933,9 @@ The `Provenance.agent` entry for the De-Identifier SHALL use `Provenance.agent.t
 
 De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. Evidence does not depend on the payload's HL7 FHIR version because:
 
-- `Provenance.target` identifies the de-identified result. For FHIR R5 and R6 results, it identifies the R4 wrapper carrying or locating that result. Use a literal R4 reference for a hosted wrapper. For a bundled wrapper, use a logical reference whose identifier matches a unique `DocumentReference.identifier` in the result package.
+- `Provenance.target` identifies a native R4 result or, for R5 and R6, the R4 wrapper carrying or locating the result.
+- In a [fully inline result package](#result-evidence-placement), every target SHALL use `Reference.reference` equal to the `Bundle.entry.fullUrl` of exactly one entry selected by the List in the same package. Each selected output entry SHALL be covered by at least one evidence target. The receiver SHALL reject missing, unresolved, ambiguous, or unselected targets and duplicate evidence placement before accepting or releasing the result.
+- For evidence carried outside a package, use a literal reference to a hosted result or wrapper. For a bundled result in a mixed-delivery package, resolve the reference within that set’s package. Use the entry’s `fullUrl` for a native R4 result and a logical reference matching a unique `DocumentReference.identifier` for a wrapper. For bulk results, use the [bulk evidence rules](#3pxx3224-bulk-file-manifests-and-authorized-retrieval).
 - Transformation summary entries use version-neutral FHIRPath target paths (e.g., `Patient.name`, `Patient.birthDate`). These paths describe what was transformed, not the version of the resource that was transformed.
 - Policy references, ruleSet identifiers, reversibility state, validation status, and audit correlation identifiers are version-independent metadata.
 
