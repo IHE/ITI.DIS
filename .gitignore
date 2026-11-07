@@ -18,3 +18,5 @@
 !/scripts/check_semantic_group_binding.py
 !/scripts/validate_mapping_examples.py
 .DS_Store
+/_build.sh
+/ig-run
