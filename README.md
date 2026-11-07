@@ -157,15 +157,15 @@ Requester-supplied and generated patient lookup tables share the DIS-LookupTable
 
 ## Build the draft guide
 
-Place an installed FHIR IG Publisher jar at `input-cache/publisher.jar`. Run the semantic-group validation and then build the guide from the repository root:
+Place an installed FHIR IG Publisher jar at `input-cache/publisher.jar`. Build the guide from the repository root:
 
 ```sh
-python3 scripts/check_semantic_group_binding.py && java -jar input-cache/publisher.jar -ig .
+java -jar input-cache/publisher.jar -ig .
 ```
 
 Read `output/qa.html` for validation and link diagnostics. The draft source includes narrative in `input/pagecontent`, conformance definitions in `input/fsh`, and downloadable content schemas in `input/images/schemas`.
 
-Edit the authoritative FHIR Semantic Group Binding table in Volume 3. The validation command above checks its group codes against the DIS Semantic Group CodeSystem. The informative catalog CSV is in `input/images/bindings` and its guide is in `input/pagecontent`.
+Edit the authoritative FHIR Semantic Group Binding table in Volume 3. Check its group codes against the DIS Semantic Group CodeSystem before publishing changes. The informative catalog CSV is in `input/images/bindings` and its guide is in `input/pagecontent`.
 
 **Published FHIR examples** appear in the guide's artifact index and FHIR example downloads. The [lookup table](input/fsh/LookupTableExamples.fsh) and [evidence](input/fsh/EvidenceExamples.fsh) examples are authored in FSH. SUSHI generates their JSON during the build.
 
