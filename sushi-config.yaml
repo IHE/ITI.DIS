@@ -98,7 +98,7 @@ pages:
     title: 1:PXX De-Identification Services (DIS)
     generation: markdown
   volume-2.md:
-    title: 2:3.x DIS Transactions
+    title: DIS Transactions
     generation: markdown
   volume-3.md:
     title: 3:PXX DIS Content Specifications
