@@ -61,6 +61,20 @@ Inspect all nine evidence elements: evidence identifier, outcome status, workflo
 
 Check Manager custody of mappings/reversibility records, mode-dependent retention, deletion of temporary mapping copies at task termination and exclusion of protected transformation material from recipient-facing output, evidence and logs. Patient association in UC-3/4 remains implementation-defined and outside standardized DIS transactions.
 
+### Bulk Result Content Identity and Access Renewal
+
+Test the [bulk result content identity rules](volume-3.html#bulk-result-content-identity) with the [two-file R4 cohort example](examples-bulk-fhir-cohort.html). Record the validated output manifest and NDJSON bytes before release. Use an authorized Requester to retrieve the result. Compare the retrieved bytes after decoding any HTTP content coding. The test harness may use byte comparison or locally computed digests.
+
+| Case | Procedure | Pass criteria |
+|---|---|---|
+| Substituted manifest | After validation and before release, attempt to replace the manifest at the same locator. Change `requiresAccessToken` and preserve both file URLs. | The result service refuses the replacement and serves the original validated manifest, or the producer detects the change and withholds the result. The Requester cannot retrieve the changed manifest as the released version. |
+| Substituted file | Repeat with one valid NDJSON file changed at its original locator. Preserve the declared FHIR resource type and manifest. | The result service refuses the replacement and serves the original bytes, or the producer detects the change and withholds the result. The Requester cannot retrieve the changed bytes as the released version. |
+| Authorized renewal | Where the deployment supports renewal, expire the temporary access for one file within the release window. Request renewal with authorized credentials, then repeat with a Requester lacking access. | Authorized renewal restores access to the original bytes and preserves the released manifest, file identities, and evidence coverage. Unauthorized renewal grants no access. |
+
+For a signed-download deployment, repeat the renewal case with `requiresAccessToken = false`. The manifest lists a stable HTTPS capability URL for the selected file version. A request to that URL redirects to a short-lived signed download URL. Verify that the client follows the redirect without a SMART bearer token. After the signed URL expires, verify that the unchanged file URL listed in the manifest can yield a fresh signed link and that the expired link still fails. Compare the downloaded bytes with the validated version after HTTP decompression. Repeat with the capability removed or revoked and with the original file version unavailable. Neither case grants renewed access or returns a substitute version.
+
+For the substitution cases, repeat after release where the test setup allows the producer to detect a storage or retrieval fault. Confirm that the affected result set becomes inaccessible after detection and that access renewal does not expose substituted content. An authorization error or expired download does not by itself report a terminal job failure.
+
 ### Jobs with Multiple Payload Sets
 
 Submit a job with two payload sets, distinct set identifiers, and an approved policy for each set. Verify dispatch and plan selection per set, including a handoff from bundled to hosted content that preserves the target set. Compare bundled and externally hosted manifest entries for each supported binding. For R5, exercise an R4 wrapper with inline bytes and with an HTTPS attachment URL. Reject direct cross-release List references, unresolved bundle-local references, wrappers with both data and URL, a mismatched payload release, duplicate set identifiers, parameters outside the applicable request table, and unauthorized manifest entries. Verify correlation of each result and its evidence to the submitted set. Fail one task after another set succeeds and verify that the Requester receives no output for either set.
