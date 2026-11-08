@@ -1,0 +1,20 @@
+<!-- IHE header override: give the IHE and domain logo containers distinct IDs. -->
+
+<div id="ihe-nav" style="float: left; line-height: 50px; margin: 8px 0; color: #808080;">
+  <a id="ihe-logo" data-no-external="true" href="http://profiles.ihe.net">
+    <img height="71" alt="Visit the IHE website" src="{{site.data.info.assets}}assets/images/ihe-international.png"/>
+  </a>
+</div>
+<div id="family-nav">
+  <a id="family-logo" data-no-external="true" href="http://hl7.org/fhir"><img height="30" alt="Visit the FHIR website" src="{{site.data.info.assets}}assets/images/fhir-logo.png"/> </a>
+</div>
+<!--
+<div id="hl7-search">
+  <a id="hl7-search-lnk" data-no-external="true" href="searchform.html"><img alt="Search FHIR" src="{{site.data.info.assets}}assets/images/search.png"/></a>
+</div>
+-->
+<div id="project-nav">
+  {% assign canonical = site.data.fhir.canonical | split: "/"  %}
+  {% assign domain = canonical[-2] %}
+    <a id="project-logo" data-no-external="true" href="http://profiles.ihe.net/{{ domain }}/index.html"><img height="70" alt="Visit the {{ domain }} website" src="{{site.data.info.assets}}assets/images/{{ domain }}.png"/> </a>
+</div>
