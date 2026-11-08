@@ -2,7 +2,7 @@
   "resourceType": "Bundle",
   "meta": {
     "profile": [
-      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ManifestPackage"
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResultPackage"
     ]
   },
   "type": "collection",

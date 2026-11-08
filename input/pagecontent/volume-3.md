@@ -510,7 +510,7 @@ DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines
 
 ### 3:PXX.3.1 Common Payload Set Delivery
 
-A job contains one or more payload sets. Each set uses one binding and version and carries one manifest at each exchange. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The selected binding defines the native data, retrieval rules, execution plan, validation, and evidence mapping.
+A job contains one or more payload sets. Each set uses one binding and version and carries one manifest at each exchange. Successful responses carry the manifest and evidence together in a result package. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The selected binding defines the native data, retrieval rules, execution plan, validation, and evidence mapping.
 
 The [shared payload set parameters](volume-2.html#grouped-payload-parameters) define how the transactions carry a payload set.
 
@@ -520,7 +520,7 @@ The [shared payload set parameters](volume-2.html#grouped-payload-parameters) de
 
 #### 3:PXX.3.1.1 Manifest Formats and Packages
 
-The `dis-resource-list` format carries an R4 DIS Resource Manifest as a standalone List or in an R4 [DIS Manifest Package](StructureDefinition-DIS-ManifestPackage.html). Serialize either as FHIR JSON or XML and declare the corresponding FHIR media type in the `manifest` attachment. The same format applies to task and job inputs and results.
+The `dis-resource-list` format carries an R4 DIS Resource Manifest as a standalone List or in an R4 [DIS Manifest Package](StructureDefinition-DIS-ManifestPackage.html). Serialize either as FHIR JSON or XML and declare the corresponding FHIR media type in the `manifest` attachment. These forms apply to inputs. Results carry the List inside the result package.
 
 The `fhir-bulk-data` format uses the JSON [bulk file manifest](#3pxx3224-bulk-file-manifests-and-authorized-retrieval) of DIS-FHIR-Payload. It enumerates NDJSON files.
 
@@ -702,13 +702,13 @@ The job request identifies the proposed processing targets. The task request ide
 
 <p id="fhir-input-result-delivery-table" class="tableTitle"><strong>Table 3:PXX.3.2.2-1: FHIR Input and Result Delivery</strong></p>
 
-| Exchange | Manifest location |
+| Exchange | Delivery attachment |
 |---|---|
 | Input | `payload.manifest` |
-| Result | `payloadResult.manifest` |
+| Result | `payloadResult.resultPackage` |
 {: .grid}
 
-For both exchanges, use `dis-resource-list` for bundled or hosted FHIR resources, or `fhir-bulk-data` for bulk files. A single inline R4 resource uses an R4 manifest package containing the List and that resource. The Manager MAY repackage inline or hosted inputs at dispatch while preserving the authorized content and set identity.
+For both exchanges, use `dis-resource-list` for bundled or hosted FHIR resources, or `fhir-bulk-data` for bulk files. A single inline R4 input uses an R4 manifest package containing the List and that resource. Its result uses a DIS Result Package. The Manager MAY repackage inline or hosted inputs at dispatch while preserving the authorized content and set identity.
 
 <a name="resource-manifest"> </a>
 
@@ -740,9 +740,14 @@ The receiving actor SHALL follow the attachment only when the DocumentReference 
 
 <a name="result-evidence-placement"> </a>
 
-**Result evidence placement.** A fully inline FHIR result has a `dis-resource-list` manifest carried in `manifest.data` as an R4 DIS Manifest Package. Every List item resolves to an entry in that package, and any selected wrapper contains its clinical payload bytes in its attachment's `data`. The producer SHALL include at least one DIS Evidence Provenance entry in the package and SHALL omit the outer `payloadResult.evidence` parts. Evidence entries support validation of the result. The manifest List SHALL NOT select them as clinical output.
+**Result package and evidence placement.** Each successful job or task result SHALL carry one [DIS Result Package](StructureDefinition-DIS-ResultPackage.html) in `payloadResult.resultPackage`. This FHIR R4 collection Bundle SHALL contain the manifest and at least one DIS Evidence Provenance entry. The attachment's `data` contains the serialized Bundle, or its HTTPS `url` identifies that Bundle at an authorized endpoint. Use `application/fhir+json` or `application/fhir+xml`. The same packaging applies when the result is returned immediately or by polling.
 
-For any other result, including a hosted manifest, a package with hosted targets or wrapper content, or a bulk manifest, the producer SHALL carry evidence in `payloadResult.evidence` and SHALL NOT carry result evidence in the manifest package. These placement rules apply independently to each set and to both job and task results. If the Manager changes the delivery form during result assembly, it SHALL apply the evidence placement and target rules for the resulting delivery form before release.
+| `manifestFormat` | Required package contents in addition to Provenance |
+|---|---|
+| `dis-resource-list` | Exactly one DIS Resource Manifest List. Its selected entries may be bundled resources or authorized HTTPS references. Apply the payload binding's wrapper or index rules. |
+| `fhir-bulk-data` | Exactly one [DIS Bulk Result Manifest](StructureDefinition-DIS-BulkResultManifest.html) DocumentReference and one [DIS Bulk Result File](StructureDefinition-DIS-BulkResultFile.html) DocumentReference per listed file. The manifest carrier holds or links to the JSON file listing. File descriptors link to the listed NDJSON files. |
+
+The List or bulk JSON manifest determines the selected output. Provenance and manifest carriers SHALL NOT be selected as clinical payload. The receiver SHALL verify that the package contents agree with the enclosing `manifestFormat`, binding and payload version, and validate evidence coverage before accepting or releasing the set. If the Manager changes how results are made available, it SHALL preserve the selected output and update the manifest and evidence targets to describe the same released set.
 
 <a name="3pxx112-version-safe-packaging"> </a>
 
@@ -782,7 +787,7 @@ For an asynchronous cohort job, the Requester supplies an HTTPS URI identifying 
 
 DIS uses the file listing conventions of the [HL7 Bulk Data Access IG STU 3](https://hl7.org/fhir/uv/bulkdata/STU3/en/export.html#response---output-manifest). For a manifest prepared for DIS, the required fields are `requiresAccessToken` (boolean) and `output` (array of file entries). Each entry SHALL identify the resource type in `type` and the file location in `url` as an absolute HTTPS URL. The manifest SHALL enumerate the complete dataset in one file listing. It may omit export-specific metadata such as `request` and `transactionTime`. The job's `payloadVersion` applies to all listed input files. A manifest with continuation links or reported export errors SHALL be rejected for processing under this binding.
 
-For asynchronous cohort jobs, the Manager returns a bulk file manifest for the de-identified NDJSON files and supplies the associated evidence with the job result. The result group identifies the output manifest and carries evidence for that set. The evidence SHALL identify the outputs by references or result-only logical identifiers that can be matched to the files or resources selected by that manifest. The Manager SHALL ensure that manifest and file access expires within the authorized release window. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset. The Manager SHALL report the failure through job status for an accepted asynchronous job.
+For asynchronous cohort jobs, the Manager returns a bulk file manifest for the de-identified NDJSON files and supplies the associated evidence with the job result. The result package carries the manifest DocumentReference and file descriptors. The manifest carrier attachment SHALL use `application/json` and exactly one of inline `data` or an authorized HTTPS `url`. Each file descriptor attachment SHALL use `application/fhir+ndjson` and the exact HTTPS URL listed for that file in the manifest. The receiver SHALL match descriptors one to one with the manifest file URLs and reject missing, duplicate or unlisted descriptors. Extract the JSON manifest for ordinary Bulk Data file retrieval. The Manager SHALL ensure that manifest and file access expires within the authorized release window. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset. The Manager SHALL report the failure through job status for an accepted asynchronous job.
 
 <a name="bulk-result-content-identity"> </a>
 
@@ -942,8 +947,9 @@ The `Provenance.agent` entry for the De-Identifier SHALL use `Provenance.agent.t
 De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. Evidence does not depend on the payload's HL7 FHIR version because:
 
 - `Provenance.target` identifies a native R4 result or, for R5 and R6, the R4 wrapper carrying or locating the result.
-- In a [fully inline result package](#result-evidence-placement), every target SHALL use `Reference.reference` equal to the `Bundle.entry.fullUrl` of exactly one entry selected by the List in the same package. Each selected output entry SHALL be covered by at least one evidence target. The receiver SHALL reject missing, unresolved, ambiguous, or unselected targets and duplicate evidence placement before accepting or releasing the result.
-- For evidence carried outside a package, use a literal reference to a hosted result or wrapper. For a bundled result in a mixed-delivery package, resolve the reference within that set’s package. Use the entry’s `fullUrl` for a native R4 result and a logical reference matching a unique `DocumentReference.identifier` for a wrapper. For bulk results, use the [bulk evidence rules](#3pxx3224-bulk-file-manifests-and-authorized-retrieval).
+- For a resource list, each `Provenance.target.reference` SHALL match a selected List item. For a bundled output, the reference SHALL resolve to exactly one entry by `Bundle.entry.fullUrl` in the same result package. For a hosted output, use the HTTPS reference selected by the List.
+- For bulk, each `Provenance.target.reference` SHALL identify a selected DIS Bulk Result File descriptor by its Bundle entry `fullUrl`. The evidence targets the R4 descriptor rather than the NDJSON URL directly.
+- Each selected output entry or file SHALL be covered by at least one evidence target. The receiver SHALL reject missing, unresolved, ambiguous, or unselected targets before accepting or releasing the result.
 - Transformation summary entries use version-neutral FHIRPath target paths (e.g., `Patient.name`, `Patient.birthDate`). These paths describe what was transformed, not the version of the resource that was transformed.
 - Policy references, ruleSet identifiers, reversibility state, validation status, and audit correlation identifiers are version-independent metadata.
 

@@ -68,11 +68,11 @@ The imaging De-Identifier uses credentials accepted by the index server to read 
 
 ## ITI-x3 Task Results and ITI-x4 Release
 
-Each successful synchronous task returns `200 OK` with one R4 `payloadResult` group and `validationStatus.valueCode = valid`. Each group repeats its dispatched set identifier, binding and version and uses `manifestFormat.valueCode = dis-resource-list`. The clinical result carries R4 Provenance in the manifest package. The hosted imaging result carries its draft evidence in the outer `evidence` part.
+Each successful synchronous task returns `200 OK` with one R4 `payloadResult` group and `validationStatus.valueCode = valid`. Each group repeats its dispatched set identifier, binding and version and uses `manifestFormat.valueCode = dis-resource-list`. Each `resultPackage` carries R4 Provenance alongside its result manifest.
 
 | Result field | Clinical task | Imaging task |
 |--------------|---------------|--------------|
-| `payloadResult.manifest.valueAttachment` | Inline R4 package whose List selects a wrapper with the de-identified R5 Patient bytes | `url = https://results.example.org/fhir/List/images-result-42/_history/1`. Its entry selects the result ImagingStudy at the authorized output endpoint |
+| `payloadResult.resultPackage.valueAttachment` | Inline R4 Bundle whose List selects the wrapper with the de-identified R5 Patient bytes | R4 Bundle containing a List that selects the hosted result ImagingStudy and Provenance targeting that ImagingStudy |
 | `Provenance.target` | Bundled `target.reference` equals the `fullUrl` of the selected R4 wrapper | Draft mapping using `target.reference = https://results.example.org/fhir/ImagingStudy/images-result-42/_history/1`. The index enumerates the exact DICOM outputs |
 {: .grid}
 

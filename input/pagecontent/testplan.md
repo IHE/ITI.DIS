@@ -79,11 +79,13 @@ For the substitution cases, repeat after release where the test setup allows the
 
 Submit a job with two payload sets, distinct set identifiers, and an approved policy for each set. Verify dispatch and plan selection per set, including a handoff from bundled to hosted content that preserves the target set. Compare bundled and externally hosted manifest entries for each supported binding. For R5, exercise an R4 wrapper with inline bytes and with an HTTPS attachment URL. Reject direct cross-release List references, unresolved bundle-local references, wrappers with both data and URL, a mismatched payload release, duplicate set identifiers, parameters outside the applicable request table, and unauthorized manifest entries. Verify correlation of each result and its evidence to the submitted set. Fail one task after another set succeeds and verify that the Requester receives no output for either set.
 
-### Evidence in Fully Inline FHIR Results
+### Result Packages and Evidence Coverage
 
-Use the native R4 Patient and wrapped R5 Encounter examples. For each fully inline set, verify that the receiver finds DIS Evidence Provenance in the decoded manifest package, that no outer evidence is present, and that each target matches exactly one selected entry by `fullUrl`. Verify that the R5 target is the R4 wrapper and that its decoded attachment validates as R5. Check synchronous job and task responses and the corresponding completed polling responses.
+Exercise fully inline R4 and wrapped R5 results, a List selecting bundled and hosted resources, and a bulk set with two NDJSON files. For each successful response, retrieve or decode its single `resultPackage`, validate the R4 Bundle, and verify that it has one manifest of the declared format and DIS Evidence Provenance. Verify that the outer result has no `manifest` or `evidence` part. Check synchronous task and job responses and the corresponding completed polling responses.
 
-Repeat with no bundled evidence, an unresolved target, duplicate target entry URLs, a target pointing to an unselected entry, and a second evidence copy in the outer result group. In each case, the receiver rejects the result and the Manager withholds release. Repeat with a result that requires external retrieval and verify that evidence appears only in the outer result group. Exercise a job containing both fully inline and hosted sets and verify placement independently for each set.
+For a List, verify that evidence covers each selected resource or wrapper. For bulk, match the file descriptors one to one to the JSON manifest, match evidence targets to those descriptors, and pass the extracted manifest to a Bulk Data client. Verify that hosted results remain accessible only to the authorized receiver. Apply the bulk content identity and renewal procedures above.
+
+Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a missing or unlisted file descriptor, an unresolved target, a target outside the set, and an outer evidence part. Verify that the receiver rejects each result and that the Manager withholds release.
 
 ### Reversible Lookup Mapping
 

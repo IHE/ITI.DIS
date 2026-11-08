@@ -20,12 +20,6 @@ RuleSet: DISPayloadDeliveryParts(direction)
 * parameter[=].part[=].max = "1"
 * parameter[=].part[=].type = #code
 * parameter[=].part[=].documentation = "Version defined by the selected binding."
-* parameter[=].part[+].name = #manifest
-* parameter[=].part[=].use = #{direction}
-* parameter[=].part[=].min = 1
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].type = #Attachment
-* parameter[=].part[=].documentation = "Serialized manifest or manifest package, carried inline or located by HTTPS URL."
 * parameter[=].part[+].name = #manifestFormat
 * parameter[=].part[=].use = #{direction}
 * parameter[=].part[=].min = 1
@@ -60,8 +54,14 @@ Usage: #definition
 * parameter[=].use = #in
 * parameter[=].min = 1
 * parameter[=].max = "*"
-* parameter[=].documentation = "Payload set with one manifest."
+* parameter[=].documentation = "Payload set with one result package containing the manifest and evidence."
 * insert DISPayloadDeliveryParts(in)
+* parameter[=].part[+].name = #manifest
+* parameter[=].part[=].use = #in
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #Attachment
+* parameter[=].part[=].documentation = "Serialized manifest or manifest package, carried inline or located by HTTPS URL."
 * parameter[=].part[+].name = #policy
 * parameter[=].part[=].use = #in
 * parameter[=].part[=].min = 1
@@ -119,14 +119,14 @@ Usage: #definition
 * parameter[=].use = #out
 * parameter[=].min = 1
 * parameter[=].max = "*"
-* parameter[=].documentation = "Payload set with one manifest."
+* parameter[=].documentation = "Payload set with one result package containing the manifest and evidence."
 * insert DISPayloadDeliveryParts(out)
-* parameter[=].part[+].name = #evidence
+* parameter[=].part[+].name = #resultPackage
 * parameter[=].part[=].use = #out
-* parameter[=].part[=].min = 0
-* parameter[=].part[=].max = "*"
-* parameter[=].part[=].type = #Provenance
-* parameter[=].part[=].documentation = "Required for hosted, mixed-delivery, or bulk results. Omit for fully inline FHIR results, which carry DIS Evidence Provenance in the manifest package."
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #Attachment
+* parameter[=].part[=].documentation = "One R4 DIS Result Package containing the manifest and evidence, inline or at an authorized HTTPS URL."
 
 // ── Output: validationStatus ──
 * parameter[+].name = #validationStatus
@@ -163,8 +163,14 @@ Usage: #definition
 * parameter[=].use = #in
 * parameter[=].min = 1
 * parameter[=].max = "1"
-* parameter[=].documentation = "Payload set with one manifest."
+* parameter[=].documentation = "Payload set with one result package containing the manifest and evidence."
 * insert DISPayloadDeliveryParts(in)
+* parameter[=].part[+].name = #manifest
+* parameter[=].part[=].use = #in
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #Attachment
+* parameter[=].part[=].documentation = "Serialized manifest or manifest package, carried inline or located by HTTPS URL."
 
 // ── Input: executionPlan ──
 * parameter[+].name = #executionPlan
@@ -213,14 +219,14 @@ Usage: #definition
 * parameter[=].use = #out
 * parameter[=].min = 1
 * parameter[=].max = "1"
-* parameter[=].documentation = "Payload set with one manifest."
+* parameter[=].documentation = "Payload set with one result package containing the manifest and evidence."
 * insert DISPayloadDeliveryParts(out)
-* parameter[=].part[+].name = #evidence
+* parameter[=].part[+].name = #resultPackage
 * parameter[=].part[=].use = #out
-* parameter[=].part[=].min = 0
-* parameter[=].part[=].max = "*"
-* parameter[=].part[=].type = #Provenance
-* parameter[=].part[=].documentation = "Required for hosted, mixed-delivery, or bulk results. Omit for fully inline FHIR results, which carry DIS Evidence Provenance in the manifest package."
+* parameter[=].part[=].min = 1
+* parameter[=].part[=].max = "1"
+* parameter[=].part[=].type = #Attachment
+* parameter[=].part[=].documentation = "One R4 DIS Result Package containing the manifest and evidence, inline or at an authorized HTTPS URL."
 
 // ── Output: generatedLookupTable (Manager only) ──
 * parameter[+].name = #generatedLookupTable

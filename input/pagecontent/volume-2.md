@@ -21,20 +21,20 @@ Every job uses the same payload set encoding, including jobs with only one set. 
 | ITI-x7 Retrieve Task Output | Authorized GET of the task polling URL. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
 {: .grid}
 
-The receiver SHALL reject a submission that includes `processingTarget`, `resourceManifest`, or another top-level parameter outside the applicable request table with HTTP 400 and an OperationOutcome. The `policy` and `lookupTable` parts appear only in ITI-x1 inputs. The `evidence` part appears only in results. `validationStatus` is `valid` on successful completion. Failure responses carry an OperationOutcome and no result. A POST without `Prefer: respond-async` selects synchronous processing. A receiver SHALL reject an async request if the applicable option is unsupported. The bulk-file cohort binding requires async job selection. Task mode is selected independently.
+The receiver SHALL reject a submission that includes `processingTarget`, `resourceManifest`, or another top-level parameter outside the applicable request table with HTTP 400 and an OperationOutcome. The `policy` and `lookupTable` parts appear only in ITI-x1 inputs. Successful results carry evidence inside the result package. `validationStatus` is `valid` on successful completion. Failure responses carry an OperationOutcome and no result. A POST without `Prefer: respond-async` selects synchronous processing. A receiver SHALL reject an async request if the applicable option is unsupported. The bulk-file cohort binding requires async job selection. Task mode is selected independently.
 
-Encode each `payload` or `payloadResult` as a named `Parameters.parameter` with the following `part` entries. Each set SHALL carry exactly one `manifest` and its `manifestFormat`. See [Volume 3](volume-3.html#payload-set-delivery) for manifest formats and target resolution.
+Encode each `payload` or `payloadResult` as a named `Parameters.parameter` with the following `part` entries. Each `payload` SHALL carry one `manifest`. Each `payloadResult` SHALL carry one `resultPackage` and SHALL omit outer `manifest` and `evidence` parts. Both groups SHALL declare `manifestFormat`. See [Volume 3](volume-3.html#payload-set-delivery) for manifest formats and target resolution.
 
 | Part | Cardinality | Encoding | Meaning |
 |------|-------------|----------|---------|
 | `setId` | 1..1 | `valueString` | Nonempty job-local identifier, reused in task inputs and results |
 | `payloadBinding` | 1..1 | `valueCode` | Binding that governs the set |
 | `payloadVersion` | 1..1 | `valueCode` | Version defined by that binding |
-| `manifest` | 1..1 | `valueAttachment` | Manifest with `contentType` and exactly one of inline `data` or an absolute HTTPS `url` |
+| `manifest` | 1..1 in `payload` only | `valueAttachment` | Input manifest with `contentType` and exactly one of inline `data` or an absolute HTTPS `url` |
+| `resultPackage` | 1..1 in `payloadResult` only | `valueAttachment` | [R4 DIS Result Package](volume-3.html#result-evidence-placement) containing the manifest and evidence. Use a FHIR media type and exactly one of inline `data` or an absolute HTTPS `url` identifying the package. |
 | `manifestFormat` | 1..1 | `valueCode` | Use `dis-resource-list` or `fhir-bulk-data` |
 | `policy` | 1..1 in ITI-x1 only | Nested `part` | One `url` as `valueUri`, one `version` as `valueString`, and optional JWS `content` as a Binary resource with `contentType = application/jose` |
 | `lookupTable` | 0..1 | `valueReference` | Optional in ITI-x1 when the binding supports a supplied lookup table |
-| `evidence` | 0..* | `resource` (R4 Provenance) | Required with at least one entry for hosted, mixed-delivery, or bulk results. Omit for fully inline FHIR results, where evidence is carried in the manifest package, and for all `payload` groups. See [evidence placement](volume-3.html#result-evidence-placement). |
 {: .grid}
 
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.
@@ -181,7 +181,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of the
 | `validationStatus` | 1..1 | code | Overall validation outcome for the job |
 {: .grid}
 
-The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, result manifest, and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them. This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set.
+The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them. This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-JOB).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x4.
 

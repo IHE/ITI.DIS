@@ -56,6 +56,18 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 # valueSets and codeSystems should be given OIDs, this is especially required if that codeSystem or valueSet is going to be used by CDA. IHE has an OID root that is managed https://wiki.ihe.net/index.php/OID_Registration, with a branch assigned to each IHE domain. Each IHE domain should have a page where they manage assignments within their branch. an OID should be assigned to each IG, and that OID placed below so that the IG publisher will manage OID assignment to all valueSets and codeSystems defined in that IG. The IG publisher will create an ./oids.ini in the project root that will need to be checked into your github repository.
 #  auto-oid-root: 1.3.6.1.4.1.19376.1.5....
 
+resources:
+  Bundle/bulk-r4-result:
+    description: "R4 result Bundle containing a bulk JSON manifest, two NDJSON file descriptors, and Provenance that targets those descriptors."
+  Parameters/bulk-r4-result:
+    description: "Successful ITI-x4 response carrying the two-file cohort result package."
+  Bundle/grouped-fhir-r4-hosted-result:
+    description: "R4 result Bundle with a manifest List and Provenance for a hosted de-identified Patient."
+  Bundle/mixed-r4-result:
+    description: "R4 result Bundle with a manifest List and Provenance covering a bundled Patient and a hosted Observation."
+  Parameters/mixed-r4-result:
+    description: "Successful result response carrying the mixed R4 result package inline."
+
 groups:
   grouped-fhir-job-examples:
     name: "Examples for a Job with R4 and R5 Payload Sets"

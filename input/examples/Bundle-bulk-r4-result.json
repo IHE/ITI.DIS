@@ -1,0 +1,150 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:b75fb8e1-47e9-593d-a3e0-83797715a3c7",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "bulk-manifest",
+        "status": "current",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/json",
+              "data": "ewogICJyZXF1aXJlc0FjY2Vzc1Rva2VuIjogdHJ1ZSwKICAib3V0cHV0IjogWwogICAgewogICAgICAidHlwZSI6ICJQYXRpZW50IiwKICAgICAgInVybCI6ICJodHRwczovL3Jlc3VsdHMuZXhhbXBsZS5vcmcvYnVsay9vdXRwdXQtcGF0aWVudHMtMS5uZGpzb24iCiAgICB9LAogICAgewogICAgICAidHlwZSI6ICJQYXRpZW50IiwKICAgICAgInVybCI6ICJodHRwczovL3Jlc3VsdHMuZXhhbXBsZS5vcmcvYnVsay9vdXRwdXQtcGF0aWVudHMtMi5uZGpzb24iCiAgICB9CiAgXQp9Cg=="
+            }
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-BulkResultManifest"
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f08e76ae-88a8-554a-9b3a-123c8dc56154",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "bulk-file-1",
+        "status": "current",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/fhir+ndjson",
+              "url": "https://results.example.org/bulk/output-patients-1.ndjson"
+            }
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-BulkResultFile"
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5cfceb42-65e1-5687-b7a7-8553eb2928e7",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "bulk-file-2",
+        "status": "current",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/fhir+ndjson",
+              "url": "https://results.example.org/bulk/output-patients-2.ndjson"
+            }
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-BulkResultFile"
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:28f187b9-cb5c-5677-82ae-e405d318184d",
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "bulk-evidence",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
+          ]
+        },
+        "target": [
+          {
+            "reference": "urn:uuid:f08e76ae-88a8-554a-9b3a-123c8dc56154"
+          },
+          {
+            "reference": "urn:uuid:5cfceb42-65e1-5687-b7a7-8553eb2928e7"
+          }
+        ],
+        "recorded": "2026-11-06T03:00:00Z",
+        "activity": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity",
+              "code": "dis-task"
+            }
+          ]
+        },
+        "policy": [
+          "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "performer"
+                }
+              ]
+            },
+            "who": {
+              "identifier": {
+                "system": "https://dis.example.org/identifiers/worker",
+                "value": "integrated-fixture"
+              }
+            }
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-outcome-status",
+            "valueCode": "complete"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-ruleset",
+            "valueString": "remove-direct-link"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-reversibility",
+            "valueCode": "irreversible"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validation-status",
+            "valueCode": "valid"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
+            "valueIdentifier": {
+              "system": "https://dis.example.org/identifiers/audit",
+              "value": "job-single-r4-inline"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "id": "bulk-r4-result",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResultPackage"
+    ]
+  }
+}

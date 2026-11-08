@@ -1,0 +1,120 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:2ad2439f-352e-526c-b6be-05f7f08dfedb",
+      "resource": {
+        "resourceType": "List",
+        "status": "current",
+        "mode": "snapshot",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+          ]
+        },
+        "entry": [
+          {
+            "item": {
+              "reference": "urn:uuid:fb8f0414-6d07-5d81-9f9a-add2fb151d91"
+            }
+          },
+          {
+            "item": {
+              "reference": "https://results.example.org/fhir/Observation/result-observation/_history/1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fb8f0414-6d07-5d81-9f9a-add2fb151d91",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "result-patient",
+        "active": true
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:39b508ed-caab-5c2f-b536-3070fc6e7606",
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "mixed-evidence",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
+          ]
+        },
+        "target": [
+          {
+            "reference": "urn:uuid:fb8f0414-6d07-5d81-9f9a-add2fb151d91"
+          },
+          {
+            "reference": "https://results.example.org/fhir/Observation/result-observation/_history/1"
+          }
+        ],
+        "recorded": "2026-11-06T03:00:00Z",
+        "activity": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity",
+              "code": "dis-task"
+            }
+          ]
+        },
+        "policy": [
+          "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "performer"
+                }
+              ]
+            },
+            "who": {
+              "identifier": {
+                "system": "https://dis.example.org/identifiers/worker",
+                "value": "integrated-fixture"
+              }
+            }
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-outcome-status",
+            "valueCode": "complete"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-ruleset",
+            "valueString": "remove-direct-link"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-reversibility",
+            "valueCode": "irreversible"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validation-status",
+            "valueCode": "valid"
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
+            "valueIdentifier": {
+              "system": "https://dis.example.org/identifiers/audit",
+              "value": "job-single-r4-inline"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResultPackage"
+    ]
+  },
+  "id": "mixed-r4-result"
+}

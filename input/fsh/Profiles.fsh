@@ -214,3 +214,58 @@ Invariant: dis-payload-attachment-source
 Description: "The attachment SHALL contain exactly one of inline data or an absolute HTTPS URL."
 Severity: #error
 Expression: "(data.exists() xor url.exists()) and (url.empty() or url.startsWith('https://'))"
+
+// ── Shared result package ───────────────────────────────────────────────────
+
+Profile: DISResultPackage
+Parent: Bundle
+Id: DIS-ResultPackage
+Title: "DIS Result Package"
+Description: "FHIR R4 collection carrying one result manifest and the DIS Evidence for one payload set."
+* ^status = #draft
+* type = #collection
+* entry 2..*
+* entry.fullUrl 1..1
+* entry.resource 1..1
+* obeys dis-result-entry-urls and dis-result-one-manifest and dis-result-evidence
+
+Invariant: dis-result-entry-urls
+Description: "Result package entry URLs SHALL be unique."
+Severity: #error
+Expression: "entry.fullUrl.isDistinct()"
+
+Invariant: dis-result-one-manifest
+Description: "A result package SHALL contain exactly one DIS Resource Manifest List or DIS Bulk Result Manifest DocumentReference."
+Severity: #error
+Expression: "entry.resource.where((ofType(List).exists() and meta.profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest|')).exists()) or (ofType(DocumentReference).exists() and meta.profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-BulkResultManifest' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-BulkResultManifest|')).exists())).count() = 1"
+
+Invariant: dis-result-evidence
+Description: "A result package SHALL contain at least one DIS Evidence Provenance."
+Severity: #error
+Expression: "entry.resource.ofType(Provenance).where(meta.profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence|')).exists()).exists()"
+
+Profile: DISBulkResultManifest
+Parent: DocumentReference
+Id: DIS-BulkResultManifest
+Title: "DIS Bulk Result Manifest"
+Description: "Carrier for the JSON file listing in a bulk DIS Result Package."
+* ^status = #draft
+* status = #current
+* content 1..1
+* content.attachment.contentType 1..1
+* content.attachment.contentType = #application/json
+* content.attachment obeys dis-payload-attachment-source
+
+Profile: DISBulkResultFile
+Parent: DocumentReference
+Id: DIS-BulkResultFile
+Title: "DIS Bulk Result File"
+Description: "Descriptor identifying one NDJSON file selected by the bulk manifest. DIS Evidence targets this descriptor."
+* ^status = #draft
+* status = #current
+* content 1..1
+* content.attachment.contentType 1..1
+* content.attachment.contentType = #application/fhir+ndjson
+* content.attachment.data 0..0
+* content.attachment.url 1..1
+* content.attachment obeys dis-payload-attachment-source
