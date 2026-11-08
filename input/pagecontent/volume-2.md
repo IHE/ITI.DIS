@@ -88,7 +88,7 @@ Figure 2:3.x1.4-1 shows the interaction for the Submit De-Identification Job tra
 
 ##### 2:3.x1.4.1.1 Trigger Events
 
-The De-Identification Requester sends a Submit De-Identification Job Request when it requires de-identification of one or more processing targets under an approved data request. The Requester SHALL have obtained an approved data request authorization — which identifies the required de-identification policy — before initiating this transaction.
+The De-Identification Requester sends a Submit De-Identification Job Request when it requires de-identification of one or more processing targets under an approved data request. Before initiating this transaction, the Requester SHALL obtain the approved data request authorization. DIS assumes the Requester can read the [exact approved policy](volume-3.html#approved-policy-access) for each payload set.
 
 ##### 2:3.x1.4.1.2 Message Semantics
 
@@ -110,7 +110,7 @@ Exactly one of `authorization.reference` or `authorization.content` SHALL be pre
 
 `policy.url` and `policy.version` are required within each policy group. They declare the canonical identity of the policy approved for this data request. The De-ID Manager validates these against the data request authorization (see authorization consistency below).
 
-`policy.content` is optional. When present, the Requester carries the JWS-signed policy Library directly in the request, and the Manager SHALL verify the JWS signature and confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager resolves the policy from the declared `policy.url` through its own mechanisms (local policy store, external fetch, etc.).
+`policy.content` is optional. When present, the Requester carries the JWS-signed policy Library directly in the request, and the Manager SHALL verify the JWS signature and confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager resolves the declared policy version by implementation-defined means.
 
 
 The `reversibilityMode` and `identity-linkage-scope` are carried inside the policy artifact (see [§3:PXX.1.3](volume-3.html#3pxx13-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. A de-identification policy is a reusable knowledge artifact: the same policy may be approved for and referenced by multiple independent data requests.
@@ -131,13 +131,13 @@ The Manager SHALL obtain and validate the data request authorization. When `auth
 
 The Manager SHALL verify that the declared `policy.url` and `policy.version` identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment). A mismatch indicates the Requester is presenting a policy that was not approved for this data request; the Manager SHALL reject the job with an OperationOutcome.
 
-The Manager SHALL obtain the policy content. When `policy.content` is present, the Manager SHALL verify the JWS signature against the trusted policy authority's public key and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager SHALL resolve the policy from the declared `policy.url` through its own mechanisms (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
+The Manager SHALL obtain the policy content. When `policy.content` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager SHALL resolve the policy identified by the declared `policy.url` and `policy.version` by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
 
 The Manager SHALL perform three-point policy content validation:
 
 1. **Schema** — verify that the policy conforms to the applicable policy schema.
 2. **Currency** — verify that the policy has not expired or been revoked.
-3. **Integrity** — when `policy.content` is present, the JWS signature verification above fulfills this point. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
+3. **Integrity** — verify that the obtained rules are the exact content bound to the approved version under the [policy validation rules](volume-3.html#3pxx132-policy-validation). Apply the JWS verification above for carried content and the deployment's resolution trust model for Manager-resolved content.
 
 If any point of the four-point validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
 

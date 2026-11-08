@@ -26,7 +26,13 @@ Check the mandatory R4 protocol binding, applicable content requirements and req
 
 ### Policy Admission and Execution
 
-Cover canonical policy URL/version declarations and their match to data request authorization. Test both optional JWS-signed Requester-carried content and Manager-resolved content using the deployment's trust model. Verify authorization consistency, integrity, schema conformance and currency before acceptance or dispatch; failed or incomplete admission validation produces a synchronous error.
+Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, schema conformance and currency before acceptance or dispatch.
+
+| Stimulus | Pass criteria |
+|---|---|
+| Submit the authorized canonical URL and version with the approved signed content. Repeat with the Manager resolving the same approved version. | Both modes use the exact approved rules. The Requester can read the same approved version in both cases. |
+| Substitute a different valid policy or version for one payload set. | The Manager returns an authorization consistency error with no acceptance, dispatch or result. |
+| Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
 
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside Phase 1.
 
@@ -95,7 +101,7 @@ Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a m
 
 ### Requester Validation of Staged Release Evidence
 
-Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Configure the expected policy version and ordered stage and ruleSet IDs independently of the result package, either from the approved policy or from authorized metadata. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case.
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case.
 
 | Stimulus | Pass criteria |
 |---|---|

@@ -92,10 +92,10 @@ Each ITI-x1 request uses one or more payload groups under one job authorization.
 
 ## Policy Model
 
-DIS separates policy definition from policy execution. Every ITI-x1 request declares the approved policy by canonical URL and version, alongside the data request authorization that approves that policy. Policy content is obtained in one of two ways:
+DIS separates policy definition from policy execution. DIS assumes that the Requester can read the policy version approved for each payload set through an implementation-defined mechanism. The request declares its canonical URL and version and carries the data request authorization. The Manager verifies that both the declared identity and the policy rules match the approval. The Manager obtains the policy content in one of two ways:
 
 - **Requester-carried content** — optional `policy.content` carries a JWS-signed policy Library as a Binary resource. The Manager verifies the signature and matches the Library's URL and version to the declaration.
-- **Manager-resolved content** — when `policy.content` is absent, the Manager resolves the declared policy through its own trust model, such as an administratively provisioned store or trusted external retrieval. A JWS signature is not required for every locally provisioned policy.
+- **Manager-resolved content** — when `policy.content` is absent, the Manager resolves the declared version by implementation-defined means, such as a trusted local store or external retrieval.
 
 The Manager validates **authorization consistency**, **integrity**, **schema conformance**, and **currency** before acceptance or dispatch. Semantic-Level policies use format-neutral semantic groups and are compiled into payload-specific execution plans. Syntax-Level policies use concrete paths for a declared payload family and version; the Manager validates and packages them as execution plans. Phase 1 uses flat, ordered rules, with one task per ruleSet and optional stage ordering; full policy composition is deferred.
 

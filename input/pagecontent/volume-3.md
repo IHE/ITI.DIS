@@ -303,16 +303,20 @@ A de-identification policy is a reusable knowledge artifact. The same policy may
 
 #### 3:PXX.1.4.1 Policy Content Resolution
 
-The `policy.content` parameter is optional. It determines how the De-ID Manager obtains the policy Library:
+<a name="approved-policy-access"> </a>
 
-**When `policy.content` is present (inline delivery):** The Requester carries the JWS-signed policy Library directly in the ITI-x1 request as a `Binary` resource with `Binary.contentType` of `application/jose`. The JWS protects the policy content from tampering by the Requester, who acts as an untrusted courier. The De-ID Manager SHALL verify the JWS signature against the trusted policy authority's public key. The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
+DIS assumes that the De-Identification Requester can read the exact approved policy Library and its rules. The Requester obtains access by implementation-defined means and SHALL declare the canonical URL and version approved for each set. The De-ID Manager SHALL verify that the approved canonical URL and version identify one immutable rules payload, including the linkage scope, rule parameters and stage order. A change to the approved rules requires a new Library version and approval for the data request.
+
+The optional `policy.content` parameter determines how the De-ID Manager obtains the policy Library:
+
+**When `policy.content` is present (inline delivery):** The Requester carries the JWS-signed policy Library directly in the ITI-x1 request as a `Binary` resource with `Binary.contentType` of `application/jose`. The JWS lets the Manager detect changes to the policy content carried by the Requester. The De-ID Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model. The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
 
 - `alg` — the signing algorithm (e.g., `RS256`, `ES256`)
-- `x5c` or `jwk` — the signing key or certificate chain, enabling the De-ID Manager to verify the signature against a trusted policy authority
+- `x5c` or `jwk` — the signing key or certificate chain used by the De-ID Manager to verify the signature under its configured trust model
 
 The De-ID Manager SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. A mismatch indicates the Requester declared one policy but couriered different content; the Manager SHALL reject the job.
 
-**When `policy.content` is absent (Manager-resolved):** The ITI-x1 request carries only `policy.url` and `policy.version`. No policy content appears in the ITI-x1 message. The De-ID Manager resolves the policy from the declared canonical URL through its own mechanisms and SHALL verify that the resolved Library URL and version match the declaration:
+**When `policy.content` is absent (Manager-resolved):** The ITI-x1 request carries only `policy.url` and `policy.version`. No policy content appears in the ITI-x1 message. The De-ID Manager SHALL resolve the exact declared policy version by implementation-defined means and verify that the resolved Library URL and version match the declaration. For example:
 
 - When the URL matches a policy managed locally by the De-ID Manager (e.g., provisioned by administrative configuration), the Manager resolves it from its own store.
 - When the URL identifies an externally hosted policy, the Manager retrieves the policy through its implementation-defined trust model (e.g., TLS-protected fetch, mutual TLS, or externally stored JWS artifacts).
@@ -328,7 +332,7 @@ Locally managed policies are trusted by virtue of their administrative provision
 The De-ID Manager SHALL perform the following validation on the resolved policy Library, as defined in [§1:PXX.4.1](volume-1.html#1pxx41-concepts):
 
 1. **Authorization consistency** — verify that `policy.url` and `policy.version` declared in the ITI-x1 request identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
-2. **Integrity** — when `policy.content` is present, verify the JWS signature and confirm that the Library's canonical URL and version match the declared values. When `policy.content` is absent, integrity is established by the Manager's resolution trust model.
+2. **Integrity** — confirm that the obtained Library's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
 3. **Schema** — verify the Library conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS policy JSON Schema](schemas/dis-policy.schema.json). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Library.effectivePeriod` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
@@ -1007,11 +1011,11 @@ For each payload set processed in two or more stages in a distributed job, the D
 
 The Manager SHALL preserve DIS Evidence from the tasks that produced the selected final output. If it changes result delivery, apply the [result packaging rules](#result-evidence-placement) while preserving task attribution. Earlier task Provenance remains associated with its own task output. The Manager SHALL exclude from the job result any superseded intermediate output and its evidence, along with source identifiers, protected mappings, confidential salts and protected transformation parameters. The staged release record SHALL appear only in the job result package for the qualifying set.
 
-The Manager SHALL ensure the Requester can determine the expected stage and ruleSet sequence and exact policy identity for a staged set independently of the result package. The approved policy may provide this information. If the Requester cannot determine it from the policy, the Manager SHALL make the authorized metadata available by an implementation-defined mechanism. This mechanism may provide the stage and ruleSet IDs and policy identity without disclosing the policy contents.
+The Requester SHALL use the [exact approved policy](#approved-policy-access) to determine the expected stage and ruleSet sequence for the submitted set. The Requester SHALL verify that `Provenance.policy` identifies that same version using the policy identity it obtained independently of the result package.
 
 For each set expected to use multiple stages, the Requester SHALL verify that the package contains one staged release record authored by the responding Manager, that its policy identifies the approved version, and that its sequence matches the expected stage and ruleSet IDs in policy order. It SHALL verify that the staged release record covers all and only the selected final outputs. It SHALL also validate the accompanying DIS Evidence and its coverage. The Requester SHALL reject the job result if any required check fails. The evidence checks apply independently of the number of Bundle entries.
 
-The [staged R4 Patient example](Bundle-staged-r4-patient-result.html) shows the final worker's DIS Evidence alongside the Manager's release record.
+The [staged R4 Patient example](Bundle-staged-r4-patient-result.html) shows the final worker's DIS Evidence alongside the Manager's release record. The [approved example policy](Library-staged-patient.html) supplies the expected stage and ruleSet order. In this example, the version-specific evidence URI for the approved policy is `https://governance.example.org/fhir/Library/staged-patient/_history/1`.
 
 <a name="3pxx17-reversible-lookup-table"> </a>
 
