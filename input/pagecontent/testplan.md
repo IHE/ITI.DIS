@@ -26,7 +26,13 @@ Check the mandatory R4 protocol binding, applicable content requirements and req
 
 ### Policy Admission and Execution
 
-Cover canonical policy URL/version declarations and their match to data request authorization. Test both optional JWS-signed Requester-carried content and Manager-resolved content using the deployment's trust model. Verify authorization consistency, integrity, schema conformance and currency before acceptance or dispatch; failed or incomplete admission validation produces a synchronous error.
+Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, schema conformance and currency before acceptance or dispatch.
+
+| Stimulus | Pass criteria |
+|---|---|
+| Submit the authorized canonical URL and version with the approved signed content. Repeat with the Manager resolving the same approved version. | Both modes use the exact approved rules. The Requester can read the same approved version in both cases. |
+| Substitute a different valid policy or version for one payload set. | The Manager returns an authorization consistency error with no acceptance, dispatch or result. |
+| Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
 
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside Phase 1.
 
@@ -92,6 +98,17 @@ Exercise fully inline R4 and wrapped R5 results, a List selecting bundled and ho
 For a List, verify that evidence covers each selected resource or wrapper. For bulk, match the file descriptors one to one to the JSON manifest, match evidence targets to those descriptors, and pass the extracted manifest to a Bulk Data client. Verify that hosted results remain accessible only to the authorized receiver. Apply the bulk content identity and renewal procedures above.
 
 Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a missing or unlisted file descriptor, an unresolved target, a target outside the set, and an outer evidence part. Verify that the receiver rejects each result and that the Manager withholds release.
+
+### Requester Validation of Staged Release Evidence
+
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case.
+
+| Stimulus | Pass criteria |
+|---|---|
+| Return the single-stage package, then the valid staged package. Reorder the Bundle entries while preserving references and stage sequence values. | The Requester accepts both. It resolves the manifest and DIS Evidence by profile and reference, verifies the Manager's record for the staged set and selects only the final Patient. |
+| Remove or duplicate the staged release record. Repeat with a missing ruleSet, duplicate sequence, altered order, wrong policy version or wrong Manager identity. | The Requester rejects the job result and does not use the clinical output. |
+| Change the release record to reference an unresolved target or a bundled intermediate Patient that the List does not select. Repeat with missing or invalid DIS Evidence. | The Requester rejects the job result. The release record does not substitute for task evidence. |
+| Complete both stages and revoke release authorization before the Manager responds. Repeat with a failure in one stage. | The Manager withholds the entire result, including the release record. |
 
 ### Reversible Lookup Mapping
 

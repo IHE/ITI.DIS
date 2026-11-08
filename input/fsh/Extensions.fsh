@@ -126,3 +126,24 @@ Invariant: dis-absolute-policy-evidence-uri
 Description: "The policy evidence URI is absolute and is not a canonical reference with a literal version separator."
 Severity: #error
 Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^|]+$')"
+
+Extension: DisValidatedStageExt
+Id: dis-validated-stage
+Title: "DIS Validated Stage"
+Description: "Identifies one validated ruleSet in an assigned stage and its position in policy order."
+* ^status = #draft
+* ^context[+].type = #element
+* ^context[=].expression = "Provenance"
+* value[x] 0..0
+* extension 3..3
+* extension ^slicing.rules = #closed
+* extension contains
+    sequence 1..1 and
+    stageId 1..1 and
+    ruleSetId 1..1
+* extension[sequence].value[x] 1..1
+* extension[sequence].value[x] only positiveInt
+* extension[stageId].value[x] 1..1
+* extension[stageId].value[x] only string
+* extension[ruleSetId].value[x] 1..1
+* extension[ruleSetId].value[x] only string
