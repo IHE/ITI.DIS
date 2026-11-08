@@ -98,6 +98,22 @@ Library.type coding dis-execution-plan.
 * content.contentType = #"application/vnd.ihe.dis.execution-plan+json"
 * content.data 1..1
 
+* relatedArtifact ^slicing.discriminator.type = #value
+* relatedArtifact ^slicing.discriminator.path = "type"
+* relatedArtifact ^slicing.rules = #open
+* relatedArtifact contains sourcePolicy 1..1
+* relatedArtifact[sourcePolicy].type = #derived-from (exactly)
+* relatedArtifact[sourcePolicy].resource 1..1
+* relatedArtifact[sourcePolicy].resource obeys dis-source-policy-version
+* relatedArtifact[sourcePolicy].url 0..0
+* relatedArtifact[sourcePolicy].document 0..0
+* relatedArtifact[sourcePolicy].extension contains DisPolicyEvidenceUri named evidenceUri 1..1
+
+Invariant: dis-source-policy-version
+Description: "The source policy reference includes its canonical URL and Library version."
+Severity: #error
+Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^|]+[|][^|]+$')"
+
 // ── Persistent, referenceable lookup table ──────────────────────────────────
 Profile: DISLookupTable
 Parent: DocumentReference

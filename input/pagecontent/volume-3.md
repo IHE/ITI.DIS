@@ -364,7 +364,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 **Capability verification.** The De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
 
-For each applicable payload set, each ruleSet produces one execution plan Library, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. The compiled execution plan Library MAY reference the source policy Library via `Library.relatedArtifact` with type `derived-from`.
+For each applicable payload set, each ruleSet produces one execution plan Library, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. Before dispatch, the Manager SHALL populate the execution plan Library's [source policy identity](#execution-plan-source-policy) from the exact approved policy it validated.
 
 <a name="3pxx25-policy-lifecycle"> </a>
 
@@ -421,6 +421,12 @@ Table 3:PXX.2.1-1 lists the required Library resource elements.
 | `Library.content.contentType` | 1..1 | SHALL be `application/vnd.ihe.dis.execution-plan+json` |
 | `Library.content.data` | 1..1 | Base64-encoded execution plan JSON |
 {: .grid}
+
+<a name="execution-plan-source-policy"> </a>
+
+**Source policy identity for ITI-x3.** A dispatched DIS Execution Plan Library SHALL include exactly one `Library.relatedArtifact` of type `derived-from` identifying the policy Library that produced the plan. Its `resource` SHALL be the approved policy's canonical URL and nonempty Library version in `canonical|version` form. The same related artifact SHALL carry one [DIS Policy Evidence URI](StructureDefinition-dis-policy-evidence-uri.html) extension. Its `valueUri` SHALL be an absolute, version-specific URI identifying the same approved policy. A version-specific FHIR Library REST URL is one example. The Manager SHALL verify that both values identify the same validated policy version before dispatch.
+
+The De-Identifier SHALL reject a plan before execution if the source policy entry, canonical version, or evidence URI is missing, malformed, or ambiguous. It SHALL copy the supplied evidence URI into `Provenance.policy` for the task. It does not need to retrieve the source policy to produce evidence. The Manager SHALL verify that the returned task evidence names the version-specific URI supplied with the plan before accepting or releasing the result. The evidence URI SHALL NOT contain credentials or temporary access tokens. The Integrated actor may use its local validated policy identity when no ITI-x3 dispatch occurs.
 
 <a name="3pxx142-execution-plan-json-structure"> </a>
 
@@ -907,7 +913,7 @@ Every completed de-identification task produces an HL7 FHIR R4 Provenance resour
 | 2 | Outcome status | `Provenance.extension[dis-outcome-status]` | Overall task outcome: `complete` or `error` |
 | 3 | Workflow reference | `Provenance.activity` | DIS activity coding; use the audit correlation identifier to associate the specific job or task |
 | 4 | Target identifier | `Provenance.target` | Reference(s) to the de-identified output resource(s) |
-| 5 | Policy-decision reference | `Provenance.policy` | URI identifying the exact validated policy version governing this task |
+| 5 | Policy-decision reference | `Provenance.policy` | URI identifying the exact validated policy version governing this task. For ITI-x3 tasks, copy the [source policy evidence URI](#execution-plan-source-policy) from the execution plan Library. |
 | 6 | RuleSet identifier | `Provenance.extension[dis-ruleset]` | Identifier of the ruleSet that produced this evidence |
 | 7 | Reversibility state | `Provenance.extension[dis-reversibility]` | `irreversible` or `reversible` |
 | 8 | Validation status | `Provenance.extension[dis-validation-status]` | Output validation result: `valid` or `invalid` |

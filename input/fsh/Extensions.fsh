@@ -110,3 +110,19 @@ Description: "Type and non-secret identifier of the authorized linkage scope."
 * extension[scopeIdentifier].value[x] only Identifier
 * extension[scopeIdentifier].valueIdentifier.system 1..1
 * extension[scopeIdentifier].valueIdentifier.value 1..1
+
+Extension: DisPolicyEvidenceUri
+Id: dis-policy-evidence-uri
+Title: "DIS Policy Evidence URI"
+Description: "Absolute URI identifying the exact approved policy version to record in task Provenance."
+* ^status = #draft
+* ^context[0].type = #element
+* ^context[0].expression = "RelatedArtifact"
+* value[x] 1..1
+* value[x] only uri
+* valueUri obeys dis-absolute-policy-evidence-uri
+
+Invariant: dis-absolute-policy-evidence-uri
+Description: "The policy evidence URI is absolute and is not a canonical reference with a literal version separator."
+Severity: #error
+Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^|]+$')"

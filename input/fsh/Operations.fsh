@@ -177,7 +177,7 @@ Usage: #definition
 * parameter[=].use = #in
 * parameter[=].min = 1
 * parameter[=].max = "1"
-* parameter[=].documentation = "Reference to the Library resource containing the compiled execution plan rules for this ruleSet."
+* parameter[=].documentation = "Reference to the Library containing compiled rules for this ruleSet and the versioned source policy identity for evidence."
 * parameter[=].type = #Reference
 * parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
 

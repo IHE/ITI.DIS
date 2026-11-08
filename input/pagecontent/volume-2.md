@@ -276,7 +276,7 @@ The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x3.4.1
 | Parameter | Cardinality | Type | Description |
 |-----------|-------------|------|-------------|
 | `payload` | 1..1 | Group | One [payload set](#grouped-payload-parameters) identifying the inputs assigned to this task |
-| `executionPlan` | 1..1 | Reference(Library) | Reference to the Library resource containing the compiled execution plan rules for this ruleSet; rules are carried in `Library.content` |
+| `executionPlan` | 1..1 | Reference(Library) | Reference to the Library resource containing the compiled rules for this ruleSet and the [source policy identity](volume-3.html#execution-plan-source-policy). Rules are carried in `Library.content` |
 | `ruleSetId` | 1..1 | string | Identifier of the ruleSet from the source policy that this task executes |
 | `stageId` | 0..1 | string | Stage identifier, when the source policy declares staged execution |
 | `lookupTable` | 0..1 | Reference(DocumentReference) | Protected identified table restricted to the task; use a derived document for a subset, with its own identifiers and pinned content (Volume 3 §3:PXX.5). |

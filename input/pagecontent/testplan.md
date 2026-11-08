@@ -32,7 +32,13 @@ Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered
 
 Compile a policy targeting `@dates` against R4 and R5 Encounter payloads. Verify that the plan uses `Encounter.period` for R4 and `Encounter.actualPeriod` for R5, that the plans preserve source rule and selector order, and that no semantic group references remain. Use an unknown group or a release with no binding and verify that the Manager fails compilation before dispatch. For a choice selector, verify that a dateTime or Period value is selected and a free-text value is outside the selection. Compile separate rules for `@birth-dates`, `@dates`, and `@subject-demographics` using binding version 0.2.0 for R4 and R5. Verify that only the `@birth-dates` rule emits a selector for `Patient.birthDate`.
 
-#### Shared Policy Across Payload Sets
+#### Source Policy Identity in an ITI-x3 Plan
+
+Dispatch the [single R4 Patient task](examples-single-r4-patient.html) with its versioned execution plan Library. Give the De-Identifier access to the plan and assigned payload. Verify that the De-Identifier can return the exact evidence URI carried by the plan in `Provenance.policy` with no retrieval of the source policy. Verify that the Manager checks that URI against the dispatched plan before release.
+
+Repeat with the `derived-from` entry absent, with an unversioned canonical, with the evidence URI absent, and with two source policy entries. Each task fails before transformation and returns an OperationOutcome without a result. Supply a policy URI for a different version when assembling the plan and verify that the Manager does not dispatch it. Return successful task evidence with a different policy URI and verify that the Manager withholds job output.
+
+### Shared Policy Across Payload Sets
 
 Submit an ITI-x1 job containing an R4 Encounter set and an R5 Encounter set with distinct `setId` values. Both sets declare the same canonical URL and version of an active Semantic-Level policy that applies `remove` to `@dates`. Use compatible De-Identifiers and one job authorization. Request asynchronous processing when both job actors support it so that premature acceptance is observable.
 

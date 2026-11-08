@@ -152,7 +152,13 @@
         "relatedArtifact": [
           {
             "type": "derived-from",
-            "resource": "https://governance.example.org/policies/patient-name-removal|1.0"
+            "resource": "https://governance.example.org/policies/patient-name-removal|1.0",
+            "extension": [
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-policy-evidence-uri",
+                "valueUri": "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+              }
+            ]
           }
         ]
       }
@@ -235,7 +241,13 @@
         "relatedArtifact": [
           {
             "type": "derived-from",
-            "resource": "https://governance.example.org/policies/encounter-subject-removal|1.0"
+            "resource": "https://governance.example.org/policies/encounter-subject-removal|1.0",
+            "extension": [
+              {
+                "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-policy-evidence-uri",
+                "valueUri": "https://governance.example.org/fhir/Library/grouped-fhir-policy-encounter-r5/_history/1"
+              }
+            ]
           }
         ]
       }
