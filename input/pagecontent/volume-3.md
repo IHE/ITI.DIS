@@ -746,7 +746,7 @@ The receiving actor SHALL follow the attachment only when the DocumentReference 
 
 <a name="result-evidence-placement"> </a>
 
-**Result package and evidence placement.** Each successful job or task result SHALL carry one [DIS Result Package](StructureDefinition-DIS-ResultPackage.html) in `payloadResult.resultPackage`. This FHIR R4 collection Bundle SHALL contain the manifest and at least one DIS Evidence Provenance entry. The attachment's `data` contains the serialized Bundle, or its HTTPS `url` identifies that Bundle at an authorized endpoint. Use `application/fhir+json` or `application/fhir+xml`. The same packaging applies when the result is returned immediately or by polling.
+**Result package and evidence placement.** Each successful job or task result SHALL carry one [DIS Result Package](StructureDefinition-DIS-ResultPackage.html) in `payloadResult.resultPackage`. This FHIR R4 collection Bundle SHALL contain the manifest and at least one DIS Evidence Provenance entry. The attachment's `data` contains the serialized Bundle, or its HTTPS `url` identifies that Bundle at an authorized endpoint. Use `application/fhir+json` or `application/fhir+xml`. The same packaging applies when the result is returned immediately or by polling. Each distributed job result set that uses multiple stages also carries [staged release evidence](#staged-release-evidence). The receiver SHALL identify the manifest and evidence by profile and validate their references.
 
 | `manifestFormat` | Required package contents in addition to Provenance |
 |---|---|
@@ -990,6 +990,28 @@ The transformation summary enables audit and review of the specific actions appl
 ### 3:PXX.4.5 Evidence Example
 
 The [evidence example](Provenance-dis-evidence-uc3-001.html) illustrates the Provenance produced when a pseudonymization task completes in Use Case 3 (Clinical Pathology Order). It conforms to the [DIS Evidence profile](StructureDefinition-DIS-Evidence.html) and references a synthetic [pseudonymized Patient](Patient-pseudonym-abc123.html).
+
+<a name="staged-release-evidence"> </a>
+
+### 3:PXX.4.6 Staged Release Evidence
+
+For each payload set processed in two or more stages in a distributed job, the De-ID Manager SHALL include exactly one [DIS Staged Release Evidence](StructureDefinition-DIS-StagedReleaseEvidence.html) Provenance in that set's job result package. This record is the Manager's assertion that it validated the assigned stage results and authorized release. The Manager SHALL include it only after validating all assigned results and rechecking release authorization. It applies to completed ITI-x1 and ITI-x4 job results.
+
+| Provenance element | Staged release requirement |
+|---|---|
+| `agent.who` | Identify the De-ID Manager as the record's author. |
+| `recorded` | Time the Manager recorded the release decision. |
+| `policy` | The version-specific evidence URI for the exact approved policy for the set. Use the same URI as the dispatched execution plans. |
+| `target` | Reference every final output entry selected by the manifest, exactly once, using the rules in [§3:PXX.4.3](#3pxx3214-evidence-representation-across-versions). |
+| `extension[dis-validated-stage]` | One entry for every assigned ruleSet whose result the Manager validated. Each entry contains `stageId`, `ruleSetId` and a positive integer `sequence`. Number entries consecutively from 1 in policy stage order and ruleSet order within each stage. The sequence represents policy order, including where independent tasks run concurrently. |
+
+The Manager SHALL preserve DIS Evidence from the tasks that produced the selected final output. If it changes result delivery, apply the [result packaging rules](#result-evidence-placement) while preserving task attribution. Earlier task Provenance remains associated with its own task output. The Manager SHALL exclude from the job result any superseded intermediate output and its evidence, along with source identifiers, protected mappings, confidential salts and protected transformation parameters. The staged release record SHALL appear only in the job result package for the qualifying set.
+
+The Manager SHALL ensure the Requester can determine the expected stage and ruleSet sequence and exact policy identity for a staged set independently of the result package. The approved policy may provide this information. If the Requester cannot determine it from the policy, the Manager SHALL make the authorized metadata available by an implementation-defined mechanism. This mechanism may provide the stage and ruleSet IDs and policy identity without disclosing the policy contents.
+
+For each set expected to use multiple stages, the Requester SHALL verify that the package contains one staged release record authored by the responding Manager, that its policy identifies the approved version, and that its sequence matches the expected stage and ruleSet IDs in policy order. It SHALL verify that the staged release record covers all and only the selected final outputs. It SHALL also validate the accompanying DIS Evidence and its coverage. The Requester SHALL reject the job result if any required check fails. The evidence checks apply independently of the number of Bundle entries.
+
+The [staged R4 Patient example](Bundle-staged-r4-patient-result.html) shows the final worker's DIS Evidence alongside the Manager's release record.
 
 <a name="3pxx17-reversible-lookup-table"> </a>
 

@@ -181,7 +181,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of the
 | `validationStatus` | 1..1 | code | Overall validation outcome for the job |
 {: .grid}
 
-The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them. This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set.
+The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them. This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set. For a distributed result set that uses multiple stages, the Manager SHALL include [staged release evidence](volume-3.html#staged-release-evidence) in the set's result package.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-JOB).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x4.
 
@@ -197,11 +197,13 @@ The Manager SHALL return one `payloadResult` per submitted `setId`, with the cor
 **Editorial Note:** The draft [Submit DIS Job OperationDefinition](OperationDefinition-submit-dis-job.html) describes this exchange. Its parameter definitions remain under review alongside the transaction text.
 </div>
 
+<a name="job-result-acceptance"> </a>
+
 ##### 2:3.x1.4.2.3 Expected Actions
 
 Upon receipt of a Submit De-Identification Job Response, the De-Identification Requester SHALL inspect the response status.
 
-In synchronous mode, on a successful response, the Requester SHALL accept and process the de-identified output and provenance evidence returned in the response. On an error response, the Requester SHALL inspect the OperationOutcome and SHALL NOT treat the failed response as valid de-identified output.
+In synchronous mode, on a successful response, the Requester SHALL apply the [result package and evidence checks](volume-3.html#result-evidence-placement) before accepting the output. For a distributed staged result, it SHALL also apply the [staged release evidence checks](volume-3.html#staged-release-evidence). On an error response, the Requester SHALL inspect the OperationOutcome and SHALL NOT treat the failed response as valid de-identified output.
 
 In asynchronous mode (DIS-ASYNC-JOB), on a 202 Accepted response, the Requester SHALL retain the job handle and SHALL proceed to poll for output using ITI-x4.
 
@@ -462,7 +464,7 @@ Upon receipt of a Retrieve Job Output Response, the De-Identification Requester 
 
 On an in-progress response, the Requester SHOULD wait for the indicated retry-after period before issuing another poll request.
 
-On a complete response, the Requester SHALL accept and process the de-identified output and provenance evidence returned in the response.
+On a complete response, the Requester SHALL apply the same result package and evidence checks as for [ITI-x1 synchronous success](#job-result-acceptance) before accepting the output.
 
 On an error response, the Requester SHALL inspect the OperationOutcome and SHALL NOT treat the failed response as valid de-identified output.
 

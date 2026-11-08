@@ -93,6 +93,17 @@ For a List, verify that evidence covers each selected resource or wrapper. For b
 
 Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a missing or unlisted file descriptor, an unresolved target, a target outside the set, and an outer evidence part. Verify that the receiver rejects each result and that the Manager withholds release.
 
+### Requester Validation of Staged Release Evidence
+
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Configure the expected policy version and ordered stage and ruleSet IDs independently of the result package, either from the approved policy or from authorized metadata. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case.
+
+| Stimulus | Pass criteria |
+|---|---|
+| Return the single-stage package, then the valid staged package. Reorder the Bundle entries while preserving references and stage sequence values. | The Requester accepts both. It resolves the manifest and DIS Evidence by profile and reference, verifies the Manager's record for the staged set and selects only the final Patient. |
+| Remove or duplicate the staged release record. Repeat with a missing ruleSet, duplicate sequence, altered order, wrong policy version or wrong Manager identity. | The Requester rejects the job result and does not use the clinical output. |
+| Change the release record to reference an unresolved target or a bundled intermediate Patient that the List does not select. Repeat with missing or invalid DIS Evidence. | The Requester rejects the job result. The release record does not substitute for task evidence. |
+| Complete both stages and revoke release authorization before the Manager responds. Repeat with a failure in one stage. | The Manager withholds the entire result, including the release record. |
+
 ### Reversible Lookup Mapping
 
 Cover both mandatory DIS-REVERSIBLE arrangements: absent table causes Manager mapping creation/maintenance and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent patient identifier replacement and valid output references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.

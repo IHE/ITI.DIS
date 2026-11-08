@@ -237,13 +237,13 @@ Profile: DISResultPackage
 Parent: Bundle
 Id: DIS-ResultPackage
 Title: "DIS Result Package"
-Description: "FHIR R4 collection carrying one result manifest and the DIS Evidence for one payload set."
+Description: "FHIR R4 collection carrying the result manifest and evidence for one payload set."
 * ^status = #draft
 * type = #collection
 * entry 2..*
 * entry.fullUrl 1..1
 * entry.resource 1..1
-* obeys dis-result-entry-urls and dis-result-one-manifest and dis-result-evidence
+* obeys dis-result-entry-urls and dis-result-one-manifest and dis-result-evidence and dis-result-one-staged-release
 
 Invariant: dis-result-entry-urls
 Description: "Result package entry URLs SHALL be unique."
@@ -259,6 +259,11 @@ Invariant: dis-result-evidence
 Description: "A result package SHALL contain at least one DIS Evidence Provenance."
 Severity: #error
 Expression: "entry.resource.ofType(Provenance).where(meta.profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence|')).exists()).exists()"
+
+Invariant: dis-result-one-staged-release
+Description: "A result package contains at most one DIS Staged Release Evidence Provenance."
+Severity: #error
+Expression: "entry.resource.ofType(Provenance).where(meta.profile.where($this = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-StagedReleaseEvidence' or $this.startsWith('https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-StagedReleaseEvidence|')).exists()).count() <= 1"
 
 Profile: DISBulkResultManifest
 Parent: DocumentReference
@@ -285,3 +290,31 @@ Description: "Descriptor identifying one NDJSON file selected by the bulk manife
 * content.attachment.data 0..0
 * content.attachment.url 1..1
 * content.attachment obeys dis-payload-attachment-source
+
+Profile: DISStagedReleaseEvidence
+Parent: Provenance
+Id: DIS-StagedReleaseEvidence
+Title: "DIS Staged Release Evidence"
+Description: "Manager-authored Provenance for the authorized release of the final output of a distributed payload set processed in multiple stages."
+* ^status = #draft
+* extension contains DisValidatedStageExt named validatedStage 2..*
+* id 1..1
+* target 1..*
+* target.reference 1..1
+* recorded 1..1
+* policy 1..1
+* agent 1..1
+* agent.type 1..1
+* agent.type = http://terminology.hl7.org/CodeSystem/provenance-participant-type#author
+* entity 0..0
+* obeys dis-release-stage-count and dis-release-stage-sequence
+
+Invariant: dis-release-stage-count
+Description: "Staged release evidence identifies at least two distinct stages."
+Severity: #error
+Expression: "extension.where(url = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validated-stage').extension.where(url = 'stageId').value.distinct().count() >= 2"
+
+Invariant: dis-release-stage-sequence
+Description: "The sequence values are unique and consecutive from one."
+Severity: #error
+Expression: "extension.where(url = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validated-stage').extension.where(url = 'sequence').value.isDistinct() and extension.where(url = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validated-stage').extension.where(url = 'sequence').value.all($this <= %resource.extension.where(url = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validated-stage').count())"
