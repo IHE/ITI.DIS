@@ -21,7 +21,7 @@ ITI-x1 and ITI-x3 each define one required operation input named `workItem` of t
 | ITI-x7 Retrieve Task Output | Authorized GET of the task polling URL, or DELETE when cancellable mode was confirmed. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
 {: .grid}
 
-The sender SHALL assign a business identifier with a system and value to the work order. The receiver SHALL use that identifier to correlate the work with the submission. For asynchronous acceptance, it SHALL associate the polling URL with the accepted work order and its identifier. Access to the polling URL requires the authorization defined for ITI-x4 or ITI-x7.
+The sender SHALL assign a business identifier with a system and value to the work order. The receiver SHALL correlate work and handle retries according to the [shared identifier and retry rules](#submission-retries). For asynchronous acceptance, it SHALL associate the polling URL with the accepted work order and its identifier. Access to the polling URL requires the authorization defined for ITI-x4 or ITI-x7.
 
 The receiver SHALL reject a malformed submission or a request body that fails to conform to the required Task profile with HTTP 400 and an R4 `OperationOutcome`. Successful results carry evidence inside the result package. `validationStatus` is `valid` on successful completion. Failure responses carry an `OperationOutcome` and withhold the result. A POST without `Prefer: respond-async` selects synchronous processing. A synchronous success returns the result on the original call. The receiver MAY retain a completed Task independently of the response. A receiver SHALL reject an async request if the applicable option is unsupported. The bulk-file cohort binding requires async job selection. Execution mode is selected independently.
 
@@ -39,6 +39,30 @@ Each request set uses a coded Task input with a manifest attachment and [DIS Pay
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.
 
 See the [single R4 Patient exchange](examples-single-r4-patient.html) for the smallest synchronous case and the [informative job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples.
+
+<a name="submission-retries"> </a>
+
+## Shared Work Order Identifier and Retry Rules
+
+These rules apply to ITI-x1 and ITI-x3. The receiver SHALL identify a submission by the receiving deployment and operation, the authenticated submitting actor, and the exact `Task.identifier.system` and `Task.identifier.value` pair. Credential changes that still authenticate the same actor preserve that scope. The submitter SHALL assign a fresh pair for each distinct work order in that scope. The business identifier is independent of the FHIR logical ID and polling URL.
+
+A retry is equivalent when it preserves the scope, the exact FHIR JSON body bytes after HTTP content decoding, and the original processing selections for `Prefer: respond-async` and `DIS-Cancellation: required`. The sender SHALL preserve the original body bytes for retries. The receiver MAY retain a protected fingerprint of those bytes for comparison.
+
+The receiver SHALL enforce a single admission per scoped identifier, including for concurrent requests. It SHALL record the binding before starting work and make an asynchronous acceptance and its original polling URL recoverable before sending HTTP 202. An ordinary equivalent repeat uses the recorded submission. An authorized repeat with changed bytes or processing selections SHALL return HTTP 409 with an R4 `OperationOutcome` indicating an identifier conflict.
+
+To recover an uncertain submission outcome, the sender SHALL POST the equivalent request to the original operation with `DIS-Submission: recover`. The receiver SHALL check only the existing record and SHALL NOT create or restart work. It SHALL apply current authorization checks before disclosing a record, polling URL, or result. Successful replayed results are subject to the original result release rules.
+
+| Recorded state | Response to an authorized equivalent repeat |
+|---|---|
+| Initial admission or synchronous execution is pending | HTTP 409 with `DIS-Submission: pending` and an R4 `OperationOutcome`. The receiver SHOULD include `Retry-After` in seconds. |
+| Asynchronous work was accepted and its polling URL remains available | The original HTTP 202 acceptance with the same `Content-Location` and, where applicable, `DIS-Cancellation: enabled`. Include `DIS-Submission: replayed`. The sender polls that URL for current status. |
+| A definitive rejection or synchronous outcome is retained | The recorded response with `DIS-Submission: replayed`. |
+| The receiver knows the recorded response or polling URL has expired | HTTP 410 with an R4 `OperationOutcome`. |
+| No record is visible to the authorized sender and recovery only was requested | HTTP 404 with an R4 `OperationOutcome`. This response does not establish that the original submission was rejected or that work has stopped. |
+
+{: .grid}
+
+The receiver SHALL document its minimum replay retention period in the applicable server operation's CapabilityStatement documentation. It SHALL retain the binding while work is active, for at least the documented period after a terminal outcome or definitive rejection, and for at least as long as the polling URL is valid. After an uncertain submission, the sender SHALL use recovery-only mode. A missing record or expired URL alone SHALL NOT cause the sender to submit replacement work. After a recorded definitive rejection, a fresh submission uses a new identifier. Recovery responses SHALL include `Cache-Control: no-store`.
 
 <a name="asynchronous-cancellation"> </a>
 
@@ -145,7 +169,7 @@ To request asynchronous job processing when both actors support DIS-ASYNC-JOB, t
 
 ##### 2:3.x1.4.1.3 Expected Actions
 
-Upon receipt of a Submit De-Identification Job Request, the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL perform the following actions.
+The De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL apply the [shared identifier and retry rules](#submission-retries). The following actions apply to a new submission.
 
 The Manager SHALL obtain and validate the data request authorization. For an authorization input with a reference, the Manager resolves the referenced resource. For an inline attachment, the Manager processes the content according to the declared `contentType`. The authorization is evidence that a data governance authority approved a data request that specifies the data scope, purpose, and the de-identification policy to be applied. If the authorization is absent, expired, or does not cover the requested processing targets, the Manager SHALL reject the job with an OperationOutcome.
 
@@ -321,6 +345,8 @@ To request asynchronous task processing when both actors support DIS-ASYNC-TASK,
 </div>
 
 ##### 2:3.x3.4.1.3 Expected Actions
+
+The De-Identifier SHALL apply the [shared identifier and retry rules](#submission-retries). The following actions apply to a new submission.
 
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
@@ -499,7 +525,7 @@ On an error response, the Requester SHALL inspect the OperationOutcome and SHALL
 
 When the Requester wishes to stop a job accepted in cancellable mode, it sends the cancellation request defined in the [shared cancellation contract](#asynchronous-cancellation). The Manager SHALL accept a cancellation request only from the original Requester or an explicitly authorized cancellation delegate. The Manager SHALL check that the job was accepted in cancellable mode before applying the request.
 
-On accepting cancellation, the Manager SHALL stop new dispatch and further local de-identification, block all job result release, and request ITI-x7 cancellation for each outstanding remote assignment for which it has a polling URL and confirmation of cancellable mode. It SHALL also account for submissions already in flight. If the polling URL and confirmation become available while an assignment may still be running, the Manager SHALL request cancellation at that URL. It SHALL NOT re-submit an assignment in order to recover a lost polling URL.
+On accepting cancellation, the Manager SHALL stop new dispatch and further local de-identification, block all job result release, and request ITI-x7 cancellation for each outstanding remote assignment for which it has a polling URL and confirmation of cancellable mode. It SHALL also account for submissions already in flight. If the polling URL and confirmation become available while an assignment may still be running, the Manager SHALL request cancellation at that URL. For a lost polling URL, the Manager SHALL use the [recovery-only request](#submission-retries) for the original assignment. It SHALL account for a recorded definitive rejection as an assignment that did not start. A missing record or an expired URL alone does not establish that the assignment is terminal.
 
 The Manager SHALL report confirmed cancellation only after local work has stopped and each dispatched assignment has reached a known terminal state. An assignment that completed or failed before its cancellation was applied counts as terminal. An unconfirmed cancellation response does not establish a terminal task state. The Manager SHALL discard any results from such assignments and SHALL NOT expose their evidence or mappings to the Requester. If the confirmation interval expires with an unresolved assignment, the Manager SHALL report unconfirmed cancellation and continue to withhold all job results. It SHALL continue cancellation of any outstanding assignments it can still address. An Integrated actor applies the same job rules to its local work.
 

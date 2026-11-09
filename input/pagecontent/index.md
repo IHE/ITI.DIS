@@ -40,6 +40,7 @@ This guide is organized into the following sections:
   - [Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)
   - [Reversible Clinical Pathology Order](examples-reversible-pathology.html)
   - [Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
+  - [Staged Asynchronous Patient Job](examples-staged-async.html)
   - [Standalone Clinical Export](examples-standalone-export.html)
 - Other
   - [Changes to Other IHE Specifications](other.html)

@@ -1,0 +1,110 @@
+{
+  "resourceType": "Task",
+  "id": "staged-async-advanced-task",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "https://dis.example.org/dis/assignment-identifiers",
+      "value": "staged-async-advanced-task"
+    }
+  ],
+  "status": "requested",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type",
+        "code": "de-identification-execution"
+      }
+    ]
+  },
+  "input": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "payload-set"
+          }
+        ]
+      },
+      "valueAttachment": {
+        "contentType": "application/fhir+json",
+        "data": "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6InN0YWdlZC1hc3luYy1hZHZhbmNlZC1pbnB1dCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1NYW5pZmVzdFBhY2thZ2UiXX0sInR5cGUiOiJjb2xsZWN0aW9uIiwiZW50cnkiOlt7ImZ1bGxVcmwiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDEiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJMaXN0IiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc291cmNlTWFuaWZlc3QiXX0sInN0YXR1cyI6ImN1cnJlbnQiLCJtb2RlIjoic25hcHNob3QiLCJlbnRyeSI6W3siaXRlbSI6eyJyZWZlcmVuY2UiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDIifX1dLCJpZCI6ImJjNTUwMDAwLTZjODctNDdjNC05YWNlLWIxNTAyM2NiMDAwMSJ9fSx7ImZ1bGxVcmwiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDIiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJQYXRpZW50IiwiYWN0aXZlIjp0cnVlLCJpZGVudGlmaWVyIjpbeyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL3BzZXVkb255bSIsInZhbHVlIjoiODE2MjYxMGExNDllN2I2NzAwNTEzZmEzZjBjZWZmNDYzMjhlMmI1ODRmZDNkMzUxZTRkNWMyNzc1YTQyZmYwYyJ9XSwiYmlydGhEYXRlIjoiMTk4NS0wNy0xNiIsImlkIjoiYmM1NTAwMDAtNmM4Ny00N2M0LTlhY2UtYjE1MDIzY2IwMDAyIn19XX0="
+      },
+      "extension": [
+        {
+          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
+          "extension": [
+            {
+              "url": "setId",
+              "valueString": "staged-patient-r4"
+            },
+            {
+              "url": "payloadBinding",
+              "valueCode": "DIS-FHIR-Payload"
+            },
+            {
+              "url": "payloadVersion",
+              "valueCode": "R4"
+            },
+            {
+              "url": "manifestFormat",
+              "valueCode": "dis-resource-list"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "execution-plan"
+          }
+        ]
+      },
+      "valueReference": {
+        "reference": "https://dis.example.org/fhir/Library/staged-async-advanced-plan/_history/1"
+      }
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "rule-set-id"
+          }
+        ]
+      },
+      "valueString": "generalize-birth-date"
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "stage-id"
+          }
+        ]
+      },
+      "valueString": "advanced"
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "reversibility-mode"
+          }
+        ]
+      },
+      "valueCode": "irreversible"
+    }
+  ]
+}
