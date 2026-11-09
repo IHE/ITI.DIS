@@ -58,7 +58,7 @@
             "reference": "urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0002"
           }
         ],
-        "recorded": "2026-11-06T03:00:00Z",
+        "recorded": "2026-11-06T03:00:30Z",
         "activity": {
           "coding": [
             {
@@ -134,7 +134,7 @@
             "reference": "urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0002"
           }
         ],
-        "recorded": "2026-11-06T03:00:01Z",
+        "recorded": "2026-11-06T03:00:31Z",
         "policy": [
           "https://governance.example.org/fhir/Library/staged-patient/_history/1"
         ],

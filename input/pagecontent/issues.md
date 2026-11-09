@@ -60,7 +60,7 @@ After accepting cancellation, the Manager accounts for each outstanding assignme
 - Repeat cancellation as the original authorized caller and as a caller with polling permission only. Verify a stable cancellation outcome for the authorized retry and denial without a state change or disclosure of cancellation details for the unauthorized caller.
 - Submit a cancellable job when an assignment requires synchronous dispatch or a De-Identifier without task cancellation support. Verify rejection before asynchronous acceptance. Repeat a valid cancellation with a transient downstream timeout and verify that the Manager does not report confirmed cancellation while the assignment's state is unknown.
 
-**Decisions for committee review.** Review the [draft cancellation wire contract](volume-2.html#asynchronous-cancellation), including capability and selection signaling, the polling outcomes, and the declared confirmation and retention intervals. The draft reports unconfirmed cancellation when the Manager cannot establish that a remote assignment has stopped. Review whether an additional mechanism for recovering a lost task polling URL is needed.
+**Decisions for committee review.** Review the [draft cancellation wire contract](volume-2.html#asynchronous-cancellation), including capability and selection signaling, the polling outcomes, and the declared confirmation and retention intervals. The [submission recovery draft](volume-2.html#submission-retries) defines a recovery-only request for a lost acceptance. Cancellation remains unconfirmed when the Manager cannot establish that a remote assignment has stopped.
 
 <a name="future-policy-management-transaction"> </a>
 

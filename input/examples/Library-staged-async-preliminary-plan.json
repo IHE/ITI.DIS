@@ -1,0 +1,42 @@
+{
+  "resourceType": "Library",
+  "id": "staged-async-preliminary-plan",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
+    ],
+    "versionId": "1"
+  },
+  "url": "https://dis.example.org/plans/staged-async-preliminary-plan",
+  "version": "1.0",
+  "name": "StagedAsyncPreliminaryPlan",
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type",
+        "code": "dis-execution-plan",
+        "display": "Execution plan (payload-specific compiled rules)"
+      }
+    ]
+  },
+  "date": "2026-11-06T03:00:05Z",
+  "content": [
+    {
+      "contentType": "application/vnd.ihe.dis.execution-plan+json",
+      "data": "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6InBzZXVkb255bWl6ZS1wYXRpZW50IiwicGF5bG9hZEJpbmRpbmciOiJESVMtRkhJUi1QYXlsb2FkIiwicGF5bG9hZFZlcnNpb24iOiJSNCIsInJ1bGVzIjpbeyJydWxlSWQiOiJoYXNoLWlkZW50aWZpZXIiLCJ0YXJnZXQiOiJQYXRpZW50LmlkZW50aWZpZXIiLCJhY3Rpb24iOiJoYXNoIiwicGFyYW1ldGVycyI6eyJtb2RlIjoic2FsdGVkIiwiYWxnb3JpdGhtIjoiU0hBLTI1NiIsInBzZXVkb255bVN5c3RlbSI6Imh0dHBzOi8vaG9zcGl0YWwuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvcHNldWRvbnltIiwiaWRlbnRpdHktbGlua2FnZS1zY29wZSI6eyJ0eXBlIjoic291cmNlLWluc3RpdHV0aW9uIiwiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2xpbmthZ2Utc2NvcGUiLCJ2YWx1ZSI6ImxhYi1wcm9qZWN0LTIwMjYifX19LCJzb3VyY2VSdWxlSWQiOiJoYXNoLWlkZW50aWZpZXIifSx7InJ1bGVJZCI6InJlbW92ZS1uYW1lIiwidGFyZ2V0IjoiUGF0aWVudC5uYW1lIiwiYWN0aW9uIjoicmVtb3ZlIiwic291cmNlUnVsZUlkIjoicmVtb3ZlLW5hbWUifV19"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "derived-from",
+      "resource": "https://governance.example.org/policies/staged-patient|1.0",
+      "extension": [
+        {
+          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-policy-evidence-uri",
+          "valueUri": "https://governance.example.org/fhir/Library/staged-patient/_history/1"
+        }
+      ]
+    }
+  ]
+}

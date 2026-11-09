@@ -24,6 +24,18 @@ Check the mandatory R4 protocol binding, applicable content requirements and req
 | Manager with a two-stage policy | First pseudonymize a Patient, then apply a record-level transformation. Repeat with two ruleSets in the same stage selecting that Patient. | The later operation receives the validated preceding output. The Manager preserves policy order and returns one authoritative result. A plan with unresolved output composition is rejected before dispatch. |
 {: .grid}
 
+### Work Order Identifier and Recovery
+
+Exercise the [shared identifier and retry rules](volume-2.html#submission-retries) on ITI-x1 and ITI-x3.
+
+| Stimulus | Pass criteria |
+|---|---|
+| Send equivalent submissions concurrently, then repeat once the original response is available. | Only one work item starts. A pending retry returns HTTP 409 with `DIS-Submission: pending`. A later retry replays the recorded response and, for async acceptance, the original polling URL. |
+| Reuse the scoped identifier with a changed body or processing selection. | HTTP 409 with an OperationOutcome indicating an identifier conflict. The original work item is preserved. |
+| Lose either submission response and recover with refreshed credentials for the same actor. Repeat for a never-submitted identifier and from another actor. | An accepted submission returns the original URL with `DIS-Submission: replayed`. Recovery for an absent record starts no work. The other actor learns nothing about the original submission. |
+| Lose an ITI-x3 response while the Manager is cancelling the job. Repeat with an accepted assignment, a recorded rejection and an absent record. | The Manager cancels an outstanding assignment once it recovers its URL, accounts for a recorded rejection without starting work, and treats an absent record as unresolved. No recovery creates an assignment or permits result release. |
+{: .grid}
+
 ### Optional Asynchronous Cancellation
 
 Use the [DIS-CANCEL contract](volume-2.html#asynchronous-cancellation) with synthetic data. Verify the cancellation extension on the applicable job and task submission operations for each participating actor. Observe each exchange using the returned polling URL.
@@ -34,7 +46,7 @@ Use the [DIS-CANCEL contract](volume-2.html#asynchronous-cancellation) with synt
 | Same actors, with an incompatible assignment | Request cancellable mode when an assignment can only run synchronously or its De-Identifier does not advertise cancellation. Repeat with the same input and omit the cancellation requirement. | The first submission returns HTTP 422 without acceptance or dispatch. The second uses ordinary asynchronous job processing when otherwise supported. An authorized DELETE of that non-cancellable job returns 405 with `Allow: GET` and leaves the state unchanged. A submission carrying the cancellation requirement without `Prefer: respond-async` returns HTTP 400. |
 | Receiver with authorized polling and cancellation callers | Repeat an authorized DELETE while pending and after confirmation. Also send DELETE with missing credentials and with credentials that authorize polling only. | The authorized retry returns the recorded outcome without creating work. The other requests return 401 and 403 respectively, without disclosing cancellation details or altering state. |
 | Manager and De-Identifier in a completion race | Complete one task just before the Manager cancels it. In a separate run, make the job result available just before the Requester requests cancellation. | The task's DELETE returns HTTP 409 and the ordinary poll confirms terminal completion. The Manager discards the task output when job cancellation was accepted. In the second run, the job's DELETE returns HTTP 409 and ordinary authorized retrieval remains available. |
-| Manager with an unresolved remote assignment | Drop the task submission response or make the task endpoint unavailable during cancellation. Continue authorized job polling beyond the advertised confirmation interval. | The Manager does not re-submit a task to recover its handle. While confirmation is pending, job polling returns HTTP 202 with `DIS-Cancellation: pending`. If work remains unconfirmed when the interval expires, polling returns HTTP 422 with `DIS-Cancellation: unconfirmed`. No result is released. |
+| Manager with an unresolved remote assignment | Drop the task submission response or make the task endpoint unavailable during cancellation. Continue authorized job polling beyond the advertised confirmation interval. | The Manager uses recovery-only requests for a lost handle and starts no new assignment. While confirmation is pending, job polling returns HTTP 202 with `DIS-Cancellation: pending`. If work remains unconfirmed when the interval expires, polling returns HTTP 422 with `DIS-Cancellation: unconfirmed`. No result is released. |
 | Externally invoked Integrated actor declaring DIS-CANCEL | Submit and cancel an accepted job while local processing is still running. | The actor stops processing, reports confirmation after local work stops, and withholds the result. All exchanges use ITI-x1 and ITI-x4. |
 {: .grid}
 
@@ -116,7 +128,7 @@ Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a m
 
 ### Requester Validation of Staged Release Evidence
 
-Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case.
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For the asynchronous run, use the [staged job walkthrough](examples-staged-async.html), including both ITI-x7 polls and recovery of an acceptance without starting duplicate work.
 
 | Stimulus | Pass criteria |
 |---|---|

@@ -67,6 +67,12 @@ resources:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
   Task/grouped-fhir-task-encounter-r5:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+  Task/staged-async-job:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+  Task/staged-async-preliminary-task:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+  Task/staged-async-advanced-task:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
   Library/staged-patient:
     description: "Approved syntax policy that gives the Requester the expected stage and ruleSet sequence for the staged R4 Patient example."
   Bundle/staged-r4-patient-result:
@@ -97,6 +103,19 @@ groups:
       - Parameters/grouped-fhir-task-result-encounter-r5
       - Parameters/grouped-fhir-job-result
       - OperationOutcome/grouped-fhir-job-failure
+  staged-async-examples:
+    name: "Staged Asynchronous Patient Job Examples"
+    resources:
+      - Library/staged-patient
+      - Task/staged-async-job
+      - Library/staged-async-preliminary-plan
+      - Task/staged-async-preliminary-task
+      - Parameters/staged-async-preliminary-result
+      - Library/staged-async-advanced-plan
+      - Task/staged-async-advanced-task
+      - Parameters/staged-async-advanced-result
+      - Bundle/staged-r4-patient-result
+      - Parameters/staged-async-job-result
   examples-reversible-pathology:
     name: "Reversible Clinical Pathology Order Examples"
     resources:
@@ -140,6 +159,9 @@ pages:
     generation: markdown
   examples-grouped-fhir-job.md:
     title: "Job with R4 and R5 Payload Sets (Informative)"
+    generation: markdown
+  examples-staged-async.md:
+    title: "Staged Asynchronous Patient Job (Informative)"
     generation: markdown
   examples-reversible-pathology.md:
     title: "Reversible Clinical Pathology Order (Informative)"
@@ -197,6 +219,7 @@ menu:
     Job with R4 and R5 Payload Sets: examples-grouped-fhir-job.html
     Reversible Clinical Pathology Order: examples-reversible-pathology.html
     Bulk FHIR Cohort Job: examples-bulk-fhir-cohort.html
+    Staged Asynchronous Patient Job: examples-staged-async.html
     Standalone Clinical Export: examples-standalone-export.html
     Mixed R5 and DICOM Job: examples-mixed-r5-dicom.html
   Artifacts: artifacts.html
