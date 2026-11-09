@@ -32,6 +32,10 @@ The Manager is authoritative for job state. The De-Identifier is authoritative f
 
 [DIS result and evidence binding](../input/pagecontent/volume-3.md#result-evidence-placement) · [DIS staged release evidence](../input/pagecontent/volume-3.md#staged-release-evidence) · [FHIR R4 draft asynchronous pattern](https://hl7.org/fhir/R4/async.html)
 
+## Future job notifications
+
+A future revision may define an optional FHIR R4 Subscription capability for asynchronous Job Task status. The Manager would notify an authorized Requester of terminal state changes, such as completion, failure or confirmed cancellation where supported. Notifications would carry the job identifier and status. The Requester would retrieve successful results and evidence through ITI-x4 and could poll for status after a missed notification. The future revision would define the subscribable status view, notification authorization, trigger criteria and subscription expiry. The proposed asynchronous binding uses ITI-x4 and ITI-x7 polling. [FHIR R4 Workflow Management](https://hl7.org/fhir/R4/workflow-management.html) · [FHIR R4 Subscription](https://hl7.org/fhir/R4/subscription.html)
+
 ## Profile update plan
 
 | Step | Changes and exit criteria |
