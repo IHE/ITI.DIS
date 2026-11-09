@@ -6,21 +6,21 @@ sequenceDiagram
 
     Note over EHR,DI: All DIS actors within hospital trust boundary
 
-    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync, clinical resources)
+    EHR->>MGR: ITI-x1 Submit Job (R4 Job Task, sync)
     activate MGR
-    Note over MGR: Validate policy, compile execution plan
+    Note over MGR: Validate authorization and policy<br/>Compile plan for Patient and linked resources
 
-    MGR->>DI: ITI-x3 Submit Task (preliminary: reversible pseudonymization)
+    MGR->>DI: ITI-x3 Submit Task (R4 Execution Task, sync)
     activate DI
-    Note over DI: Pseudonymize within trust boundary
-    DI-->>MGR: Pseudonymized resources + evidence
+    Note over DI: Pseudonymize Patient and preserve clinical links
+    DI-->>MGR: 200 OK (result, evidence, protected generatedLookupTable)
     deactivate DI
 
-    Note over MGR: Retain identity table + pseudonym index on-premise
-    MGR-->>EHR: ITI-x1 Response (pseudonymized payload + evidence)
+    Note over MGR: Validate result and retain mappings on-premise
+    MGR-->>EHR: ITI-x1 200 OK (pseudonymized result and evidence)
     deactivate MGR
 
-    EHR->>AI: Transmit pseudonymized data (outside DIS)
+    EHR->>AI: Transmit pseudonymized clinical data (outside DIS)
     activate AI
     AI-->>EHR: AI recommendation referencing pseudonym (outside DIS)
     deactivate AI
