@@ -104,7 +104,7 @@ The request body SHALL be a [DIS Job Task](StructureDefinition-DIS-JobTask.html)
 | `payload-set` | 1..* | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | One manifest with the set's binding, version, approved policy and any permitted supplied lookup reference |
 {: .grid}
 
-The authorization is evidence that a governance authority approved the data request, including the policy applicable to each set. Its internal structure is determined by the deployment's authorization mechanism. Each set SHALL have a unique `setId` and declare its approved policy as a versioned canonical (`Library.url|Library.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives reversibility mode and linkage scope from the approved policy.
+The authorization is evidence that a governance authority approved the data request, including the policy applicable to each set. Its internal structure is determined by the deployment's authorization mechanism. Each set SHALL have a unique `setId` and declare its approved policy as a versioned canonical (`Library.url|Library.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives the job's reversibility mode from the common mode declared by the approved policies and obtains each set's linkage scope from its policy.
 
 To request asynchronous job processing when both actors support DIS-ASYNC-JOB, the Requester SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -129,6 +129,8 @@ The Manager SHALL perform three-point policy content validation:
 3. **Integrity** — verify that the obtained rules are the exact content bound to the approved version under the [policy validation rules](volume-3.html#3pxx132-policy-validation). Apply the JWS verification above for carried content and the deployment's resolution trust model for Manager-resolved content.
 
 If any point of the four-point validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
+
+The Manager SHALL verify that all approved policies declare the same reversibility mode before accepting an asynchronous job or beginning synchronous execution. If the modes differ, the Manager SHALL reject the job with an OperationOutcome before dispatching any tasks.
 
 When reversible mode is selected, the Manager SHALL use a supplied `lookupTable` for direct-identifier mapping. When the request contains no table, the Manager SHALL create or maintain and persist the mapping needed for reversal. The Manager SHALL reject a supplied table in irreversible mode. The approved policy SHALL authorize lookup-backed replacement for the affected identifiers. The Manager SHALL reject incompatible policy and table combinations without changing the approved rules.
 
@@ -178,7 +180,7 @@ The Manager SHALL return one `payloadResult` per submitted `setId`, with the cor
 
 **401 Unauthorized / 403 Forbidden.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the authorization failure.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying which of the four policy validation points (authorization consistency, integrity, schema conformance, currency) failed.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying the failed policy validation point or reporting that the approved policies declare different reversibility modes.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the server error.
 
@@ -272,12 +274,12 @@ The request body SHALL be a [DIS Execution Task](StructureDefinition-DIS-Executi
 | `rule-set-id` | 1..1 | `valueString` | RuleSet from the source policy that this assignment executes |
 | `stage-id` | 0..1 | `valueString` | Required when the source policy declares staged execution |
 | `lookup-table` | 0..1 | `valueReference` | Protected lookup table restricted to the assignment |
-| `reversibility-mode` | 1..1 | `valueCode` | `irreversible` or `reversible`, derived from the approved policy |
+| `reversibility-mode` | 1..1 | `valueCode` | The job's reversibility mode, either `irreversible` or `reversible` |
 {: .grid}
 
 The Manager SHALL preserve the job's `setId`, binding, and version for the assigned inputs. It MAY change the delivery of the same authorized content. The execution plan carries the policy identity. Any assigned lookup table is sent in its own protected input.
 
-The `reversibility-mode` input in ITI-x3 is derived from the approved policy for the assigned set. The De-ID Manager passes the policy-determined mode to the De-Identifier as an operational instruction; the De-Identifier does not independently select the mode.
+The De-ID Manager SHALL set the `reversibility-mode` input in every ITI-x3 Execution Task to the job's reversibility mode. The De-Identifier SHALL apply the supplied mode.
 
 When using `lookup-table`, the Manager SHALL dispatch only a protected reference to a document with the entries needed for the assigned task. If the source contains additional entries, the Manager SHALL create a [task-scoped lookup document](volume-3.html#3pxx5-reversible-lookup-table) and track its correlation to the pinned source. The De-Identifier's credentials SHALL NOT grant access to the unrestricted table in that case. The Manager SHALL delete derived task artifacts at termination unless retention is explicitly authorized.
 

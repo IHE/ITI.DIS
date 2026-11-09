@@ -32,6 +32,7 @@ Configure the Requester with access to the approved policy and the Manager with 
 |---|---|
 | Submit the authorized canonical URL and version with the approved signed content. Repeat with the Manager resolving the same approved version. | Both modes use the exact approved rules. The Requester can read the same approved version in both cases. |
 | Substitute a different valid policy or version for one payload set. | The Manager returns an authorization consistency error with no acceptance, dispatch or result. |
+| Submit a job with two sets under different approved policies. Give both policies the same reversibility mode, then repeat with one policy declaring the other mode and approval for that policy. | With a common mode, every Execution Task carries that mode. With mixed modes, ITI-x1 returns HTTP 422 with an OperationOutcome before acceptance or dispatch and returns no result. |
 | Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
 
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside Phase 1.

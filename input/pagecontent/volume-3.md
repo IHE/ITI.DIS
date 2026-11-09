@@ -227,7 +227,7 @@ Table 3:PXX.1.3-1 lists the top-level elements of the policy rules JSON.
 |---------|-------------|------|-------------|
 | `policyVersion` | 1..1 | string | Policy rules JSON format version. Use `1.0` for this schema. `Library.version` identifies the policy revision. |
 | `representationLevel` | 1..1 | code | `semantic` or `syntax` |
-| `reversibilityMode` | 1..1 | code | `irreversible` or `reversible` |
+| `reversibilityMode` | 1..1 | code | `irreversible` or `reversible`. All policies used in a job declare the same mode. |
 | `identity-linkage-scope` | 0..1 | object | Authorized scope for lookup-backed replacement or salted hashing. Required when either is used. A `job` scope declares only `type`. A `source-institution` or `cross-community` scope declares `type` and an `identifier` with `system` and `value`. |
 | `payloadFamily` | 0..1 | string | Required for Syntax-Level policies. Phase 1 uses `fhir`. Semantic-Level policies omit this field. |
 | `payloadVersion` | 0..1 | string | Required for Syntax-Level policies. Use `R4`, `R5`, or provisional `R6` under the payload version rules. Semantic-Level policies omit this field. |

@@ -244,7 +244,9 @@ The Irreversible De-Identification Option (DIS-IRREVERSIBLE) requires that, when
 
 Irreversible mode denotes the absence of a DIS-maintained reverse-mapping capability; it does not guarantee that individuals cannot be identified through other information. Retained derivation secrets may permit reproduction and matching against candidate identities. The authorized policy SHALL specify the consistency scope. The De-Identifier’s deployment manages the salt version and protected retention within the authorized scope. It SHALL retire job-scoped material at job termination so that it cannot be used for another job. Material retained for authorized cross-job consistency SHALL be protected, scoped and destroyed when the authorized retention period ends. Such retention SHALL NOT include a patient-to-pseudonym index and SHALL be disclosed as a limitation of the irreversible-mode claim.
 
-At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared by the De-ID Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier. An actor MAY declare both options to indicate it supports both modes, with the mode selected per job by the de-identification policy.
+At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared by the De-ID Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier. An actor MAY declare both options to indicate it supports both modes.
+
+Each job SHALL use one reversibility mode for all payload sets and execution tasks. Different payload sets MAY use different approved policies. All policies used in the job SHALL declare the same reversibility mode.
 
 <a name="required-groupings"> </a>
 
