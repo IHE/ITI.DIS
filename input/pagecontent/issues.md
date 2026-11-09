@@ -13,6 +13,7 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
 - [Asynchronous job and task cancellation](#asynchronous-job-and-task-cancellation)
+- [IUA grouping and authorization denials](#iua-grouping-and-denial-responses)
 - [Future policy management transaction](#future-policy-management-transaction)
 - **Draft contract review:** confirm the payload set transaction contract, capability declarations, stage ordering, and release authorization. Complete detailed conformance procedures and validate them against the agreed baseline.
 
@@ -61,6 +62,14 @@ After accepting cancellation, the Manager accounts for each outstanding assignme
 - Submit a cancellable job when an assignment requires synchronous dispatch or a De-Identifier without task cancellation support. Verify rejection before asynchronous acceptance. Repeat a valid cancellation with a transient downstream timeout and verify that the Manager does not report confirmed cancellation while the assignment's state is unknown.
 
 **Decisions for committee review.** Review the [draft cancellation wire contract](volume-2.html#asynchronous-cancellation), including capability and selection signaling, the polling outcomes, and the declared confirmation and retention intervals. The [submission recovery draft](volume-2.html#submission-retries) defines a recovery-only request for a lost acceptance. Cancellation remains unconfirmed when the Manager cannot establish that a remote assignment has stopped.
+
+<a name="iua-grouping-and-denial-responses"> </a>
+
+#### IUA Grouping and Authorization Denials
+
+The current grouping table lists Authorization Client or Resource Server for the Manager and Integrated actor. For exchanges that use IUA, the Requester presents a token to the Manager or externally invoked Integrated actor on the job leg. The distributed Manager presents a token to the De-Identifier on the task leg. [ITI-72 §3.72.4.3](https://profiles.ihe.net/ITI/IUA/) assigns HTTP 401 when token verification, scope matching, or IUA access policy enforcement fails. DIS also specifies HTTP 403 when an authenticated caller lacks permission to poll or cancel a work item.
+
+The committee needs to confirm which IUA groupings are required on each leg, including the Manager's distinct roles and the externally invoked Integrated actor. It also needs to define how DIS distinguishes an IUA access denial from a work item authorization denial, or align the status codes for requests governed by both requirements. The denial must protect work item state, outputs, and evidence regardless of the response code.
 
 <a name="future-policy-management-transaction"> </a>
 

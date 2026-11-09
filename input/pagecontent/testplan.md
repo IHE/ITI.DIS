@@ -53,6 +53,20 @@ Use the [DIS-CANCEL contract](volume-2.html#asynchronous-cancellation) with synt
 | Externally invoked Integrated actor declaring DIS-CANCEL | Submit and cancel an accepted job while local processing is still running. | The actor stops processing, reports confirmation after local work stops, and withholds the result. All exchanges use ITI-x1 and ITI-x4. |
 {: .grid}
 
+### Transport, Authorization and Audit
+
+Apply the [actor grouping table](volume-1.html#required-groupings) and the [shared transaction authorization and audit rules](volume-2.html#transaction-authorization) to the actors and options under test. Use synthetic work items and credentials.
+
+| Actor and setup | Stimulus | Pass criteria |
+|---|---|---|
+| Actors on either DIS exchange | Inspect each actor's declared ATNA grouping. Connect over TLS 1.2 or later with both trusted peers, then repeat with an untrusted peer. | The Requester declares Secure Application. Each processing actor declares Secure Node or Secure Application. Only the trusted peers can complete the DIS exchange. |
+| Requester, retrieval delegate, and job responder | Poll with a delegate credential that permits retrieval only. With that credential, attempt job cancellation and recovery of the original submission. Repeat recovery as the original actor using renewed credentials. | The delegate can poll within its authorized scope. Its cancellation and recovery attempts reveal no protected state and cause no change. Authorized recovery under the original actor identity returns the retained submission outcome. |
+| De-Identifier and two authenticated Managers | Give one Manager a task assignment. Have the other Manager attempt recovery, polling, and cancellation using the known identifier or polling URL. | The assigned Manager can perform its authorized actions. The other Manager obtains no task state, output, evidence, or generated mapping, and its attempts leave the assignment unchanged. |
+| Polling initiator with a configured trusted responder | Return a polling URL for an unauthorized endpoint. Repeat with a trusted initial URL that redirects to an unauthorized destination. | The initiator sends no poll, cancellation request, or credentials to the unauthorized destination. |
+| Manager and result service after completion | Revoke the Requester's release authorization before it retrieves the job result. Attempt an authorized submission replay for a completed synchronous job after its release authorization has been revoked. | The responder and result service withhold the output and evidence. A replay does not bypass the current release check. |
+| Audit inspection on both actor exchanges | Exercise initial submission, recovery, authorized and denied polling, terminal failure, and allowed and denied cancellation where supported. | The audit trail records the actions and outcomes required by each transaction. Completed task evidence correlates to the audit trail. Logs and error diagnostics omit tokens, signed access URLs, source payload bodies, salts, and lookup contents. |
+{: .grid}
+
 ### Policy Admission and Execution
 
 Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, schema conformance and currency before acceptance or dispatch.
