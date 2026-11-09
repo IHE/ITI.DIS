@@ -123,13 +123,13 @@ For more details see the detailed [transaction description](volume-2.html#23x3-s
 
 #### 1:PXX.1.2.3 Retrieve Job Output [ITI-x4]
 
-This transaction is used by the De-Identification Requester to retrieve the status and output of a previously submitted asynchronous job.
+This transaction is used by the De-Identification Requester to retrieve the status and output of a previously submitted asynchronous job. With DIS-CANCEL, the Requester can also request cancellation of a job accepted in cancellable mode.
 
 For more details see the detailed [transaction description](volume-2.html#23x4-retrieve-job-output-iti-x4).
 
 #### 1:PXX.1.2.4 Retrieve Task Output [ITI-x7]
 
-The De-ID Manager polls the De-Identifier for the status of an accepted asynchronous task and retrieves its output and evidence when available. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
+The De-ID Manager polls the De-Identifier for the status of an accepted asynchronous task and retrieves its output and evidence when available. With DIS-CANCEL, the Manager can also request cancellation of a task accepted in cancellable mode. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
 
 For more details see the detailed [transaction description](volume-2.html#23x7-retrieve-task-output-iti-x7).
 
@@ -145,17 +145,21 @@ Options that may be selected for each actor in this profile are listed in Table 
 |-------|-------------|-----------|
 | De-Identification Requester | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
 | De-Identification Requester | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
+| De-Identification Requester | Asynchronous Cancellation (DIS-CANCEL) | [1:PXX.2.7](#asynchronous-cancellation-option) |
 | De-ID Manager | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
 | De-ID Manager | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
 | De-ID Manager | Asynchronous Task Processing (DIS-ASYNC-TASK) | [1:PXX.2.5](#1pxx25-asynchronous-task-processing-option) |
+| De-ID Manager | Asynchronous Cancellation (DIS-CANCEL) | [1:PXX.2.7](#asynchronous-cancellation-option) |
 | De-ID Manager | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | De-ID Manager | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
 | De-Identifier | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
 | De-Identifier | Asynchronous Task Processing (DIS-ASYNC-TASK) | [1:PXX.2.5](#1pxx25-asynchronous-task-processing-option) |
+| De-Identifier | Asynchronous Cancellation (DIS-CANCEL) | [1:PXX.2.7](#asynchronous-cancellation-option) |
 | De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | De-Identifier | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
 | Integrated De-ID Manager/De-Identifier | HL7 FHIR Payload (DIS-FHIR-Payload) (See Note 1) | [1:PXX.2.3](#1pxx23-hl7-fhir-payload-option) |
 | Integrated De-ID Manager/De-Identifier | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
+| Integrated De-ID Manager/De-Identifier | Asynchronous Cancellation (DIS-CANCEL) | [1:PXX.2.7](#asynchronous-cancellation-option) |
 | Integrated De-ID Manager/De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | Integrated De-ID Manager/De-Identifier | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
 {: .grid}
@@ -171,6 +175,7 @@ Table 1:PXX.2-2 summarizes all Phase 1 options and their applicability per actor
 | DIS-FHIR-Payload | Required (Note 1) | Required (Note 1) | Required (Note 1) | Required (Note 1) | HL7 FHIR payload binding — content model, baseline execution plan, and rules for obtaining inputs and delivering results for independently versioned HL7 FHIR R4 and R5 processing payloads, with provisional R6 support. |
 | DIS-ASYNC-JOB | Optional | Optional | Not applicable | Optional | Asynchronous job processing. Both participating Requester and Manager (or Integrated actor) declare support; ITI-x4 required. For the Integrated actor, DIS-ASYNC-JOB requires ITI-x1. |
 | DIS-ASYNC-TASK | Not applicable | Optional | Optional | Not applicable | Asynchronous task processing. Both participating Manager and De-Identifier declare support; ITI-x7 required. Not applicable to the Integrated actor. |
+| DIS-CANCEL | Optional | Optional | Optional | Optional when externally invoked | Adds cancellation messages to ITI-x4 and ITI-x7. Requires DIS-ASYNC-JOB on the job exchange and DIS-ASYNC-TASK on the task exchange. |
 | DIS-IRREVERSIBLE | Not applicable | Optional | Optional | Optional | No Manager mapping retention after job completion; incompatible with a supplied reversible lookup table. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
 | DIS-REVERSIBLE | Not applicable | Optional | Optional | Optional | Both participating Manager and De-Identifier declare reversible pseudonymization support. The Integrated actor declares this as a single actor. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
 {: .grid}
@@ -236,7 +241,7 @@ The Asynchronous Task Processing Option (DIS-ASYNC-TASK) enables the De-ID Manag
 
 Both the participating De-ID Manager and De-Identifier SHALL declare DIS-ASYNC-TASK and SHALL support ITI-x7. This option does not apply to the Integrated De-ID Manager/De-Identifier.
 
-DIS-ASYNC-JOB and DIS-ASYNC-TASK are independent. A Manager may support async jobs without async tasks (processing tasks synchronously), or async tasks without async jobs (returning results synchronously to the Requester while dispatching tasks asynchronously to De-Identifiers).
+Ordinary async job and task processing can be selected independently. A Manager may support async jobs without async tasks, or async tasks without async jobs. A distributed job submitted in cancellable mode uses asynchronous task processing under DIS-CANCEL.
 
 ### 1:PXX.2.6 Irreversible De-Identification Option
 
@@ -247,6 +252,16 @@ Irreversible mode denotes the absence of a DIS-maintained reverse-mapping capabi
 At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared by the De-ID Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier. An actor MAY declare both options to indicate it supports both modes.
 
 Each job SHALL use one reversibility mode for all payload sets and execution tasks. Different payload sets MAY use different approved policies. All policies used in the job SHALL declare the same reversibility mode.
+
+<a name="asynchronous-cancellation-option"> </a>
+
+### 1:PXX.2.7 Asynchronous Cancellation Option
+
+The Asynchronous Cancellation Option (DIS-CANCEL) enables the Requester to cancel a job accepted in cancellable mode through ITI-x4. A distributed Manager uses ITI-x7 to cancel outstanding asynchronous assignments. An externally invoked Integrated actor stops its work locally.
+
+A Requester or Integrated actor declaring DIS-CANCEL SHALL declare DIS-ASYNC-JOB. A distributed Manager declaring DIS-CANCEL SHALL declare DIS-ASYNC-JOB and DIS-ASYNC-TASK. A De-Identifier declaring DIS-CANCEL SHALL declare DIS-ASYNC-TASK. Both actors on an exchange SHALL support DIS-CANCEL before the initiator requests cancellable mode for that work item.
+
+When the Requester requires cancellable mode, a distributed Manager SHALL use only asynchronous assignments that support cancellation. If the Manager accepts cancellation, it SHALL stop dispatching new work, block release of the job results, and propagate cancellation to outstanding De-Identifiers. The Manager reports confirmed job cancellation after local work has stopped and all dispatched assignments have reached known terminal states. See the [shared cancellation contract](volume-2.html#asynchronous-cancellation).
 
 <a name="required-groupings"> </a>
 
