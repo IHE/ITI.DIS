@@ -40,6 +40,16 @@ The Manager SHALL preserve set identity, binding, and version when changing how 
 
 See the [single R4 Patient exchange](examples-single-r4-patient.html) for the smallest synchronous case and the [informative job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples.
 
+<a name="transaction-authorization"> </a>
+
+## Shared Transaction Authorization and Audit
+
+For each request, the responder SHALL authenticate the caller and authorize the specific action and work item before disclosing work item state or changing it. The data request authorization governs the approved data scope and policy. Access credentials identify and authorize the actor for the transaction or for the specific service hosting referenced data. Apply the [referenced input and result access rules](volume-3.html#3pxx32-authorization-and-stable-retrieval) when data travels by reference.
+
+Before polling or cancelling, the initiator SHALL verify that the polling URL identifies an HTTPS endpoint authorized to serve that work item on behalf of the original responder. If a redirect is used, the initiator SHALL verify the destination before sending credentials or issuing the request there. It SHALL use credentials valid for the destination. An authorization denial SHALL omit work item state, results, evidence, and protected transformation material.
+
+Audit records SHALL distinguish a new submission, a recovery request, a poll, a cancellation request, and the applicable outcome. Use opaque work item and audit correlation identifiers when known. Audit records and error diagnostics SHALL exclude raw access tokens, signed access URLs, source payload bodies, salts, and supplied or generated lookup contents.
+
 <a name="asynchronous-polling-lifecycle"> </a>
 
 ## Shared Asynchronous Polling Lifecycle
@@ -56,7 +66,7 @@ A retry is equivalent when it preserves the scope, the exact FHIR JSON body byte
 
 The receiver SHALL enforce a single admission per scoped identifier, including for concurrent requests. It SHALL record the binding before starting work and make an asynchronous acceptance and its original polling URL recoverable before sending HTTP 202. An ordinary equivalent repeat uses the recorded submission. An authorized repeat with changed bytes or processing selections SHALL return HTTP 409 with an R4 `OperationOutcome` indicating an identifier conflict.
 
-To recover an uncertain submission outcome, the sender SHALL POST the equivalent request to the original operation with `DIS-Submission: recover`. The receiver SHALL check only the existing record and SHALL NOT create or restart work. It SHALL apply current authorization checks before disclosing a record, polling URL, or result. Successful replayed results are subject to the original result release rules.
+To recover an uncertain submission outcome, the sender SHALL POST the equivalent request to the original operation with `DIS-Submission: recover`. The receiver SHALL check only the existing record and SHALL NOT create or restart work. The receiver SHALL authorize recovery under the original submitting actor's authenticated identity and current permissions. Renewed credentials may identify the same actor. Successful replayed results are subject to the original result release rules.
 
 | Recorded state | Response to an authorized equivalent repeat |
 |---|---|
@@ -551,7 +561,7 @@ See [DIS Security Considerations](volume-1.html#security-considerations).
 
 #### 2:3.x4.6.1 Security Audit Considerations
 
-The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL record an audit event for each ITI-x4 poll that returns a completed job. In-progress and denied polling requests SHALL also generate audit events. The audit event for a completed retrieval SHALL include the job identifier and the audit correlation identifier from the de-identification evidence. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
+The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL record an audit event for each ITI-x4 poll that returns a completed job. In-progress, failed, and denied polls and allowed or denied cancellation requests SHALL also generate audit events. The audit event for a completed retrieval SHALL include the job identifier and the audit correlation identifier from the de-identification evidence. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
 
 <a name="23x7-retrieve-task-output-iti-x7"> </a>
 
@@ -659,4 +669,4 @@ See [DIS Security Considerations](volume-1.html#security-considerations).
 
 #### 2:3.x7.6.1 Security Audit Considerations
 
-The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI-x7 poll that returns a completed task. Polling requests that return in-progress status SHOULD be logged but MAY be recorded at a reduced frequency. The audit event SHALL NOT include confidential salts or other protected transformation material. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
+The De-ID Manager and the De-Identifier SHALL audit completed, failed, and denied ITI-x7 polls and allowed or denied cancellation requests. Ordinary in-progress polls SHOULD be logged and MAY be recorded at a reduced frequency. The audit event SHALL NOT include confidential salts or other protected transformation material. Implementations SHOULD use [IHE BALP](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation.
