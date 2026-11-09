@@ -1,45 +1,43 @@
-# Modeling de-id job and task using FHIR R4 Task
+# Complete FHIR R4 Task work orders for DIS
 
-**Status** — Discussion draft for ITI.DIS review. The current Phase 1 transaction definitions remain the conformance baseline.
+**Status** — Proposed Phase 1 binding for committee review. This proposal identifies the profile changes to make if the committee adopts the design.
 
-## Design
+## Decision proposed
 
-Use the FHIR operation to submit work, a profiled FHIR R4 `Task` to identify and describe the work order when actors need to exchange it, and `Parameters` to carry the work order, payload and result. FHIR R4 operations accept a resource as a named parameter. The R4 workflow resource is independent of the FHIR version of the processing payload. [FHIR R4 operations](https://hl7.org/fhir/R4/operations.html#exec) · [FHIR R4 Task](https://hl7.org/fhir/R4/task.html)
+Use FHIR R4 operations to submit a complete job or execution order between independently implemented actors. Define one required input named `workItem` of type `Task` for each submission operation. Use R4 `Parameters.parameter.resource` as the required interoperable encoding. The submitted Task contains every instruction or an authorized reference to it. Each field has one authoritative location. Preserve `Parameters` for successful results. FHIR R4 also permits a bare resource body when the invocation has exactly one resource input. Decide explicitly whether DIS will support that form in addition to the required envelope. [FHIR R4 Operations](https://hl7.org/fhir/R4/operations.html#request) · [FHIR R4 Parameters](https://hl7.org/fhir/R4/parameters.html)
 
-| Exchange | Proposed treatment |
+| Exchange | Complete work order |
 | --- | --- |
-| **ITI-x1 Submit De-Identification Job** · De-Identification Requester → De-ID Manager | Keep the current Phase 1 request. `Parameters` groups one or more payload sets with their approved policy identities and carries one data request authorization. The Manager may represent the overall job as an internal parent Task. If a later use case requires the Requester to exchange a job work order, consider one job-level `workItem` resource parameter alongside the existing authorization and payload groups. |
-| **ITI-x3 Submit De-Identification Task** · De-ID Manager → De-Identifier | If DIS standardizes a shared work order, start here. Each dispatch assigns one ruleset for one payload set. Add a `workItem` resource parameter containing a profiled execution Task. Retain the system-level `$submit-dis-task` operation and the ITI-x7 polling interaction. |
+| **ITI-x1** · Requester → Manager or externally invoked Integrated actor | A Job Task with one data request authorization and one or more payload sets. Each set carries the exact approved policy identity and any permitted supplied lookup reference. The Requester can convey the order as one identifiable artifact. The receiving actor independently validates authorization, policy and payload before acceptance. |
+| **ITI-x3** · Manager → De-Identifier | A separate Execution Task for one assigned ruleSet and payload set. It contains the compiled execution plan reference, ruleSet ID, stage ID when applicable, reversibility mode and any authorized task-scoped lookup reference. The De-Identifier receives the assigned data and instructions for its stage. |
 
-[Current submission and polling transactions](../input/pagecontent/volume-2.md)
+The Manager is authoritative for job state. The De-Identifier is authoritative for execution of its assignment. An externally invoked Integrated actor receives the Job Task and manages its execution internally. Both profiles use R4 even when the selected payload uses another supported FHIR release. [DIS actors and options](../input/pagecontent/volume-1.md) · [Current submission and polling transactions](../input/pagecontent/volume-2.md)
 
-## Candidate ITI-x3 request binding
+## Candidate content binding
 
-| Element | Candidate definition |
+- **Identity and intent.** Require a scoped business identifier in `Task.identifier`, a coded job or execution type, `intent = order`, and `status = requested` on submission. Define the authority for actor identity, the scope of identifiers, and how equivalent retries differ from a new order. Separate business identifiers, resource IDs, polling URLs and audit correlation identifiers. Decide where responses or evidence need to carry the business identifier for correlation. The Manager correlates assigned work to the job. Use `Task.partOf` when disclosure of the parent reference is authorized.
+- **Job authorization.** Define one coded authorization input with a reference or an attachment. Apply the existing authorization checks to the caller and every requested set. Require validation of the exact approved policy content, including the current signed-carrier and Manager-resolved modes.
+- **Payload sets.** Use one coded `Task.input` per set. Carry the manifest as `valueAttachment` and group `setId`, `payloadBinding`, `payloadVersion` and `manifestFormat` in one required complex extension on that input. For the Job Task, include the exact approved policy canonical URL and version in the same group. Define how that group carries optional signed policy content and a permitted lookup reference. For signed content, prefer a local reference to a contained R4 `Binary` with `contentType = application/jose` and preserve the exact JWS bytes. Constrain the Job Task to unique set IDs and the Execution Task to exactly one assigned set.
+- **Execution instructions.** Add coded inputs for the DIS Execution Plan Library reference, ruleSet ID, stage ID when applicable, and reversibility mode. Keep a protected lookup reference scoped to the assignment. Validate agreement between the assigned set, the plan and the ruleSet before execution. The plan retains the exact source policy identity and evidence URI.
+
+[FHIR R4 Task inputs and relationships](https://hl7.org/fhir/R4/task-definitions.html) · [FHIR R4 extensions](https://hl7.org/fhir/R4/extensibility.html) · [DIS execution-plan source policy](../input/pagecontent/volume-3.md#execution-plan-source-policy)
+
+## Results, status and cancellation
+
+- **Results.** Keep synchronous `200 OK` with the existing `Parameters` outputs. Keep asynchronous `202 Accepted` with `Content-Location` and retrieve the deferred operation output through ITI-x4 or ITI-x7. Document which HTTP polling mechanics DIS takes from the draft R4 asynchronous pattern and define the DIS response body explicitly. Keep job and execution modes independent.
+- **Evidence and release.** A completed execution Task records the outcome of the assigned work. The Manager validates all required results and rechecks release authorization. Keep the DIS Result Package, mandatory DIS Evidence `Provenance`, and staged release `Provenance` for qualifying sets. The Manager controls what each recipient can see, including plan references, lookup material and intermediate results.
+- **Shared status.** If DIS adopts independently readable status, define an authorized, limited view maintained by the receiving actor. Specify discoverability, permitted fields and retention separately from the full work order and result. A readable job state must distinguish terminal processing outcomes from retrieval errors.
+- **Cancellation.** If DIS supports cancelling accepted jobs, define an explicit authorized Requester–Manager interaction. Distinguish acknowledgement from terminal cancellation and define the outcome when cancellation races with completion. Once cancellation is accepted, the Manager blocks result release, stops dispatching and propagates cancellation to every active assignment. The Manager confirms job cancellation after reconciling all dispatched work. Work that already reached a terminal state keeps its recorded outcome. An in-flight synchronous ITI-x3 assignment needs an independent cancellation interaction keyed by an identifier known before completion. The capability declaration must make clear which combinations support cancellation.
+
+[DIS result and evidence binding](../input/pagecontent/volume-3.md#result-evidence-placement) · [DIS staged release evidence](../input/pagecontent/volume-3.md#staged-release-evidence) · [FHIR R4 draft asynchronous pattern](https://hl7.org/fhir/R4/async.html)
+
+## Profile update plan
+
+| Step | Changes and exit criteria |
 | --- | --- |
-| `workItem` | One profiled R4 `Task`, carried as `Parameters.parameter.resource`. The Manager assigns a business identifier in `Task.identifier`, using `system` and `value` to identify the logical assignment. The submitted Task has `intent = order` and `status = requested`. |
-| `Task.input` for `executionPlan` | One coded input with a `valueReference` to the existing DIS Execution Plan Library. Its source policy identity and evidence URI retain their existing meanings. |
-| `Task.input` for `ruleSetId` | One coded input with a `valueString` identifying the ruleset that this assignment executes. |
-| `Task.input` for `stageId` | A coded input with a `valueString`, present when the source policy declares staged execution. |
-| `payload` | The existing required group for one assigned payload set, including `setId`, binding, version and manifest. |
-| `lookupTable` | The existing conditional, protected reference to the lookup document scoped to the assignment. |
-| `reversibilityMode` | The existing required top-level parameter derived from the approved policy. |
+| **1. Agree the actor contract** | Update Volume 1 with the Job Task and Execution Task roles, authoritative state and assigned scope. Confirm the required submission encoding, identifier and retry semantics, and whether shared status and cancellation are part of the first revision or separately declared capabilities. Record the committee decision before changing conformance requirements. |
+| **2. Draft both submission transactions** | Update ITI-x1 and ITI-x3 in Volume 2 with the sole work-order input, admission checks, expected actor behavior and error responses. Cross-check ITI-x4 and ITI-x7 for deferred outputs, authorization and retention. Keep the success condition tied to validated results and the existing release rules. |
+| **3. Define the FHIR artifacts** | Add Job Task and Execution Task profiles, input codes, the payload-set extension and request profiles. Update both system-level OperationDefinitions and actor CapabilityStatements. For the wrapped form, use `OperationDefinition.inputProfile` to reference a Parameters profile that constrains the `workItem` resource to the appropriate Task profile. Mark submissions as state-affecting. Document the content mappings and protection rules in Volume 3. |
+| **4. Demonstrate and verify** | Update the single-Patient synchronous example, a mixed R4/R5 multi-set submission, and a staged asynchronous example. Include both policy delivery modes and protected lookup where applicable. Add Test Plan cases for malformed Task inputs, missing or duplicate set metadata, mismatched payload versions, authorization or policy failure before acceptance, retry correlation, and result and Provenance parity. If cancellation is adopted, also test propagation, completion races, an in-flight synchronous assignment and withholding all output. Compile FSH, validate the examples against their declared profiles, and build the IG. |
 
-The three coded Task inputs replace their equivalent top-level parameters in this candidate binding. The operation and Task profile would define one authoritative location per field. The submitted status means the Manager is requesting execution. The De-Identifier makes its acceptance decision after its existing checks. HL7 CDex provides a precedent for `intent = order` and `status = requested` in a Task-based data request. [FHIR R4 Task inputs](https://hl7.org/fhir/R4/task-definitions.html#Task.input) · [FHIR R4 Task statuses](https://hl7.org/fhir/R4/codesystem-task-status.html) · [HL7 CDex Task-based exchange](https://hl7.org/fhir/us/davinci-cdex/task-based-approach.html) · [DIS execution-plan source policy](../input/pagecontent/volume-3.md#execution-plan-source-policy)
-
-## Execution and results
-
-- **Synchronous ITI-x3.** Return the existing result, evidence and validation status in the original `200 OK`.
-- **Asynchronous ITI-x3.** Return `202 Accepted` with the polling URL in `Content-Location`. The completed ITI-x7 poll returns the existing result structure.
-- **Job tracking.** The Manager may persist its internal job Task for asynchronous processing or use a transient instance for synchronous processing. The ITI-x1 and ITI-x4 contracts continue to define the Requester's view of the job. An internal parent Task can group execution Tasks via `Task.partOf` where the parent reference can be resolved.
-- **Stage history.** Returning a completed Task or publishing a chain of stage Tasks is a separate decision. If DIS adopts that result model, a completed Task would retain the assignment identifier so the Manager can correlate it with the dispatch and the Requester can follow the disclosed stage history. A recipient-facing representation would need its own disclosure rules for protected plan references, lookup material and intermediate data. Existing release Provenance continues to attest to the final output and validated stage sequence.
-
-[Current task response and retrieval](../input/pagecontent/volume-2.md) · [Current result and evidence binding](../input/pagecontent/volume-3.md) · [FHIR R4 Task relationships](https://hl7.org/fhir/R4/task-definitions.html#Task.partOf)
-
-## Decision and verification
-
-Adopt the ITI-x3 binding if the Manager and De-Identifier need a shared, identifiable work order. If the requirement is limited to polling, the current exchange already provides that. If the requirement is limited to correlating a dispatch with its outcome, compare the smaller alternative of an explicit assignment identifier in the existing operation. A direct `POST /Task` would be a separate change to the interaction contract and lifecycle management. [HL7 R4 workflow management](https://hl7.org/fhir/R4/workflow-management.html#optiong)
-
-Before specifying the candidate binding, agree how the identifier is scoped, how a retry of the same assignment differs from a new assignment, and how the receiver handles reuse of an identifier with different inputs. Also decide whether the identifier needs to be echoed in results or linked to evidence. The FHIR resource ID, polling URL and audit correlation identifier retain their respective roles.
-
-If approved, update the ITI-x3 request narrative, OperationDefinition, execution Task profile and input codes, examples, and Test Plan together. Use synthetic cases to check synchronous completion and asynchronous retrieval, missing or conflicting assignment inputs, and stage and ruleset consistency with the execution plan. Where identity continuity or retry behavior becomes a requirement, test it in both delivery modes. [Current OperationDefinitions](../input/fsh/Operations.fsh) · [Current Test Plan](../input/pagecontent/testplan.md)
+[Development work plan](../DEVELOPMENT-WORK-PLAN.md) · [OperationDefinitions](../input/fsh/Operations.fsh) · [Actor CapabilityStatements](../input/fsh/capability.fsh) · [Test Plan](../input/pagecontent/testplan.md) · [FHIR R4 OperationDefinition input profile](https://hl7.org/fhir/R4/operationdefinition-definitions.html#OperationDefinition.inputProfile)
