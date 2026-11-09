@@ -26,8 +26,8 @@ Send each task to `POST /fhir/$submit-dis-task`. The task request carries one pa
 
 | Set | ITI-x3 request | ITI-x3 success response | Evidence target |
 |-----|----------------|-------------------------|-----------------|
-| `patient-r4` | [R4 task](Task-grouped-fhir-task-patient-r4.html) | [R4 task result](Parameters-grouped-fhir-task-result-patient-r4.html) | Literal reference to the versioned result Patient selected by the hosted result List. |
-| `encounter-r5` | [R5 task](Task-grouped-fhir-task-encounter-r5.html) | [R5 task result](Parameters-grouped-fhir-task-result-encounter-r5.html) | Provenance inside the [result manifest package](Bundle-grouped-fhir-r5-output.html) targets the selected wrapper by its Bundle entry URL. |
+| `patient-r4` | [Execution Task for the R4 Patient](Task-grouped-fhir-task-patient-r4.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-patient-r4.html) | Literal reference to the versioned result Patient selected by the hosted result List. |
+| `encounter-r5` | [Execution Task for the R5 Encounter](Task-grouped-fhir-task-encounter-r5.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-encounter-r5.html) | Provenance inside the [result manifest package](Bundle-grouped-fhir-r5-output.html) targets the selected wrapper by its Bundle entry URL. |
 {: .grid}
 
 Both task responses use `200 OK` and include the corresponding `payloadResult` with R4 Provenance. The R5 result retains `actualPeriod` and `status: completed` after removal of `subject`. The result attachment still carries an R5 Encounter. See [FHIR R5 Encounter](https://hl7.org/fhir/R5/encounter.html) and [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).

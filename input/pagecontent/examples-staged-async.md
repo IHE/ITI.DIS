@@ -1,5 +1,5 @@
 <div markdown="1" class="stu-note">
-**Informative example.** The Patient, authorization, signing key and endpoints are synthetic. The pseudonym is an illustrative worker output.
+**Informative example.** The Patient, authorization, signing key, endpoints, and test salt are synthetic.
 </div>
 
 A Requester submits one R4 Patient in payload set `staged-patient-r4`. The Manager assigns two asynchronous tasks to separate De-Identifiers. The preliminary worker replaces the source identifier and removes the name. The advanced worker receives only the validated intermediate Patient and reduces the birth date to its year.
@@ -26,6 +26,8 @@ The Manager returns `202 Accepted` with an empty body and `Content-Location: htt
 ### Dispatch and Poll Each Stage
 
 For each row, the Manager submits the Execution Task to the assigned worker's `POST [base]/$submit-dis-task` with `Prefer: respond-async`. Each worker returns 202 with an empty body and its own polling URL. The Manager retrieves the task status and results through authorized ITI-x7 GET requests.
+
+To reproduce the preliminary Patient's pseudonym, use the source identifier pair from the Job Task, the linkage scope from the signed policy, and the 16 public test salt bytes `000102030405060708090a0b0c0d0e0f` in the [patient identifier derivation](volume-3.html#3pxx123-baseline-patient-pseudonym-derivation). The advanced task preserves that pseudonym.
 
 | Stage | ITI-x3 work order | ITI-x7 successful poll | Manager check |
 |---|---|---|---|
