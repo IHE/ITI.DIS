@@ -46,7 +46,7 @@ Description: """
 DIS de-identification policy artifact. A Library resource carrying a versioned
 policy governing de-identification transformations. The policy rules JSON is
 carried in Library.content as base64-encoded data. A policy may be delivered
-inline (JWS-signed via policy.content in ITI-x1) or resolved by the De-ID
+inline (JWS-signed in a contained Binary in the ITI-x1 Job Task) or resolved by the De-ID
 Manager from its own trust model. Policies are distinguished from execution
 plans by Library.type coding dis-policy.
 """

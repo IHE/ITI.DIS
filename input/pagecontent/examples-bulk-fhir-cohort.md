@@ -6,7 +6,7 @@ An authorized Requester submits a two-Patient R4 cohort as an asynchronous job. 
 
 | Exchange | What the message carries |
 |----------|--------------------------|
-| ITI-x1 | The authorization, one `payload` group with `setId = cohort-r4`, `payloadBinding = DIS-FHIR-Payload`, `payloadVersion = R4`, and the approved policy URL and version. Use `manifestFormat = fhir-bulk-data` and an `application/json` manifest attachment with the HTTPS input manifest URL. The Requester sends `Prefer: respond-async`. The Manager returns `202 Accepted` with the job polling URL. |
+| ITI-x1 | A Job Task with authorization and one `payload-set` input with `setId = cohort-r4`, `payloadBinding = DIS-FHIR-Payload`, `payloadVersion = R4`, and the approved policy URL and version. Use `manifestFormat = fhir-bulk-data` and an `application/json` manifest attachment with the HTTPS input manifest URL. The Requester sends `Prefer: respond-async`. The Manager returns `202 Accepted` with the job polling URL. |
 | ITI-x3 | The Manager dispatches that set with a concrete R4 execution plan and irreversible mode. The De-Identifier obtains credentials accepted by the manifest and file services and retrieves both files. The manifest sets `requiresAccessToken = true`. |
 | ITI-x4 | After validation, the Manager returns a [result for `cohort-r4`](Parameters-bulk-r4-result.html) with a `resultPackage` attachment. The [R4 Bundle](Bundle-bulk-r4-result.html) contains the [output manifest](examples/bulk-fhir/output-manifest.json), file descriptors and Provenance. The response carries top-level `validationStatus = valid`. |
 {: .grid}

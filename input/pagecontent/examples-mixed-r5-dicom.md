@@ -4,21 +4,20 @@
 
 This draft walkthrough exercises ITI-x1, ITI-x3, and ITI-x4. The job is asynchronous and the two task exchanges are synchronous. The authorized recipient needs a clinical resource and an imaging set for separate analyses. Neither approved policy requires the recipient to join them by a shared pseudonym. The Manager uses `setId` to correlate work and results within the job. A `setId` identifies a payload set, rather than a patient.
 
-The tables describe the R4 wire parameters. Each successful task and job response carries top-level `validationStatus = valid`. Example artifact URLs denote the contents described in the walkthrough.
+The tables describe the R4 work-order inputs and result parameters. Each successful task and job response carries top-level `validationStatus = valid`. Example artifact URLs denote the contents described in the walkthrough.
 
 <a name="job-submission"> </a>
 
 ## ITI-x1 Job Submission
 
-The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The R4 `Parameters` carries `authorization.reference` pointing to `https://governance.example.org/fhir/DocumentReference/permit-42`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
+The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The R4 Job Task carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
 
-| Part of each `payload` group | Clinical set | Imaging set |
+| Metadata or manifest of each `payload-set` input | Clinical set | Imaging set |
 |--------------------------------|--------------|-------------|
 | `setId.valueString` | `clinical` | `images` |
 | `payloadBinding.valueCode` | `DIS-FHIR-Payload` | `DIS-DICOM1` |
 | `payloadVersion.valueCode` | `R5` | `2026d` (illustrative DICOM edition code) |
-| `policy.url.valueUri` | `https://governance.example.org/policies/fhir-research` | `https://governance.example.org/policies/dicom-research` |
-| `policy.version.valueString` | `1.0` | `1.0` |
+| `policy.valueCanonical` | `https://governance.example.org/policies/fhir-research\|1.0` | `https://governance.example.org/policies/dicom-research\|1.0` |
 | `manifestFormat.valueCode` | `dis-resource-list` | `dis-resource-list` |
 | `manifest.valueAttachment.contentType` | `application/fhir+json` | `application/fhir+json` |
 | `manifest.valueAttachment.data` or `.url` | Base64-encoded R4 manifest package in `data` | `https://index.example.org/fhir/List/images-42/_history/1` in `url` |
@@ -46,14 +45,14 @@ The Manager resolves the permit and checks both policy assignments. It resolves 
 
 ## ITI-x3 Task Dispatch and Execution
 
-The Manager sends one `POST /fhir/$submit-dis-task` to the assigned De-Identifier for each set. This example uses one ruleSet per set. The R4 request carries one `payload` group with the corresponding `setId`, `payloadBinding`, `payloadVersion`, `manifestFormat`, and `manifest` fields. The separate `executionPlan`, `ruleSetId`, and `reversibilityMode` parameters identify the task instructions. Both policies select `irreversible` in this example.
+The Manager sends one `POST /fhir/$submit-dis-task` to the assigned De-Identifier for each set. This example uses one ruleSet per set. Each R4 Execution Task carries one `payload-set` input with a manifest attachment and its `setId`, `payloadBinding`, `payloadVersion`, and `manifestFormat` metadata. The `execution-plan`, `rule-set-id`, and `reversibility-mode` inputs identify the task instructions. Both policies select `irreversible` in this example.
 
 | Task field | Clinical task | Imaging task |
 |------------|---------------|--------------|
-| `payload.setId.valueString` | `clinical` | `images` |
-| `payload.manifest.valueAttachment` | Same inline manifest package and original R5 bytes | `url = https://index.example.org/fhir/List/images-42/_history/1`, with authorized access to the versioned study index and Endpoint and to the two assigned instances |
-| `executionPlan.valueReference.reference` | `https://dis.example.org/fhir/Library/plan-clinical-42/_history/1` | `https://dis.example.org/fhir/Library/plan-images-42/_history/1` |
-| `ruleSetId.valueString` | `clinical-direct-identifiers` | `imaging-confidentiality` |
+| `setId` in payload-set metadata | `clinical` | `images` |
+| `valueAttachment` in the payload-set input | Same inline manifest package and original R5 bytes | `url = https://index.example.org/fhir/List/images-42/_history/1`, with authorized access to the versioned study index and Endpoint and to the two assigned instances |
+| `execution-plan` reference | `https://dis.example.org/fhir/Library/plan-clinical-42/_history/1` | `https://dis.example.org/fhir/Library/plan-images-42/_history/1` |
+| `rule-set-id` string | `clinical-direct-identifiers` | `imaging-confidentiality` |
 {: .grid}
 
 The clinical De-Identifier decodes the wrapper and checks that the payload is valid R5. It applies the approved `remove` rule to `Patient.name` and validates the resulting Patient as R5. The id `example` is synthetic and carries no patient identity. The result of this illustrative rule is:
@@ -76,7 +75,7 @@ Each successful synchronous task returns `200 OK` with one R4 `payloadResult` gr
 | `Provenance.target` | Bundled `target.reference` equals the `fullUrl` of the selected R4 wrapper | Draft mapping using `target.reference = https://results.example.org/fhir/ImagingStudy/images-result-42/_history/1`. The index enumerates the exact DICOM outputs |
 {: .grid}
 
-For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched `ruleSetId`, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3.html#3pxx4-de-identification-evidence).
+For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched ruleSet identifier, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3.html#3pxx4-de-identification-evidence).
 
 The Manager correlates both results by `setId` and checks that the result manifests, objects, and evidence agree. It keeps the hosted imaging output accessible only to authorized processing actors until the job is ready to release. Once both sets pass, the Requester polls `GET https://dis.example.org/jobs/job-42` with authorized credentials. The Manager returns `200 OK` with both `payloadResult` groups in one R4 `Parameters` response. The Requester can decode the clinical result immediately and use its authorized access to retrieve the imaging result. The result index enumerates only the replacement UIDs, and the result manifests and evidence exclude source identifiers and protected transformation material.
 
@@ -193,7 +192,7 @@ This check uses synthetic data for the mixed job. The imaging fixtures are DICOM
 
 | Check | Observed result |
 |------|-----------------|
-| Job and task packaging | The R4 ITI-x1 and ITI-x3 examples match the generated OperationDefinition parameter names, value types, and cardinalities checked by the fixture. The clinical task carries the same R5 payload bytes. |
+| Job and task packaging | Check the R4 ITI-x1 and ITI-x3 requests against the respective Job Task and Execution Task profiles and operation contracts. The clinical task carries the same R5 payload bytes. |
 | Imaging selection | The versioned List and ImagingStudy resolve to the same two authorized SOP Instance UIDs on both passes. The check reads the selected files from offline WADO-RS multipart response fixtures. It excludes the third instance and rejects a response containing the other selected instance in place of the requested one. |
 | Result and evidence resolution | The clinical evidence identifies the bundled R4 wrapper. The imaging evidence references the R4 result index, which resolves to exactly two Part 10 files with the expected replacement UIDs. |
 | Failed-job response | With one required input unavailable, the failed ITI-x4 fixture contains only an OperationOutcome. A counterexample that returns only the clinical result fails the release check. |

@@ -9,32 +9,31 @@ The following transactions are specified in this volume:
 
 <a name="grouped-payload-parameters"> </a>
 
-## Shared Payload Set Parameters
+## Shared Work Orders and Payload Sets
 
-Every job uses the same payload set encoding, including jobs with only one set. The POST requests and successful HTTP 200 responses use R4 `Parameters`. The polling GET requests have no body.
+ITI-x1 and ITI-x3 each define one required operation input named `workItem` of type `Task`. The sender SHALL POST the applicable profiled R4 Task directly as the request body. The body carries one complete work order. Successful HTTP 200 responses use R4 `Parameters`. The polling GET requests have no body.
 
 | Transaction | Input | Successful response |
-|---|---|---|
-| ITI-x1 Submit Job | One `authorization` and one or more `payload` groups. Each group includes its policy and may include an authorized lookup reference. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
-| ITI-x3 Submit Task | Exactly one assigned `payload` group, one `executionPlan`, one `ruleSetId`, one `reversibilityMode`, and a `stageId` for staged execution. A protected task-scoped `lookupTable` applies when assigned. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
+|-------------|-------|---------------------|
+| ITI-x1 Submit Job | [DIS Job Task](StructureDefinition-DIS-JobTask.html) with one authorization and one or more payload sets. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
+| ITI-x3 Submit Task | [DIS Execution Task](StructureDefinition-DIS-ExecutionTask.html) with one assigned set and its execution instructions. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
 | ITI-x4 Retrieve Job Output | Authorized GET of the job polling URL. | HTTP 200 with the same body as synchronous ITI-x1 success. HTTP 202 indicates processing is pending and carries no result. |
 | ITI-x7 Retrieve Task Output | Authorized GET of the task polling URL. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
 {: .grid}
 
-The receiver SHALL reject a submission that includes `processingTarget`, `resourceManifest`, or another top-level parameter outside the applicable request table with HTTP 400 and an OperationOutcome. The `policy` and `lookupTable` parts appear only in ITI-x1 inputs. Successful results carry evidence inside the result package. `validationStatus` is `valid` on successful completion. Failure responses carry an OperationOutcome and no result. A POST without `Prefer: respond-async` selects synchronous processing. A receiver SHALL reject an async request if the applicable option is unsupported. The bulk-file cohort binding requires async job selection. Task mode is selected independently.
+The sender SHALL assign a business identifier with a system and value to the work order. The receiver SHALL use that identifier to correlate the work with the submission. For asynchronous acceptance, it SHALL associate the polling URL with the accepted work order and its identifier. Access to the polling URL requires the authorization defined for ITI-x4 or ITI-x7.
 
-Encode each `payload` or `payloadResult` as a named `Parameters.parameter` with the following `part` entries. Each `payload` SHALL carry one `manifest`. Each `payloadResult` SHALL carry one `resultPackage` and SHALL omit outer `manifest` and `evidence` parts. Both groups SHALL declare `manifestFormat`. See [Volume 3](volume-3.html#payload-set-delivery) for manifest formats and target resolution.
+The receiver SHALL reject a malformed submission or a request body that fails to conform to the required Task profile with HTTP 400 and an R4 `OperationOutcome`. Successful results carry evidence inside the result package. `validationStatus` is `valid` on successful completion. Failure responses carry an `OperationOutcome` and withhold the result. A POST without `Prefer: respond-async` selects synchronous processing. A synchronous success returns the result on the original call. The receiver MAY retain a completed Task independently of the response. A receiver SHALL reject an async request if the applicable option is unsupported. The bulk-file cohort binding requires async job selection. Execution mode is selected independently.
+
+Each request set uses a coded Task input with a manifest attachment and [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html). Each result set uses a named `payloadResult` parameter with the following parts. The `payloadResult` SHALL omit outer `manifest` and `evidence` parts. See [Volume 3](volume-3.html#payload-set-delivery) for manifest formats and target resolution.
 
 | Part | Cardinality | Encoding | Meaning |
 |------|-------------|----------|---------|
-| `setId` | 1..1 | `valueString` | Nonempty job-local identifier, reused in task inputs and results |
+| `setId` | 1..1 | `valueString` | Nonempty job-local identifier, reused from the request set |
 | `payloadBinding` | 1..1 | `valueCode` | Binding that governs the set |
 | `payloadVersion` | 1..1 | `valueCode` | Version defined by that binding |
-| `manifest` | 1..1 in `payload` only | `valueAttachment` | Input manifest with `contentType` and exactly one of inline `data` or an absolute HTTPS `url` |
-| `resultPackage` | 1..1 in `payloadResult` only | `valueAttachment` | [R4 DIS Result Package](volume-3.html#result-evidence-placement) containing the manifest and evidence. Use a FHIR media type and exactly one of inline `data` or an absolute HTTPS `url` identifying the package. |
 | `manifestFormat` | 1..1 | `valueCode` | Use `dis-resource-list` or `fhir-bulk-data` |
-| `policy` | 1..1 in ITI-x1 only | Nested `part` | One `url` as `valueUri`, one `version` as `valueString`, and optional JWS `content` as a Binary resource with `contentType = application/jose` |
-| `lookupTable` | 0..1 | `valueReference` | Optional in ITI-x1 when the binding supports a supplied lookup table |
+| `resultPackage` | 1..1 | `valueAttachment` | [R4 DIS Result Package](volume-3.html#result-evidence-placement) with a FHIR media type and exactly one of inline `data` or an authorized HTTPS `url` |
 {: .grid}
 
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.
@@ -70,11 +69,12 @@ Table 2:3.x1.2-1 lists the actors and their roles in this transaction.
 - [HL7 FHIR R4 RESTful API]({{site.data.fhir.path}}http.html) — FHIR RESTful interactions
 - [HL7 FHIR R4 Operations]({{site.data.fhir.path}}operations.html) — FHIR operation framework
 - [HL7 FHIR R4 Asynchronous Request Pattern]({{site.data.fhir.path}}async.html) — async processing pattern (when DIS-ASYNC-JOB is supported)
-- [HL7 FHIR R4 Parameters]({{site.data.fhir.path}}parameters.html) — input/output resource for operations
+- [HL7 FHIR R4 Task]({{site.data.fhir.path}}task.html) — work-order request
+- [HL7 FHIR R4 Parameters]({{site.data.fhir.path}}parameters.html) — successful operation result envelope
 - [HL7 FHIR R4 OperationOutcome]({{site.data.fhir.path}}operationoutcome.html) — error reporting
 - [HL7 FHIR R4 Provenance]({{site.data.fhir.path}}provenance.html) — de-identification evidence
-- [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515) — JSON Web Signature (JWS), for `policy.content` signature validation
-- [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK), for signing key representation (applicable to `policy.content`)
+- [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515) — JSON Web Signature (JWS), for `policyContent` signature validation
+- [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK), for signing key representation (applicable to `policyContent`)
 
 ### 2:3.x1.4 Interactions and Messages
 
@@ -94,28 +94,17 @@ The De-Identification Requester sends a Submit De-Identification Job Request whe
 
 The De-Identification Requester SHALL invoke the `$submit-dis-job` operation using `POST [base]/$submit-dis-job`. The request SHALL use `Content-Type: application/fhir+json`.
 
-The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x1.4.1.2-1 lists the input parameters.
+The request body SHALL be a [DIS Job Task](StructureDefinition-DIS-JobTask.html) with `intent = order` and `status = requested`. The following coded inputs carry the authorization and selected data.
 
-<p id="t3.x1.4.1.2-1" class="tableTitle"><strong>Table 2:3.x1.4.1.2-1: ITI-x1 Request Input Parameters</strong></p>
+<p id="t3.x1.4.1.2-1" class="tableTitle"><strong>Table 2:3.x1.4.1.2-1: ITI-x1 Job Task Inputs</strong></p>
 
-| Parameter | Cardinality | Type | Description |
-|-----------|-------------|------|-------------|
-| `payload` | 1..* | Group | One [payload set](#grouped-payload-parameters) per input set, including its approved policy and any set-specific lookup table |
-| `authorization` | 1..1 | BackboneElement | Data request authorization evidence; exactly one variant SHALL be present |
-| `authorization.reference` | 0..1 | Reference | Reference to an externally hosted authorization evidence resource |
-| `authorization.content` | 0..1 | Attachment | Authorization evidence embedded directly; `contentType` declares the format |
+| Input code | Cardinality | Value | Description |
+|------------|-------------|-------|-------------|
+| `authorization` | 1..1 | `valueReference` or `valueAttachment` | Authorization evidence, either an externally hosted resource or an inline attachment with a declared content type |
+| `payload-set` | 1..* | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | One manifest with the set's binding, version, approved policy and any permitted supplied lookup reference |
 {: .grid}
 
-Exactly one of `authorization.reference` or `authorization.content` SHALL be present. The authorization is evidence that a data governance authority approved a data request, including identification of the approved de-identification policy. DIS does not define the authorization's internal structure — it is determined by the authorization mechanism used in the deployment (e.g., EHDS data permit, institutional governance approval, bilateral agreement). The De-ID Manager is configured to understand the authorization format and extract the approved policy identity from it.
-
-`policy.url` and `policy.version` are required within each policy group. They declare the canonical identity of the policy approved for this data request. The De-ID Manager validates these against the data request authorization (see authorization consistency below).
-
-`policy.content` is optional. When present, the Requester carries the JWS-signed policy Library directly in the request, and the Manager SHALL verify the JWS signature and confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager resolves the declared policy version by implementation-defined means.
-
-
-The `reversibilityMode` and `identity-linkage-scope` are carried inside the policy artifact (see [§3:PXX.1.3](volume-3.html#3pxx13-policy-rules-json-structure)) and are not duplicated as transaction parameters. The De-ID Manager extracts these values from the validated policy content. A de-identification policy is a reusable knowledge artifact: the same policy may be approved for and referenced by multiple independent data requests.
-
-The Requester SHALL send one or more `payload` groups. The `setId` values SHALL be unique within the job. Each group SHALL declare its binding and version, supply one manifest, and include a `policy` part with the approved canonical URL and version. A group MAY carry `policy.content` or a `lookupTable` reference under the existing policy and lookup table rules for its binding. The same policy may be named in more than one group if approved and applicable to each. The request SHALL omit the top-level `policy`, `lookupTable`, `payloadBinding`, `payloadVersion`, `processingTarget`, and `resourceManifest` parameters.
+The authorization is evidence that a governance authority approved the data request, including the policy applicable to each set. Its internal structure is determined by the deployment's authorization mechanism. Each set SHALL have a unique `setId` and declare its approved policy as a versioned canonical (`Library.url|Library.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives the job's reversibility mode from the common mode declared by the approved policies and obtains each set's linkage scope from its policy.
 
 To request asynchronous job processing when both actors support DIS-ASYNC-JOB, the Requester SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -127,11 +116,11 @@ To request asynchronous job processing when both actors support DIS-ASYNC-JOB, t
 
 Upon receipt of a Submit De-Identification Job Request, the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL perform the following actions.
 
-The Manager SHALL obtain and validate the data request authorization. When `authorization.reference` is present, the Manager resolves the referenced resource. When `authorization.content` is present, the Manager processes the embedded attachment according to the declared `contentType`. The authorization is evidence that a data governance authority approved a data request that specifies the data scope, purpose, and the de-identification policy to be applied. If the authorization is absent, expired, or does not cover the requested processing targets, the Manager SHALL reject the job with an OperationOutcome.
+The Manager SHALL obtain and validate the data request authorization. For an authorization input with a reference, the Manager resolves the referenced resource. For an inline attachment, the Manager processes the content according to the declared `contentType`. The authorization is evidence that a data governance authority approved a data request that specifies the data scope, purpose, and the de-identification policy to be applied. If the authorization is absent, expired, or does not cover the requested processing targets, the Manager SHALL reject the job with an OperationOutcome.
 
-The Manager SHALL verify that the declared `policy.url` and `policy.version` identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment). A mismatch indicates the Requester is presenting a policy that was not approved for this data request; the Manager SHALL reject the job with an OperationOutcome.
+For each set, the Manager SHALL verify that the declared versioned canonical identifies the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment). A mismatch indicates the Requester is presenting a policy that was not approved for this data request; the Manager SHALL reject the job with an OperationOutcome.
 
-The Manager SHALL obtain the policy content. When `policy.content` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared `policy.url` and `policy.version`. When `policy.content` is absent, the Manager SHALL resolve the policy identified by the declared `policy.url` and `policy.version` by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
+The Manager SHALL obtain the policy content. When `policyContent` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared versioned policy canonical. When `policyContent` is absent, the Manager SHALL resolve the policy identified by the declared canonical and version by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
 
 The Manager SHALL perform three-point policy content validation:
 
@@ -140,6 +129,8 @@ The Manager SHALL perform three-point policy content validation:
 3. **Integrity** — verify that the obtained rules are the exact content bound to the approved version under the [policy validation rules](volume-3.html#3pxx132-policy-validation). Apply the JWS verification above for carried content and the deployment's resolution trust model for Manager-resolved content.
 
 If any point of the four-point validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
+
+The Manager SHALL verify that all approved policies declare the same reversibility mode before accepting an asynchronous job or beginning synchronous execution. If the modes differ, the Manager SHALL reject the job with an OperationOutcome before dispatching any tasks.
 
 When reversible mode is selected, the Manager SHALL use a supplied `lookupTable` for direct-identifier mapping. When the request contains no table, the Manager SHALL create or maintain and persist the mapping needed for reversal. The Manager SHALL reject a supplied table in irreversible mode. The approved policy SHALL authorize lookup-backed replacement for the affected identifiers. The Manager SHALL reject incompatible policy and table combinations without changing the approved rules.
 
@@ -189,7 +180,7 @@ The Manager SHALL return one `payloadResult` per submitted `setId`, with the cor
 
 **401 Unauthorized / 403 Forbidden.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the authorization failure.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying which of the four policy validation points (authorization consistency, integrity, schema conformance, currency) failed.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying the failed policy validation point or reporting that the approved policies declare different reversibility modes.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the server error.
 
@@ -248,7 +239,8 @@ Table 2:3.x3.2-1 lists the actors and their roles in this transaction.
 - [HL7 FHIR R4]({{site.data.fhir.path}}) — HL7 FHIR Release 4.0.1
 - [HL7 FHIR R4 RESTful API]({{site.data.fhir.path}}http.html) — FHIR RESTful interactions
 - [HL7 FHIR R4 Operations]({{site.data.fhir.path}}operations.html) — FHIR operation framework
-- [HL7 FHIR R4 Parameters]({{site.data.fhir.path}}parameters.html) — task request and result envelope
+- [HL7 FHIR R4 Task]({{site.data.fhir.path}}task.html) — work-order request
+- [HL7 FHIR R4 Parameters]({{site.data.fhir.path}}parameters.html) — successful operation result envelope
 - [HL7 FHIR R4 Library]({{site.data.fhir.path}}library.html) — execution plan carrier
 - [HL7 FHIR R4 Provenance]({{site.data.fhir.path}}provenance.html) — de-identification evidence
 - [HL7 FHIR R4 OperationOutcome]({{site.data.fhir.path}}operationoutcome.html) — error reporting
@@ -271,25 +263,25 @@ The De-ID Manager sends a Submit De-Identification Task Request for each ruleSet
 
 The De-ID Manager SHALL invoke the `$submit-dis-task` operation using `POST [base]/$submit-dis-task`. The request SHALL use `Content-Type: application/fhir+json`.
 
-The request body SHALL be an HL7 FHIR R4 `Parameters` resource. Table 2:3.x3.4.1.2-1 lists the input parameters.
+The request body SHALL be a [DIS Execution Task](StructureDefinition-DIS-ExecutionTask.html) with `intent = order` and `status = requested`. The coded inputs identify the assigned set and execution instructions.
 
-<p id="t3.x3.4.1.2-1" class="tableTitle"><strong>Table 2:3.x3.4.1.2-1: ITI-x3 Request Input Parameters</strong></p>
+<p id="t3.x3.4.1.2-1" class="tableTitle"><strong>Table 2:3.x3.4.1.2-1: ITI-x3 Execution Task Inputs</strong></p>
 
-| Parameter | Cardinality | Type | Description |
-|-----------|-------------|------|-------------|
-| `payload` | 1..1 | Group | One [payload set](#grouped-payload-parameters) identifying the inputs assigned to this task |
-| `executionPlan` | 1..1 | Reference(Library) | Reference to the Library resource containing the compiled rules for this ruleSet and the [source policy identity](volume-3.html#execution-plan-source-policy). Rules are carried in `Library.content` |
-| `ruleSetId` | 1..1 | string | Identifier of the ruleSet from the source policy that this task executes |
-| `stageId` | 0..1 | string | Stage identifier, when the source policy declares staged execution |
-| `lookupTable` | 0..1 | Reference(DocumentReference) | Protected identified table restricted to the task; use a derived document for a subset, with its own identifiers and pinned content (Volume 3 §3:PXX.5). |
-| `reversibilityMode` | 1..1 | code | `irreversible` or `reversible`; derived from the approved policy for the assigned set |
+| Input code | Cardinality | Value | Description |
+|------------|-------------|-------|-------------|
+| `payload-set` | 1..1 | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | Manifest for the assigned set or subset |
+| `execution-plan` | 1..1 | `valueReference` | [DIS Execution Plan Library](StructureDefinition-DIS-ExecutionPlan.html) for this ruleSet, including the [source policy identity](volume-3.html#execution-plan-source-policy) |
+| `rule-set-id` | 1..1 | `valueString` | RuleSet from the source policy that this assignment executes |
+| `stage-id` | 0..1 | `valueString` | Required when the source policy declares staged execution |
+| `lookup-table` | 0..1 | `valueReference` | Protected lookup table restricted to the assignment |
+| `reversibility-mode` | 1..1 | `valueCode` | The job's reversibility mode, either `irreversible` or `reversible` |
 {: .grid}
 
-Each task SHALL carry exactly one `payload` group with the job's `setId`, binding, and version for the assigned inputs. The Manager MAY change how the manifest and its entries are hosted or bundled when dispatching the same authorized content. The task group SHALL omit `policy` and `lookupTable` parts. The Manager carries the compiled plan and any assigned lookup table in their existing task parameters. It SHALL omit top-level `payloadBinding`, `payloadVersion`, `processingTarget`, and `resourceManifest`.
+The Manager SHALL preserve the job's `setId`, binding, and version for the assigned inputs. It MAY change the delivery of the same authorized content. The execution plan carries the policy identity. Any assigned lookup table is sent in its own protected input.
 
-The `reversibilityMode` in ITI-x3 is derived from the approved policy for the assigned set. The De-ID Manager passes the policy-determined mode to the De-Identifier as an operational instruction; the De-Identifier does not independently select the mode.
+The De-ID Manager SHALL set the `reversibility-mode` input in every ITI-x3 Execution Task to the job's reversibility mode. The De-Identifier SHALL apply the supplied mode.
 
-When using `lookupTable`, the Manager SHALL dispatch only a protected reference to a document with the entries needed for the assigned task. If the source contains additional entries, the Manager SHALL create a [task-scoped lookup document](volume-3.html#3pxx5-reversible-lookup-table) and track its correlation to the pinned source. The De-Identifier's credentials SHALL NOT grant access to the unrestricted table in that case. The Manager SHALL delete derived task artifacts at termination unless retention is explicitly authorized.
+When using `lookup-table`, the Manager SHALL dispatch only a protected reference to a document with the entries needed for the assigned task. If the source contains additional entries, the Manager SHALL create a [task-scoped lookup document](volume-3.html#3pxx5-reversible-lookup-table) and track its correlation to the pinned source. The De-Identifier's credentials SHALL NOT grant access to the unrestricted table in that case. The Manager SHALL delete derived task artifacts at termination unless retention is explicitly authorized.
 
 To request asynchronous task processing when both actors support DIS-ASYNC-TASK, the Manager SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -307,7 +299,7 @@ The De-Identifier SHALL retrieve the assigned processing targets using the [retr
 
 The De-Identifier SHALL apply supplied patient mappings or generate patient pseudonyms according to the execution plan. It SHALL verify that the decoded plan conforms to the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation) and that its ruleSet, payload binding and payload version agree with the task. It SHALL obtain and validate the deployment-provisioned salt for each salted hash rule before transformation. A missing or invalid salt SHALL fail the task without partial output.
 
-When `lookupTable` is present, the De-Identifier SHALL resolve and validate the assigned protected DocumentReference and pin its exact content as specified in Volume 3 §3:PXX.5. Retrieval or pinning failure SHALL fail the task. It SHALL use only its supplied entries for lookup-backed replacement, SHALL fail a task with a missing required entry without returning partial output, and SHALL delete all task-local copies at task termination. It SHALL NOT delete the authoritative source repository document. It SHALL NOT generate fallback mappings. The Manager SHALL withhold all job output on such a task failure.
+When the `lookup-table` input is present, the De-Identifier SHALL resolve and validate the assigned protected DocumentReference and pin its exact content as specified in Volume 3 §3:PXX.5. Retrieval or pinning failure SHALL fail the task. It SHALL use only its supplied entries for lookup-backed replacement, SHALL fail a task with a missing required entry without returning partial output, and SHALL delete all task-local copies at task termination. It SHALL NOT delete the authoritative source repository document. It SHALL NOT generate fallback mappings. The Manager SHALL withhold all job output on such a task failure.
 
 The De-Identifier SHALL apply the execution plan rules to the processing target in full. Partial execution is not permitted. If any rule cannot be applied, the De-Identifier SHALL reject the task with an OperationOutcome and SHALL NOT produce partial output.
 
@@ -345,6 +337,8 @@ The De-Identifier returns one of the HTTP status codes described below.
 The De-Identifier SHALL return one `payloadResult` matching the dispatched `setId`, binding, and version, with its evidence.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-TASK).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x7.
+
+**400 Bad Request.** The response body is an R4 `OperationOutcome` describing the malformed or nonconforming Execution Task.
 
 **422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's payload binding, payload version, or required transformation actions fall outside the De-Identifier's declared capabilities.
 
@@ -448,7 +442,7 @@ The De-ID Manager sends a Retrieve Job Output Response upon receipt of each poll
 
 ##### 2:3.x4.4.2.2 Message Semantics
 
-The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of three HTTP status codes per the HL7 FHIR R4 Asynchronous Request Pattern.
+The De-ID Manager (or Integrated De-ID Manager/De-Identifier) uses the HTTP polling mechanics of the draft HL7 FHIR R4 Asynchronous Request Pattern. DIS defines the deferred operation response as follows.
 
 **202 Accepted — Job in progress.** The `Retry-After` response header contains the recommended polling interval in seconds. The `X-Progress` response header MAY be present with a human-readable status string. The response body is empty.
 
@@ -550,7 +544,7 @@ The De-Identifier sends a Retrieve Task Output Response upon receipt of each pol
 
 ##### 2:3.x7.4.2.2 Message Semantics
 
-The De-Identifier returns one of three HTTP status codes per the HL7 FHIR R4 Asynchronous Request Pattern.
+The De-Identifier uses the HTTP polling mechanics of the draft HL7 FHIR R4 Asynchronous Request Pattern. DIS defines the deferred operation response as follows.
 
 **202 Accepted — Task in progress.** The `Retry-After` response header contains the recommended polling interval in seconds. The response body is empty.
 
