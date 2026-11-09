@@ -19,8 +19,8 @@ The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application
 | `payloadVersion.valueCode` | `R5` | `2026d` (illustrative DICOM edition code) |
 | `policy.valueCanonical` | `https://governance.example.org/policies/fhir-research\|1.0` | `https://governance.example.org/policies/dicom-research\|1.0` |
 | `manifestFormat.valueCode` | `dis-resource-list` | `dis-resource-list` |
-| `manifest.valueAttachment.contentType` | `application/fhir+json` | `application/fhir+json` |
-| `manifest.valueAttachment.data` or `.url` | Base64-encoded R4 manifest package in `data` | `https://index.example.org/fhir/List/images-42/_history/1` in `url` |
+| `Task.input.valueAttachment.contentType` | `application/fhir+json` | `application/fhir+json` |
+| `Task.input.valueAttachment.data` or `.url` | Base64-encoded R4 manifest package in `data` | `https://index.example.org/fhir/List/images-42/_history/1` in `url` |
 {: .grid}
 
 Use the [inline R5 package structure](volume-3.html#inline-r5-manifest-package) for the clinical set. In this walkthrough the inner attachment carries the UTF-8 JSON shown below, encoded as base64. The UUID in the List resolves to the R4 wrapper in the same package.
@@ -93,65 +93,125 @@ The first walkthrough assumes independent result sets. A later example requiring
 
 ## Hosted R5 Submission Variant
 
-This ITI-x1 variant uses hosted manifests for both sets. The R5 wrapper locates the Patient through its attachment URL. The example DICOM edition is illustrative. The final DICOM option will declare its supported edition codes.
+Post this R4 Job Task directly to ITI-x1 with `Prefer: respond-async`. Both payload sets use hosted manifests. The R5 wrapper locates the Patient through its attachment URL. The example DICOM edition is illustrative. The final DICOM option will declare its supported edition codes.
 
 ```json
 {
-  "resourceType": "Parameters",
-  "parameter": [
+  "resourceType": "Task",
+  "id": "mixed-hosted-job-42",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask"
+    ]
+  },
+  "identifier": [
     {
-      "name": "authorization",
-      "part": [
-        {
-          "name": "reference",
-          "valueReference": {
-            "reference": "https://governance.example.org/fhir/DocumentReference/permit-42"
+      "system": "https://requester.example.org/dis/job-identifiers",
+      "value": "mixed-hosted-job-42"
+    }
+  ],
+  "status": "requested",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type",
+        "code": "de-identification-job"
+      }
+    ]
+  },
+  "input": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "authorization"
           }
-        }
-      ]
+        ]
+      },
+      "valueReference": {
+        "reference": "https://governance.example.org/fhir/DocumentReference/permit-42"
+      }
     },
     {
-      "name": "payload",
-      "part": [
-        { "name": "setId", "valueString": "clinical" },
-        { "name": "payloadBinding", "valueCode": "DIS-FHIR-Payload" },
-        { "name": "payloadVersion", "valueCode": "R5" },
-        { "name": "manifestFormat", "valueCode": "dis-resource-list" },
-        {
-          "name": "manifest",
-          "valueAttachment": {
-            "contentType": "application/fhir+json",
-            "url": "https://index.example.org/fhir/List/clinical-42/_history/1"
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "payload-set"
           }
-        },
+        ]
+      },
+      "valueAttachment": {
+        "contentType": "application/fhir+json",
+        "url": "https://index.example.org/fhir/List/clinical-42/_history/1"
+      },
+      "extension": [
         {
-          "name": "policy",
-          "part": [
-            { "name": "url", "valueUri": "https://governance.example.org/policies/fhir-research" },
-            { "name": "version", "valueString": "1.0" }
+          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
+          "extension": [
+            {
+              "url": "setId",
+              "valueString": "clinical"
+            },
+            {
+              "url": "payloadBinding",
+              "valueCode": "DIS-FHIR-Payload"
+            },
+            {
+              "url": "payloadVersion",
+              "valueCode": "R5"
+            },
+            {
+              "url": "manifestFormat",
+              "valueCode": "dis-resource-list"
+            },
+            {
+              "url": "policy",
+              "valueCanonical": "https://governance.example.org/policies/fhir-research|1.0"
+            }
           ]
         }
       ]
     },
     {
-      "name": "payload",
-      "part": [
-        { "name": "setId", "valueString": "images" },
-        { "name": "payloadBinding", "valueCode": "DIS-DICOM1" },
-        { "name": "payloadVersion", "valueCode": "2026d" },
-        { "name": "manifestFormat", "valueCode": "dis-resource-list" },
-        {
-          "name": "manifest",
-          "valueAttachment": {
-            "contentType": "application/fhir+json",
-            "url": "https://index.example.org/fhir/List/images-42/_history/1"
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "payload-set"
           }
-        },
+        ]
+      },
+      "valueAttachment": {
+        "contentType": "application/fhir+json",
+        "url": "https://index.example.org/fhir/List/images-42/_history/1"
+      },
+      "extension": [
         {
-          "name": "policy",
-          "part": [
-            { "name": "url", "valueUri": "https://governance.example.org/policies/dicom-research" },
-            { "name": "version", "valueString": "1.0" }
+          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
+          "extension": [
+            {
+              "url": "setId",
+              "valueString": "images"
+            },
+            {
+              "url": "payloadBinding",
+              "valueCode": "DIS-DICOM1"
+            },
+            {
+              "url": "payloadVersion",
+              "valueCode": "2026d"
+            },
+            {
+              "url": "manifestFormat",
+              "valueCode": "dis-resource-list"
+            },
+            {
+              "url": "policy",
+              "valueCanonical": "https://governance.example.org/policies/dicom-research|1.0"
+            }
           ]
         }
       ]

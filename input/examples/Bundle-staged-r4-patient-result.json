@@ -37,7 +37,7 @@
         "identifier": [
           {
             "system": "https://hospital.example.org/identifiers/pseudonym",
-            "value": "8162610a149e7b6700513fa3f0ceff46328e2b584fd3d351e4d5c2775a42ff0c"
+            "value": "ad6753a9df119f98eee645f6c1d23856c39681ad185052e2ab1a8f75b2660bd9"
           }
         ],
         "birthDate": "1985",
