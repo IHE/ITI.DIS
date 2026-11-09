@@ -23,7 +23,7 @@ ITI-x1 and ITI-x3 each define one required operation input named `workItem` of t
 
 The sender SHALL assign a business identifier with a system and value to the work order. The receiver SHALL correlate work and handle retries according to the [shared identifier and retry rules](#submission-retries). For asynchronous acceptance, it SHALL associate the polling URL with the accepted work order and its identifier. Access to the polling URL requires the authorization defined for ITI-x4 or ITI-x7.
 
-The receiver SHALL reject a malformed submission or a request body that fails to conform to the required Task profile with HTTP 400 and an R4 `OperationOutcome`. Successful results carry evidence inside the result package. `validationStatus` is `valid` on successful completion. Failure responses carry an `OperationOutcome` and withhold the result. A POST without `Prefer: respond-async` selects synchronous processing. A synchronous success returns the result on the original call. The receiver MAY retain a completed Task independently of the response. A receiver SHALL reject an async request if the applicable option is unsupported. The bulk-file cohort binding requires async job selection. Execution mode is selected independently.
+The receiver SHALL reject a malformed submission or a request body that fails to conform to the required Task profile with HTTP 400 and an R4 `OperationOutcome`. Successful results carry evidence inside the result package. `validationStatus` is `valid` on successful completion. Failure responses carry an `OperationOutcome` and withhold the result. A POST without `Prefer: respond-async` selects synchronous processing. A synchronous success returns the result on the original call. The receiver MAY retain a completed Task independently of the response. A receiver SHALL reject an async request with HTTP 422 and an R4 `OperationOutcome` if the applicable option is unsupported. It SHALL NOT accept that submission for synchronous processing. The bulk-file cohort binding requires async job selection. Execution mode is selected independently.
 
 Each request set uses a coded Task input with a manifest attachment and [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html). Each result set uses a named `payloadResult` parameter with the following parts. The `payloadResult` SHALL omit outer `manifest` and `evidence` parts. See [Volume 3](volume-3.html#payload-set-delivery) for manifest formats and target resolution.
 
@@ -39,6 +39,12 @@ Each request set uses a coded Task input with a manifest attachment and [DIS Pay
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.
 
 See the [single R4 Patient exchange](examples-single-r4-patient.html) for the smallest synchronous case and the [informative job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples.
+
+<a name="asynchronous-polling-lifecycle"> </a>
+
+## Shared Asynchronous Polling Lifecycle
+
+For ITI-x4 and ITI-x7, the responder SHALL keep the polling URL usable while processing is pending. It SHALL document a minimum terminal retention period in the applicable submission server operation's CapabilityStatement documentation. The period starts when a terminal outcome is recorded. During that period the responder SHALL keep the polling URL and terminal outcome available, subject to current retrieval authorization and the result release rules. For accepted cancellation, also apply the [cancellation retention rules](#asynchronous-cancellation). An expired polling URL is a retrieval error.
 
 <a name="submission-retries"> </a>
 
@@ -211,7 +217,7 @@ In asynchronous mode (DIS-ASYNC-JOB), the Manager SHALL return a job handle in t
 
 ##### 2:3.x1.4.2.1 Trigger Events
 
-The De-ID Manager sends a Submit De-Identification Job Response upon completion of job execution and output assembly. In asynchronous mode, the Manager sends the response immediately after accepting the job, before execution completes.
+For synchronous processing, the Manager sends the response when the result or failure is determined. Before accepting an asynchronous job, the Manager SHALL validate the authorization, perform the four policy checks for every set, and complete the other checks this transaction requires at admission. It returns HTTP 202 on acceptance and reports subsequent processing failures through ITI-x4.
 
 ##### 2:3.x1.4.2.2 Message Semantics
 
@@ -235,7 +241,7 @@ The Manager SHALL return one `payloadResult` per submitted `setId`, with the cor
 
 **401 Unauthorized / 403 Forbidden.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the authorization failure.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying the failed policy validation point, reporting that the approved policies declare different reversibility modes, or indicating that required cancellable mode is unavailable.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying the failed policy validation point, reporting that the approved policies declare different reversibility modes, or indicating that the requested asynchronous or cancellable mode is unavailable.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the server error.
 
@@ -374,7 +380,7 @@ In asynchronous mode (DIS-ASYNC-TASK), the De-Identifier SHALL return a task han
 
 ##### 2:3.x3.4.2.1 Trigger Events
 
-The De-Identifier sends a Submit De-Identification Task Response upon completion of task execution. In asynchronous mode, the De-Identifier sends the response immediately after accepting the task, before execution completes.
+For synchronous processing, the De-Identifier sends the response when the result or failure is determined. Before accepting an asynchronous task, it SHALL validate the Task body, verify the caller's authority to submit the assignment, and check that the exchange mode, payload binding, and declared version are supported. It returns HTTP 202 on acceptance. Checks that require obtaining the execution plan or payload may continue after acceptance. It reports failures detected after acceptance through ITI-x7.
 
 ##### 2:3.x3.4.2.2 Message Semantics
 
@@ -397,7 +403,9 @@ The De-Identifier SHALL return one `payloadResult` matching the dispatched `setI
 
 **400 Bad Request.** The response body is an R4 `OperationOutcome` describing the malformed or nonconforming Execution Task.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's payload binding, payload version, or required transformation actions fall outside the De-Identifier's declared capabilities or that required cancellable mode is unavailable.
+**401 Unauthorized / 403 Forbidden.** The response body is an R4 `OperationOutcome` describing the authorization failure.
+
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's payload binding, payload version, or required transformation actions fall outside the De-Identifier's declared capabilities or that the requested asynchronous or cancellable mode is unavailable.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the execution failure. No partial output is returned.
 
@@ -409,7 +417,9 @@ The De-Identifier SHALL return one `payloadResult` matching the dispatched `setI
 
 Upon receipt of a Submit De-Identification Task Response, the De-ID Manager SHALL inspect the response status.
 
-In synchronous mode, on a successful response, the Manager SHALL validate and retain any required protected mapping output before release. The Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester. On an error response, the Manager SHALL inspect the OperationOutcome, SHALL NOT incorporate partial output into the job result, and SHALL report the failure to the Requester via the ITI-x1 response.
+In synchronous mode, on a successful response, the Manager SHALL validate and retain any required protected mapping output before release. The Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester.
+
+On a definitive ITI-x3 rejection or processing failure, the Manager SHALL inspect the OperationOutcome and withhold job output. It SHALL report the failure on ITI-x1 for a synchronous job or through ITI-x4 for an accepted asynchronous job. An uncertain ITI-x3 submission outcome follows the [recovery rules](#submission-retries). If job cancellation has been accepted, the [job cancellation rules](#job-cancellation) apply.
 
 In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager SHALL retain the task handle and SHALL proceed to retrieve output using ITI-x7.
 
@@ -477,7 +487,7 @@ The De-Identification Requester SHALL poll using `GET [Content-Location]`, where
 
 The request body is empty.
 
-The Requester SHALL include authorization credentials consistent with those presented in the original ITI-x1 submission.
+The caller SHALL include credentials authenticating the original Requester or an explicitly authorized retrieval delegate.
 
 ##### 2:3.x4.4.1.3 Expected Actions
 
@@ -487,7 +497,7 @@ For accepted cancellation, the Manager SHALL apply the [shared cancellation resp
 
 When the job is still in progress, the Manager SHALL indicate in-progress status and SHOULD include retry-after guidance to help the Requester pace its polling.
 
-When the job is complete, the Manager SHALL return the de-identified output and provenance evidence. The Manager SHALL retain completed job output for a minimum retention period sufficient for the Requester to retrieve it; the specific duration is implementation-defined in Phase 1.
+When the job is complete, the Manager SHALL return the de-identified output and provenance evidence under the [polling lifecycle](#asynchronous-polling-lifecycle) and result release rules.
 
 When the job has failed, the Manager SHALL return error information via OperationOutcome. The Manager SHALL NOT release partial output.
 
@@ -501,7 +511,7 @@ The De-ID Manager sends a Retrieve Job Output Response upon receipt of each poll
 
 The De-ID Manager (or Integrated De-ID Manager/De-Identifier) uses the HTTP polling mechanics of the draft HL7 FHIR R4 Asynchronous Request Pattern. DIS defines the deferred operation response as follows.
 
-**202 Accepted — Job in progress.** The `Retry-After` response header contains the recommended polling interval in seconds. The `X-Progress` response header MAY be present with a human-readable status string. The response body is empty.
+**202 Accepted — Job in progress.** The Manager SHOULD include `Retry-After` with the recommended polling interval in seconds. The `X-Progress` response header MAY be present with a human-readable status string. The response body is empty.
 
 **200 OK — Job complete.** The body and release rules are identical to [ITI-x1 synchronous success](#23x1422-message-semantics), including one `payloadResult` per submitted set and `validationStatus`.
 
@@ -573,7 +583,7 @@ Table 2:3.x7.2-1 lists the actors and their roles in this transaction.
 
 ### 2:3.x7.4 Interactions and Messages
 
-Figure 2:3.x7.4-1 shows the interaction for the Retrieve Task Output transaction, including the three possible response states.
+Figure 2:3.x7.4-1 shows ordinary task polling for pending, completed, and failed work.
 
 <p><a href="dis-iti-x7-interactions.png"><img src="dis-iti-x7-interactions.png" alt="ITI-x7 retrieve task output interaction diagram" width="659" style="max-width: 100%; height: auto;" /></a></p>
 
@@ -599,7 +609,7 @@ Upon receipt of a Retrieve Task Output Request, the De-Identifier SHALL return t
 
 When the task is still in progress, the De-Identifier SHALL indicate in-progress status and SHOULD include retry-after guidance.
 
-When the task is complete, the De-Identifier SHALL return the de-identified output and provenance evidence, and, when required by the ITI-x3 output rules, the protected `generatedLookupTable` for the Manager.
+When the task is complete, the De-Identifier SHALL return the de-identified output and provenance evidence and any protected `generatedLookupTable` required by ITI-x3. It SHALL apply the [polling lifecycle](#asynchronous-polling-lifecycle).
 
 When the task has failed, the De-Identifier SHALL return error information via OperationOutcome. The De-Identifier SHALL NOT release partial output.
 
@@ -613,7 +623,7 @@ The De-Identifier sends a Retrieve Task Output Response upon receipt of each pol
 
 The De-Identifier uses the HTTP polling mechanics of the draft HL7 FHIR R4 Asynchronous Request Pattern. DIS defines the deferred operation response as follows.
 
-**202 Accepted — Task in progress.** The `Retry-After` response header contains the recommended polling interval in seconds. The response body is empty.
+**202 Accepted — Task in progress.** The De-Identifier SHOULD include `Retry-After` with the recommended polling interval in seconds. The response body is empty.
 
 **200 OK — Task complete.** The body is identical to [ITI-x3 synchronous success](#23x3422-message-semantics), including one `payloadResult`, `validationStatus`, and the protected `generatedLookupTable` when required. The Manager SHALL exclude the generated lookup table from recipient-facing job output.
 
@@ -629,7 +639,7 @@ On an in-progress response, the Manager SHOULD wait for the indicated retry-afte
 
 On a complete response, if the Manager has accepted job cancellation, it SHALL apply the [job cancellation rules](#job-cancellation). Otherwise it SHALL validate and retain any required protected mapping output before release and accept the de-identified output and evidence for assembly into the job response to the Requester. The Manager SHALL NOT expose partial output to the Requester.
 
-On an error response, the Manager SHALL inspect the OperationOutcome. An authorization or transient polling error does not establish a terminal task failure. If the response reports terminal task failure and the Manager has accepted job cancellation, it SHALL account for the task as terminal under the [job cancellation rules](#job-cancellation). Otherwise it SHALL withhold the job result and report the task failure through ITI-x1 or ITI-x4, as applicable.
+On an error response, the Manager SHALL inspect the OperationOutcome and any `DIS-Cancellation` header. For a cancellation outcome, it SHALL apply the [job cancellation rules](#job-cancellation). An authorization error, expired polling URL, or transient retrieval error leaves the task outcome unresolved. When ITI-x7 reports a terminal processing failure, the Manager SHALL account for the task as terminal if job cancellation has been accepted. For a terminal processing failure in a job without accepted cancellation, it SHALL withhold the job result and report the failure on ITI-x1 for a synchronous job or through ITI-x4 for an accepted asynchronous job.
 
 #### 2:3.x7.4.3 Cancel De-Identification Task
 
