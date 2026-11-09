@@ -71,7 +71,7 @@ The actors in this profile are described in more detail in the sections below.
 
 #### 1:PXX.1.1.1 De-Identification Requester
 
-The De-Identification Requester submits de-identification jobs to the De-ID Manager, presenting evidence of an approved data request and declaring the canonical URL and version of the approved de-identification policy. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
+The De-Identification Requester submits a complete R4 Job Task to the De-ID Manager. It carries the authorization and each selected payload set with its approved policy canonical and version. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
 
 In Phase 1, the De-Identification Requester receives the job result through ITI-x1 or ITI-x4.
 
@@ -81,7 +81,7 @@ Phase 1 does not standardize how the Requester obtains or discovers a de-identif
 
 #### 1:PXX.1.1.2 De-ID Manager
 
-The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that the presented policy matches the policy approved in the authorization, compiles the policy into an execution plan, dispatches tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
+The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that the presented policy matches the policy approved in the authorization, compiles the policy into an execution plan, dispatches scoped R4 Execution Tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
 The De-ID Manager retains persistent custody of Manager-managed identity mappings and reversibility records; a Requester may retain and supply its own lookup table for reversible jobs (§1:PXX.2.2). Whether these records are persisted depends on the declared reversibility mode (see [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) and [1:PXX.2.6](#1pxx26-irreversible-de-identification-option)). See [1:PXX.4.1](#1pxx41-concepts) for the policy model, four-point validation, and policy variants. See [1:PXX.5.4](#1pxx54-reversibility-material-custody) for custody obligations.
 
@@ -280,7 +280,7 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 DIS introduces the following key concepts that provide necessary background for understanding the profile.
 
-**Policy-Governed De-Identification.** DIS separates policy approval from policy execution. DIS assumes the De-Identification Requester can read the exact approved policy through an implementation-defined mechanism. The Requester declares the approved policy's canonical URL and version for each payload set. The De-ID Manager checks that both the declaration and the policy rules match the data request authorization. The Requester may carry the JWS-signed policy in `policy.content` or let the Manager resolve the declared version through its trust model.
+**Policy-Governed De-Identification.** DIS separates policy approval from policy execution. DIS assumes the De-Identification Requester can read the exact approved policy through an implementation-defined mechanism. The Requester declares the approved policy's canonical URL and version for each payload set. The De-ID Manager checks that both the declaration and the policy rules match the data request authorization. The Requester may carry the JWS-signed policy in `policyContent` or let the Manager resolve the declared version through its trust model.
 
 The De-ID Manager validates all policies:
 
@@ -293,8 +293,8 @@ A de-identification policy is a reusable knowledge artifact. The same policy may
 
 Every ITI-x1 request declares the approved policy by canonical URL and version. Optionally, the Requester may also carry the policy content directly:
 
-- **Policy content carried (`policy.content` present)** -- the JWS-signed policy Library is embedded directly in the request as a `Binary` resource. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. The Requester obtains the signed artifact through its implementation-defined mechanism.
-- **Policy content resolved by Manager (`policy.content` absent)** -- the Manager resolves the declared policy version by implementation-defined means.
+- **Policy content carried (`policyContent` present)** -- the Job Task carries the JWS-signed policy Library in a contained `Binary` resource referenced by the set. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. The Requester obtains the signed artifact through its implementation-defined mechanism.
+- **Policy content resolved by Manager (`policyContent` absent)** -- the Manager resolves the declared policy version by implementation-defined means.
 
 A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same four-point validation. Both are approved by the joint privacy team.
 
@@ -493,7 +493,7 @@ The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be groupe
 
 ### 1:PXX.5.3 Policy Integrity
 
-The De-ID Manager SHALL verify authorization consistency, integrity, schema conformance, and currency of every policy before job execution. When the Requester carries policy content (`policy.content`), the Manager SHALL verify the JWS signature and confirm the Library's canonical URL and version match the declared `policy.url` and `policy.version`. When the Manager resolves the policy itself, integrity is established by the Manager's resolution trust model (administrative provisioning, mutual TLS, or other mechanisms appropriate to the deployment). Authorization consistency means the declared policy URL and version match the approval. The Manager SHALL verify that the policy rules match the exact content bound to the approved version in either delivery mode. Policies that fail any validation point SHALL be rejected.
+The De-ID Manager SHALL verify authorization consistency, integrity, schema conformance, and currency of every policy before job execution. When the Requester carries policy content (`policyContent`), the Manager SHALL verify the JWS signature and confirm the Library's canonical URL and version match the declared policy canonical and version. When the Manager resolves the policy itself, integrity is established by the Manager's resolution trust model (administrative provisioning, mutual TLS, or other mechanisms appropriate to the deployment). Authorization consistency means the declared policy URL and version match the approval. The Manager SHALL verify that the policy rules match the exact content bound to the approved version in either delivery mode. Policies that fail any validation point SHALL be rejected.
 
 ### 1:PXX.5.4 Reversibility Material Custody
 

@@ -1,6 +1,6 @@
 // DIS OperationDefinitions
 
-// Shared parts of payload set inputs and results.
+// Shared parts of payload set results.
 RuleSet: DISPayloadDeliveryParts(direction)
 * parameter[=].part[+].name = #setId
 * parameter[=].part[=].use = #{direction}
@@ -49,70 +49,15 @@ Usage: #definition
 * type = false
 * instance = false
 
-// ── Input: payload ──
-* parameter[+].name = #payload
-* parameter[=].use = #in
-* parameter[=].min = 1
-* parameter[=].max = "*"
-* parameter[=].documentation = "Payload set with one result package containing the manifest and evidence."
-* insert DISPayloadDeliveryParts(in)
-* parameter[=].part[+].name = #manifest
-* parameter[=].part[=].use = #in
-* parameter[=].part[=].min = 1
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].type = #Attachment
-* parameter[=].part[=].documentation = "Serialized manifest or manifest package, carried inline or located by HTTPS URL."
-* parameter[=].part[+].name = #policy
-* parameter[=].part[=].use = #in
-* parameter[=].part[=].min = 1
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].documentation = "Identifies the approved de-identification policy for this data request."
-* parameter[=].part[=].part[+].name = #url
-* parameter[=].part[=].part[=].use = #in
-* parameter[=].part[=].part[=].min = 1
-* parameter[=].part[=].part[=].max = "1"
-* parameter[=].part[=].part[=].documentation = "Canonical URL of the approved policy (Library.url)."
-* parameter[=].part[=].part[=].type = #uri
-* parameter[=].part[=].part[+].name = #version
-* parameter[=].part[=].part[=].use = #in
-* parameter[=].part[=].part[=].min = 1
-* parameter[=].part[=].part[=].max = "1"
-* parameter[=].part[=].part[=].documentation = "Version of the approved policy (Library.version)."
-* parameter[=].part[=].part[=].type = #string
-* parameter[=].part[=].part[+].name = #content
-* parameter[=].part[=].part[=].use = #in
-* parameter[=].part[=].part[=].min = 0
-* parameter[=].part[=].part[=].max = "1"
-* parameter[=].part[=].part[=].documentation = "JWS-signed policy artifact, when the Requester carries the policy content directly. Binary.contentType SHALL be application/jose."
-* parameter[=].part[=].part[=].type = #Binary
-* parameter[=].part[+].name = #lookupTable
-* parameter[=].part[=].use = #in
-* parameter[=].part[=].min = 0
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].type = #Reference
-* parameter[=].part[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
-* parameter[=].part[=].documentation = "Reference to an identified DIS Lookup Table DocumentReference. Resolve and pin its version-specific identifier and exact JSON content before processing. For tasks, expose only assigned entries through a protected scoped document. Missing entries fail the job without fallback or partial output."
+* affectsState = true
 
-// ── Input: authorization ──
-* parameter[+].name = #authorization
+// ── Input: workItem ──
+* parameter[+].name = #workItem
 * parameter[=].use = #in
 * parameter[=].min = 1
 * parameter[=].max = "1"
-* parameter[=].documentation = "Data request authorization evidence; exactly one of authorization.reference or authorization.content SHALL be present."
-
-* parameter[=].part[+].name = #reference
-* parameter[=].part[=].use = #in
-* parameter[=].part[=].min = 0
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].documentation = "Reference to an externally hosted authorization evidence resource."
-* parameter[=].part[=].type = #Reference
-
-* parameter[=].part[+].name = #content
-* parameter[=].part[=].use = #in
-* parameter[=].part[=].min = 0
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].documentation = "Authorization evidence embedded directly; contentType declares the format."
-* parameter[=].part[=].type = #Attachment
+* parameter[=].type = #Task
+* parameter[=].documentation = "The direct POST body is a Task conforming to https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask."
 
 // ── Output: payloadResult ──
 * parameter[+].name = #payloadResult
@@ -158,61 +103,15 @@ Usage: #definition
 * type = false
 * instance = false
 
-// ── Input: payload ──
-* parameter[+].name = #payload
+* affectsState = true
+
+// ── Input: workItem ──
+* parameter[+].name = #workItem
 * parameter[=].use = #in
 * parameter[=].min = 1
 * parameter[=].max = "1"
-* parameter[=].documentation = "Payload set with one result package containing the manifest and evidence."
-* insert DISPayloadDeliveryParts(in)
-* parameter[=].part[+].name = #manifest
-* parameter[=].part[=].use = #in
-* parameter[=].part[=].min = 1
-* parameter[=].part[=].max = "1"
-* parameter[=].part[=].type = #Attachment
-* parameter[=].part[=].documentation = "Serialized manifest or manifest package, carried inline or located by HTTPS URL."
-
-// ── Input: executionPlan ──
-* parameter[+].name = #executionPlan
-* parameter[=].use = #in
-* parameter[=].min = 1
-* parameter[=].max = "1"
-* parameter[=].documentation = "Reference to the Library containing compiled rules for this ruleSet and the versioned source policy identity for evidence."
-* parameter[=].type = #Reference
-* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
-
-// ── Input: ruleSetId ──
-* parameter[+].name = #ruleSetId
-* parameter[=].use = #in
-* parameter[=].min = 1
-* parameter[=].max = "1"
-* parameter[=].documentation = "Identifier of the ruleSet from the source policy that this task executes."
-* parameter[=].type = #string
-
-// ── Input: stageId ──
-* parameter[+].name = #stageId
-* parameter[=].use = #in
-* parameter[=].min = 0
-* parameter[=].max = "1"
-* parameter[=].documentation = "Stage identifier, when the source policy declares staged execution."
-* parameter[=].type = #string
-
-// ── Input: lookupTable ──
-* parameter[+].name = #lookupTable
-* parameter[=].use = #in
-* parameter[=].min = 0
-* parameter[=].max = "1"
-* parameter[=].type = #Reference
-* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
-* parameter[=].documentation = "Reference to an identified DIS Lookup Table DocumentReference. Resolve and pin its version-specific identifier and exact JSON content before processing. For tasks, expose only assigned entries through a protected scoped document. Missing entries fail the job without fallback or partial output."
-
-// ── Input: reversibilityMode ──
-* parameter[+].name = #reversibilityMode
-* parameter[=].use = #in
-* parameter[=].min = 1
-* parameter[=].max = "1"
-* parameter[=].documentation = "Reversibility mode (irreversible or reversible); derived from the policy validated in ITI-x1."
-* parameter[=].type = #code
+* parameter[=].type = #Task
+* parameter[=].documentation = "The direct POST body is a Task conforming to https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask."
 
 // ── Output: payloadResult ──
 * parameter[+].name = #payloadResult
@@ -234,8 +133,7 @@ Usage: #definition
 * parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].type = #DocumentReference
-* parameter[=].targetProfile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-LookupTable"
-* parameter[=].documentation = "Inline DIS Lookup Table returned for reversible Manager-managed patient identifier hashing. Protected output to the Manager."
+* parameter[=].documentation = "Inline DocumentReference conforming to DIS-LookupTable, returned for reversible Manager-managed patient identifier hashing. Protected output to the Manager."
 
 // ── Output: validationStatus ──
 * parameter[+].name = #validationStatus

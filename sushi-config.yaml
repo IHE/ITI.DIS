@@ -57,6 +57,16 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 #  auto-oid-root: 1.3.6.1.4.1.19376.1.5....
 
 resources:
+  Task/single-r4-patient-job-request:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+  Task/single-r4-patient-task-request:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+  Task/grouped-fhir-job-request:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+  Task/grouped-fhir-task-patient-r4:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+  Task/grouped-fhir-task-encounter-r5:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
   Library/staged-patient:
     description: "Approved syntax policy that gives the Requester the expected stage and ruleSet sequence for the staged R4 Patient example."
   Bundle/staged-r4-patient-result:
@@ -80,9 +90,9 @@ groups:
       - Bundle/grouped-fhir-hosted-artifacts
       - Bundle/grouped-fhir-r5-input
       - Bundle/grouped-fhir-r5-output
-      - Parameters/grouped-fhir-job-request
-      - Parameters/grouped-fhir-task-patient-r4
-      - Parameters/grouped-fhir-task-encounter-r5
+      - Task/grouped-fhir-job-request
+      - Task/grouped-fhir-task-patient-r4
+      - Task/grouped-fhir-task-encounter-r5
       - Parameters/grouped-fhir-task-result-patient-r4
       - Parameters/grouped-fhir-task-result-encounter-r5
       - Parameters/grouped-fhir-job-result

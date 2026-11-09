@@ -1,0 +1,99 @@
+{
+  "resourceType": "Task",
+  "id": "grouped-fhir-task-patient-r4",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "https://dis.example.org/dis/assignment-identifiers",
+      "value": "grouped-fhir-task-patient-r4"
+    }
+  ],
+  "status": "requested",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type",
+        "code": "de-identification-execution"
+      }
+    ]
+  },
+  "input": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "payload-set"
+          }
+        ]
+      },
+      "valueAttachment": {
+        "contentType": "application/fhir+json",
+        "url": "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input/_history/1"
+      },
+      "extension": [
+        {
+          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
+          "extension": [
+            {
+              "url": "setId",
+              "valueString": "patient-r4"
+            },
+            {
+              "url": "payloadBinding",
+              "valueCode": "DIS-FHIR-Payload"
+            },
+            {
+              "url": "payloadVersion",
+              "valueCode": "R4"
+            },
+            {
+              "url": "manifestFormat",
+              "valueCode": "dis-resource-list"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "execution-plan"
+          }
+        ]
+      },
+      "valueReference": {
+        "reference": "https://dis.example.org/fhir/Library/grouped-fhir-plan-patient-r4/_history/1"
+      }
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "rule-set-id"
+          }
+        ]
+      },
+      "valueString": "remove-direct-link"
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "reversibility-mode"
+          }
+        ]
+      },
+      "valueCode": "irreversible"
+    }
+  ]
+}

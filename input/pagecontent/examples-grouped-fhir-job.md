@@ -8,7 +8,7 @@ One asynchronous job submits a hosted **R4 Patient** and an inline **R5 Encounte
 
 ## Submit the Job
 
-Send the [ITI-x1 request](Parameters-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one authorization reference identifies the permit covering both sets and their policy versions. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 source and result Lists, R4 Patient resources, and both policies and plans at their example locations. The collection is a reference for readers. The Requester sends the ITI-x1 Parameters resource.
+Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one authorization reference identifies the permit covering both sets and their policy versions. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 source and result Lists, R4 Patient resources, and both policies and plans at their example locations. The collection is a reference for readers. The Requester sends the Job Task directly as the ITI-x1 request body.
 
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
@@ -26,8 +26,8 @@ Send each task to `POST /fhir/$submit-dis-task`. The task request carries one pa
 
 | Set | ITI-x3 request | ITI-x3 success response | Evidence target |
 |-----|----------------|-------------------------|-----------------|
-| `patient-r4` | [R4 task](Parameters-grouped-fhir-task-patient-r4.html) | [R4 task result](Parameters-grouped-fhir-task-result-patient-r4.html) | Literal reference to the versioned result Patient selected by the hosted result List. |
-| `encounter-r5` | [R5 task](Parameters-grouped-fhir-task-encounter-r5.html) | [R5 task result](Parameters-grouped-fhir-task-result-encounter-r5.html) | Provenance inside the [result manifest package](Bundle-grouped-fhir-r5-output.html) targets the selected wrapper by its Bundle entry URL. |
+| `patient-r4` | [R4 task](Task-grouped-fhir-task-patient-r4.html) | [R4 task result](Parameters-grouped-fhir-task-result-patient-r4.html) | Literal reference to the versioned result Patient selected by the hosted result List. |
+| `encounter-r5` | [R5 task](Task-grouped-fhir-task-encounter-r5.html) | [R5 task result](Parameters-grouped-fhir-task-result-encounter-r5.html) | Provenance inside the [result manifest package](Bundle-grouped-fhir-r5-output.html) targets the selected wrapper by its Bundle entry URL. |
 {: .grid}
 
 Both task responses use `200 OK` and include the corresponding `payloadResult` with R4 Provenance. The R5 result retains `actualPeriod` and `status: completed` after removal of `subject`. The result attachment still carries an R5 Encounter. See [FHIR R5 Encounter](https://hl7.org/fhir/R5/encounter.html) and [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).
