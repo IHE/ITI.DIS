@@ -4,51 +4,30 @@ sequenceDiagram
     participant DI_P as De-Identifier<br/>(Preliminary)
     participant DI_A as De-Identifier<br/>(Advanced)
 
-    Note over DAC,MGR: Data permit and signed policy exist
+    Note over DAC,MGR: Permit and approved policy available<br/>Policy declares the authorized linkage scope
+    DAC->>MGR: ITI-x1 Submit Job (R4 Job Task, async)
+    Note over MGR: Validate authorization and policy before acceptance
+    Note over DAC,MGR: If admission fails, return a synchronous error and stop
+    MGR-->>DAC: 202 Accepted, Content-Location job-url
 
-    DAC->>MGR: ITI-x1 Submit De-Identification Job (async, with identity-linkage-scope)
-    activate MGR
-    Note over MGR: Validate authorization and all four policy checks
-    Note over DAC,MGR: If validation fails or cannot complete: synchronous error, no acceptance or dispatch
-    MGR-->>DAC: 202 Accepted + Content-Location: polling-url (validation succeeded)
-    deactivate MGR
+    Note over MGR: Compile one plan per assigned ruleSet and payload set
+    MGR->>DI_P: ITI-x3 Submit Task (R4 Execution Task, preliminary)
+    Note over DI_P: Requested pseudonymization<br/>under the authorized linkage scope
+    DI_P-->>MGR: 202 Accepted, Content-Location preliminary-url
 
-    activate MGR
-    Note over MGR: Compile staged execution plan (two ruleSets)
+    DAC->>MGR: ITI-x4 GET job-url
+    MGR-->>DAC: 202 Accepted (in progress, Retry-After)
 
-    MGR->>DI_P: ITI-x3 Submit Task (preliminary: irreversible pseudonymization)
-    activate DI_P
-    Note over DI_P: Pseudonymize using the authorized scope<br/>and provisioned salt
-    DI_P-->>MGR: 202 Accepted + Content-Location: task-polling-url
-    deactivate DI_P
+    MGR->>DI_P: ITI-x7 GET preliminary-url
+    DI_P-->>MGR: 200 OK (preliminary output and evidence)
+    Note over MGR: Validate preliminary output before dispatch
+    MGR->>DI_A: ITI-x3 Submit Task (R4 Execution Task, validated preliminary input)
+    Note over DI_A: Requested fixed generalization<br/>and record-level suppression
+    DI_A-->>MGR: 202 Accepted, Content-Location advanced-url
 
-    MGR->>DI_P: ITI-x7 Retrieve Task Output (GET task-polling-url)
-    activate DI_P
-    DI_P-->>MGR: 200 OK (transformed output + evidence)
-    deactivate DI_P
-
-    MGR->>DI_A: ITI-x3 Submit Task (advanced ruleSet)
-    activate DI_A
-    Note over DI_A: Fixed generalization,<br/>record-level suppression
-    DI_A-->>MGR: 202 Accepted + Content-Location: task-polling-url
-    deactivate DI_A
-
-    MGR->>DI_A: ITI-x7 Retrieve Task Output (GET task-polling-url)
-    activate DI_A
-    DI_A-->>MGR: 200 OK (transformed output + evidence)
-    deactivate DI_A
-
-    Note over MGR: No reversibility material retained (DIS-IRREVERSIBLE)
-    deactivate MGR
-
-    DAC->>MGR: ITI-x4 GET polling-url
-    activate MGR
-    MGR-->>DAC: 202 Accepted + Retry-After (in-progress)
-    deactivate MGR
-
-    DAC->>MGR: ITI-x4 GET polling-url
-    activate MGR
-    MGR-->>DAC: 200 OK (de-identified HL7 FHIR output + evidence)
-    deactivate MGR
-
-    Note over DAC: Forward HL7 FHIR output to SPE. Future DICOM linkage requires authorized scope and compatible derivation.
+    MGR->>DI_A: ITI-x7 GET advanced-url
+    DI_A-->>MGR: 200 OK (final task output and evidence)
+    Note over MGR: Validate final output and recheck release authorization<br/>Record staged release Provenance
+    DAC->>MGR: ITI-x4 GET job-url
+    MGR-->>DAC: 200 OK (R4 Parameters with cohort and evidence)
+    Note over DAC: Deliver the released FHIR cohort to the SPE (outside DIS)
