@@ -18,10 +18,10 @@ This section defines the actors, transactions, and content responsibilities in t
 DIS defines three deployment models for de-identification processing:
 
 - **Distributed model** -- the De-Identification Requester submits jobs to a De-ID Manager, which validates the policy, compiles an execution plan, and dispatches tasks to one or more De-Identifiers. This model supports staged execution with trust isolation between stages.
-- **Integrated model with external Requester** -- the Integrated De-ID Manager/De-Identifier accepts jobs via ITI-x1, combines policy validation, execution plan compilation, and transformation execution within a single actor, and returns output to the Requester. ITI-x3 and ITI-x7 are internal.
+- **Integrated model with external Requester** -- the Integrated De-ID Manager/De-Identifier accepts jobs via ITI-x1, combines policy validation, execution plan compilation, and transformation execution within a single actor, and returns output to the Requester. The Integrated actor performs task processing internally.
 - **Integrated standalone model** -- the Integrated De-ID Manager/De-Identifier operates without external transactions, producing conformant de-identified output and evidence through local invocation. This model supports lightweight workflows such as clinician-initiated document export (see [Use Case 5](#1pxx425-use-case-5-de-identified-health-data-export-content-conformance)).
 
-Figure 1:PXX.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them. The outer boundary represents the Integrated De-ID Manager/De-Identifier, which combines the De-ID Manager and De-Identifier into a single actor. When the Integrated actor is deployed, ITI-x3 and ITI-x7 are performed internally and do not appear on the wire.
+Figure 1:PXX.1-1 shows the actors directly involved in the DIS Profile and the relevant transactions between them. The outer boundary represents the Integrated De-ID Manager/De-Identifier, which combines the De-ID Manager and De-Identifier into a single actor. ITI-x3 and ITI-x7 apply only to the distributed model.
 
 <p><a href="dis-actors-and-transactions.png"><img src="dis-actors-and-transactions.png" alt="DIS actors and transactions" width="517" style="max-width: 100%; height: auto;" /></a></p>
 
@@ -45,7 +45,7 @@ Table 1:PXX.1-1 lists the transactions for each actor directly involved in the D
 |  | ITI-x4 Retrieve Job Output | Responder | C (See Note 1, Note 2) | ITI TF-2: 3.x4 |
 {: .grid}
 
-Note 1: *ITI-x4 is required when the Asynchronous Job Processing Option (DIS-ASYNC-JOB) is supported. ITI-x7 is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. ITI-x4 enables the Requester to poll for job output; ITI-x7 enables the Manager to retrieve task output from the De-Identifier. ITI-x7 does not apply to the Integrated De-ID Manager/De-Identifier.*
+Note 1: *ITI-x4 is required when the Asynchronous Job Processing Option (DIS-ASYNC-JOB) is supported. ITI-x7 is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. ITI-x4 enables the Requester to poll for job status and output. ITI-x7 enables the Manager to poll the De-Identifier for task status and output. ITI-x7 does not apply to the Integrated De-ID Manager/De-Identifier.*
 
 Note 2: *The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions (content conformance only). When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester. ITI-x4 is required when both ITI-x1 and DIS-ASYNC-JOB are supported.*
 
@@ -71,17 +71,15 @@ The actors in this profile are described in more detail in the sections below.
 
 #### 1:PXX.1.1.1 De-Identification Requester
 
-The De-Identification Requester submits a complete R4 Job Task to the De-ID Manager. It carries the authorization and each selected payload set with its approved policy canonical and version. In the synchronous mode, the Requester receives de-identified output and evidence inline in the ITI-x1 response. In the asynchronous mode, the Requester retrieves output via ITI-x4 polling.
+The De-Identification Requester submits a complete R4 Job Task to the De-ID Manager. It carries the authorization and each selected payload set with its approved policy canonical and version. In synchronous mode, the Requester receives the result for each payload set in the ITI-x1 response, either as an inline result package or as an authorized HTTPS URL to retrieve it. In asynchronous mode, the Requester polls for job status and results via ITI-x4.
 
-In Phase 1, the De-Identification Requester receives the job result through ITI-x1 or ITI-x4.
-
-Phase 1 does not standardize how the Requester obtains or discovers a de-identification policy. The Requester declares the approved policy by canonical URL and version in ITI-x1; the mechanism by which the policy was obtained is an implementation-defined concern. Implementers MAY use any mechanism that produces a valid policy, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
+Phase 1 does not standardize how the Requester obtains or discovers a de-identification policy. The Requester declares the approved policy for each payload set by canonical URL and version in ITI-x1. Implementers MAY use any mechanism that produces a valid policy, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
 <a name="de-id-manager"> </a>
 
 #### 1:PXX.1.1.2 De-ID Manager
 
-The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that the presented policy matches the policy approved in the authorization, compiles the policy into an execution plan, dispatches scoped R4 Execution Tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
+The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that each payload set's policy matches the policy approved in the authorization, prepares an execution plan for each assigned ruleSet and payload set, dispatches scoped R4 Execution Tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
 The De-ID Manager retains persistent custody of Manager-managed identity mappings and reversibility records; a Requester may retain and supply its own lookup table for reversible jobs (§1:PXX.2.2). Whether these records are persisted depends on the declared reversibility mode (see [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) and [1:PXX.2.6](#1pxx26-irreversible-de-identification-option)). See [1:PXX.4.1](#1pxx41-concepts) for the policy model, four-point validation, and policy variants. See [1:PXX.5.4](#1pxx54-reversibility-material-custody) for custody obligations.
 
@@ -97,11 +95,11 @@ A Phase 1 De-Identifier SHALL declare its capabilities, including supported payl
 
 #### 1:PXX.1.1.4 Integrated De-ID Manager/De-Identifier
 
-The Integrated De-ID Manager/De-Identifier combines the functionality of the De-ID Manager and the De-Identifier into a single actor. It does not initiate nor accept the Submit De-Identification Task [ITI-x3] transaction.
+The Integrated De-ID Manager/De-Identifier combines the functionality of the De-ID Manager and the De-Identifier into a single actor. The Integrated actor performs task processing internally.
 
 The Integrated De-ID Manager/De-Identifier validates de-identification policies, compiles validated policy into execution plans, executes the plans internally, and produces de-identified output and provenance evidence. It performs all Manager obligations (policy validation, execution plan compilation, reversibility material custody) and all De-Identifier obligations (transformation execution, evidence production, capability declaration) within a single actor.
 
-The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions, producing conformant de-identified output and evidence through local invocation. When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester and returns output inline (synchronous) or via ITI-x4 polling (when DIS-ASYNC-JOB is also supported).
+The Integrated De-ID Manager/De-Identifier MAY operate standalone without external transactions, producing conformant de-identified output and evidence through local invocation. When ITI-x1 is supported, the Integrated actor accepts jobs from an external De-Identification Requester and delivers results through the synchronous ITI-x1 response or through ITI-x4 polling when both participants support DIS-ASYNC-JOB and the Requester asks for asynchronous processing.
 
 The Integrated De-ID Manager/De-Identifier follows the same mapping arrangements and custody obligations as the De-ID Manager, including locally supplied lookup tables in standalone mode. Whether these records are persisted depends on the declared reversibility mode. Manager-managed persistent mappings remain within the integrated actor's trust boundary; supplied lookup tables follow §1:PXX.2.2.
 
@@ -113,13 +111,13 @@ The transactions in this profile are summarized in the sections below.
 
 #### 1:PXX.1.2.1 Submit De-Identification Job [ITI-x1]
 
-This transaction is used to submit a de-identification job with evidence of an approved data request, declaring the approved de-identification policy. The De-ID Manager validates the submission, orchestrates processing, and returns de-identified output and evidence. The transaction supports both synchronous and asynchronous response modes.
+The Requester submits an R4 Job Task containing the data request authorization and identifying the approved policy for each payload set. The De-ID Manager or Integrated actor validates the submission and orchestrates processing. In synchronous mode, the response returns one result per payload set, with each result package delivered inline or by authorized HTTPS URL. In asynchronous mode, acceptance provides a polling URL for ITI-x4.
 
 For more details see the detailed [transaction description](volume-2.html#23x1-submit-de-identification-job-iti-x1).
 
 #### 1:PXX.1.2.2 Submit De-Identification Task [ITI-x3]
 
-This transaction is used to dispatch a de-identification task from the De-ID Manager to a De-Identifier. Each task carries the execution plan for one ruleSet. The De-Identifier applies the transformation rules and returns de-identified output and evidence.
+The De-ID Manager dispatches an R4 Execution Task to a De-Identifier. Each task carries the execution plan for one ruleSet applied to one payload set. In synchronous mode, the De-Identifier returns the result package inline or by authorized HTTPS URL. In asynchronous mode, acceptance provides a polling URL for ITI-x7.
 
 For more details see the detailed [transaction description](volume-2.html#23x3-submit-de-identification-task-iti-x3).
 
@@ -131,7 +129,7 @@ For more details see the detailed [transaction description](volume-2.html#23x4-r
 
 #### 1:PXX.1.2.4 Retrieve Task Output [ITI-x7]
 
-This transaction is used by the De-ID Manager to retrieve the output of a completed asynchronous task from a De-Identifier. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
+The De-ID Manager polls the De-Identifier for the status of an accepted asynchronous task and retrieves its output and evidence when available. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
 
 For more details see the detailed [transaction description](volume-2.html#23x7-retrieve-task-output-iti-x7).
 
@@ -170,7 +168,7 @@ Table 1:PXX.2-2 summarizes all Phase 1 options and their applicability per actor
 
 | Option | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
 |--------|-----------|---------|---------------|-----------------------------------|-------------------------|
-| DIS-FHIR-Payload | Required (Note 1) | Required (Note 1) | Required (Note 1) | Required (Note 1) | HL7 FHIR payload binding — content model, baseline execution plan, and rules for obtaining inputs and delivering results for independently versioned HL7 FHIR R4, R5, and R6 processing payloads. |
+| DIS-FHIR-Payload | Required (Note 1) | Required (Note 1) | Required (Note 1) | Required (Note 1) | HL7 FHIR payload binding — content model, baseline execution plan, and rules for obtaining inputs and delivering results for independently versioned HL7 FHIR R4 and R5 processing payloads, with provisional R6 support. |
 | DIS-ASYNC-JOB | Optional | Optional | Not applicable | Optional | Asynchronous job processing. Both participating Requester and Manager (or Integrated actor) declare support; ITI-x4 required. For the Integrated actor, DIS-ASYNC-JOB requires ITI-x1. |
 | DIS-ASYNC-TASK | Not applicable | Optional | Optional | Not applicable | Asynchronous task processing. Both participating Manager and De-Identifier declare support; ITI-x7 required. Not applicable to the Integrated actor. |
 | DIS-IRREVERSIBLE | Not applicable | Optional | Optional | Optional | No Manager mapping retention after job completion; incompatible with a supplied reversible lookup table. At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared. |
@@ -181,7 +179,7 @@ Note 1: *DIS-FHIR-Payload is required for all actors in Phase 1 since it is the 
 
 ### 1:PXX.2.1 Mandatory Baseline
 
-All DIS actors implement the HL7 FHIR R4 protocol binding as a mandatory requirement of the profile. This includes synchronous job processing via ITI-x1 (for the De-Identification Requester, De-ID Manager, and optionally the Integrated De-ID Manager/De-Identifier), task dispatch via ITI-x3 (for the De-ID Manager and De-Identifier), and the associated HL7 FHIR R4 workflow resources (Parameters, Provenance, OperationOutcome). The protocol binding is content-neutral — it can orchestrate de-identification of any payload type for which a corresponding payload binding is declared. The HL7 FHIR R4 protocol binding is not an option; it is a mandatory requirement of the profile.
+All DIS actors implement the HL7 FHIR R4 protocol binding as a mandatory requirement of the profile. This includes synchronous job processing via ITI-x1 (for the De-Identification Requester, De-ID Manager, and optionally the Integrated De-ID Manager/De-Identifier), task dispatch via ITI-x3 (for the De-ID Manager and De-Identifier), and the associated HL7 FHIR R4 workflow resources (`Task` for submissions, `Parameters` for result responses, `Bundle` for result packages, `Provenance` for evidence, and `OperationOutcome` for errors). The protocol binding is content-neutral — it can orchestrate de-identification of any payload type for which a corresponding payload binding is declared. The HL7 FHIR R4 protocol binding is not an option; it is a mandatory requirement of the profile.
 
 ### 1:PXX.2.2 Reversible Pseudonymization Option
 
@@ -217,24 +215,24 @@ The execution plan model is payload-specific. Each payload binding defines its o
 
 #### 1:PXX.2.3.2 Cross-Version Payload Support
 
-DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. An HL7 FHIR R5 or R6 resource can be de-identified through HL7 FHIR R4 protocol transactions without requiring an R5 or R6 version of the protocol binding. This cross-version support rests on four design properties:
+DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. Through the same R4 transactions, actors can submit HL7 FHIR R5 processing payloads and, provisionally, R6 processing payloads. This cross-version support rests on four design properties:
 
 - **Version identification** -- each processing payload SHALL explicitly identify its HL7 FHIR version. De-Identifiers SHALL declare which payload versions they support, and the Manager SHALL verify compatibility before dispatch. HL7 FHIR payloads SHALL be validated against their declared version.
 - **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the HL7 FHIR R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the HL7 FHIR R4 transaction envelope. Packaging patterns are specified in the [FHIR payload binding](volume-3.html#fhir-payload-binding).
 - **Version-neutral policy targets** -- Semantic-Level policies use common semantic group codes. The Manager resolves each code to FHIRPath selectors for the declared payload release during compilation. Volume 3 defines the [Semantic Group Binding](volume-3.html#3pxx3213-semantic-group-bindings).
 - **Evidence across versions** -- de-identification evidence is represented as HL7 FHIR R4 Provenance (protocol layer, not payload). The evidence model does not depend on the payload's HL7 FHIR version.
 
-HL7 FHIR R4 protocol resources (`Parameters`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain HL7 FHIR R4 regardless of the payload version.
+HL7 FHIR R4 protocol resources (`Task`, `Parameters`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain HL7 FHIR R4 regardless of the payload version.
 
 ### 1:PXX.2.4 Asynchronous Job Processing Option
 
-The Asynchronous Job Processing Option (DIS-ASYNC-JOB) enables the De-Identification Requester and De-ID Manager (or Integrated actor) to support asynchronous job-level workflows. The Requester submits an asynchronous ITI-x1 request and retrieves de-identified output and evidence via ITI-x4 polling.
+The Asynchronous Job Processing Option (DIS-ASYNC-JOB) enables the De-Identification Requester and De-ID Manager (or Integrated actor) to support asynchronous job-level workflows. The Requester submits an asynchronous ITI-x1 request and uses ITI-x4 to poll for job status and retrieve de-identified output and evidence.
 
 Both the participating Requester and Manager (or Integrated actor) SHALL declare DIS-ASYNC-JOB and SHALL support ITI-x4 (Retrieve Job Output). The Integrated actor SHALL support ITI-x1 when declaring DIS-ASYNC-JOB. This option is required for multi-patient cohort workflows where processing time exceeds the request timeout. HTTP-level message semantics are specified in the ITI-x1 and ITI-x4 [transaction descriptions](volume-2.html).
 
 ### 1:PXX.2.5 Asynchronous Task Processing Option
 
-The Asynchronous Task Processing Option (DIS-ASYNC-TASK) enables the De-ID Manager and De-Identifier to support asynchronous task-level workflows. When DIS-ASYNC-TASK is declared, the De-ID Manager dispatches tasks via ITI-x3 and retrieves output, evidence, and validation status via ITI-x7 (Retrieve Task Output) after task completion.
+The Asynchronous Task Processing Option (DIS-ASYNC-TASK) enables the De-ID Manager and De-Identifier to support asynchronous task-level workflows. For an asynchronous ITI-x3 exchange, the De-ID Manager uses ITI-x7 (Retrieve Task Output) to poll for task status and retrieve output and evidence upon successful completion.
 
 Both the participating De-ID Manager and De-Identifier SHALL declare DIS-ASYNC-TASK and SHALL support ITI-x7. This option does not apply to the Integrated De-ID Manager/De-Identifier.
 
@@ -291,14 +289,14 @@ The De-ID Manager validates all policies:
 
 A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. The data request authorization is the per-request evidence that a data governance authority approved a specific data request — including identification of the de-identification policy to be applied. The authorization binds each set to its approved policy version. Applying changed rules or a different version requires approval for the data request.
 
-Every ITI-x1 request declares the approved policy by canonical URL and version. Optionally, the Requester may also carry the policy content directly:
+Every ITI-x1 request declares the approved policy for each payload set by canonical URL and version. The Requester may also carry the policy content for each set.
 
 - **Policy content carried (`policyContent` present)** -- the Job Task carries the JWS-signed policy Library in a contained `Binary` resource referenced by the set. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. The Requester obtains the signed artifact through its implementation-defined mechanism.
 - **Policy content resolved by Manager (`policyContent` absent)** -- the Manager resolves the declared policy version by implementation-defined means.
 
 A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same four-point validation. Both are approved by the joint privacy team.
 
-**RuleSets and Staged Execution.** DIS organizes de-identification rules into ruleSets -- named groups of rules with shared data-semantic character. A policy contains one or more ruleSets. Optionally, a policy may declare stages that reference ruleSet IDs to define execution ordering and trust isolation boundaries. When stages are declared, a preliminary stage typically handles direct identifiers (hashing, removal), and an advanced stage applies policy-specified record-level rules to quasi-identifiers. The De-ID Manager dispatches one ITI-x3 task per ruleSet, grouped by stage ordering when stages are present. Each De-Identifier receives its assigned plan and authorized stage inputs. Volume 3 defines how validated results move between stages. For a distributed payload set that uses multiple stages, the Manager records the validated execution in [staged release evidence](volume-3.html#staged-release-evidence) associated with the final result.
+**RuleSets and Staged Execution.** DIS organizes de-identification rules into ruleSets -- named groups of rules with shared data-semantic character. A policy contains one or more ruleSets. Optionally, a policy may declare stages that reference ruleSet IDs to define execution ordering and trust isolation boundaries. When stages are declared, a preliminary stage typically handles direct identifiers (hashing, removal), and an advanced stage applies policy-specified record-level rules to quasi-identifiers. For each payload set, the De-ID Manager dispatches one ITI-x3 task per assigned ruleSet and follows the declared stage ordering when stages are present. Each De-Identifier receives its assigned plan and authorized stage inputs. Volume 3 defines how validated results move between stages. For a distributed payload set that uses multiple stages, the Manager records the validated execution in [staged release evidence](volume-3.html#staged-release-evidence) associated with the final result.
 
 **De-Identification Technique Classification.** DIS transformation actions are classified per ISO/IEC 20889:2018 *Privacy enhancing data de-identification terminology and classification of techniques*. Each DIS action code carries an ISO/IEC 20889 `technique` attribute tracing the action to its §9 classification. DIS actions are concrete operational instructions (what the De-Identifier does); ISO techniques are the classification framework. Action design is informed by the RSNA CTP DICOM Anonymizer function patterns. Table 1:PXX.4-2 maps Phase 1 actions to their ISO technique classification.
 
@@ -385,7 +383,7 @@ The preliminary ruleSet pseudonymizes direct identifiers with irreversible, proj
 
 Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. No DIS reverse-mapping service is maintained; this does not exclude identification through auxiliary information or reproduction using retained derivation secrets.
 
-The De-ID Manager dispatches tasks asynchronously (DIS-ASYNC-TASK). Each De-Identifier accepts the task via ITI-x3 and the Manager retrieves the output via ITI-x7 polling after task completion. The DAC retrieves the de-identified output and evidence via ITI-x4 polling and forwards it to the SPE.
+The De-ID Manager dispatches tasks asynchronously (DIS-ASYNC-TASK). Each De-Identifier accepts the task via ITI-x3. The Manager polls via ITI-x7 for status and retrieves the output when the task completes. The DAC retrieves the de-identified output and evidence via ITI-x4 polling and forwards it to the SPE.
 
 ##### 1:PXX.4.2.1.2 Cross-Border Epidemiological Study Process Flow
 
@@ -407,7 +405,7 @@ The advanced ruleSet applies fixed quasi-identifier generalization and policy-sp
 
 Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. Consistent pseudonyms are still produced within the project scope during processing, enabling longitudinal linkage in the de-identified dataset, without a retained reverse-mapping table. Any authorized retention of derivation secrets remains subject to §1:PXX.2.6.
 
-The De-ID Manager dispatches tasks asynchronously (DIS-ASYNC-TASK). Each De-Identifier accepts the task via ITI-x3 and the Manager retrieves the output via ITI-x7 polling after task completion. The DAC retrieves the de-identified HL7 FHIR output via ITI-x4 and delivers it to the SPE.
+The De-ID Manager dispatches tasks asynchronously (DIS-ASYNC-TASK). Each De-Identifier accepts the task via ITI-x3. The Manager polls via ITI-x7 for status and retrieves the output when the task completes. The DAC retrieves the de-identified HL7 FHIR output via ITI-x4 and delivers it to the SPE.
 
 ##### 1:PXX.4.2.2.2 AI/ML Method Development Process Flow
 
@@ -493,7 +491,7 @@ The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be groupe
 
 ### 1:PXX.5.3 Policy Integrity
 
-The De-ID Manager SHALL verify authorization consistency, integrity, schema conformance, and currency of every policy before job execution. When the Requester carries policy content (`policyContent`), the Manager SHALL verify the JWS signature and confirm the Library's canonical URL and version match the declared policy canonical and version. When the Manager resolves the policy itself, integrity is established by the Manager's resolution trust model (administrative provisioning, mutual TLS, or other mechanisms appropriate to the deployment). Authorization consistency means the declared policy URL and version match the approval. The Manager SHALL verify that the policy rules match the exact content bound to the approved version in either delivery mode. Policies that fail any validation point SHALL be rejected.
+The De-ID Manager or Integrated De-ID Manager/De-Identifier SHALL verify authorization consistency, integrity, schema conformance, and currency of the policy for every payload set before accepting an asynchronous job or starting synchronous execution. When the Requester carries policy content (`policyContent`), the Manager SHALL verify the JWS signature and confirm the Library's canonical URL and version match the declared policy canonical and version. When the Manager resolves the policy itself, integrity is established by the Manager's resolution trust model (administrative provisioning, mutual TLS, or other mechanisms appropriate to the deployment). Authorization consistency means the declared policy URL and version match the approval. The Manager SHALL verify that the policy rules match the exact content bound to the approved version in either delivery mode. Policies that fail any validation point SHALL be rejected.
 
 ### 1:PXX.5.4 Reversibility Material Custody
 
