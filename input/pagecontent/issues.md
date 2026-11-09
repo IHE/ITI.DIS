@@ -36,7 +36,7 @@ Considerations include Phase 1 scope, overlap with MHD Document Source grouping 
 
 #### Asynchronous Job and Task Cancellation
 
-**Proposal for committee review.** Add optional cancellation to [ITI-x4 Retrieve Job Output](volume-2.html#23x4-retrieve-job-output-iti-x4) and [ITI-x7 Retrieve Task Output](volume-2.html#23x7-retrieve-task-output-iti-x7). Each transaction would carry a cancellation message between its existing actors. The Requester would control its job through the Manager, which would coordinate cancellation across the De-Identifiers assigned to that job. [IHE ITI-22 §3.22.4.3](https://profiles.ihe.net/ITI/TF/Volume2/ITI-22.html) is a precedent for including an optional cancellation message in an existing transaction.
+**Phase 1 editorial draft.** The draft [DIS-CANCEL option](volume-1.html#asynchronous-cancellation-option) adds optional cancellation to [ITI-x4 Retrieve Job Output](volume-2.html#23x4-retrieve-job-output-iti-x4) and [ITI-x7 Retrieve Task Output](volume-2.html#23x7-retrieve-task-output-iti-x7). Each transaction would carry a cancellation message between its existing actors. The Requester would control its job through the Manager, which would coordinate cancellation across the De-Identifiers assigned to that job. [IHE ITI-22 §3.22.4.3](https://profiles.ihe.net/ITI/TF/Volume2/ITI-22.html) is a precedent for including an optional cancellation message in an existing transaction.
 
 | Exchange | Proposed message | Effect of acceptance |
 |---|---|---|
@@ -60,7 +60,7 @@ After accepting cancellation, the Manager accounts for each outstanding assignme
 - Repeat cancellation as the original authorized caller and as a caller with polling permission only. Verify a stable cancellation outcome for the authorized retry and denial without a state change or disclosure of cancellation details for the unauthorized caller.
 - Submit a cancellable job when an assignment requires synchronous dispatch or a De-Identifier without task cancellation support. Verify rejection before asynchronous acceptance. Repeat a valid cancellation with a transient downstream timeout and verify that the Manager does not report confirmed cancellation while the assignment's state is unknown.
 
-**Decisions for committee review.** Confirm whether to include optional cancellation in Phase 1. If included, specify how actors advertise support, how the Requester selects it for a job and the Manager confirms selection, and how polling represents pending and terminal cancellation. Define how the Manager recovers a task's polling URL after an ambiguous submission, how it reports unconfirmed downstream cancellation, and how long cancellation status remains available. These decisions would feed the Volume 1 option and actor tables, Volume 2 transaction text, capability declarations, and the Test Plan.
+**Decisions for committee review.** Review the [draft cancellation wire contract](volume-2.html#asynchronous-cancellation), including capability and selection signaling, the polling outcomes, and the declared confirmation and retention intervals. The draft reports unconfirmed cancellation when the Manager cannot establish that a remote assignment has stopped. Review whether an additional mechanism for recovering a lost task polling URL is needed.
 
 <a name="future-policy-management-transaction"> </a>
 

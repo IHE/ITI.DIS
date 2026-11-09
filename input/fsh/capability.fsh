@@ -27,6 +27,16 @@ Description: "One compatible payload binding, release, input manifest format, re
 * extension[action].value[x] 1..1
 * extension[action].value[x] only code
 
+Extension: DISCancellationSupport
+Id: dis-cancellation-support
+Title: "DIS Asynchronous Cancellation Support"
+Description: "The actor supports the DIS-CANCEL option on the job or task exchange identified by this submission operation and REST mode."
+* ^context[0].type = #element
+* ^context[0].expression = "CapabilityStatement.rest.operation"
+* value[x] 1..1
+* value[x] only boolean
+* valueBoolean = true (exactly)
+
 RuleSet: DISCapabilityRequirements(actor)
 * name = "{actor}"
 * status = #draft
@@ -40,7 +50,7 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "DIS De-Identification Requester"
 * insert DISCapabilityRequirements(DISRequester)
-* description = "The Requester submits a DIS Job Task directly to the ITI-x1 operation. When it declares DIS-ASYNC-JOB, it also polls the job URL using ITI-x4."
+* description = "The Requester submits a DIS Job Task directly to the ITI-x1 operation. When it declares DIS-ASYNC-JOB, it also polls the job URL using ITI-x4. With DIS-CANCEL it can request cancellable jobs and send ITI-x4 cancellation requests."
 * rest[0].mode = #client
 * rest[0].operation[0].name = "submit-dis-job"
 * rest[0].operation[0].definition = Canonical(submit-dis-job)
@@ -50,7 +60,7 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "DIS De-ID Manager"
 * insert DISCapabilityRequirements(DISManager)
-* description = "The Manager receives a direct DIS Job Task body in ITI-x1 and submits a direct DIS Execution Task body in ITI-x3. With DIS-ASYNC-JOB it serves ITI-x4 polling, and with DIS-ASYNC-TASK it initiates ITI-x7 polling."
+* description = "The Manager receives a direct DIS Job Task body in ITI-x1 and submits a direct DIS Execution Task body in ITI-x3. With DIS-ASYNC-JOB it serves ITI-x4 polling, and with DIS-ASYNC-TASK it initiates ITI-x7 polling. With DIS-CANCEL it accepts ITI-x4 cancellation requests and propagates them through ITI-x7."
 * rest[0].mode = #server
 * rest[0].operation[0].name = "submit-dis-job"
 * rest[0].operation[0].definition = Canonical(submit-dis-job)
@@ -63,7 +73,7 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "DIS De-Identifier"
 * insert DISCapabilityRequirements(DISDeIdentifier)
-* description = "The De-Identifier receives a direct DIS Execution Task body in ITI-x3 and publishes its compatible processing capabilities. With DIS-ASYNC-TASK it serves ITI-x7 polling."
+* description = "The De-Identifier receives a direct DIS Execution Task body in ITI-x3 and publishes its compatible processing capabilities. With DIS-ASYNC-TASK it serves ITI-x7 polling. With DIS-CANCEL it can accept ITI-x7 cancellation requests."
 * rest[0].mode = #server
 * rest[0].operation[0].name = "submit-dis-task"
 * rest[0].operation[0].definition = Canonical(submit-dis-task)
@@ -73,7 +83,7 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "DIS Integrated De-ID Manager/De-Identifier"
 * insert DISCapabilityRequirements(DISIntegrated)
-* description = "Standalone operation claims content conformance. When external submission is supported, the Integrated actor declares the ITI-x1 server operation and accepts a direct DIS Job Task body. With DIS-ASYNC-JOB it serves ITI-x4 polling."
+* description = "Standalone operation claims content conformance. When external submission is supported, the Integrated actor declares the ITI-x1 server operation and accepts a direct DIS Job Task body. With DIS-ASYNC-JOB it serves ITI-x4 polling. With DIS-CANCEL it can accept ITI-x4 cancellation requests for externally submitted jobs."
 * rest[0].mode = #server
 * rest[0].operation[0].name = "submit-dis-job"
 * rest[0].operation[0].definition = Canonical(submit-dis-job)
