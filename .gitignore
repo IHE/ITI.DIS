@@ -12,6 +12,7 @@
 /_genonce.sh
 /input/pagecontent/references
 /.claude
+/.codex/
 /docs
 /decisions
 /scripts/
