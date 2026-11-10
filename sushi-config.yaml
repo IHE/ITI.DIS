@@ -158,22 +158,22 @@ pages:
     title: "Synchronous Single R4 Patient (Informative)"
     generation: markdown
   examples-grouped-fhir-job.md:
-    title: "Job with R4 and R5 Payload Sets (Informative)"
+    title: "UC-2 – Job with R4 and R5 Payload Sets (Informative)"
     generation: markdown
   examples-staged-async.md:
-    title: "Staged Asynchronous Patient Job (Informative)"
+    title: "UC-1 and UC-2 – Staged Asynchronous Patient Job (Informative)"
     generation: markdown
   examples-reversible-pathology.md:
-    title: "Reversible Clinical Pathology Order (Informative)"
+    title: "UC-3 and UC-4 – Reversible Mapping in the Pathology Scenario (Informative)"
     generation: markdown
   examples-bulk-fhir-cohort.md:
-    title: "Bulk FHIR Cohort Job (Informative)"
+    title: "UC-1 – Bulk FHIR Cohort Job (Informative)"
     generation: markdown
   examples-standalone-export.md:
-    title: "Standalone Clinical Export (Informative)"
+    title: "UC-5 – Standalone Clinical Export (Informative)"
     generation: markdown
   examples-mixed-r5-dicom.md:
-    title: "Mixed R5 and DICOM Job (Informative)"
+    title: "UC-2 Extension – Mixed R5 and DICOM Job (Illustrative)"
     generation: markdown
   draft-native-payload-bindings.md:
     title: "Draft DICOM and CDA Payload Bindings"
@@ -216,12 +216,12 @@ menu:
   Examples:
     Policy Rules Examples: examples-policy-rules.html
     Synchronous Single R4 Patient: examples-single-r4-patient.html
-    Job with R4 and R5 Payload Sets: examples-grouped-fhir-job.html
-    Reversible Clinical Pathology Order: examples-reversible-pathology.html
-    Bulk FHIR Cohort Job: examples-bulk-fhir-cohort.html
-    Staged Asynchronous Patient Job: examples-staged-async.html
-    Standalone Clinical Export: examples-standalone-export.html
-    Mixed R5 and DICOM Job: examples-mixed-r5-dicom.html
+    "UC-1 – Bulk FHIR Cohort Job": examples-bulk-fhir-cohort.html
+    "UC-1 and UC-2 – Staged Asynchronous Patient Job": examples-staged-async.html
+    "UC-2 – Job with R4 and R5 Payload Sets": examples-grouped-fhir-job.html
+    "UC-3 and UC-4 – Reversible Mapping in the Pathology Scenario": examples-reversible-pathology.html
+    "UC-5 – Standalone Clinical Export": examples-standalone-export.html
+    "UC-2 Extension – Mixed R5 and DICOM Job (Illustrative)": examples-mixed-r5-dicom.html
   Artifacts: artifacts.html
   Other:
     Draft DICOM and CDA Payload Bindings: draft-native-payload-bindings.html

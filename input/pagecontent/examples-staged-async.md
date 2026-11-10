@@ -1,5 +1,5 @@
 <div markdown="1" class="stu-note">
-**Informative example.** The Patient, authorization, signing key, endpoints, and test salt are synthetic.
+**Informative example.** This walkthrough illustrates the stage handoff and release evidence in [UC-1](volume-1.html#1pxx421-use-case-1-cross-border-epidemiological-study-using-ips) and [UC-2](volume-1.html#uc-2). The Patient, authorization, signing key, endpoints, and test salt are synthetic.
 </div>
 
 A Requester submits one R4 Patient in payload set `staged-patient-r4`. The Manager assigns two asynchronous tasks to separate De-Identifiers. The preliminary worker replaces the source identifier and removes the name. The advanced worker receives only the validated intermediate Patient and reduces the birth date to its year.

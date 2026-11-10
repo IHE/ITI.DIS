@@ -37,11 +37,12 @@ This guide is organized into the following sections:
   - [Reversible Lookup Table and Examples](volume-3.html#3pxx5-reversible-lookup-table)
 - Examples
   - [Policy Rules Examples](examples-policy-rules.html)
-  - [Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)
-  - [Reversible Clinical Pathology Order](examples-reversible-pathology.html)
-  - [Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
-  - [Staged Asynchronous Patient Job](examples-staged-async.html)
-  - [Standalone Clinical Export](examples-standalone-export.html)
+  - [UC-1 – Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
+  - [UC-1 and UC-2 – Staged Asynchronous Patient Job](examples-staged-async.html)
+  - [UC-2 – Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)
+  - [UC-3 and UC-4 – Reversible Mapping in the Pathology Scenario](examples-reversible-pathology.html)
+  - [UC-5 – Standalone Clinical Export](examples-standalone-export.html)
+  - [UC-2 Extension – Mixed R5 and DICOM Job (Illustrative)](examples-mixed-r5-dicom.html)
 - Other
   - [Changes to Other IHE Specifications](other.html)
   - [Download and Analysis](download.html)

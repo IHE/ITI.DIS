@@ -2,7 +2,7 @@
 **Informative example.** All identifiers and mappings on this page are synthetic. In a deployment, the source identifiers, lookup tables, and effective salt are protected.
 </div>
 
-The Requester submits a pathology order for one patient. This example isolates the Patient resource from the order to show how DIS replaces the patient business identifier. The approved policy has a source-institution linkage scope with identifier `https://hospital.example.org/identifiers/linkage-scope|lab-project-2026`. The source pair is `https://hospital.example.org/identifiers/mrn|A123`. Both variants remove `Patient.name` and use reversible mode. See [Clinical Pathology Order](volume-1.html#1pxx423-use-case-3-clinical-pathology-order-pseudonymous-care).
+The Requester submits a pathology order for one patient. This example isolates the Patient resource from the order to show how DIS replaces the patient business identifier. The approved policy has a source-institution linkage scope with identifier `https://hospital.example.org/identifiers/linkage-scope|lab-project-2026`. The source pair is `https://hospital.example.org/identifiers/mrn|A123`. Both variants remove `Patient.name` and use reversible mode. See [UC-3 Clinical Pathology Order](volume-1.html#1pxx423-use-case-3-clinical-pathology-order-pseudonymous-care). The Manager-managed variant also illustrates the hospital-side mapping and evidence flow for [UC-4 Cloud Decision Support](volume-1.html#1pxx424-use-case-4-ai-assisted-clinical-decision-support-cloud-deployment).
 
 ## Synchronous Job with an Asynchronous Task
 
