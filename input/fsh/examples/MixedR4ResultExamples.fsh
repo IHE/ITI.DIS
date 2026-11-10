@@ -3,6 +3,7 @@
 Instance: mixed-r4-result-of-Bundle
 InstanceOf: DISResultPackage
 Usage: #example
+Title: "mixed-r4-result"
 * id = "mixed-r4-result"
 * type = #collection
 * entry[0].fullUrl = "urn:uuid:2ad2439f-352e-526c-b6be-05f7f08dfedb"
@@ -15,6 +16,7 @@ Usage: #example
 Instance: mixed-r4-result-of-Parameters
 InstanceOf: Parameters
 Usage: #example
+Title: "mixed-r4-result"
 * id = "mixed-r4-result"
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"

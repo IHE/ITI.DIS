@@ -3,6 +3,7 @@
 Instance: bulk-r4-result-of-Bundle
 InstanceOf: DISResultPackage
 Usage: #example
+Title: "bulk-r4-result"
 * id = "bulk-r4-result"
 * type = #collection
 * entry[0].fullUrl = "urn:uuid:b75fb8e1-47e9-593d-a3e0-83797715a3c7"
@@ -19,6 +20,7 @@ Usage: #example
 Instance: bulk-r4-result-of-Parameters
 InstanceOf: Parameters
 Usage: #example
+Title: "bulk-r4-result"
 * id = "bulk-r4-result"
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"

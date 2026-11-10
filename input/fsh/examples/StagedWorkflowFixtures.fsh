@@ -10,6 +10,7 @@ RuleSet: StagedPatientInputAttachment(path)
 Instance: staged-async-advanced-plan
 InstanceOf: DISExecutionPlan
 Usage: #example
+Title: "StagedAsyncAdvancedPlan"
 * meta.versionId = "1"
 * url = "https://dis.example.org/plans/staged-async-advanced-plan"
 * version = "1.0"
@@ -111,6 +112,7 @@ Usage: #example
 Instance: staged-async-preliminary-plan
 InstanceOf: DISExecutionPlan
 Usage: #example
+Title: "StagedAsyncPreliminaryPlan"
 * meta.versionId = "1"
 * url = "https://dis.example.org/plans/staged-async-preliminary-plan"
 * version = "1.0"
@@ -174,6 +176,7 @@ Usage: #example
 Instance: staged-patient
 InstanceOf: DISPolicy
 Usage: #example
+Title: "StagedPatientPolicy"
 * meta.versionId = "1"
 * url = "https://governance.example.org/policies/staged-patient"
 * version = "1.0"

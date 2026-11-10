@@ -48,6 +48,7 @@ Usage: #example
 Instance: standalone-export-policy
 InstanceOf: DISPolicy
 Usage: #example
+Title: "StandaloneExportPolicy"
 * meta.versionId = "1"
 * url = "https://export.example.org/fhir/Library/standalone-export-policy"
 * version = "1.0"
