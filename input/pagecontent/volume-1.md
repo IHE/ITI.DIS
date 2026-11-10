@@ -416,11 +416,11 @@ The [staged asynchronous example](examples-staged-async.html) shows the task seq
 
 #### 1:PXX.4.2.2 Use Case 2: FHIR Input Preparation for Multimodal AI/ML
 
-An AI/ML consortium develops or validates cancer models using clinical records, laboratory results, radiology, and other data. Phase 1 DIS prepares the structured FHIR inputs, including measurements derived from images. Native DICOM processing is outside Phase 1. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows how a future binding could add a separate native imaging payload set to the same job.
+An AI/ML consortium prepares a lung cancer cohort for model development or validation. The approved data include clinical records, laboratory results, and structured CT measurements. Phase 1 DIS prepares these FHIR inputs for the cohort release. Native DICOM processing is outside Phase 1. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows how a future binding could add a separate native imaging payload set to the same job.
 
 ##### 1:PXX.4.2.2.1 AI/ML Method Development Use Case Description
 
-The consortium holds a data permit identifying the approved inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous R4 Job Task through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical and laboratory records. The other declares R5 and carries structured imaging measurements, such as the longest tumor diameter measured on CT as an [R5 Observation](https://hl7.org/fhir/R5/observation.html). The DIS requests, responses, and evidence use R4 for both sets.
+The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous R4 Job Task through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and carries CT-derived measurements as [R5 Observation](https://hl7.org/fhir/R5/observation.html) resources. The DIS requests, responses, and evidence use R4 for both sets.
 
 The Manager validates the permit and both approved policies before accepting the job. The clinical set uses two assigned ruleSets. The preliminary ruleSet assigns irreversible pseudonyms under the policy's `identity-linkage-scope`. Matching source identifier pairs produce consistent pseudonyms when the tasks use the same authorized scope, effective salt and salt version, and compatible derivation parameters. The advanced ruleSet applies fixed quasi-identifier generalization and policy-specified record-level suppression to validated preliminary output. Any dataset-level assessment or processing occurs outside DIS before release to the SPE.
 
@@ -430,7 +430,7 @@ Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity
 
 The Manager compiles one plan per assigned ruleSet and payload set, submits asynchronous R4 Execution Tasks through ITI-x3, and retrieves their results through ITI-x7. It validates the preliminary clinical result before dispatching the advanced clinical task. After validating both final results and rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4, including staged release Provenance for the clinical set. The DAC delivers the approved FHIR output to the SPE outside DIS.
 
-The [grouped FHIR job example](examples-grouped-fhir-job.html) shows R4 clinical and laboratory records and an R5 imaging-derived measurement in one job, using one task per set to focus on version-specific packaging. The [staged asynchronous example](examples-staged-async.html) shows the two-stage handoff and evidence separately.
+The [grouped FHIR job example](examples-grouped-fhir-job.html) uses sample records from the clinical, lab, and CT datasets to show how one job packages R4 and R5 payload sets. It uses one task per set. The [staged asynchronous example](examples-staged-async.html) shows the two-stage handoff and evidence separately.
 
 ##### 1:PXX.4.2.2.2 AI/ML Method Development Process Flow
 
