@@ -36,11 +36,14 @@ dependencies:
     version: 1.1.x
 
 
+instanceOptions:
+  # Assign inline resource IDs explicitly where the examples carry them.
+  setId: standalone-only
+
 parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+Parameters
   path-resource:
     - input/resources
     - fsh-generated/resources
-    - input/examples
 #  path-pages:
 #    - input/pagecontent
 #    - fsh-generated/includes
