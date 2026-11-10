@@ -3,7 +3,7 @@
 Extension: DISProcessingCapability
 Id: dis-processing-capability
 Title: "DIS Processing Capability"
-Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. The actions listed are supported together for that combination."
+Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. For the Phase 1 FHIR payload binding, the input and result formats match. The actions listed are supported together for that combination."
 * ^context[0].type = #element
 * ^context[0].expression = "CapabilityStatement"
 * value[x] 0..0
@@ -26,6 +26,16 @@ Description: "One compatible payload binding, release, input manifest format, re
 * extension[reversibilityMode].value[x] only code
 * extension[action].value[x] 1..1
 * extension[action].value[x] only code
+
+Extension: DISAsyncSupport
+Id: dis-async-support
+Title: "DIS Asynchronous Processing Support"
+Description: "The actor supports asynchronous processing and polling on the job or task exchange identified by this submission operation and REST mode."
+* ^context[0].type = #element
+* ^context[0].expression = "CapabilityStatement.rest.operation"
+* value[x] 1..1
+* value[x] only boolean
+* valueBoolean = true (exactly)
 
 Extension: DISCancellationSupport
 Id: dis-cancellation-support

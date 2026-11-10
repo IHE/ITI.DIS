@@ -54,6 +54,36 @@ Audit records SHALL distinguish a new submission, a recovery request, a poll, a 
 
 ## Shared Asynchronous Polling Lifecycle
 
+<a name="asynchronous-capability-declaration"></a>
+
+### Capability declaration
+
+An actor declaring DIS-ASYNC-JOB or DIS-ASYNC-TASK SHALL include one [DIS Asynchronous Processing Support extension](StructureDefinition-dis-async-support.html) with `valueBoolean = true` on the corresponding `CapabilityStatement.rest.operation` entry of its implementation CapabilityStatement. The operation definition and REST mode identify the exchange and role.
+
+| Option | Operation entry | Client | Server |
+|---|---|---|---|
+| DIS-ASYNC-JOB | `submit-dis-job` | De-Identification Requester | De-ID Manager or externally invoked Integrated actor |
+| DIS-ASYNC-TASK | `submit-dis-task` | De-ID Manager | De-Identifier |
+{: .grid}
+
+An implementation SHALL omit the extension on entries for which it does not support asynchronous processing. Before selecting asynchronous processing with `Prefer: respond-async`, the initiator SHALL verify the peer's declaration on the corresponding server entry. For example, a De-Identifier supporting asynchronous task processing includes the following operation entry under `rest.mode = server`.
+
+```json
+{
+  "name": "submit-dis-task",
+  "definition": "https://profiles.ihe.net/ITI/DIS/OperationDefinition/submit-dis-task",
+  "documentation": "Terminal polling outcomes and submission replay records are each retained for at least 24 hours.",
+  "extension": [
+    {
+      "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-async-support",
+      "valueBoolean": true
+    }
+  ]
+}
+```
+
+### Polling and retention
+
 For ITI-x4 and ITI-x7, the responder SHALL keep the polling URL usable while processing is pending. It SHALL document a minimum terminal retention period in the applicable submission server operation's CapabilityStatement documentation. The period starts when a terminal outcome is recorded. During that period the responder SHALL keep the polling URL and terminal outcome available, subject to current retrieval authorization and the result release rules. For accepted cancellation, also apply the [cancellation retention rules](#asynchronous-cancellation). An expired polling URL is a retrieval error.
 
 <a name="submission-retries"> </a>
@@ -88,7 +118,7 @@ This contract applies to implementations declaring [DIS-CANCEL](volume-1.html#as
 
 ### Capability and submission
 
-An actor declaring DIS-CANCEL SHALL include one [DIS Asynchronous Cancellation Support extension](StructureDefinition-dis-cancellation-support.html) with `valueBoolean = true` on the applicable `CapabilityStatement.rest.operation` entries. Use the `submit-dis-job` client entry for the Requester and the server entry for the Manager or externally invoked Integrated actor. Use the `submit-dis-task` client entry for the Manager and the server entry for the De-Identifier. Before requesting cancellable mode, the initiator SHALL verify the peer's corresponding server declaration.
+An actor declaring DIS-CANCEL SHALL include one [DIS Asynchronous Cancellation Support extension](StructureDefinition-dis-cancellation-support.html) with `valueBoolean = true` on the applicable `CapabilityStatement.rest.operation` entries. Place it alongside the [asynchronous processing support extension](#asynchronous-capability-declaration) on each operation entry where the actor supports cancellation. Before requesting cancellable mode, the initiator SHALL verify both extensions on the peer's corresponding server entry.
 
 The initiator selects cancellable mode by sending both `Prefer: respond-async` and `DIS-Cancellation: required` on ITI-x1 or ITI-x3. The latter is a DIS requirement on the exchange. The receiver SHALL reject a request that uses it without `Prefer: respond-async` with HTTP 400 and an R4 `OperationOutcome`. If the receiver cannot accept cancellable work, it SHALL return HTTP 422 and an R4 `OperationOutcome` without accepting the work. On successful admission in cancellable mode, it SHALL return `202 Accepted` with both `Content-Location` and `DIS-Cancellation: enabled`. The initiator SHALL consider cancellation available only after receiving both headers. A submission without the cancellation requirement uses the ordinary submission and polling contract.
 
@@ -96,7 +126,7 @@ Before accepting a cancellable distributed job, the Manager SHALL verify that th
 
 ### Cancellation and polling responses
 
-The initiator SHALL send an authorized `DELETE` with an empty body to the exact `Content-Location` returned at submission. The receiver SHALL enforce cancellation authorization independently of polling authorization. It SHALL return HTTP 401 for missing or invalid credentials and HTTP 403 for an authenticated caller without cancellation permission. For an authorized caller of a polling URL whose work item was accepted without cancellable mode, it SHALL return HTTP 405 with `Allow: GET`. These responses SHALL include an R4 `OperationOutcome` without changing the work item state or disclosing cancellation details. The following responses apply to authorized cancellation requests and authorized polls of the same URL. Cancellation state responses SHALL contain `Cache-Control: no-store` and SHALL withhold all results for the work item. The receiver SHALL document its maximum pending confirmation interval and minimum terminal cancellation status retention period in the corresponding server operation's CapabilityStatement documentation. The confirmation interval starts when cancellation is accepted and the retention period starts when a terminal cancellation outcome is recorded. The receiver SHALL keep the polling URL available through both intervals.
+The initiator SHALL send an authorized `DELETE` with an empty body to the exact `Content-Location` returned at submission. The receiver SHALL enforce cancellation authorization independently of polling authorization. It SHALL return HTTP 401 for missing or invalid credentials and HTTP 403 for an authenticated caller without cancellation permission. For an authorized caller of a polling URL whose work item was accepted without cancellable mode, it SHALL return HTTP 405 with `Allow: GET`. These responses SHALL include an R4 `OperationOutcome` without changing the work item state or disclosing cancellation details. The following responses apply to authorized cancellation requests and authorized polls of the same URL. Cancellation state responses SHALL contain `Cache-Control: no-store` and SHALL withhold all results for the work item. The receiver SHALL document its maximum pending confirmation interval and minimum terminal cancellation status retention period in the corresponding server operation's CapabilityStatement documentation. The confirmation interval starts when cancellation is accepted. The retention period starts when the receiver first records `cancelled` or `unconfirmed`. The receiver SHALL keep the polling URL available through both intervals.
 
 | State or outcome | Response to cancellation request | Response to subsequent poll |
 |---|---|---|
@@ -107,7 +137,7 @@ The initiator SHALL send an authorized `DELETE` with an empty body to the exact 
 
 {: .grid}
 
-For pending cancellation, the receiver SHOULD include `Retry-After` in seconds. A repeated authorized `DELETE` while cancellation is pending or its outcome is retained SHALL report the recorded state without restarting work or cancellation. After the documented retention period, the ordinary expired URL response applies. An HTTP 410 or 422 without the specified `DIS-Cancellation` value SHALL NOT be treated as a cancellation outcome. An endpoint outage, missing response, authorization denial, or expired polling URL SHALL NOT be treated as proof that the work stopped.
+For pending cancellation, the receiver SHOULD include `Retry-After` in seconds. A repeated authorized `DELETE` while cancellation is pending or its outcome is retained SHALL report the recorded state without restarting work or cancellation. If the receiver establishes that cancellation is confirmed after recording `unconfirmed` and while the polling URL remains available, it SHALL record `cancelled` and return the confirmed cancellation responses on subsequent requests. The minimum cancellation retention period starts again when the receiver records this confirmation. Once the polling URL expires, the ordinary expired URL response applies. An HTTP 410 or 422 without the specified `DIS-Cancellation` value SHALL NOT be treated as a cancellation outcome. An endpoint outage, missing response, authorization denial, or expired polling URL SHALL NOT be treated as proof that the work stopped.
 
 The receiver SHALL resolve the race between accepting cancellation and making the terminal processing outcome available. If cancellation takes effect first, it SHALL prevent release of results for the work item and apply the existing cleanup requirements. If the terminal processing outcome takes effect first, cancellation leaves that outcome in place. Each actor SHALL audit cancellation requests and outcomes using the applicable DIS audit requirements.
 
@@ -374,7 +404,7 @@ The De-Identifier SHALL apply the [shared identifier and retry rules](#submissio
 
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
-The De-Identifier SHALL verify that the task's payload binding and version are within its declared capabilities. If the task specifies a payload binding or version that the De-Identifier does not support, the De-Identifier SHALL reject the task with an OperationOutcome.
+Before accepting the task, the De-Identifier SHALL verify that the task's processing combination and required actions are within its declared capabilities. For the Phase 1 FHIR payload binding, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an unsupported combination or action with HTTP 422 and an R4 OperationOutcome.
 
 The De-Identifier SHALL retrieve the assigned processing targets using the [retrieval authorization rules](volume-3.html#obtaining-processing-targets) and verify the declared payload release before transformation.
 
@@ -415,7 +445,7 @@ The De-Identifier returns one of the HTTP status codes described below.
 | `validationStatus` | 1..1 | code | Per-task validation outcome |
 {: .grid}
 
-The De-Identifier SHALL return one `payloadResult` matching the dispatched `setId`, binding, and version, with its evidence.
+The De-Identifier SHALL return one `payloadResult` matching the dispatched `setId`, binding, and version, with its evidence. For the Phase 1 FHIR payload binding, the result `manifestFormat` SHALL match the assigned input manifest format. The Manager SHALL reject a task result with a different manifest format. This rule also applies to ITI-x7 success.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-TASK).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x7.
 
@@ -423,7 +453,7 @@ The De-Identifier SHALL return one `payloadResult` matching the dispatched `setI
 
 **401 Unauthorized / 403 Forbidden.** The response body is an R4 `OperationOutcome` describing the authorization failure.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's payload binding, payload version, or required transformation actions fall outside the De-Identifier's declared capabilities or that the requested asynchronous or cancellable mode is unavailable.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's processing combination or required transformation actions fall outside the De-Identifier's declared capabilities or that the requested asynchronous or cancellable mode is unavailable.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the execution failure. No partial output is returned.
 
@@ -443,7 +473,7 @@ In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager S
 
 ### 2:3.x3.5 CapabilityStatement Resource
 
-The [De-Identifier capability requirements](CapabilityStatement-DIS-De-Identifier.html) identify the system-level operation. A De-Identifier implementing this transaction SHALL declare `$submit-dis-task` and its supported processing combinations on its implementation CapabilityStatement. Each [DIS Processing Capability](StructureDefinition-dis-processing-capability.html) instance declares one binding, release, input manifest format, result manifest format and reversibility mode, with the actions the actor supports together. The Manager SHALL match the whole combination and all required actions within a single entry before dispatch. The implementation SHALL document parameter restrictions and any separately negotiated protected transformation inputs in the CapabilityStatement documentation for the operation.
+The [De-Identifier capability requirements](CapabilityStatement-DIS-De-Identifier.html) identify the system-level operation. A De-Identifier implementing this transaction SHALL declare `$submit-dis-task` and its supported processing combinations on its implementation CapabilityStatement. Each [DIS Processing Capability](StructureDefinition-dis-processing-capability.html) instance declares one binding, release, input manifest format, result manifest format and reversibility mode, with the actions the actor supports together. For the Phase 1 FHIR payload binding, an advertised entry SHALL use the same code for `inputFormat` and `resultFormat`. The Manager SHALL match the whole combination and all required actions within a single entry before dispatch. The implementation SHALL document parameter restrictions and any separately negotiated protected transformation inputs in the CapabilityStatement documentation for the operation.
 
 The De-ID Manager implementing this transaction SHALL provide a CapabilityStatement Resource indicating that it can invoke the `$submit-dis-task` operation.
 
@@ -559,9 +589,9 @@ The Manager SHALL report confirmed cancellation only after local work has stoppe
 
 ### 2:3.x4.5 CapabilityStatement Resource
 
-The De-ID Manager and Integrated De-ID Manager/De-Identifier declaring DIS-ASYNC-JOB SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) indicating support for the ITI-x4 polling interaction.
+The De-ID Manager and Integrated De-ID Manager/De-Identifier declaring DIS-ASYNC-JOB SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) declaring support for the ITI-x4 polling interaction as specified in the [shared capability declaration](#asynchronous-capability-declaration).
 
-The De-Identification Requester declaring DIS-ASYNC-JOB SHALL provide a CapabilityStatement Resource indicating that it can perform the ITI-x4 polling interaction. Actors supporting cancellation SHALL also declare DIS-CANCEL as specified in the [shared cancellation contract](#asynchronous-cancellation).
+The De-Identification Requester declaring DIS-ASYNC-JOB SHALL provide a CapabilityStatement Resource declaring that it can perform the ITI-x4 polling interaction using the same extension on its client entry. Actors supporting cancellation SHALL also declare DIS-CANCEL as specified in the [shared cancellation contract](#asynchronous-cancellation).
 
 ### 2:3.x4.6 Security Considerations
 
@@ -667,9 +697,9 @@ If the De-Identifier reports that an assignment was already terminal, the Manage
 
 ### 2:3.x7.5 CapabilityStatement Resource
 
-The De-Identifier declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) indicating support for the ITI-x7 polling interaction.
+The De-Identifier declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) declaring support for the ITI-x7 polling interaction as specified in the [shared capability declaration](#asynchronous-capability-declaration).
 
-The De-ID Manager declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource indicating that it can perform the ITI-x7 polling interaction. Actors supporting cancellation SHALL also declare DIS-CANCEL as specified in the [shared cancellation contract](#asynchronous-cancellation).
+The De-ID Manager declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource declaring that it can perform the ITI-x7 polling interaction using the same extension on its client entry. Actors supporting cancellation SHALL also declare DIS-CANCEL as specified in the [shared cancellation contract](#asynchronous-cancellation).
 
 ### 2:3.x7.6 Security Considerations
 

@@ -729,11 +729,11 @@ The job request identifies the proposed processing targets. The task request ide
 
 | Exchange | Delivery attachment |
 |---|---|
-| Input | `payload.manifest` |
+| Input | `Task.input.valueAttachment` on the `payload-set` input |
 | Result | `payloadResult.resultPackage` |
 {: .grid}
 
-For both exchanges, use `dis-resource-list` for bundled or hosted FHIR resources, or `fhir-bulk-data` for bulk files. A single inline R4 input uses an R4 manifest package containing the List and that resource. Its result uses a DIS Result Package. The Manager MAY repackage inline or hosted inputs at dispatch while preserving the authorized content and set identity.
+For both exchanges, use `dis-resource-list` for bundled or hosted FHIR resources, or `fhir-bulk-data` for bulk files. A single inline R4 input uses an R4 manifest package containing the List and that resource. Its result uses a DIS Result Package. The FHIR task result uses the same manifest format as the assigned input, as specified in [ITI-x3](volume-2.html#23x3422-message-semantics). The Manager MAY repackage inline or hosted inputs at dispatch while preserving the authorized content and set identity.
 
 <a name="resource-manifest"> </a>
 
@@ -849,7 +849,7 @@ The Manager SHALL reject the job if it cannot establish that the identified data
 
 ##### 3:PXX.3.2.2.5 Inline R5 Manifest Package Example
 
-For inline submission, carry the following R4 collection as the serialized `payload.manifest.valueAttachment.data` with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The inner attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
+For inline submission, carry the following R4 collection as the serialized `Task.input.valueAttachment.data` on the `payload-set` input with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The inner attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
 
 ```json
 {
