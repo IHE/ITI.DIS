@@ -8,7 +8,7 @@ Description: "Identifies the two kinds of submitted DIS work orders."
 * ^caseSensitive = true
 * ^content = #complete
 * #de-identification-job "De-identification job"
-* #de-identification-execution "De-identification execution assignment"
+* #de-identification-execution "De-identification task"
 
 CodeSystem: DISTaskInput
 Id: dis-task-input
