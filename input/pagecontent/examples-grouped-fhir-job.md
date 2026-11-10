@@ -1,8 +1,8 @@
 <div markdown="1" class="stu-note">
-**Informative example.** This synthetic job illustrates the version-specific packaging in [Use Case 2](volume-1.html#uc-2) using one task per set. The two policies demonstrate selected field removals. Release of real data requires a policy appropriate to the approved use and the identifying content in the input.
+**Informative example.** This synthetic job illustrates [UC-2 FHIR Input Preparation for Multimodal AI/ML](volume-1.html#uc-2). The job is asynchronous and each worker task is synchronous. The two policies demonstrate selected field removals. Release of real data requires a policy appropriate to the approved use and the identifying content in the input.
 </div>
 
-The cohort job has two payload sets. One contains **R4 clinical records and laboratory results** and the other contains **R5 CT-derived measurements**. The walkthrough uses a hosted Patient and a linked lab result as sample records for the first set and an inline CT measurement for the second set. Each set uses its own policy and declared FHIR version. The permit authorizes independent analysis of the CT measurements. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows how a separate payload set could carry native CT images. The Job Task, Execution Tasks, Parameters, manifests, wrappers, and Provenance all use R4.
+The cohort job has two payload sets. One contains **R4 clinical records and laboratory results** and the other contains **R5 CT-derived measurements**. The walkthrough uses a hosted Patient and a linked lab result as sample records for the first set and an inline CT measurement for the second set. Each set uses its own policy and declared FHIR version. The permit authorizes independent analysis of the CT measurements. The [illustrative FHIR and DICOM extension](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) shows how a separate payload set could carry native CT images. The Job Task, Execution Tasks, Parameters, manifests, wrappers, and Provenance all use R4.
 
 <a name="grouped-fhir-submission"> </a>
 
@@ -20,7 +20,7 @@ Each Job Task input names the versioned policy approved for that set. The hosted
 | `imaging-measurement-r5` | An [inline R4 manifest package](Bundle-grouped-fhir-r5-input.html) contains a List and a wrapper whose attachment carries the serialized R5 Observation. | Syntax-Level policy `imaging-subject-removal` version `1.0` removes `Observation.subject` in R5. |
 {: .grid}
 
-The Manager verifies the permit, resolves and validates both policies, and establishes the authorized target sets. On acceptance, it returns `202 Accepted` with `Content-Location: https://dis.example.org/jobs/job-51`. See [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1).
+The Manager verifies the permit, resolves and validates both policies, and establishes the authorized target sets. On acceptance, it returns `202 Accepted` with `Content-Location: https://dis.example.org/jobs/job-51`. If the acceptance response is lost, the Requester repeats the original request bytes and processing selections with `DIS-Submission: recover`. The Manager returns the same polling URL with `DIS-Submission: replayed`, and the job runs once. See [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) and the [recovery rules](volume-2.html#submission-retries).
 
 <a name="grouped-fhir-dispatch"> </a>
 
@@ -40,6 +40,6 @@ Both synchronous task responses use `200 OK` and include the corresponding `payl
 
 ## Retrieve the Job Result
 
-The Requester polls `GET https://dis.example.org/jobs/job-51` with authorized credentials. A poll before completion returns `202 Accepted` with no result body. After both task results pass validation and the Manager rechecks release authorization, it returns `200 OK` with the [ITI-x4 result](Parameters-grouped-fhir-job-result.html). The response contains one `payloadResult` per submitted set, with each set's manifest and evidence.
+The Requester polls `GET https://dis.example.org/jobs/job-51` with authorized credentials. A poll before completion returns `202 Accepted` with no result body. After both task results pass validation and the Manager rechecks release authorization, it returns `200 OK` with the [ITI-x4 result](Parameters-grouped-fhir-job-result.html). The response contains one `payloadResult` per submitted set, with each set's manifest and evidence. The Requester delivers both approved FHIR sets to the Secure Processing Environment outside DIS.
 
 In the failure variant, the versioned Patient becomes inaccessible after acceptance. The imaging measurement task may already have succeeded. The Manager fails the job and returns the [example OperationOutcome](OperationOutcome-grouped-fhir-job-failure.html) with HTTP 422 on the next authorized poll. Both result sets are withheld. See [ITI-x4](volume-2.html#23x4-retrieve-job-output-iti-x4).

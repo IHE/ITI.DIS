@@ -1,40 +1,28 @@
 sequenceDiagram
     participant DAC as De-Identification Requester<br/>(DAC)
     participant MGR as De-ID Manager
-    participant DI_P as De-Identifier<br/>(Preliminary clinical)
-    participant DI_A as De-Identifier<br/>(Advanced clinical)
-    participant DI_I as De-Identifier<br/>(Imaging measurement)
+    participant DI_C as De-Identifier<br/>(R4 clinical and lab)
+    participant DI_I as De-Identifier<br/>(R5 CT measurements)
 
-    Note over DAC,MGR: Permit and approved policies available<br/>R4 clinical set and R5 imaging measurement set
     DAC->>MGR: ITI-x1 Submit Job (R4 Job Task, async)
-    Note over MGR: Validate authorization and both policies<br/>before accepting the job
-    Note over DAC,MGR: If admission fails, return a synchronous error and stop
+    Note over MGR: Validate permit and both policies<br/>before accepting the job
     MGR-->>DAC: 202 Accepted, Content-Location job-url
+    opt Acceptance response lost
+        DAC->>MGR: Repeat ITI-x1 with DIS-Submission: recover
+        MGR-->>DAC: 202 Accepted, same URL, DIS-Submission: replayed
+    end
 
-    Note over MGR: Compile one plan per assigned ruleSet<br/>and payload set
-    MGR->>DI_P: ITI-x3 Submit Task (R4 Execution Task, preliminary clinical)
-    Note over DI_P: Requested pseudonymization<br/>under the authorized linkage scope
-    DI_P-->>MGR: 202 Accepted, Content-Location preliminary-url
+    MGR->>DI_C: ITI-x3 Submit Task (R4 clinical set, sync)
+    Note over DI_C: Requested removal of Patient.name<br/>and retention of lab links
+    DI_C-->>MGR: 200 OK (R4 clinical result and evidence)
 
     DAC->>MGR: ITI-x4 GET job-url
-    MGR-->>DAC: 202 Accepted (in progress, Retry-After)
+    MGR-->>DAC: 202 Accepted (in progress)
 
-    MGR->>DI_P: ITI-x7 GET preliminary-url
-    DI_P-->>MGR: 200 OK (preliminary output and evidence)
-    Note over MGR: Validate preliminary output<br/>before advanced dispatch
-    MGR->>DI_A: ITI-x3 Submit Task (R4 Execution Task, validated preliminary clinical input)
-    Note over DI_A: Requested fixed generalization<br/>and record-level suppression
-    DI_A-->>MGR: 202 Accepted, Content-Location advanced-url
-
-    MGR->>DI_I: ITI-x3 Submit Task (R4 Execution Task, R5 measurement)
-    Note over DI_I: Requested removal<br/>of the patient reference
-    DI_I-->>MGR: 202 Accepted, Content-Location imaging-url
-
-    MGR->>DI_A: ITI-x7 GET advanced-url
-    DI_A-->>MGR: 200 OK (final clinical output and evidence)
-    MGR->>DI_I: ITI-x7 GET imaging-url
-    DI_I-->>MGR: 200 OK (final measurement and evidence)
-    Note over MGR: Validate both sets and recheck authorization<br/>Record staged release Provenance for the clinical set
+    MGR->>DI_I: ITI-x3 Submit Task (R5 measurement set, sync)
+    Note over DI_I: Requested removal of the patient reference
+    DI_I-->>MGR: 200 OK (R5 measurement result and R4 evidence)
+    Note over MGR: Validate both sets and recheck<br/>release authorization
     DAC->>MGR: ITI-x4 GET job-url
     MGR-->>DAC: 200 OK (R4 Parameters with both sets and evidence)
-    Note over DAC: Deliver both FHIR sets to the SPE<br/>(outside DIS)
+    Note over DAC: Deliver both approved sets to the SPE<br/>(outside DIS)

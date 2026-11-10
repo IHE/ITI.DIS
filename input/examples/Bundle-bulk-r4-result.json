@@ -93,7 +93,7 @@
           ]
         },
         "policy": [
-          "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+          "https://governance.example.org/fhir/Library/uc1-bulk-cohort-policy/_history/1"
         ],
         "agent": [
           {
@@ -108,7 +108,7 @@
             "who": {
               "identifier": {
                 "system": "https://dis.example.org/identifiers/worker",
-                "value": "integrated-fixture"
+                "value": "example-advanced-worker"
               }
             }
           }
@@ -120,7 +120,7 @@
           },
           {
             "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-ruleset",
-            "valueString": "remove-direct-link"
+            "valueString": "generalize-birth-date"
           },
           {
             "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-reversibility",
@@ -134,10 +134,92 @@
             "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
             "valueIdentifier": {
               "system": "https://dis.example.org/identifiers/audit",
-              "value": "job-single-r4-inline"
+              "value": "example-uc1-advanced-task"
             }
           }
         ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:887f26cc-3962-51c5-81bd-c7bb6c0b5aca",
+      "resource": {
+        "resourceType": "Provenance",
+        "meta": {
+          "profile": [
+            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-StagedReleaseEvidence"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The De-ID Manager validated both stages before releasing the cohort files.</p></div>"
+        },
+        "target": [
+          {
+            "reference": "urn:uuid:f08e76ae-88a8-554a-9b3a-123c8dc56154"
+          },
+          {
+            "reference": "urn:uuid:5cfceb42-65e1-5687-b7a7-8553eb2928e7"
+          }
+        ],
+        "recorded": "2026-11-06T03:00:31Z",
+        "policy": [
+          "https://governance.example.org/fhir/Library/uc1-bulk-cohort-policy/_history/1"
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "identifier": {
+                "system": "https://dis.example.org/identifiers/manager",
+                "value": "example-de-id-manager"
+              }
+            }
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validated-stage",
+            "extension": [
+              {
+                "url": "sequence",
+                "valuePositiveInt": 1
+              },
+              {
+                "url": "stageId",
+                "valueString": "preliminary"
+              },
+              {
+                "url": "ruleSetId",
+                "valueString": "pseudonymize-patient"
+              }
+            ]
+          },
+          {
+            "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-validated-stage",
+            "extension": [
+              {
+                "url": "sequence",
+                "valuePositiveInt": 2
+              },
+              {
+                "url": "stageId",
+                "valueString": "advanced"
+              },
+              {
+                "url": "ruleSetId",
+                "valueString": "generalize-birth-date"
+              }
+            ]
+          }
+        ],
+        "id": "bulk-release-evidence"
       }
     }
   ],

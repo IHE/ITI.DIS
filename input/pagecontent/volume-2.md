@@ -38,7 +38,7 @@ Each request set uses a coded Task input with a manifest attachment and [DIS Pay
 
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.
 
-See the [UC-2 job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples and the [reversible mapping walkthrough for UC-3 and UC-4](examples-reversible-pathology.html) for a synchronous job with a deferred task.
+See the [UC-2 job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples and the [UC-3 pathology order](examples-reversible-pathology.html) and [UC-4 cloud decision support](examples-cloud-decision-support.html) examples for synchronous jobs and tasks.
 
 <a name="transaction-authorization"> </a>
 
@@ -119,7 +119,7 @@ The receiver SHALL resolve the race between accepting cancellation and making th
 
 The Submit De-Identification Job transaction is used by the De-Identification Requester to submit a de-identification job to the De-ID Manager (or Integrated De-ID Manager/De-Identifier). The submission declares the approved de-identification policy by canonical URL and version, presents evidence of the approved data request, and includes references to the processing targets. The Requester may optionally carry the JWS-signed policy content directly. The de-identification policy is a reusable knowledge artifact that may be approved for multiple independent data requests. The De-ID Manager validates the submission, verifies that the presented policy matches the policy approved in the data request authorization, compiles the policy into a payload-specific execution plan, orchestrates task execution via ITI-x3 (or executes internally for the Integrated actor), and returns de-identified output and provenance evidence. The transaction supports both synchronous and asynchronous response modes.
 
-See the informative example of [submitting a job with an inline R5 resource and hosted DICOM inputs](examples-mixed-r5-dicom.html#job-submission).
+See the informative example of [submitting a job with an inline R5 resource and hosted DICOM inputs](draft-native-payload-bindings.html#job-submission).
 
 ### 2:3.x1.2 Actors Roles
 
@@ -291,7 +291,7 @@ The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manag
 
 The Submit De-Identification Task transaction is used by the De-ID Manager to dispatch a de-identification task for one ruleSet to a De-Identifier. Each task conveys the compiled execution plan rules for one ruleSet, a payload set identifying the processing targets, and a protected lookup-table reference when the assigned rules require one. The De-Identifier verifies capability compatibility, applies the execution plan rules to the processing target, produces de-identified output conforming to the declared payload binding and version, and returns the output with provenance evidence. The transaction supports both synchronous and asynchronous response modes. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
 
-See the informative example of [dispatching separate clinical and imaging tasks for one job](examples-mixed-r5-dicom.html#task-dispatch).
+See the informative example of [dispatching separate clinical and imaging tasks for one job](draft-native-payload-bindings.html#task-dispatch).
 
 ### 2:3.x3.2 Actors Roles
 
@@ -455,7 +455,7 @@ The De-ID Manager and the De-Identifier SHALL record an audit event for each ITI
 
 The Retrieve Job Output transaction is used by the De-Identification Requester to retrieve the status and output of a previously submitted asynchronous de-identification job. The Requester polls the De-ID Manager (or Integrated De-ID Manager/De-Identifier) using the job handle received in the ITI-x1 202 Accepted response. The Manager returns the current job status, and when the job is complete, returns the de-identified output and provenance evidence. This transaction is required when the Asynchronous Job Processing Option (DIS-ASYNC-JOB) is declared.
 
-See the informative example of [retrieving both result sets or reporting a failure of the job](examples-mixed-r5-dicom.html#results-and-release).
+See the informative example of [retrieving both result sets or reporting a failure of the job](draft-native-payload-bindings.html#results-and-release).
 
 ### 2:3.x4.2 Actors Roles
 

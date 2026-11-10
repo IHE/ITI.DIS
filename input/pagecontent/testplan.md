@@ -145,7 +145,7 @@ Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a m
 
 ### Requester Validation of Staged Release Evidence
 
-Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the R4 set from the [UC-2 job result](Parameters-grouped-fhir-job-result.html) as the single-stage baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For the asynchronous run, use the [staged job walkthrough](examples-staged-async.html), including both ITI-x7 polls and recovery of an acceptance without starting duplicate work.
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the R4 set from the [UC-2 job result](Parameters-grouped-fhir-job-result.html) as the single-stage baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For the asynchronous run, adapt the [UC-1 staged cohort exchange](examples-bulk-fhir-cohort.html#submit-dispatch-and-retrieve) or use the compact [Job Task](Task-staged-async-job.html) and the [preliminary](Task-staged-async-preliminary-task.html) and [advanced](Task-staged-async-advanced-task.html) task fixtures. Exercise both ITI-x7 polls and repeat with [recovery of a lost acceptance](examples-grouped-fhir-job.html#grouped-fhir-submission).
 
 | Stimulus | Pass criteria |
 |---|---|
@@ -188,7 +188,7 @@ These checks support draft DICOM, CDA, and R6 design review. Phase 1 pass/fail c
 
 ### Mixed R5 and DICOM Job Procedure
 
-Use the [mixed payload walkthrough](examples-mixed-r5-dicom.html) once the DICOM binding is available for testing. Configure an R5-capable De-Identifier, a DICOM-capable De-Identifier, and an imaging endpoint with two authorized instances and an additional instance outside the manifest. Use one permit covering both sets and their approved policies.
+Use the [mixed payload walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) once the DICOM binding is available for testing. Configure an R5-capable De-Identifier, a DICOM-capable De-Identifier, and an imaging endpoint with two authorized instances and an additional instance outside the manifest. Use one permit covering both sets and their approved policies.
 
 | Step | Action | Expected result |
 |------|--------|-----------------|

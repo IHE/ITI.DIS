@@ -287,7 +287,7 @@ Within a stage, the Manager SHALL process ruleSets in the listed order for any i
 
 <a name="3pxx131-policy-rules-examples"> </a>
 
-See the [Bulk FHIR Syntax-Level policy](examples-bulk-fhir-cohort.html#approved-policy), [staged policy](examples-staged-async.html#approved-staged-policy), and [reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy) in their respective use-case examples.
+See the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-policy), [UC-3 reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy), and [UC-4 signed Syntax-Level policy](examples-cloud-decision-support.html#approved-policy-and-delivery) in their respective use-case examples.
 
 <a name="3pxx23-policy-delivery-and-validation"> </a>
 
@@ -911,7 +911,7 @@ The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe 
 
 <a name="mixed-payload-walkthrough"> </a>
 
-See the [informative mixed R5 and DICOM job walkthrough](examples-mixed-r5-dicom.html) for an example of the proposed DICOM binding.
+See the [informative mixed R5 and DICOM job walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) for an example of the proposed DICOM binding.
 
 <a name="evidence-baseline"> </a>
 

@@ -1,1 +1,1 @@
-{"resourceType":"Patient","active":false,"id":"result-02"}
+{"resourceType":"Patient","id":"result-02","active":false,"identifier":[{"system":"https://study.example.org/identifiers/pseudonym","value":"551fd2ec5f85d2adb9c40fcaa1ded732b1c43b94d4f4a6fefde6e70da0be0b56"}],"birthDate":"1973"}
