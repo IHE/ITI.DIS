@@ -44,7 +44,7 @@ Usage: #example
 Instance: staged-async-advanced-task
 InstanceOf: Task
 Usage: #example
-* meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
+* meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask"
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "staged-async-advanced-task"
 * status = #requested
@@ -72,7 +72,7 @@ Usage: #example
 * input[=].valueCode = #irreversible
 
 Instance: staged-async-job
-InstanceOf: DISJobTask
+InstanceOf: DISDeIdentificationJob
 Usage: #example
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "staged-async-job"
@@ -146,7 +146,7 @@ Usage: #example
 Instance: staged-async-preliminary-task
 InstanceOf: Task
 Usage: #example
-* meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
+* meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask"
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "staged-async-preliminary-task"
 * status = #requested

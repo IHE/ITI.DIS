@@ -61,21 +61,21 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 
 resources:
   Task/uc1-bulk-cohort-job:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob
   Task/uc4-cloud-decision-support-job:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob
   Task/grouped-fhir-job-request:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob
   Task/grouped-fhir-task-patient-r4:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
   Task/grouped-fhir-task-imaging-measurement-r5:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
   Task/staged-async-job:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob
   Task/staged-async-preliminary-task:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
   Task/staged-async-advanced-task:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
   Library/staged-patient:
     description: "Approved syntax policy that gives the Requester the expected stage and ruleSet sequence for the staged R4 Patient example."
   Bundle/staged-r4-patient-result:

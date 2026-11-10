@@ -38,7 +38,7 @@ Title: "bulk-r4-result"
 * parameter[=].valueCode = #valid
 
 Instance: uc1-bulk-cohort-job
-InstanceOf: DISJobTask
+InstanceOf: DISDeIdentificationJob
 Usage: #example
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "uc1-bulk-cohort-job"

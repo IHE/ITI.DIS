@@ -46,7 +46,7 @@ Usage: #example
 * issue.diagnostics = "A required hosted resource became unavailable after job acceptance."
 
 Instance: grouped-fhir-job-request
-InstanceOf: DISJobTask
+InstanceOf: DISDeIdentificationJob
 Usage: #example
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "grouped-fhir-job-request"
@@ -129,7 +129,7 @@ Usage: #example
 * entry[=].resource = grouped-fhir-evidence-imaging-measurement-r5
 
 Instance: grouped-fhir-task-imaging-measurement-r5
-InstanceOf: DISExecutionTask
+InstanceOf: DISDeIdentificationTask
 Usage: #example
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "grouped-fhir-task-imaging-measurement-r5"
@@ -147,7 +147,7 @@ Usage: #example
 * input[reversibilityMode].valueCode = #irreversible
 
 Instance: grouped-fhir-task-patient-r4
-InstanceOf: DISExecutionTask
+InstanceOf: DISDeIdentificationTask
 Usage: #example
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "grouped-fhir-task-patient-r4"

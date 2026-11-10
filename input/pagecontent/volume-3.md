@@ -520,7 +520,7 @@ DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines
 
 ### 3:PXX.3.1 Common Payload Set Delivery
 
-The [De-Identification Job profile](StructureDefinition-DIS-JobTask.html) and [De-Identification Task profile](StructureDefinition-DIS-ExecutionTask.html) define the FHIR R4 `Task` request bodies for ITI-x1 and ITI-x3. They use the [DIS Work Order Input codes](CodeSystem-dis-task-input.html) for `Task.input.type`. Each `payload-set` input has one manifest attachment as `Task.input.valueAttachment` and one [DIS Payload Set Metadata extension](StructureDefinition-dis-payload-set.html) on that input.
+The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.html) and [De-Identification Task profile](StructureDefinition-DIS-DeIdentificationTask.html) define the FHIR R4 `Task` request bodies for ITI-x1 and ITI-x3. They use the [DIS Work Order Input codes](CodeSystem-dis-task-input.html) for `Task.input.type`. Each `payload-set` input has one manifest attachment as `Task.input.valueAttachment` and one [DIS Payload Set Metadata extension](StructureDefinition-dis-payload-set.html) on that input.
 
 | Subextension | Value | ITI-x1 job submission | ITI-x3 task submission |
 |--------------|-------|----------|----------------|

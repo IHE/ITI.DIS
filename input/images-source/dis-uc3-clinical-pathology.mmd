@@ -6,11 +6,11 @@ sequenceDiagram
 
     Note over EHR,MGR: Care-context authorization and pseudonymization policy exist
 
-    EHR->>MGR: ITI-x1 Submit Job (sync)
+    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync)
     activate MGR
     Note over MGR: Validate authorization and policy<br/>Compile plan for Patient and ServiceRequest
 
-    MGR->>DI: ITI-x3 Submit Task (sync)
+    MGR->>DI: ITI-x3 Submit De-Identification Task (sync)
     activate DI
     Note over DI: Assign pseudonym and preserve<br/>ServiceRequest subject linkage
     DI-->>MGR: 200 OK (result, evidence, protected generatedLookupTable)
