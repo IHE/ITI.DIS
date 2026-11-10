@@ -1,7 +1,7 @@
 // UC-4 job and its signed policy Library.
 
 Instance: uc4-cloud-decision-support-job
-InstanceOf: DISJobTask
+InstanceOf: DISDeIdentificationJob
 Usage: #example
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "uc4-cloud-decision-support-job"

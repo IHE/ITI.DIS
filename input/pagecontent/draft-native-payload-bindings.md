@@ -143,7 +143,7 @@ Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both p
   "id": "mixed-hosted-job-42",
   "meta": {
     "profile": [
-      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask"
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob"
     ]
   },
   "identifier": [
@@ -294,7 +294,7 @@ This check uses synthetic data for the mixed job. The imaging fixtures are DICOM
 
 | Check | Observed result |
 |------|-----------------|
-| Job and task packaging | Check the R4 ITI-x1 and ITI-x3 requests against the respective [De-Identification Job](StructureDefinition-DIS-JobTask.html) and [De-Identification Task](StructureDefinition-DIS-ExecutionTask.html) profiles and operation contracts. The clinical task carries the same R5 payload bytes. |
+| Job and task packaging | Check the R4 ITI-x1 and ITI-x3 requests against the respective [De-Identification Job](StructureDefinition-DIS-DeIdentificationJob.html) and [De-Identification Task](StructureDefinition-DIS-DeIdentificationTask.html) profiles and operation contracts. The clinical task carries the same R5 payload bytes. |
 | Imaging selection | The versioned List and ImagingStudy resolve to the same two authorized SOP Instance UIDs on both passes. The check reads the selected files from offline WADO-RS multipart response fixtures. It excludes the third instance and rejects a response containing the other selected instance in place of the requested one. |
 | Result and evidence resolution | The clinical evidence identifies the bundled R4 wrapper. The imaging evidence references the R4 result index, which resolves to exactly two Part 10 files with the expected replacement UIDs. |
 | Failed-job response | With one required input unavailable, the failed ITI-x4 fixture contains only an OperationOutcome. A counterexample that returns only the clinical result fails the release check. |

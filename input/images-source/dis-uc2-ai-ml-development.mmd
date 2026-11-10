@@ -4,7 +4,7 @@ sequenceDiagram
     participant DI_C as De-Identifier<br/>(R4 clinical and lab)
     participant DI_I as De-Identifier<br/>(R5 CT measurements)
 
-    DAC->>MGR: ITI-x1 Submit Job (async)
+    DAC->>MGR: ITI-x1 Submit De-Identification Job (async)
     Note over MGR: Validate permit and both policies<br/>before accepting the job
     MGR-->>DAC: 202 Accepted, Content-Location job-url
     opt Acceptance response lost
@@ -12,14 +12,14 @@ sequenceDiagram
         MGR-->>DAC: 202 Accepted, same URL, DIS-Submission: replayed
     end
 
-    MGR->>DI_C: ITI-x3 Submit Task (R4 clinical set, sync)
+    MGR->>DI_C: ITI-x3 Submit De-Identification Task (R4 clinical set, sync)
     Note over DI_C: Requested removal of Patient.name<br/>and retention of lab links
     DI_C-->>MGR: 200 OK (R4 clinical result and evidence)
 
     DAC->>MGR: ITI-x4 GET job-url
     MGR-->>DAC: 202 Accepted (in progress)
 
-    MGR->>DI_I: ITI-x3 Submit Task (R5 measurement set, sync)
+    MGR->>DI_I: ITI-x3 Submit De-Identification Task (R5 measurement set, sync)
     Note over DI_I: Requested removal of the patient reference
     DI_I-->>MGR: 200 OK (R5 measurement result and R4 evidence)
     Note over MGR: Validate both sets and recheck<br/>release authorization

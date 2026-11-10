@@ -15,7 +15,7 @@ DIS addresses this by providing a governed, auditable path from authorization to
 ## What Phase 1 Delivers
 
 - **Four actors** — De-ID Manager, De-Identifier, De-Identification Requester, Integrated De-ID Manager/De-Identifier
-- **Four transactions** — ITI-x1 (Submit Job), ITI-x3 (Submit Task), ITI-x4 (Retrieve Job Output), ITI-x7 (Retrieve Task Output)
+- **Four transactions** — ITI-x1 (Submit De-Identification Job), ITI-x3 (Submit De-Identification Task), ITI-x4 (Retrieve Job Output), ITI-x7 (Retrieve Task Output)
 - **A minimum de-id evidence baseline** — 9-element evidence structure carried in HL7 FHIR Provenance
 - **A single HL7 FHIR payload binding (DIS-FHIR-Payload)** — covering HL7 FHIR R4/R5/R6 resources, Bundles, and Bulk Data
 - **Synchronous and asynchronous job patterns** — inline output for single-patient workflows, deferred output with polling for multi-patient cohorts

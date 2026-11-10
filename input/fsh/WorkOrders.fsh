@@ -83,9 +83,9 @@ RuleSet: DISWorkOrderPayloadSet
 * input[payloadSet].value[x] obeys dis-work-order-manifest-source
 * input[payloadSet].extension contains DISPayloadSet named payloadSet 1..1
 
-Profile: DISJobTask
+Profile: DISDeIdentificationJob
 Parent: Task
-Id: DIS-JobTask
+Id: DIS-DeIdentificationJob
 Title: "De-Identification Job"
 Description: "FHIR R4 representation of the de-identification job submitted through ITI-x1. Each payload set declares the exact approved policy version."
 * insert DISWorkOrderSubmission
@@ -99,9 +99,9 @@ Description: "FHIR R4 representation of the de-identification job submitted thro
 * input[payloadSet].extension[payloadSet].extension[policy] 1..1
 * obeys dis-work-order-unique-sets
 
-Profile: DISExecutionTask
+Profile: DISDeIdentificationTask
 Parent: Task
-Id: DIS-ExecutionTask
+Id: DIS-DeIdentificationTask
 Title: "De-Identification Task"
 Description: "FHIR R4 representation of a de-identification task submitted through ITI-x3 for one ruleSet and one payload set."
 * insert DISWorkOrderSubmission
@@ -110,7 +110,7 @@ Description: "FHIR R4 representation of a de-identification task submitted throu
 * basedOn 0..0
 * groupIdentifier 0..0
 * partOf 0..1
-* partOf only Reference(DISJobTask)
+* partOf only Reference(DISDeIdentificationJob)
 * partOf.reference 0..0
 * partOf.display 0..0
 * partOf.identifier 1..1

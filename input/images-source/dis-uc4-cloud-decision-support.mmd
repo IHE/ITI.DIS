@@ -6,11 +6,11 @@ sequenceDiagram
 
     Note over EHR,DI: All DIS actors within hospital trust boundary
 
-    EHR->>MGR: ITI-x1 Submit Job (sync)
+    EHR->>MGR: ITI-x1 Submit De-Identification Job (sync)
     activate MGR
     Note over MGR: Validate authorization and policy<br/>Compile plan for Patient and linked resources
 
-    MGR->>DI: ITI-x3 Submit Task (sync)
+    MGR->>DI: ITI-x3 Submit De-Identification Task (sync)
     activate DI
     Note over DI: Pseudonymize Patient and preserve clinical links
     DI-->>MGR: 200 OK (result, evidence, protected generatedLookupTable)

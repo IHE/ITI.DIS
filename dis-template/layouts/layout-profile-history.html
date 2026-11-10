@@ -1,0 +1,23 @@
+---
+---
+<!-- get modelType -->
+{% include fragment-modelType.html id='{{[id]}}' %}
+
+{% include fragment-pagebegin.html %}
+
+<div style="counter-reset: section 10" class="col-12">
+  <!--ReleaseHeader--><p id="publish-box">Publish Box goes here</p><!--EndReleaseHeader-->
+  {% include fragment-profile-navtabs.html type='{{[type]}}' id='{{[id]}}' active='history' %}
+
+  {% assign profile = site.data.structuredefinitions["{{[id]}}"] %}
+  {% assign profileTitle = profile.title | default: profile.name | default: "{{[id]}}" | escape_once %}
+  <a name="root"> </a>
+  <h2 id="root">{{modelType}}: {{profileTitle}} - Change History</h2>
+{% include fragment-simpletable.html %}
+  <p>Changes in the {{profileTitle}} {{modelType | downcase}}.</p>
+
+  {%include {{[type]}}-{{[id]}}-history.xhtml%}
+
+</div>
+{% assign includetabscripts = 'true' %}
+{% include fragment-pageend.html %}

@@ -57,7 +57,7 @@ Usage: #definition
 * parameter[=].min = 1
 * parameter[=].max = "1"
 * parameter[=].type = #Task
-* parameter[=].documentation = "The direct POST body is a Task conforming to https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask."
+* parameter[=].documentation = "The direct POST body is a Task conforming to https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob."
 
 // ── Output: payloadResult ──
 * parameter[+].name = #payloadResult
@@ -111,7 +111,7 @@ Usage: #definition
 * parameter[=].min = 1
 * parameter[=].max = "1"
 * parameter[=].type = #Task
-* parameter[=].documentation = "The direct POST body is a Task conforming to https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask."
+* parameter[=].documentation = "The direct POST body is a Task conforming to https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask."
 
 // ── Output: payloadResult ──
 * parameter[+].name = #payloadResult
