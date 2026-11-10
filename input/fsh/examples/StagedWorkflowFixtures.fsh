@@ -10,6 +10,7 @@ RuleSet: StagedPatientInputAttachment(path)
 Instance: staged-async-advanced-plan
 InstanceOf: DISExecutionPlan
 Usage: #example
+Description: "Execution plan for the advanced stage of the asynchronous Patient job."
 Title: "StagedAsyncAdvancedPlan"
 * meta.versionId = "1"
 * url = "https://dis.example.org/plans/staged-async-advanced-plan"
@@ -26,6 +27,7 @@ Title: "StagedAsyncAdvancedPlan"
 Instance: staged-async-advanced-result
 InstanceOf: Parameters
 Usage: #example
+Description: "Completed task response carrying the output of the advanced de-identification stage."
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"
 * parameter[=].part[=].valueString = "staged-patient-r4"
@@ -44,6 +46,7 @@ Usage: #example
 Instance: staged-async-advanced-task
 InstanceOf: Task
 Usage: #example
+Description: "Task submission for the advanced stage of the asynchronous Patient job."
 * meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask"
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "staged-async-advanced-task"
@@ -74,6 +77,7 @@ Usage: #example
 Instance: staged-async-job
 InstanceOf: DISDeIdentificationJob
 Usage: #example
+Description: "Submission for an asynchronous Patient job with two ordered de-identification stages."
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "staged-async-job"
 * status = #requested
@@ -94,6 +98,7 @@ Usage: #example
 Instance: staged-async-job-result
 InstanceOf: Parameters
 Usage: #example
+Description: "Completed staged job response carrying the Patient result and release evidence."
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"
 * parameter[=].part[=].valueString = "staged-patient-r4"
@@ -112,6 +117,7 @@ Usage: #example
 Instance: staged-async-preliminary-plan
 InstanceOf: DISExecutionPlan
 Usage: #example
+Description: "Execution plan for the preliminary stage of the asynchronous Patient job."
 Title: "StagedAsyncPreliminaryPlan"
 * meta.versionId = "1"
 * url = "https://dis.example.org/plans/staged-async-preliminary-plan"
@@ -128,6 +134,7 @@ Title: "StagedAsyncPreliminaryPlan"
 Instance: staged-async-preliminary-result
 InstanceOf: Parameters
 Usage: #example
+Description: "Completed task response carrying the Patient output of the preliminary stage."
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"
 * parameter[=].part[=].valueString = "staged-patient-r4"
@@ -146,6 +153,7 @@ Usage: #example
 Instance: staged-async-preliminary-task
 InstanceOf: Task
 Usage: #example
+Description: "Task submission for the preliminary stage of the asynchronous Patient job."
 * meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask"
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "staged-async-preliminary-task"

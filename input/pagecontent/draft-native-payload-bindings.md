@@ -26,6 +26,8 @@ The proposals use the [common manifest contract](volume-3.html#payload-set-deliv
 
 A DICOM wrapper would use `application/dicom` for the native instance.
 
+The informative examples include a [DICOM study index](ImagingStudy-study-42.html) with its [WADO-RS endpoint](Endpoint-wado-42.html), and a [hosted CDA document index](DocumentReference-draft-cda-document-index.html).
+
 ## Open Binding Work
 
 The experimental DICOM study index inherits two extensible [FHIR R4 ImagingStudy bindings](https://hl7.org/fhir/R4/imagingstudy.html#terminology) that the online IG Publisher cannot resolve as FHIR ValueSet resources. These are RadLex Playbook on `ImagingStudy.procedureCode` and the DICOM SOP Class UID table on `ImagingStudy.series.instance.sopClass`. Verify code selection against the referenced sources during draft binding review.

@@ -3,6 +3,7 @@
 Instance: standalone-export-evidence
 InstanceOf: DISEvidence
 Usage: #example
+Description: "De-identification evidence for the standalone clinical document export."
 * target = Reference(https://export.example.org/fhir/Bundle/standalone-export-output)
 * recorded = "2026-11-06T03:00:00Z"
 * policy = "https://export.example.org/fhir/Library/standalone-export-policy/_history/1"
@@ -20,6 +21,7 @@ Usage: #example
 Instance: standalone-export-input
 InstanceOf: Bundle
 Usage: #example
+Description: "Synthetic FHIR clinical document selected for standalone de-identification."
 * type = #document
 * timestamp = "2026-11-06T03:00:00Z"
 * identifier.system = "https://export.example.org/identifiers/document"
@@ -34,6 +36,7 @@ Usage: #example
 Instance: standalone-export-output
 InstanceOf: Bundle
 Usage: #example
+Description: "De-identified FHIR clinical document produced by the standalone export."
 * type = #document
 * timestamp = "2026-11-06T03:00:00Z"
 * identifier.system = "https://export.example.org/identifiers/document"
@@ -48,6 +51,7 @@ Usage: #example
 Instance: standalone-export-policy
 InstanceOf: DISPolicy
 Usage: #example
+Description: "Approved policy applied locally before the standalone clinical document export."
 Title: "StandaloneExportPolicy"
 * meta.versionId = "1"
 * url = "https://export.example.org/fhir/Library/standalone-export-policy"

@@ -3,6 +3,7 @@
 Instance: pathology-supplied-lookup
 InstanceOf: DISLookupTable
 Usage: #example
+Description: "Requester-supplied lookup table used in the reversible pathology example."
 * meta.versionId = "1"
 * status = #current
 * masterIdentifier.system = "urn:example:lookup-content-version"
@@ -19,6 +20,7 @@ Usage: #example
 Instance: pathology-task-lookup
 InstanceOf: DISLookupTable
 Usage: #example
+Description: "Task-specific subset of the requester-supplied lookup table used in the reversible pathology example."
 * meta.versionId = "1"
 * status = #current
 * masterIdentifier.system = "urn:example:lookup-content-version"
