@@ -306,7 +306,7 @@ After accepting a de-identification job for distributed processing, the De-ID Ma
 
 The Manager tracks which job, set, ruleSet, and stage each assignment belongs to. It uses that association to validate results, coordinate cancellation, and link audit records. A De-Identifier receives the information needed for its assignment. See the [assignment correlation and disclosure rules](volume-2.html#assignment-correlation).
 
-The ITI-x1 job submission and ITI-x3 task submission each use a FHIR R4 `Task` resource conforming to the profile for that transaction. Each payload set declares its processing payload release independently, as described in [Cross-Version Payload Support](#1pxx232-cross-version-payload-support).
+The ITI-x1 job submission uses a FHIR R4 `Task` resource conforming to the [De-Identification Job profile](StructureDefinition-DIS-JobTask.html). The ITI-x3 task submission uses a FHIR R4 `Task` resource conforming to the [De-Identification Task profile](StructureDefinition-DIS-ExecutionTask.html). Each payload set declares its processing payload release independently, as described in [Cross-Version Payload Support](#1pxx232-cross-version-payload-support).
 
 #### 1:PXX.4.1.2 Policy, Payload, and Evidence
 

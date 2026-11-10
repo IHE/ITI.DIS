@@ -15,8 +15,8 @@ ITI-x1 and ITI-x3 each define one required operation input named `workItem` of t
 
 | Transaction | Input | Successful response |
 |-------------|-------|---------------------|
-| ITI-x1 Submit Job | FHIR R4 `Task` conforming to [`DIS-JobTask`](StructureDefinition-DIS-JobTask.html) with one authorization and one or more payload sets. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
-| ITI-x3 Submit Task | FHIR R4 `Task` conforming to [`DIS-ExecutionTask`](StructureDefinition-DIS-ExecutionTask.html) with one assigned set and its execution instructions. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
+| ITI-x1 Submit Job | FHIR R4 `Task` conforming to the [De-Identification Job profile](StructureDefinition-DIS-JobTask.html) with one authorization and one or more payload sets. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
+| ITI-x3 Submit Task | FHIR R4 `Task` conforming to the [De-Identification Task profile](StructureDefinition-DIS-ExecutionTask.html) with one assigned set and its execution instructions. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
 | ITI-x4 Retrieve Job Output | Authorized GET of the job polling URL, or DELETE when cancellable mode was confirmed. | HTTP 200 with the same body as synchronous ITI-x1 success. HTTP 202 indicates processing is pending and carries no result. |
 | ITI-x7 Retrieve Task Output | Authorized GET of the task polling URL, or DELETE when cancellable mode was confirmed. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
 {: .grid}
@@ -165,7 +165,7 @@ The De-Identification Requester sends a Submit De-Identification Job Request whe
 
 The De-Identification Requester SHALL invoke the `$submit-dis-job` operation using `POST [base]/$submit-dis-job`. The request SHALL use `Content-Type: application/fhir+json`.
 
-The request body SHALL be a FHIR R4 `Task` conforming to [`DIS-JobTask`](StructureDefinition-DIS-JobTask.html) with `intent = order` and `status = requested`. The following coded inputs carry the authorization and selected data.
+The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification Job profile](StructureDefinition-DIS-JobTask.html) with `intent = order` and `status = requested`. The following coded inputs carry the authorization and selected data.
 
 <p id="t3.x1.4.1.2-1" class="tableTitle"><strong>Table 2:3.x1.4.1.2-1: ITI-x1 Job Submission Inputs</strong></p>
 
@@ -334,7 +334,7 @@ The De-ID Manager sends a Submit De-Identification Task Request for each ruleSet
 
 The De-ID Manager SHALL invoke the `$submit-dis-task` operation using `POST [base]/$submit-dis-task`. The request SHALL use `Content-Type: application/fhir+json`.
 
-The request body SHALL be a FHIR R4 `Task` conforming to [`DIS-ExecutionTask`](StructureDefinition-DIS-ExecutionTask.html) with `intent = order` and `status = requested`. The coded inputs identify the assigned set and execution instructions.
+The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification Task profile](StructureDefinition-DIS-ExecutionTask.html) with `intent = order` and `status = requested`. The coded inputs identify the assigned set and execution instructions.
 
 <p id="t3.x3.4.1.2-1" class="tableTitle"><strong>Table 2:3.x3.4.1.2-1: ITI-x3 Task Submission Inputs</strong></p>
 
