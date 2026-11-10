@@ -21,6 +21,11 @@
             "item": {
               "reference": "https://source.example.org/fhir/r4/Patient/grouped-fhir-patient-input/_history/1"
             }
+          },
+          {
+            "item": {
+              "reference": "https://source.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-input/_history/1"
+            }
           }
         ]
       }
@@ -58,6 +63,11 @@
           {
             "item": {
               "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
+            }
+          },
+          {
+            "item": {
+              "reference": "https://results.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-output/_history/1"
             }
           }
         ]
@@ -164,17 +174,17 @@
       }
     },
     {
-      "fullUrl": "https://governance.example.org/fhir/Library/grouped-fhir-policy-encounter-r5",
+      "fullUrl": "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-r5",
       "resource": {
         "resourceType": "Library",
-        "id": "grouped-fhir-policy-encounter-r5",
+        "id": "grouped-fhir-policy-imaging-r5",
         "meta": {
           "profile": [
             "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Policy"
           ],
           "versionId": "1"
         },
-        "url": "https://governance.example.org/policies/encounter-subject-removal",
+        "url": "https://governance.example.org/policies/imaging-subject-removal",
         "version": "1.0",
         "name": "GroupedFHIRPolicyR5",
         "status": "active",
@@ -191,13 +201,13 @@
         "content": [
           {
             "contentType": "application/vnd.ihe.dis.policy+json",
-            "data": "eyJwb2xpY3lWZXJzaW9uIjoiMS4wIiwicmVwcmVzZW50YXRpb25MZXZlbCI6InN5bnRheCIsInJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwicGF5bG9hZEZhbWlseSI6ImZoaXIiLCJwYXlsb2FkVmVyc2lvbiI6IlI1IiwicnVsZVNldHMiOlt7InJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInJ1bGVzIjpbeyJydWxlSWQiOiJyZW1vdmUtMDEiLCJ0YXJnZXQiOiJFbmNvdW50ZXIuc3ViamVjdCIsImFjdGlvbiI6InJlbW92ZSJ9XX1dfQ=="
+            "data": "eyJwb2xpY3lWZXJzaW9uIjoiMS4wIiwicmVwcmVzZW50YXRpb25MZXZlbCI6InN5bnRheCIsInJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwicGF5bG9hZEZhbWlseSI6ImZoaXIiLCJwYXlsb2FkVmVyc2lvbiI6IlI1IiwicnVsZVNldHMiOlt7InJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInJ1bGVzIjpbeyJydWxlSWQiOiJyZW1vdmUtMDEiLCJ0YXJnZXQiOiJPYnNlcnZhdGlvbi5zdWJqZWN0IiwiYWN0aW9uIjoicmVtb3ZlIn1dfV19"
           }
         ],
         "identifier": [
           {
             "system": "https://governance.example.org/identifiers/policy",
-            "value": "grouped-fhir-policy-encounter-r5"
+            "value": "grouped-fhir-policy-imaging-r5"
           }
         ],
         "publisher": "Example governance authority",
@@ -208,17 +218,17 @@
       }
     },
     {
-      "fullUrl": "https://dis.example.org/fhir/Library/grouped-fhir-plan-encounter-r5",
+      "fullUrl": "https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-r5",
       "resource": {
         "resourceType": "Library",
-        "id": "grouped-fhir-plan-encounter-r5",
+        "id": "grouped-fhir-plan-imaging-r5",
         "meta": {
           "profile": [
             "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
           ],
           "versionId": "1"
         },
-        "url": "https://dis.example.org/fhir/plans/encounter-r5",
+        "url": "https://dis.example.org/fhir/plans/imaging-r5",
         "version": "1.0",
         "name": "GroupedFHIRPlanR5",
         "status": "active",
@@ -235,17 +245,17 @@
         "content": [
           {
             "contentType": "application/vnd.ihe.dis.execution-plan+json",
-            "data": "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInBheWxvYWRCaW5kaW5nIjoiRElTLUZISVItUGF5bG9hZCIsInBheWxvYWRWZXJzaW9uIjoiUjUiLCJydWxlcyI6W3sicnVsZUlkIjoicmVtb3ZlLTAxIiwidGFyZ2V0IjoiRW5jb3VudGVyLnN1YmplY3QiLCJhY3Rpb24iOiJyZW1vdmUiLCJzb3VyY2VSdWxlSWQiOiJyZW1vdmUtMDEifV19"
+            "data": "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsInBheWxvYWRCaW5kaW5nIjoiRElTLUZISVItUGF5bG9hZCIsInBheWxvYWRWZXJzaW9uIjoiUjUiLCJydWxlcyI6W3sicnVsZUlkIjoicmVtb3ZlLTAxIiwidGFyZ2V0IjoiT2JzZXJ2YXRpb24uc3ViamVjdCIsImFjdGlvbiI6InJlbW92ZSIsInNvdXJjZVJ1bGVJZCI6InJlbW92ZS0wMSJ9XX0="
           }
         ],
         "relatedArtifact": [
           {
             "type": "derived-from",
-            "resource": "https://governance.example.org/policies/encounter-subject-removal|1.0",
+            "resource": "https://governance.example.org/policies/imaging-subject-removal|1.0",
             "extension": [
               {
                 "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-policy-evidence-uri",
-                "valueUri": "https://governance.example.org/fhir/Library/grouped-fhir-policy-encounter-r5/_history/1"
+                "valueUri": "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-r5/_history/1"
               }
             ]
           }
@@ -265,10 +275,88 @@
           {
             "attachment": {
               "contentType": "application/json",
-              "data": "eyJleGFtcGxlT25seSI6dHJ1ZSwicmVxdWVzdGVyIjoiZXhhbXBsZS1yZXF1ZXN0ZXIiLCJwdXJwb3NlIjoiRXhhbXBsZSB3b3JrZmxvdyByZXZpZXciLCJwYXlsb2FkcyI6W3sic2V0SWQiOiJwYXRpZW50LXI0Iiwic291cmNlIjoiaHR0cHM6Ly9zb3VyY2UuZXhhbXBsZS5vcmcvZmhpci9yNC9QYXRpZW50L2dyb3VwZWQtZmhpci1wYXRpZW50LWlucHV0L19oaXN0b3J5LzEiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwiLCJwb2xpY3lWZXJzaW9uIjoiMS4wIn0seyJzZXRJZCI6ImVuY291bnRlci1yNSIsInNvdXJjZSI6IkJ1bmRsZS9ncm91cGVkLWZoaXItcjUtaW5wdXQvRW5jb3VudGVyL2dyb3VwZWQtZmhpci1lbmNvdW50ZXItaW5wdXQiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvZW5jb3VudGVyLXN1YmplY3QtcmVtb3ZhbCIsInBvbGljeVZlcnNpb24iOiIxLjAifV19"
+              "data": "eyJleGFtcGxlT25seSI6dHJ1ZSwicmVxdWVzdGVyIjoiZXhhbXBsZS1yZXF1ZXN0ZXIiLCJwdXJwb3NlIjoiSWxsdXN0cmF0ZSBwcmVwYXJhdGlvbiBvZiBpbmRlcGVuZGVudCBGSElSIGlucHV0cyBmb3IgbXVsdGltb2RhbCBBSS9NTCIsInBheWxvYWRzIjpbeyJzZXRJZCI6InBhdGllbnQtcjQiLCJzb3VyY2UiOiJodHRwczovL3NvdXJjZS5leGFtcGxlLm9yZy9maGlyL3I0L0xpc3QvZ3JvdXBlZC1maGlyLXI0LWlucHV0L19oaXN0b3J5LzEiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwiLCJwb2xpY3lWZXJzaW9uIjoiMS4wIn0seyJzZXRJZCI6ImltYWdpbmctcjUiLCJzb3VyY2UiOiJCdW5kbGUvZ3JvdXBlZC1maGlyLXI1LWlucHV0L09ic2VydmF0aW9uL2dyb3VwZWQtZmhpci10dW1vci1pbnB1dCIsInBvbGljeSI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9pbWFnaW5nLXN1YmplY3QtcmVtb3ZhbCIsInBvbGljeVZlcnNpb24iOiIxLjAifV19"
             }
           }
         ]
+      }
+    },
+    {
+      "fullUrl": "https://source.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-input",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "grouped-fhir-hemoglobin-input",
+        "meta": {
+          "versionId": "1"
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "718-7"
+            }
+          ],
+          "text": "Hemoglobin"
+        },
+        "subject": {
+          "reference": "https://source.example.org/fhir/r4/Patient/grouped-fhir-patient-input/_history/1"
+        },
+        "valueQuantity": {
+          "value": 12.4,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://results.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-output",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "grouped-fhir-hemoglobin-output",
+        "meta": {
+          "versionId": "1"
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "718-7"
+            }
+          ],
+          "text": "Hemoglobin"
+        },
+        "subject": {
+          "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
+        },
+        "valueQuantity": {
+          "value": 12.4,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        }
       }
     }
   ]

@@ -26,6 +26,11 @@
             "item": {
               "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
             }
+          },
+          {
+            "item": {
+              "reference": "https://results.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-output/_history/1"
+            }
           }
         ]
       }
@@ -43,6 +48,9 @@
         "target": [
           {
             "reference": "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-output/_history/1"
           }
         ],
         "recorded": "2026-11-06T03:00:00Z",

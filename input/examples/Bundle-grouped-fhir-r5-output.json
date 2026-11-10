@@ -44,14 +44,14 @@
           {
             "attachment": {
               "contentType": "application/fhir+json; fhirVersion=5.0",
-              "data": "eyJyZXNvdXJjZVR5cGUiOiJFbmNvdW50ZXIiLCJpZCI6Imdyb3VwZWQtZmhpci1lbmNvdW50ZXItb3V0cHV0Iiwic3RhdHVzIjoiY29tcGxldGVkIiwiYWN0dWFsUGVyaW9kIjp7InN0YXJ0IjoiMjAyNi0wOCJ9fQ=="
+              "data": "eyJyZXNvdXJjZVR5cGUiOiJPYnNlcnZhdGlvbiIsImlkIjoiZ3JvdXBlZC1maGlyLXR1bW9yLW91dHB1dCIsInN0YXR1cyI6ImZpbmFsIiwiY2F0ZWdvcnkiOlt7ImNvZGluZyI6W3sic3lzdGVtIjoiaHR0cDovL3Rlcm1pbm9sb2d5LmhsNy5vcmcvQ29kZVN5c3RlbS9vYnNlcnZhdGlvbi1jYXRlZ29yeSIsImNvZGUiOiJpbWFnaW5nIn1dfV0sImNvZGUiOnsidGV4dCI6Ikxvbmdlc3QgZGlhbWV0ZXIgb2YgdGFyZ2V0IGxlc2lvbiBtZWFzdXJlZCBvbiBDVCJ9LCJ2YWx1ZVF1YW50aXR5Ijp7InZhbHVlIjoyOCwidW5pdCI6Im1tIiwic3lzdGVtIjoiaHR0cDovL3VuaXRzb2ZtZWFzdXJlLm9yZyIsImNvZGUiOiJtbSJ9fQ=="
             }
           }
         ],
         "identifier": [
           {
             "system": "https://dis.example.org/identifiers/example-result",
-            "value": "example-51-encounter"
+            "value": "example-51-imaging"
           }
         ]
       }
@@ -60,7 +60,7 @@
       "fullUrl": "urn:uuid:9bdffaab-3a1c-5c28-8843-2f4c388c3842",
       "resource": {
         "resourceType": "Provenance",
-        "id": "grouped-fhir-evidence-encounter-r5",
+        "id": "grouped-fhir-evidence-imaging-r5",
         "meta": {
           "profile": [
             "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
@@ -81,7 +81,7 @@
           ]
         },
         "policy": [
-          "https://governance.example.org/fhir/Library/grouped-fhir-policy-encounter-r5/_history/1"
+          "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-r5/_history/1"
         ],
         "agent": [
           {
@@ -122,7 +122,7 @@
             "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
             "valueIdentifier": {
               "system": "https://dis.example.org/identifiers/audit",
-              "value": "job-51-encounter-r5"
+              "value": "job-51-imaging-r5"
             }
           }
         ]
