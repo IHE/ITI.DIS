@@ -1,0 +1,264 @@
+// Compact staged Patient fixtures used by the Test Plan.
+
+// The job and task examples share the exact serialized attachment bytes. Update the encoded package when its corresponding fixture changes.
+
+RuleSet: StagedPatientInputAttachment(path)
+* {path} = "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6InN0YWdlZC1hc3luYy1zb3VyY2UiLCJtZXRhIjp7InByb2ZpbGUiOlsiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9ESVMtTWFuaWZlc3RQYWNrYWdlIl19LCJ0eXBlIjoiY29sbGVjdGlvbiIsImVudHJ5IjpbeyJmdWxsVXJsIjoidXJuOnV1aWQ6ZDA1NWExM2EtNDgzNC01OTZhLThmODgtYjkwOWQwZGZkN2M4IiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiTGlzdCIsImlkIjoic3RhZ2VkLWFzeW5jLXNvdXJjZS1saXN0IiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc291cmNlTWFuaWZlc3QiXX0sInN0YXR1cyI6ImN1cnJlbnQiLCJtb2RlIjoic25hcHNob3QiLCJlbnRyeSI6W3siaXRlbSI6eyJyZWZlcmVuY2UiOiJ1cm46dXVpZDphNzIzYjRhZS04ZDFlLTVhZTItYWY0Ni1hMTBhYzFkNzJjMWUifX1dfX0seyJmdWxsVXJsIjoidXJuOnV1aWQ6YTcyM2I0YWUtOGQxZS01YWUyLWFmNDYtYTEwYWMxZDcyYzFlIiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiUGF0aWVudCIsImlkIjoic3RhZ2VkLWFzeW5jLXNvdXJjZS1wYXRpZW50IiwibWV0YSI6eyJ2ZXJzaW9uSWQiOiIxIn0sImFjdGl2ZSI6dHJ1ZSwibmFtZSI6W3siZmFtaWx5IjoiRXhhbXBsZSJ9XSwiaWRlbnRpZmllciI6W3sic3lzdGVtIjoiaHR0cHM6Ly9ob3NwaXRhbC5leGFtcGxlLm9yZy9pZGVudGlmaWVycy9tcm4iLCJ2YWx1ZSI6IlNUQUdFRC1FWEFNUExFLTAwMSJ9XSwiYmlydGhEYXRlIjoiMTk4NS0wNy0xNiJ9fV19"
+
+// The two execution tasks declare their DIS profile explicitly to preserve the original stage-id and reversibility-mode input order.
+
+Instance: staged-async-advanced-plan
+InstanceOf: DISExecutionPlan
+Usage: #example
+* meta.versionId = "1"
+* url = "https://dis.example.org/plans/staged-async-advanced-plan"
+* version = "1.0"
+* name = "StagedAsyncAdvancedPlan"
+* status = #active
+* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-execution-plan "Execution plan (payload-specific compiled rules)"
+* date = "2026-11-06T03:00:20Z"
+* content.contentType = #application/vnd.ihe.dis.execution-plan+json
+* content.data = "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6ImdlbmVyYWxpemUtYmlydGgtZGF0ZSIsInBheWxvYWRCaW5kaW5nIjoiRElTLUZISVItUGF5bG9hZCIsInBheWxvYWRWZXJzaW9uIjoiUjQiLCJydWxlcyI6W3sicnVsZUlkIjoiYmlydGgteWVhciIsInRhcmdldCI6IlBhdGllbnQuYmlydGhEYXRlIiwiYWN0aW9uIjoidHJ1bmNhdGUtZGF0ZSIsInBhcmFtZXRlcnMiOnsicHJlY2lzaW9uIjoieWVhciJ9LCJzb3VyY2VSdWxlSWQiOiJiaXJ0aC15ZWFyIn1dfQ=="
+* relatedArtifact[sourcePolicy].resource = "https://governance.example.org/policies/staged-patient|1.0"
+* relatedArtifact[sourcePolicy].extension[evidenceUri].valueUri = "https://governance.example.org/fhir/Library/staged-patient/_history/1"
+
+Instance: staged-async-advanced-result
+InstanceOf: Parameters
+Usage: #example
+* parameter[0].name = "payloadResult"
+* parameter[=].part[0].name = "setId"
+* parameter[=].part[=].valueString = "staged-patient-r4"
+* parameter[=].part[+].name = "payloadBinding"
+* parameter[=].part[=].valueCode = #DIS-FHIR-Payload
+* parameter[=].part[+].name = "payloadVersion"
+* parameter[=].part[=].valueCode = #R4
+* parameter[=].part[+].name = "manifestFormat"
+* parameter[=].part[=].valueCode = #dis-resource-list
+* parameter[=].part[+].name = "resultPackage"
+* parameter[=].part[=].valueAttachment.contentType = #application/fhir+json
+* parameter[=].part[=].valueAttachment.data = "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6InN0YWdlZC1hc3luYy1hZHZhbmNlZC1wYWNrYWdlIiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc3VsdFBhY2thZ2UiXX0sInR5cGUiOiJjb2xsZWN0aW9uIiwiZW50cnkiOlt7ImZ1bGxVcmwiOiJ1cm46dXVpZDowYWJkYzAwMC02MWMwLTRhMTUtYTI2MS1iMTUwMjNjYjAwMDEiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJMaXN0IiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc291cmNlTWFuaWZlc3QiXX0sInN0YXR1cyI6ImN1cnJlbnQiLCJtb2RlIjoic25hcHNob3QiLCJlbnRyeSI6W3siaXRlbSI6eyJyZWZlcmVuY2UiOiJ1cm46dXVpZDowYWJkYzAwMC02MWMwLTRhMTUtYTI2MS1iMTUwMjNjYjAwMDIifX1dLCJpZCI6IjBhYmRjMDAwLTYxYzAtNGExNS1hMjYxLWIxNTAyM2NiMDAwMSJ9fSx7ImZ1bGxVcmwiOiJ1cm46dXVpZDowYWJkYzAwMC02MWMwLTRhMTUtYTI2MS1iMTUwMjNjYjAwMDIiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJQYXRpZW50IiwiYWN0aXZlIjp0cnVlLCJpZGVudGlmaWVyIjpbeyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL3BzZXVkb255bSIsInZhbHVlIjoiYWQ2NzUzYTlkZjExOWY5OGVlZTY0NWY2YzFkMjM4NTZjMzk2ODFhZDE4NTA1MmUyYWIxYThmNzViMjY2MGJkOSJ9XSwiYmlydGhEYXRlIjoiMTk4NSIsImlkIjoiMGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAyIn19LHsiZnVsbFVybCI6InVybjp1dWlkOjBhYmRjMDAwLTYxYzAtNGExNS1hMjYxLWIxNTAyM2NiMDAwMyIsInJlc291cmNlIjp7InJlc291cmNlVHlwZSI6IlByb3ZlbmFuY2UiLCJtZXRhIjp7InByb2ZpbGUiOlsiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9ESVMtRXZpZGVuY2UiXX0sInRhcmdldCI6W3sicmVmZXJlbmNlIjoidXJuOnV1aWQ6MGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAyIn1dLCJyZWNvcmRlZCI6IjIwMjYtMTEtMDZUMDM6MDA6MzBaIiwiYWN0aXZpdHkiOnsiY29kaW5nIjpbeyJzeXN0ZW0iOiJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9Db2RlU3lzdGVtL2Rpcy1hY3Rpdml0eSIsImNvZGUiOiJkaXMtdGFzayJ9XX0sInBvbGljeSI6WyJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvZmhpci9MaWJyYXJ5L3N0YWdlZC1wYXRpZW50L19oaXN0b3J5LzEiXSwiYWdlbnQiOlt7InR5cGUiOnsiY29kaW5nIjpbeyJzeXN0ZW0iOiJodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL3Byb3ZlbmFuY2UtcGFydGljaXBhbnQtdHlwZSIsImNvZGUiOiJwZXJmb3JtZXIifV19LCJ3aG8iOnsiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9pZGVudGlmaWVycy93b3JrZXIiLCJ2YWx1ZSI6ImV4YW1wbGUtYWR2YW5jZWQtd29ya2VyIn19fV0sImV4dGVuc2lvbiI6W3sidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtb3V0Y29tZS1zdGF0dXMiLCJ2YWx1ZUNvZGUiOiJjb21wbGV0ZSJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtcnVsZXNldCIsInZhbHVlU3RyaW5nIjoiZ2VuZXJhbGl6ZS1iaXJ0aC1kYXRlIn0seyJ1cmwiOiJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL2Rpcy1yZXZlcnNpYmlsaXR5IiwidmFsdWVDb2RlIjoiaXJyZXZlcnNpYmxlIn0seyJ1cmwiOiJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL2Rpcy12YWxpZGF0aW9uLXN0YXR1cyIsInZhbHVlQ29kZSI6InZhbGlkIn0seyJ1cmwiOiJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL2Rpcy1hdWRpdC1jb3JyZWxhdGlvbiIsInZhbHVlSWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9pZGVudGlmaWVycy9hdWRpdCIsInZhbHVlIjoiZXhhbXBsZS1zdGFnZWQtYWR2YW5jZWQtdGFzayJ9fV0sImlkIjoiMGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAzIn19XX0="
+* parameter[+].name = "validationStatus"
+* parameter[=].valueCode = #valid
+
+Instance: staged-async-advanced-task
+InstanceOf: Task
+Usage: #example
+* meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
+* identifier.system = "https://dis.example.org/dis/assignment-identifiers"
+* identifier.value = "staged-async-advanced-task"
+* status = #requested
+* intent = #order
+* code = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type#de-identification-execution
+* input[0].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#payload-set
+* input[=].valueAttachment.contentType = #application/fhir+json
+* input[=].valueAttachment.data = "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6InN0YWdlZC1hc3luYy1hZHZhbmNlZC1pbnB1dCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1NYW5pZmVzdFBhY2thZ2UiXX0sInR5cGUiOiJjb2xsZWN0aW9uIiwiZW50cnkiOlt7ImZ1bGxVcmwiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDEiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJMaXN0IiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc291cmNlTWFuaWZlc3QiXX0sInN0YXR1cyI6ImN1cnJlbnQiLCJtb2RlIjoic25hcHNob3QiLCJlbnRyeSI6W3siaXRlbSI6eyJyZWZlcmVuY2UiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDIifX1dLCJpZCI6ImJjNTUwMDAwLTZjODctNDdjNC05YWNlLWIxNTAyM2NiMDAwMSJ9fSx7ImZ1bGxVcmwiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDIiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJQYXRpZW50IiwiYWN0aXZlIjp0cnVlLCJpZGVudGlmaWVyIjpbeyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL3BzZXVkb255bSIsInZhbHVlIjoiYWQ2NzUzYTlkZjExOWY5OGVlZTY0NWY2YzFkMjM4NTZjMzk2ODFhZDE4NTA1MmUyYWIxYThmNzViMjY2MGJkOSJ9XSwiYmlydGhEYXRlIjoiMTk4NS0wNy0xNiIsImlkIjoiYmM1NTAwMDAtNmM4Ny00N2M0LTlhY2UtYjE1MDIzY2IwMDAyIn19XX0="
+* input[=].extension.url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set"
+* input[=].extension.extension[0].url = "setId"
+* input[=].extension.extension[=].valueString = "staged-patient-r4"
+* input[=].extension.extension[+].url = "payloadBinding"
+* input[=].extension.extension[=].valueCode = #DIS-FHIR-Payload
+* input[=].extension.extension[+].url = "payloadVersion"
+* input[=].extension.extension[=].valueCode = #R4
+* input[=].extension.extension[+].url = "manifestFormat"
+* input[=].extension.extension[=].valueCode = #dis-resource-list
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#execution-plan
+* input[=].valueReference = Reference(https://dis.example.org/fhir/Library/staged-async-advanced-plan/_history/1)
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#rule-set-id
+* input[=].valueString = "generalize-birth-date"
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#stage-id
+* input[=].valueString = "advanced"
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#reversibility-mode
+* input[=].valueCode = #irreversible
+
+Instance: staged-async-job
+InstanceOf: DISJobTask
+Usage: #example
+* identifier.system = "https://requester.example.org/dis/job-identifiers"
+* identifier.value = "staged-async-job"
+* status = #requested
+* intent = #order
+* code = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type#de-identification-job
+* input[authorization].valueAttachment.contentType = #application/json
+* input[authorization].valueAttachment.data = "eyJpZCI6InN0YWdlZC1hc3luYy1wZXJtaXQiLCJhdXRob3JpemVkU2V0Ijoic3RhZ2VkLXBhdGllbnQtcjQiLCJhcHByb3ZlZFBvbGljeSI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9zdGFnZWQtcGF0aWVudHwxLjAiLCJpZGVudGl0eUxpbmthZ2VTY29wZSI6eyJ0eXBlIjoic291cmNlLWluc3RpdHV0aW9uIiwiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2xpbmthZ2Utc2NvcGUiLCJ2YWx1ZSI6ImxhYi1wcm9qZWN0LTIwMjYifX19"
+* input[payloadSet].valueAttachment.contentType = #application/fhir+json
+* insert StagedPatientInputAttachment(input[payloadSet].valueAttachment.data)
+* input[payloadSet].extension[payloadSet].extension[setId].valueString = "staged-patient-r4"
+* input[payloadSet].extension[payloadSet].extension[payloadBinding].valueCode = #DIS-FHIR-Payload
+* input[payloadSet].extension[payloadSet].extension[payloadVersion].valueCode = #R4
+* input[payloadSet].extension[payloadSet].extension[manifestFormat].valueCode = #dis-resource-list
+* input[payloadSet].extension[payloadSet].extension[policy].valueCanonical = "https://governance.example.org/policies/staged-patient|1.0"
+* input[payloadSet].extension[payloadSet].extension[policyContent].valueReference = Reference(staged-signed-policy)
+* contained = staged-signed-policy
+
+Instance: staged-async-job-result
+InstanceOf: Parameters
+Usage: #example
+* parameter[0].name = "payloadResult"
+* parameter[=].part[0].name = "setId"
+* parameter[=].part[=].valueString = "staged-patient-r4"
+* parameter[=].part[+].name = "payloadBinding"
+* parameter[=].part[=].valueCode = #DIS-FHIR-Payload
+* parameter[=].part[+].name = "payloadVersion"
+* parameter[=].part[=].valueCode = #R4
+* parameter[=].part[+].name = "manifestFormat"
+* parameter[=].part[=].valueCode = #dis-resource-list
+* parameter[=].part[+].name = "resultPackage"
+* parameter[=].part[=].valueAttachment.contentType = #application/fhir+json
+* parameter[=].part[=].valueAttachment.data = "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6InN0YWdlZC1yNC1wYXRpZW50LXJlc3VsdCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1SZXN1bHRQYWNrYWdlIl19LCJ0eXBlIjoiY29sbGVjdGlvbiIsImVudHJ5IjpbeyJmdWxsVXJsIjoidXJuOnV1aWQ6MGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAxIiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiTGlzdCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1SZXNvdXJjZU1hbmlmZXN0Il19LCJzdGF0dXMiOiJjdXJyZW50IiwibW9kZSI6InNuYXBzaG90IiwiZW50cnkiOlt7Iml0ZW0iOnsicmVmZXJlbmNlIjoidXJuOnV1aWQ6MGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAyIn19XSwiaWQiOiIwYWJkYzAwMC02MWMwLTRhMTUtYTI2MS1iMTUwMjNjYjAwMDEifX0seyJmdWxsVXJsIjoidXJuOnV1aWQ6MGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAyIiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiUGF0aWVudCIsImFjdGl2ZSI6dHJ1ZSwiaWRlbnRpZmllciI6W3sic3lzdGVtIjoiaHR0cHM6Ly9ob3NwaXRhbC5leGFtcGxlLm9yZy9pZGVudGlmaWVycy9wc2V1ZG9ueW0iLCJ2YWx1ZSI6ImFkNjc1M2E5ZGYxMTlmOThlZWU2NDVmNmMxZDIzODU2YzM5NjgxYWQxODUwNTJlMmFiMWE4Zjc1YjI2NjBiZDkifV0sImJpcnRoRGF0ZSI6IjE5ODUiLCJpZCI6IjBhYmRjMDAwLTYxYzAtNGExNS1hMjYxLWIxNTAyM2NiMDAwMiJ9fSx7ImZ1bGxVcmwiOiJ1cm46dXVpZDowYWJkYzAwMC02MWMwLTRhMTUtYTI2MS1iMTUwMjNjYjAwMDMiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJQcm92ZW5hbmNlIiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLUV2aWRlbmNlIl19LCJ0YXJnZXQiOlt7InJlZmVyZW5jZSI6InVybjp1dWlkOjBhYmRjMDAwLTYxYzAtNGExNS1hMjYxLWIxNTAyM2NiMDAwMiJ9XSwicmVjb3JkZWQiOiIyMDI2LTExLTA2VDAzOjAwOjMwWiIsImFjdGl2aXR5Ijp7ImNvZGluZyI6W3sic3lzdGVtIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvQ29kZVN5c3RlbS9kaXMtYWN0aXZpdHkiLCJjb2RlIjoiZGlzLXRhc2sifV19LCJwb2xpY3kiOlsiaHR0cHM6Ly9nb3Zlcm5hbmNlLmV4YW1wbGUub3JnL2ZoaXIvTGlicmFyeS9zdGFnZWQtcGF0aWVudC9faGlzdG9yeS8xIl0sImFnZW50IjpbeyJ0eXBlIjp7ImNvZGluZyI6W3sic3lzdGVtIjoiaHR0cDovL3Rlcm1pbm9sb2d5LmhsNy5vcmcvQ29kZVN5c3RlbS9wcm92ZW5hbmNlLXBhcnRpY2lwYW50LXR5cGUiLCJjb2RlIjoicGVyZm9ybWVyIn1dfSwid2hvIjp7ImlkZW50aWZpZXIiOnsic3lzdGVtIjoiaHR0cHM6Ly9kaXMuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvd29ya2VyIiwidmFsdWUiOiJleGFtcGxlLWFkdmFuY2VkLXdvcmtlciJ9fX1dLCJleHRlbnNpb24iOlt7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLW91dGNvbWUtc3RhdHVzIiwidmFsdWVDb2RlIjoiY29tcGxldGUifSx7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLXJ1bGVzZXQiLCJ2YWx1ZVN0cmluZyI6ImdlbmVyYWxpemUtYmlydGgtZGF0ZSJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtcmV2ZXJzaWJpbGl0eSIsInZhbHVlQ29kZSI6ImlycmV2ZXJzaWJsZSJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtdmFsaWRhdGlvbi1zdGF0dXMiLCJ2YWx1ZUNvZGUiOiJ2YWxpZCJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtYXVkaXQtY29ycmVsYXRpb24iLCJ2YWx1ZUlkZW50aWZpZXIiOnsic3lzdGVtIjoiaHR0cHM6Ly9kaXMuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvYXVkaXQiLCJ2YWx1ZSI6ImV4YW1wbGUtc3RhZ2VkLWFkdmFuY2VkLXRhc2sifX1dLCJpZCI6IjBhYmRjMDAwLTYxYzAtNGExNS1hMjYxLWIxNTAyM2NiMDAwMyJ9fSx7ImZ1bGxVcmwiOiJ1cm46dXVpZDowYWJkYzAwMC02MWMwLTRhMTUtYTI2MS1iMTUwMjNjYjAwMDQiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJQcm92ZW5hbmNlIiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVN0YWdlZFJlbGVhc2VFdmlkZW5jZSJdfSwidGV4dCI6eyJzdGF0dXMiOiJnZW5lcmF0ZWQiLCJkaXYiOiI8ZGl2IHhtbG5zPVwiaHR0cDovL3d3dy53My5vcmcvMTk5OS94aHRtbFwiPjxwPlRoZSBEZS1JRCBNYW5hZ2VyIHZhbGlkYXRlZCB0aGUgcHJlbGltaW5hcnkgcHNldWRvbnltaXphdGlvbiBhbmQgYWR2YW5jZWQgZGF0ZSBnZW5lcmFsaXphdGlvbiBzdGFnZXMgYmVmb3JlIHJlbGVhc2luZyB0aGUgZmluYWwgUGF0aWVudC48L3A+PC9kaXY+In0sInRhcmdldCI6W3sicmVmZXJlbmNlIjoidXJuOnV1aWQ6MGFiZGMwMDAtNjFjMC00YTE1LWEyNjEtYjE1MDIzY2IwMDAyIn1dLCJyZWNvcmRlZCI6IjIwMjYtMTEtMDZUMDM6MDA6MzFaIiwicG9saWN5IjpbImh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9maGlyL0xpYnJhcnkvc3RhZ2VkLXBhdGllbnQvX2hpc3RvcnkvMSJdLCJhZ2VudCI6W3sidHlwZSI6eyJjb2RpbmciOlt7InN5c3RlbSI6Imh0dHA6Ly90ZXJtaW5vbG9neS5obDcub3JnL0NvZGVTeXN0ZW0vcHJvdmVuYW5jZS1wYXJ0aWNpcGFudC10eXBlIiwiY29kZSI6ImF1dGhvciJ9XX0sIndobyI6eyJpZGVudGlmaWVyIjp7InN5c3RlbSI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL21hbmFnZXIiLCJ2YWx1ZSI6ImV4YW1wbGUtZGUtaWQtbWFuYWdlciJ9fX1dLCJleHRlbnNpb24iOlt7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLXZhbGlkYXRlZC1zdGFnZSIsImV4dGVuc2lvbiI6W3sidXJsIjoic2VxdWVuY2UiLCJ2YWx1ZVBvc2l0aXZlSW50IjoxfSx7InVybCI6InN0YWdlSWQiLCJ2YWx1ZVN0cmluZyI6InByZWxpbWluYXJ5In0seyJ1cmwiOiJydWxlU2V0SWQiLCJ2YWx1ZVN0cmluZyI6InBzZXVkb255bWl6ZS1wYXRpZW50In1dfSx7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLXZhbGlkYXRlZC1zdGFnZSIsImV4dGVuc2lvbiI6W3sidXJsIjoic2VxdWVuY2UiLCJ2YWx1ZVBvc2l0aXZlSW50IjoyfSx7InVybCI6InN0YWdlSWQiLCJ2YWx1ZVN0cmluZyI6ImFkdmFuY2VkIn0seyJ1cmwiOiJydWxlU2V0SWQiLCJ2YWx1ZVN0cmluZyI6ImdlbmVyYWxpemUtYmlydGgtZGF0ZSJ9XX1dLCJpZCI6IjBhYmRjMDAwLTYxYzAtNGExNS1hMjYxLWIxNTAyM2NiMDAwNCJ9fV19"
+* parameter[+].name = "validationStatus"
+* parameter[=].valueCode = #valid
+
+Instance: staged-async-preliminary-plan
+InstanceOf: DISExecutionPlan
+Usage: #example
+* meta.versionId = "1"
+* url = "https://dis.example.org/plans/staged-async-preliminary-plan"
+* version = "1.0"
+* name = "StagedAsyncPreliminaryPlan"
+* status = #active
+* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-execution-plan "Execution plan (payload-specific compiled rules)"
+* date = "2026-11-06T03:00:05Z"
+* content.contentType = #application/vnd.ihe.dis.execution-plan+json
+* content.data = "eyJwbGFuVmVyc2lvbiI6IjEuMCIsInJ1bGVTZXRJZCI6InBzZXVkb255bWl6ZS1wYXRpZW50IiwicGF5bG9hZEJpbmRpbmciOiJESVMtRkhJUi1QYXlsb2FkIiwicGF5bG9hZFZlcnNpb24iOiJSNCIsInJ1bGVzIjpbeyJydWxlSWQiOiJoYXNoLWlkZW50aWZpZXIiLCJ0YXJnZXQiOiJQYXRpZW50LmlkZW50aWZpZXIiLCJhY3Rpb24iOiJoYXNoIiwicGFyYW1ldGVycyI6eyJtb2RlIjoic2FsdGVkIiwiYWxnb3JpdGhtIjoiU0hBLTI1NiIsInBzZXVkb255bVN5c3RlbSI6Imh0dHBzOi8vaG9zcGl0YWwuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvcHNldWRvbnltIiwiaWRlbnRpdHktbGlua2FnZS1zY29wZSI6eyJ0eXBlIjoic291cmNlLWluc3RpdHV0aW9uIiwiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2xpbmthZ2Utc2NvcGUiLCJ2YWx1ZSI6ImxhYi1wcm9qZWN0LTIwMjYifX19LCJzb3VyY2VSdWxlSWQiOiJoYXNoLWlkZW50aWZpZXIifSx7InJ1bGVJZCI6InJlbW92ZS1uYW1lIiwidGFyZ2V0IjoiUGF0aWVudC5uYW1lIiwiYWN0aW9uIjoicmVtb3ZlIiwic291cmNlUnVsZUlkIjoicmVtb3ZlLW5hbWUifV19"
+* relatedArtifact[sourcePolicy].resource = "https://governance.example.org/policies/staged-patient|1.0"
+* relatedArtifact[sourcePolicy].extension[evidenceUri].valueUri = "https://governance.example.org/fhir/Library/staged-patient/_history/1"
+
+Instance: staged-async-preliminary-result
+InstanceOf: Parameters
+Usage: #example
+* parameter[0].name = "payloadResult"
+* parameter[=].part[0].name = "setId"
+* parameter[=].part[=].valueString = "staged-patient-r4"
+* parameter[=].part[+].name = "payloadBinding"
+* parameter[=].part[=].valueCode = #DIS-FHIR-Payload
+* parameter[=].part[+].name = "payloadVersion"
+* parameter[=].part[=].valueCode = #R4
+* parameter[=].part[+].name = "manifestFormat"
+* parameter[=].part[=].valueCode = #dis-resource-list
+* parameter[=].part[+].name = "resultPackage"
+* parameter[=].part[=].valueAttachment.contentType = #application/fhir+json
+* parameter[=].part[=].valueAttachment.data = "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6InN0YWdlZC1hc3luYy1wcmVsaW1pbmFyeS1wYWNrYWdlIiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc3VsdFBhY2thZ2UiXX0sInR5cGUiOiJjb2xsZWN0aW9uIiwiZW50cnkiOlt7ImZ1bGxVcmwiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDEiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJMaXN0IiwibWV0YSI6eyJwcm9maWxlIjpbImh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vRElTLVJlc291cmNlTWFuaWZlc3QiXX0sInN0YXR1cyI6ImN1cnJlbnQiLCJtb2RlIjoic25hcHNob3QiLCJlbnRyeSI6W3siaXRlbSI6eyJyZWZlcmVuY2UiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDIifX1dLCJpZCI6ImJjNTUwMDAwLTZjODctNDdjNC05YWNlLWIxNTAyM2NiMDAwMSJ9fSx7ImZ1bGxVcmwiOiJ1cm46dXVpZDpiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDIiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJQYXRpZW50IiwiYWN0aXZlIjp0cnVlLCJpZGVudGlmaWVyIjpbeyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL3BzZXVkb255bSIsInZhbHVlIjoiYWQ2NzUzYTlkZjExOWY5OGVlZTY0NWY2YzFkMjM4NTZjMzk2ODFhZDE4NTA1MmUyYWIxYThmNzViMjY2MGJkOSJ9XSwiYmlydGhEYXRlIjoiMTk4NS0wNy0xNiIsImlkIjoiYmM1NTAwMDAtNmM4Ny00N2M0LTlhY2UtYjE1MDIzY2IwMDAyIn19LHsiZnVsbFVybCI6InVybjp1dWlkOmJjNTUwMDAwLTZjODctNDdjNC05YWNlLWIxNTAyM2NiMDAwMyIsInJlc291cmNlIjp7InJlc291cmNlVHlwZSI6IlByb3ZlbmFuY2UiLCJtZXRhIjp7InByb2ZpbGUiOlsiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9ESVMtRXZpZGVuY2UiXX0sInRhcmdldCI6W3sicmVmZXJlbmNlIjoidXJuOnV1aWQ6YmM1NTAwMDAtNmM4Ny00N2M0LTlhY2UtYjE1MDIzY2IwMDAyIn1dLCJyZWNvcmRlZCI6IjIwMjYtMTEtMDZUMDM6MDA6MTBaIiwiYWN0aXZpdHkiOnsiY29kaW5nIjpbeyJzeXN0ZW0iOiJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9Db2RlU3lzdGVtL2Rpcy1hY3Rpdml0eSIsImNvZGUiOiJkaXMtdGFzayJ9XX0sInBvbGljeSI6WyJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvZmhpci9MaWJyYXJ5L3N0YWdlZC1wYXRpZW50L19oaXN0b3J5LzEiXSwiYWdlbnQiOlt7InR5cGUiOnsiY29kaW5nIjpbeyJzeXN0ZW0iOiJodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL3Byb3ZlbmFuY2UtcGFydGljaXBhbnQtdHlwZSIsImNvZGUiOiJwZXJmb3JtZXIifV19LCJ3aG8iOnsiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9pZGVudGlmaWVycy93b3JrZXIiLCJ2YWx1ZSI6ImV4YW1wbGUtcHJlbGltaW5hcnktd29ya2VyIn19fV0sImV4dGVuc2lvbiI6W3sidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtb3V0Y29tZS1zdGF0dXMiLCJ2YWx1ZUNvZGUiOiJjb21wbGV0ZSJ9LHsidXJsIjoiaHR0cHM6Ly9wcm9maWxlcy5paGUubmV0L0lUSS9ESVMvU3RydWN0dXJlRGVmaW5pdGlvbi9kaXMtcnVsZXNldCIsInZhbHVlU3RyaW5nIjoicHNldWRvbnltaXplLXBhdGllbnQifSx7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLXJldmVyc2liaWxpdHkiLCJ2YWx1ZUNvZGUiOiJpcnJldmVyc2libGUifSx7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLXZhbGlkYXRpb24tc3RhdHVzIiwidmFsdWVDb2RlIjoidmFsaWQifSx7InVybCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL1N0cnVjdHVyZURlZmluaXRpb24vZGlzLWF1ZGl0LWNvcnJlbGF0aW9uIiwidmFsdWVJZGVudGlmaWVyIjp7InN5c3RlbSI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2F1ZGl0IiwidmFsdWUiOiJleGFtcGxlLXN0YWdlZC1wcmVsaW1pbmFyeS10YXNrIn19XSwiaWQiOiJiYzU1MDAwMC02Yzg3LTQ3YzQtOWFjZS1iMTUwMjNjYjAwMDMifX1dfQ=="
+* parameter[+].name = "validationStatus"
+* parameter[=].valueCode = #valid
+
+Instance: staged-async-preliminary-task
+InstanceOf: Task
+Usage: #example
+* meta.profile = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
+* identifier.system = "https://dis.example.org/dis/assignment-identifiers"
+* identifier.value = "staged-async-preliminary-task"
+* status = #requested
+* intent = #order
+* code = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type#de-identification-execution
+* input[0].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#payload-set
+* input[=].valueAttachment.contentType = #application/fhir+json
+* insert StagedPatientInputAttachment(input[=].valueAttachment.data)
+* input[=].extension.url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set"
+* input[=].extension.extension[0].url = "setId"
+* input[=].extension.extension[=].valueString = "staged-patient-r4"
+* input[=].extension.extension[+].url = "payloadBinding"
+* input[=].extension.extension[=].valueCode = #DIS-FHIR-Payload
+* input[=].extension.extension[+].url = "payloadVersion"
+* input[=].extension.extension[=].valueCode = #R4
+* input[=].extension.extension[+].url = "manifestFormat"
+* input[=].extension.extension[=].valueCode = #dis-resource-list
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#execution-plan
+* input[=].valueReference = Reference(https://dis.example.org/fhir/Library/staged-async-preliminary-plan/_history/1)
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#rule-set-id
+* input[=].valueString = "pseudonymize-patient"
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#stage-id
+* input[=].valueString = "preliminary"
+* input[+].type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input#reversibility-mode
+* input[=].valueCode = #irreversible
+
+Instance: staged-patient
+InstanceOf: DISPolicy
+Usage: #example
+* meta.versionId = "1"
+* url = "https://governance.example.org/policies/staged-patient"
+* version = "1.0"
+* name = "StagedPatientPolicy"
+* status = #active
+* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-policy "De-identification policy (Semantic-Level or Syntax-Level rules)"
+* date = "2026-11-06T03:00:00Z"
+* publisher = "Example Data Governance Authority"
+* effectivePeriod.start = "2026-01-01"
+* effectivePeriod.end = "2026-12-31"
+* identifier.system = "https://governance.example.org/identifiers/policy"
+* identifier.value = "staged-patient"
+* content.contentType = #application/vnd.ihe.dis.policy+json
+* content.data = "eyJwb2xpY3lWZXJzaW9uIjoiMS4wIiwicmVwcmVzZW50YXRpb25MZXZlbCI6InN5bnRheCIsInJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwicGF5bG9hZEZhbWlseSI6ImZoaXIiLCJwYXlsb2FkVmVyc2lvbiI6IlI0IiwiaWRlbnRpdHktbGlua2FnZS1zY29wZSI6eyJ0eXBlIjoic291cmNlLWluc3RpdHV0aW9uIiwiaWRlbnRpZmllciI6eyJzeXN0ZW0iOiJodHRwczovL2hvc3BpdGFsLmV4YW1wbGUub3JnL2lkZW50aWZpZXJzL2xpbmthZ2Utc2NvcGUiLCJ2YWx1ZSI6ImxhYi1wcm9qZWN0LTIwMjYifX0sInJ1bGVTZXRzIjpbeyJydWxlU2V0SWQiOiJwc2V1ZG9ueW1pemUtcGF0aWVudCIsInJ1bGVzIjpbeyJydWxlSWQiOiJoYXNoLWlkZW50aWZpZXIiLCJ0YXJnZXQiOiJQYXRpZW50LmlkZW50aWZpZXIiLCJhY3Rpb24iOiJoYXNoIiwicGFyYW1ldGVycyI6eyJtb2RlIjoic2FsdGVkIiwiYWxnb3JpdGhtIjoiU0hBLTI1NiIsInBzZXVkb255bVN5c3RlbSI6Imh0dHBzOi8vaG9zcGl0YWwuZXhhbXBsZS5vcmcvaWRlbnRpZmllcnMvcHNldWRvbnltIn19LHsicnVsZUlkIjoicmVtb3ZlLW5hbWUiLCJ0YXJnZXQiOiJQYXRpZW50Lm5hbWUiLCJhY3Rpb24iOiJyZW1vdmUifV19LHsicnVsZVNldElkIjoiZ2VuZXJhbGl6ZS1iaXJ0aC1kYXRlIiwicnVsZXMiOlt7InJ1bGVJZCI6ImJpcnRoLXllYXIiLCJ0YXJnZXQiOiJQYXRpZW50LmJpcnRoRGF0ZSIsImFjdGlvbiI6InRydW5jYXRlLWRhdGUiLCJwYXJhbWV0ZXJzIjp7InByZWNpc2lvbiI6InllYXIifX1dfV0sInN0YWdlcyI6W3sic3RhZ2VJZCI6InByZWxpbWluYXJ5IiwicnVsZVNldFJlZnMiOlsicHNldWRvbnltaXplLXBhdGllbnQiXX0seyJzdGFnZUlkIjoiYWR2YW5jZWQiLCJydWxlU2V0UmVmcyI6WyJnZW5lcmFsaXplLWJpcnRoLWRhdGUiXX1dfQ=="
+
+Instance: staged-r4-patient-result
+InstanceOf: DISResultPackage
+Usage: #example
+* type = #collection
+* entry[0].fullUrl = "urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0001"
+* entry[=].resource = StagedResultManifest
+* entry[+].fullUrl = "urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0002"
+* entry[=].resource = StagedResultPatient
+* entry[+].fullUrl = "urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0003"
+* entry[=].resource = StagedResultWorkerEvidence
+* entry[+].fullUrl = "urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0004"
+* entry[=].resource = StagedResultReleaseEvidence
+
+Instance: StagedResultManifest
+InstanceOf: DISResourceManifest
+Usage: #inline
+* id = "0abdc000-61c0-4a15-a261-b15023cb0001"
+* status = #current
+* mode = #snapshot
+* entry.item = Reference(urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0002)
+
+Instance: StagedResultPatient
+InstanceOf: Patient
+Usage: #inline
+* id = "0abdc000-61c0-4a15-a261-b15023cb0002"
+* active = true
+* identifier.system = "https://hospital.example.org/identifiers/pseudonym"
+* identifier.value = "ad6753a9df119f98eee645f6c1d23856c39681ad185052e2ab1a8f75b2660bd9"
+* birthDate = "1985"
+
+Instance: StagedResultWorkerEvidence
+InstanceOf: DISEvidence
+Usage: #inline
+* id = "0abdc000-61c0-4a15-a261-b15023cb0003"
+* target = Reference(urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0002)
+* recorded = "2026-11-06T03:00:30Z"
+* activity = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity#dis-task
+* policy = "https://governance.example.org/fhir/Library/staged-patient/_history/1"
+* agent.type = http://terminology.hl7.org/CodeSystem/provenance-participant-type#performer
+* agent.who.identifier.system = "https://dis.example.org/identifiers/worker"
+* agent.who.identifier.value = "example-advanced-worker"
+* extension[outcomeStatus].valueCode = #complete
+* extension[ruleSet].valueString = "generalize-birth-date"
+* extension[reversibility].valueCode = #irreversible
+* extension[validationStatus].valueCode = #valid
+* extension[auditCorrelation].valueIdentifier.system = "https://dis.example.org/identifiers/audit"
+* extension[auditCorrelation].valueIdentifier.value = "example-staged-advanced-task"
+
+Instance: StagedResultReleaseEvidence
+InstanceOf: DISStagedReleaseEvidence
+Usage: #inline
+* id = "0abdc000-61c0-4a15-a261-b15023cb0004"
+* target = Reference(urn:uuid:0abdc000-61c0-4a15-a261-b15023cb0002)
+* recorded = "2026-11-06T03:00:31Z"
+* policy = "https://governance.example.org/fhir/Library/staged-patient/_history/1"
+* agent.type = http://terminology.hl7.org/CodeSystem/provenance-participant-type#author
+* agent.who.identifier.system = "https://dis.example.org/identifiers/manager"
+* agent.who.identifier.value = "example-de-id-manager"
+* extension[validatedStage][0].extension[sequence].valuePositiveInt = 1
+* extension[validatedStage][0].extension[stageId].valueString = "preliminary"
+* extension[validatedStage][0].extension[ruleSetId].valueString = "pseudonymize-patient"
+* extension[validatedStage][1].extension[sequence].valuePositiveInt = 2
+* extension[validatedStage][1].extension[stageId].valueString = "advanced"
+* extension[validatedStage][1].extension[ruleSetId].valueString = "generalize-birth-date"
+* text.status = #generated
+* text.div = "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The De-ID Manager validated the preliminary pseudonymization and advanced date generalization stages before releasing the final Patient.</p></div>"
+
+Instance: staged-signed-policy
+InstanceOf: DISSignedPolicy
+Usage: #inline
+* id = "staged-signed-policy"
+* contentType = #application/jose
+* data = "ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltUnBjeTF6ZEdGblpXUXRaWGhoYlhCc1pTSjkuZXdvZ0lDSnlaWE52ZFhKalpWUjVjR1VpT2lBaVRHbGljbUZ5ZVNJc0NpQWdJbWxrSWpvZ0luTjBZV2RsWkMxd1lYUnBaVzUwSWl3S0lDQWliV1YwWVNJNklIc0tJQ0FnSUNKd2NtOW1hV3hsSWpvZ1d3b2dJQ0FnSUNBaWFIUjBjSE02THk5d2NtOW1hV3hsY3k1cGFHVXVibVYwTDBsVVNTOUVTVk12VTNSeWRXTjBkWEpsUkdWbWFXNXBkR2x2Ymk5RVNWTXRVRzlzYVdONUlnb2dJQ0FnWFN3S0lDQWdJQ0oyWlhKemFXOXVTV1FpT2lBaU1TSUtJQ0I5TEFvZ0lDSjFjbXdpT2lBaWFIUjBjSE02THk5bmIzWmxjbTVoYm1ObExtVjRZVzF3YkdVdWIzSm5MM0J2YkdsamFXVnpMM04wWVdkbFpDMXdZWFJwWlc1MElpd0tJQ0FpZG1WeWMybHZiaUk2SUNJeExqQWlMQW9nSUNKdVlXMWxJam9nSWxOMFlXZGxaRkJoZEdsbGJuUlFiMnhwWTNraUxBb2dJQ0p6ZEdGMGRYTWlPaUFpWVdOMGFYWmxJaXdLSUNBaWRIbHdaU0k2SUhzS0lDQWdJQ0pqYjJScGJtY2lPaUJiQ2lBZ0lDQWdJSHNLSUNBZ0lDQWdJQ0FpYzNsemRHVnRJam9nSW1oMGRIQnpPaTh2Y0hKdlptbHNaWE11YVdobExtNWxkQzlKVkVrdlJFbFRMME52WkdWVGVYTjBaVzB2WkdsekxXeHBZbkpoY25rdGRIbHdaU0lzQ2lBZ0lDQWdJQ0FnSW1OdlpHVWlPaUFpWkdsekxYQnZiR2xqZVNJc0NpQWdJQ0FnSUNBZ0ltUnBjM0JzWVhraU9pQWlSR1V0YVdSbGJuUnBabWxqWVhScGIyNGdjRzlzYVdONUlDaFRaVzFoYm5ScFl5MU1aWFpsYkNCdmNpQlRlVzUwWVhndFRHVjJaV3dnY25Wc1pYTXBJZ29nSUNBZ0lDQjlDaUFnSUNCZENpQWdmU3dLSUNBaVpHRjBaU0k2SUNJeU1ESTJMVEV4TFRBMlZEQXpPakF3T2pBd1dpSXNDaUFnSW5CMVlteHBjMmhsY2lJNklDSkZlR0Z0Y0d4bElFUmhkR0VnUjI5MlpYSnVZVzVqWlNCQmRYUm9iM0pwZEhraUxBb2dJQ0psWm1abFkzUnBkbVZRWlhKcGIyUWlPaUI3Q2lBZ0lDQWljM1JoY25RaU9pQWlNakF5Tmkwd01TMHdNU0lzQ2lBZ0lDQWlaVzVrSWpvZ0lqSXdNall0TVRJdE16RWlDaUFnZlN3S0lDQWlhV1JsYm5ScFptbGxjaUk2SUZzS0lDQWdJSHNLSUNBZ0lDQWdJbk41YzNSbGJTSTZJQ0pvZEhSd2N6b3ZMMmR2ZG1WeWJtRnVZMlV1WlhoaGJYQnNaUzV2Y21jdmFXUmxiblJwWm1sbGNuTXZjRzlzYVdONUlpd0tJQ0FnSUNBZ0luWmhiSFZsSWpvZ0luTjBZV2RsWkMxd1lYUnBaVzUwSWdvZ0lDQWdmUW9nSUYwc0NpQWdJbU52Ym5SbGJuUWlPaUJiQ2lBZ0lDQjdDaUFnSUNBZ0lDSmpiMjUwWlc1MFZIbHdaU0k2SUNKaGNIQnNhV05oZEdsdmJpOTJibVF1YVdobExtUnBjeTV3YjJ4cFkza3Jhbk52YmlJc0NpQWdJQ0FnSUNKa1lYUmhJam9nSW1WNVNuZGlNbmh3V1ROc1YxcFlTbnBoVnpsMVNXcHZhVTFUTkhkSmFYZHBZMjFXZDJOdFZucGFWelV3V1ZoU2NHSXlOVTFhV0Zwc1lrTkpOa2x1VGpWaWJsSm9aVU5KYzBsdVNteGtiVlo1WXpKc2FXRlhlSEJrU0d4T1lqSlNiRWxxYjJsaFdFcDVXbGhhYkdOdVRuQlpiWGhzU1dsM2FXTkhSalZpUnpsb1drVmFhR0pYYkhObFUwazJTVzFhYjJGWVNXbE1RMHAzV1Zoc2MySXlSbXRXYlZaNVl6SnNkbUpwU1RaSmJFa3dTV2wzYVdGWFVteGlibEp3WkVocmRHSkhiSFZoTWtadVdsTXhlbGt5T1hkYVUwazJaWGxLTUdWWVFteEphbTlwWXpJNU1XTnRUbXhNVjJ4MVl6TlNjR1JJVmpCaFZ6bDFTV2wzYVdGWFVteGlibEp3V20xc2JHTnBTVFpsZVVwNlpWaE9NRnBYTUdsUGFVcHZaRWhTZDJONmIzWk1NbWgyWXpOQ2NHUkhSbk5NYlZZMFdWY3hkMkpIVlhWaU0wcHVUREpzYTFwWE5UQmhWMXB3V2xoS2Vrd3llSEJpYlhSb1dqSlZkR015VG5aalIxVnBURU5LTWxsWGVERmFVMGsyU1cxNGFGbHBNWGRqYlRseFdsZE9NRXhVU1hkTmFsbHBabGd3YzBsdVNqRmlSMVpVV2xoU2VrbHFjR0psZVVwNVpGZDRiRlV5VmpCVFYxRnBUMmxLZDJNeVZqRmFSemwxWlZjeGNHVnRWWFJqUjBZd1lWZFdkV1JEU1hOSmJrb3hZa2RXZWtscWNHSmxlVXA1WkZkNGJGTlhVV2xQYVVwdldWaE9iMHhYYkd0YVZ6VXdZVmRhY0ZwWVNXbE1RMG93V1ZoS2JscFlVV2xQYVVwUldWaFNjRnBYTlRCTWJXeHJXbGMxTUdGWFduQmFXRWxwVEVOS2FGa3pVbkJpTWpScFQybEtiMWxZVG05SmFYZHBZMGRHZVZsWE1XeGtSMVo1WTNsSk5tVjVTblJpTWxKc1NXcHZhV015Um5Oa1IxWnJTV2wzYVZsWGVHNWlNMHB3WkVkb2RFbHFiMmxWTUdoQ1RGUkpNVTVwU1hOSmJrSjZXbGhXYTJJeU5UVmlWazQxWXpOU2JHSlRTVFpKYldnd1pFaENlazlwT0haaFJ6bDZZMGRzTUZsWGQzVmFXR2hvWWxoQ2MxcFROWFpqYldOMllWZFNiR0p1VW5CYWJXeHNZMjVOZG1OSVRteGtWMUoyWW01c2RFbHVNVGxNU0hOcFkyNVdjMXBWYkd0SmFtOXBZMjFXZEdJeldteE1WelZvWWxkVmFVeERTakJaV0VwdVdsaFJhVTlwU2xGWldGSndXbGMxTUV4dE5XaGlWMVZwVEVOS2FGa3pVbkJpTWpScFQybEtlVnBYTVhaa2JWVnBabFl4T1V4SWMybGpibFp6V2xaT2JHUkZiR3RKYW05cFdqSldkVnBZU21oaVIydzJXbE14YVdGWVNqQmhRekZyV1ZoU2JFbHBkMmxqYmxaeldsaE5hVTlzZERkSmJrb3hZa2RXU2xwRFNUWkpiVXB3WTI1U2IweFliR3haV0VscFRFTktNRmxZU201YVdGRnBUMmxLVVZsWVVuQmFWelV3VEcxS2NHTnVVbTlTUjBZd1dsTkpjMGx0Um1wa1IyeDJZbWxKTmtsdVVubGtWelZxV1ZoU2JFeFhVbWhrUjFWcFRFTktkMWxZU21oaVYxWXdXbGhLZWtscWNEZEpia0o1V2xkT2NHTXliSFppYVVrMlNXNXNiRmxZU1dsbVdERmtabFl3YzBsdVRqQlpWMlJzWTNsSk5sY3pjMmxqTTFKb1dqSldTbHBEU1RaSmJrSjVXbGQ0Y0dKWGJIVlpXRW8xU1dsM2FXTnVWbk5hVms1c1pFWktiRnB1VFdsUGJITnBZMGhPYkdSWFVuWmlibXgwWVZod2JFeFlRbWhrUjJ4c1ltNVJhVmhZTUhObGVVcDZaRWRHYmxwVmJHdEphbTlwV1ZkU01sbFhOV3BhVjFGcFRFTktlV1JYZUd4Vk1sWXdWVzFXYldONVNUWlhlVXB1V2xjMWJHTnRSbk5oV0hCc1RGZEtjR051VW05TVYxSm9aRWRWYVZoWU1XUm1VVDA5SWdvZ0lDQWdmUW9nSUYwS2ZRby5teDhWTlVZRWZuLU1IRmRJNEJrZnRiSFA5ME44azJfRm5haUMzclRsRjlsX3hHd0tiOWViN0dCZHZyU2loVUp2ODlabUpYRnpmTERBNTU0OExfVUJZbnRUSHJWcWdzaS1vVGNyNzU2X3dCNkh3WkI2XzIteUIxbldaWU15TUIzSTE0UGJxSHNDdEppSmY4Ui1JNmgtTlAtNEhTN2FOTmlGSTVRMFBnNHZETlZJWjk4TzRRenNQY2ZCQUtaUVQ0XzlOUVV1VHZEU1dGZEUtZlpfM0tHMTdNREVXLXI4bFZNMzRIeEFzWW1xSHdLNWdOOFFETWdnTFp2WDNWaE5WNHJrNzhpVVRtam5fWWZMak5TdlF6YXVyWURsckhfZzBPaVdteEpOT290TnlfbTJkamFESk1zZmtHMVJBWXRNQndJX3lrelQ5Y1BiRTRHRTdNTzlOcXR6U3c="
