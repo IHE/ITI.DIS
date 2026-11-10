@@ -251,7 +251,7 @@ Irreversible mode denotes the absence of a DIS-maintained reverse-mapping capabi
 
 At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared by the De-ID Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier. An actor MAY declare both options to indicate it supports both modes.
 
-Each job SHALL use one reversibility mode for all payload sets and execution tasks. Different payload sets MAY use different approved policies. All policies used in the job SHALL declare the same reversibility mode.
+Each job SHALL use one reversibility mode for all its payload sets and de-identification tasks. Different payload sets MAY use different approved policies. All policies used in the job SHALL declare the same reversibility mode.
 
 <a name="asynchronous-cancellation-option"> </a>
 

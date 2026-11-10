@@ -6,7 +6,7 @@ This draft applies the [complete Task work-order proposal](fhir-r4-task-work-ord
 
 ## Field mapping
 
-| Field or constraint | Job Task in ITI-x1 | Execution Task in ITI-x3 |
+| Field or constraint | De-identification job in ITI-x1 | De-identification task in ITI-x3 |
 | --- | --- | --- |
 | Work-order identity | Requester-assigned `Task.identifier` with a system and value | Manager-assigned `Task.identifier` with a system and value |
 | Submitted state | Coded job type, `intent = order` and `status = requested` | Coded execution type, `intent = order` and `status = requested` |
@@ -15,7 +15,7 @@ This draft applies the [complete Task work-order proposal](fhir-r4-task-work-ord
 | Approved policy and lookup | The payload-set extension carries the versioned policy canonical and can carry an authorized supplied lookup reference. For inline signed policy, define a local reference to a contained R4 `Binary` with `contentType = application/jose` and preserve its exact JWS bytes. | The versioned execution plan conveys the validated source policy identity and evidence URI. A separate coded input carries any protected, assignment-scoped lookup reference. |
 | Execution instructions | The Manager validates the policy and prepares the plan | One coded input each for the execution plan reference, ruleSet ID, and reversibility mode. A stage ID input is required when the policy declares stages. |
 
-Each `Task.input` has one typed value. For a payload-set input, the attachment carries the manifest and the extension associates the metadata with that particular attachment. The Task and its manifest package use R4. The set's declared payload version governs the selected clinical data. The Manager correlates the Job Task with its Execution Tasks and may use `Task.partOf` where disclosure of the parent is authorized. [FHIR R4 Task inputs](https://hl7.org/fhir/R4/task-definitions.html#Task.input) · [DIS payload-set contract](../input/pagecontent/volume-2.md#grouped-payload-parameters)
+Each `Task.input` has one typed value. For a payload-set input, the attachment carries the manifest and the extension associates the metadata with that particular attachment. The Task and its manifest package use R4. The set's declared payload version governs the selected clinical data. The Manager correlates the de-identification job with its de-identification tasks and may use `Task.partOf` where disclosure of the parent is authorized. [FHIR R4 Task inputs](https://hl7.org/fhir/R4/task-definitions.html#Task.input) · [DIS payload-set contract](../input/pagecontent/volume-2.md#grouped-payload-parameters)
 
 **Identifier decision for review.** Scope the business identifier to the submitting actor and its declared namespace. Define what makes a retry equivalent, which authorized callers can recover an accepted order, and the response for an identifier reused with changed instructions. Keep the business identifier distinct from a resource ID and the async polling URL.
 
@@ -23,7 +23,7 @@ Each `Task.input` has one typed value. For a payload-set input, the attachment c
 
 Use the archived [synthetic R4 Patient manifest package](https://github.com/IHE/ITI.DIS/blob/4bd0d8bdd0ef86aa403a4ab91595fc619fec3e00/input/examples/Bundle-single-r4-patient-input.json) and [policy, plan and authorization fixtures](https://github.com/IHE/ITI.DIS/blob/4bd0d8bdd0ef86aa403a4ab91595fc619fec3e00/input/examples/Bundle-grouped-fhir-hosted-artifacts.json). The illustrative HTTPS endpoints in the Task attachments serve the same authorized manifest selection. The Manager can provide that selection through a scoped assignment endpoint. Assume the authorization covers the Patient and policy version. The policy removes the Patient's name in this synthetic example.
 
-### 1. Requester submits the Job Task
+### 1. Requester submits the de-identification job
 
 Send `POST [manager-base]/$submit-dis-job` with `Content-Type: application/fhir+json` and the following body. Synchronous processing is selected by omitting `Prefer: respond-async`. The Manager validates authorization, the exact approved policy and the selected payload set before dispatch.
 
@@ -105,7 +105,7 @@ Send `POST [manager-base]/$submit-dis-job` with `Content-Type: application/fhir+
 }
 ```
 
-### 2. Manager submits the Execution Task
+### 2. Manager submits the de-identification task
 
 Send `POST [worker-base]/$submit-dis-task` with the following body using the same content type and synchronous selection. The assignment preserves `patient-r4`, its binding and version, and identifies the compiled plan and ruleSet for the De-Identifier.
 
