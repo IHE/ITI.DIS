@@ -36,7 +36,6 @@ This guide is organized into the following sections:
   - [De-Identification Evidence](volume-3.html#evidence-baseline)
   - [Reversible Lookup Table and Examples](volume-3.html#3pxx5-reversible-lookup-table)
 - Examples
-  - [Policy Rules Examples](examples-policy-rules.html)
   - [UC-1 – Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
   - [UC-1 and UC-2 – Staged Asynchronous Patient Job](examples-staged-async.html)
   - [UC-2 – Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)

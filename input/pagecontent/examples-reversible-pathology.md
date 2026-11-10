@@ -4,6 +4,53 @@
 
 The Requester submits a pathology order for one patient. This example isolates the Patient resource from the order to show how DIS replaces the patient business identifier. The approved policy has a source-institution linkage scope with identifier `https://hospital.example.org/identifiers/linkage-scope|lab-project-2026`. The source pair is `https://hospital.example.org/identifiers/mrn|A123`. Both variants remove `Patient.name` and use reversible mode. See [UC-3 Clinical Pathology Order](volume-1.html#1pxx423-use-case-3-clinical-pathology-order-pseudonymous-care). The Manager-managed variant also illustrates the hospital-side mapping and evidence flow for [UC-4 Cloud Decision Support](volume-1.html#1pxx424-use-case-4-ai-assisted-clinical-decision-support-cloud-deployment).
 
+## Approved Reversible Policy
+
+### UC-3 Pathology Order
+
+This decoded Semantic-Level policy governs the Manager-managed UC-3 variant. The [compiled execution plan](volume-3.html#3pxx213-execution-plan-example) resolves the scope and expands the rule targets. A Syntax-Level R4 policy can express the same rules with `Patient.identifier` and `Patient.name` as the concrete targets.
+
+```json
+{
+  "policyVersion": "1.0",
+  "representationLevel": "semantic",
+  "reversibilityMode": "reversible",
+  "identity-linkage-scope": {
+    "type": "source-institution",
+    "identifier": {
+      "system": "https://hospital.example.org/identifiers/linkage-scope",
+      "value": "lab-project-2026"
+    }
+  },
+  "ruleSets": [
+    {
+      "ruleSetId": "direct-identifiers",
+      "rules": [
+        {
+          "ruleId": "P01",
+          "target": "@subject-business-identifiers",
+          "action": "hash",
+          "parameters": {
+            "mode": "salted",
+            "algorithm": "SHA-256",
+            "pseudonymSystem": "https://hospital.example.org/identifiers/pseudonym"
+          }
+        },
+        {
+          "ruleId": "P02",
+          "target": "@subject-names",
+          "action": "remove"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### UC-4 Cloud Decision Support
+
+The hospital approves the same reversible rule pattern under a separate cloud decision support policy and linkage scope, for example `https://hospital.example.org/identifiers/linkage-scope|cloud-cds-2026`. That policy applies to the authorized clinical resources and preserves their references to the pseudonymized Patient. The Manager retains the mapping before release as illustrated in this walkthrough.
+
 ## Synchronous Job with an Asynchronous Task
 
 The Requester sends a synchronous ITI-x1 submission with the authorized data scope, the canonical URL and version of the approved policy, and one Job Task payload-set input whose manifest selects the R4 Patient. The Manager validates the approval, linkage scope, and policy before dispatching ITI-x3 with `Prefer: respond-async`. The De-Identifier returns `202 Accepted` and a task polling URL in `Content-Location`. The Manager polls that URL using ITI-x7. An in-progress response has no task output. When the task completes, the Manager validates the returned output and evidence before completing ITI-x1.

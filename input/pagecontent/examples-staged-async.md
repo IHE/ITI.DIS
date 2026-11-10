@@ -4,6 +4,10 @@
 
 A Requester submits one R4 Patient in payload set `staged-patient-r4`. The Manager assigns two asynchronous tasks to separate De-Identifiers. The preliminary worker replaces the source identifier and removes the name. The advanced worker receives only the validated intermediate Patient and reduces the birth date to its year.
 
+### Approved Staged Policy
+
+The [approved R4 Syntax-Level policy](Library-staged-patient.html) defines two stages. The preliminary rules replace the patient business identifier with an irreversible scoped pseudonym and remove the name. The advanced rule reduces the birth date to the year. The Manager compiles one plan per ruleSet and dispatches them in policy order.
+
 ### Submit and Recover the Job
 
 Send the [Job Task](Task-staged-async-job.html) to `POST https://dis.example.org/fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The Task carries one synthetic authorization attachment and an inline manifest. Its `policyContent` reference resolves to a contained `application/jose` Binary. Decode `Binary.data` to obtain the compact JWS. The signed payload bytes are the [approved Library](Library-staged-patient.html). The Manager independently knows the authorized Library version and the URI to use in evidence.

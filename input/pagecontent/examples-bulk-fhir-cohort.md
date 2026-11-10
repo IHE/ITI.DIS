@@ -2,7 +2,37 @@
 **Informative example.** The manifest and NDJSON files are synthetic fixtures. Example URLs represent authorized endpoints in the walkthrough.
 </div>
 
-An authorized Requester submits a two-Patient R4 cohort as an asynchronous job. The [input manifest](examples/bulk-fhir/input-manifest.json) lists two prepared files, [input file 1](examples/bulk-fhir/input-patients-1.ndjson) and [input file 2](examples/bulk-fhir/input-patients-2.ndjson). Each file contains one complete Patient. The approved irreversible policy removes `Patient.name`. This example assigns fresh opaque resource identities for the output and introduces no mapping for reversal.
+An authorized Requester submits a two-Patient R4 cohort as an asynchronous job. The [input manifest](examples/bulk-fhir/input-manifest.json) lists two prepared files, [input file 1](examples/bulk-fhir/input-patients-1.ndjson) and [input file 2](examples/bulk-fhir/input-patients-2.ndjson). Each file contains one complete Patient. This example assigns fresh opaque resource identities for the output and introduces no mapping for reversal.
+
+## Approved Policy
+
+The approved R4 Syntax-Level policy `https://governance.example.org/policies/patient-name-removal|1.0` removes `Patient.name` from each record. The same [policy Library](Bundle-grouped-fhir-hosted-artifacts.html) is used by the R4 set in UC-2. Its decoded rules are shown below.
+
+```json
+{
+  "policyVersion": "1.0",
+  "representationLevel": "syntax",
+  "reversibilityMode": "irreversible",
+  "payloadFamily": "fhir",
+  "payloadVersion": "R4",
+  "ruleSets": [
+    {
+      "ruleSetId": "remove-direct-link",
+      "rules": [
+        {
+          "ruleId": "remove-01",
+          "target": "Patient.name",
+          "action": "remove"
+        }
+      ]
+    }
+  ]
+}
+```
+
+For the two-stage pseudonymization pattern in UC-1, see the [signed policy in the staged walkthrough](examples-staged-async.html#approved-staged-policy).
+
+## Exchange
 
 | Exchange | What the message carries |
 |----------|--------------------------|

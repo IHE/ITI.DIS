@@ -8,12 +8,16 @@ The cohort job has two payload sets. One contains **R4 clinical records and labo
 
 ## Submit the Job
 
-Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one authorization reference identifies the permit covering both sets and their policy versions. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 source and result Lists, R4 clinical resources, and both policies and plans at their example locations. The Requester sends the Job Task directly as the ITI-x1 request body.
+Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one authorization reference identifies the permit covering both sets and their policy versions. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 source and result Lists, and R4 clinical resources at their example locations. The Requester sends the Job Task directly as the ITI-x1 request body.
+
+### Payload Sets and Approved Policies
+
+Each Job Task input names the versioned policy approved for that set. The hosted artifact collection includes both policy Libraries and the plans derived from them. Both policies use irreversible processing.
 
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
-| `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Syntax-Level R4 policy removes `Patient.name`. |
-| `imaging-measurement-r5` | An [inline R4 manifest package](Bundle-grouped-fhir-r5-input.html) contains a List and a wrapper whose attachment carries the serialized R5 Observation. | Syntax-Level R5 policy removes `Observation.subject`. |
+| `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Syntax-Level policy `patient-name-removal` version `1.0` removes `Patient.name` in R4. |
+| `imaging-measurement-r5` | An [inline R4 manifest package](Bundle-grouped-fhir-r5-input.html) contains a List and a wrapper whose attachment carries the serialized R5 Observation. | Syntax-Level policy `imaging-subject-removal` version `1.0` removes `Observation.subject` in R5. |
 {: .grid}
 
 The Manager verifies the permit, resolves and validates both policies, and establishes the authorized target sets. On acceptance, it returns `202 Accepted` with `Content-Location: https://dis.example.org/jobs/job-51`. See [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1).

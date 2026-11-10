@@ -470,7 +470,7 @@ The De-Identifier returns the output and evidence to the Manager. When it genera
 
 The EHR uses an authorized, implementation-defined interaction with the Manager's mapping service to associate the AI output with the correct patient chart. The Manager retains custody of the identity table and pseudonym index and returns only the resolution result needed for that association. This interaction is outside the transactions standardized by DIS Phase 1.
 
-The identity table, pseudonym index, and confidential salts remain inside the hospital trust boundary. The [Manager-managed pathology example](examples-reversible-pathology.html) illustrates the reversible mapping and evidence flow used on the hospital side.
+The identity table, pseudonym index, and confidential salts remain inside the hospital trust boundary. The [UC-4 policy and Manager-managed mapping example](examples-reversible-pathology.html#uc-4-cloud-decision-support) illustrates the reversible mapping and evidence flow used on the hospital side.
 
 ##### 1:PXX.4.2.4.2 AI-Assisted Clinical Decision Support Process Flow
 

@@ -38,7 +38,7 @@ Each request set uses a coded Task input with a manifest attachment and [DIS Pay
 
 The Manager SHALL preserve set identity, binding, and version when changing how manifest entries are made available. Where a task processes a subset, its delivery description SHALL identify that subset. Before releasing job results, the Manager SHALL validate all output sets and any cross-set relationships required by the authorization and approved policies. A job that requires cross-set linkage SHALL be rejected if the selected bindings and policies cannot provide and validate that linkage.
 
-See the [single R4 Patient exchange](examples-single-r4-patient.html) for the smallest synchronous case and the [informative job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples.
+See the [UC-2 job with R4 and R5 payload sets](examples-grouped-fhir-job.html) for complete submission, dispatch, and result examples and the [reversible mapping walkthrough for UC-3 and UC-4](examples-reversible-pathology.html) for a synchronous job with a deferred task.
 
 <a name="transaction-authorization"> </a>
 
