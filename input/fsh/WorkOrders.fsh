@@ -59,7 +59,7 @@ Profile: DISSignedPolicy
 Parent: Binary
 Id: DIS-SignedPolicy
 Title: "DIS Signed Policy"
-Description: "Contained JWS-signed policy Library carried in a Job Task."
+Description: "Contained JWS-signed policy Library carried in a job submission."
 * id 1..1
 * contentType = #"application/jose" (exactly)
 * data 1..1
@@ -86,8 +86,8 @@ RuleSet: DISWorkOrderPayloadSet
 Profile: DISJobTask
 Parent: Task
 Id: DIS-JobTask
-Title: "DIS Job Task"
-Description: "Complete job work order submitted in ITI-x1. Each payload set declares the exact approved policy version."
+Title: "De-Identification Job"
+Description: "FHIR R4 representation of the de-identification job submitted through ITI-x1. Each payload set declares the exact approved policy version."
 * insert DISWorkOrderSubmission
 * code = $DISWorkOrderType#de-identification-job
 * contained only DISSignedPolicy
@@ -102,12 +102,20 @@ Description: "Complete job work order submitted in ITI-x1. Each payload set decl
 Profile: DISExecutionTask
 Parent: Task
 Id: DIS-ExecutionTask
-Title: "DIS Execution Task"
-Description: "Complete execution assignment submitted in ITI-x3 for one ruleSet and one payload set."
+Title: "De-Identification Task"
+Description: "FHIR R4 representation of a de-identification task submitted through ITI-x3 for one ruleSet and one payload set."
 * insert DISWorkOrderSubmission
 * code = $DISWorkOrderType#de-identification-execution
 * contained 0..0
+* basedOn 0..0
+* groupIdentifier 0..0
 * partOf 0..1
+* partOf only Reference(DISJobTask)
+* partOf.reference 0..0
+* partOf.display 0..0
+* partOf.identifier 1..1
+* partOf.identifier.system 1..1
+* partOf.identifier.value 1..1
 * input contains
     payloadSet 1..1 and
     executionPlan 1..1 and

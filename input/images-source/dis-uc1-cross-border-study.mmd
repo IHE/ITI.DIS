@@ -5,13 +5,13 @@ sequenceDiagram
     participant DI_A as De-Identifier<br/>(Advanced)
 
     Note over DAC,MGR: Study authorization and signed policy available
-    DAC->>MGR: ITI-x1 Submit Job (R4 Job Task, async)
+    DAC->>MGR: ITI-x1 Submit Job (async)
     Note over MGR: Validate authorization and policy before acceptance
     Note over DAC,MGR: If admission fails, return a synchronous error and stop
     MGR-->>DAC: 202 Accepted, Content-Location job-url
 
     Note over MGR: Compile one plan per assigned ruleSet and payload set
-    MGR->>DI_P: ITI-x3 Submit Task (R4 Execution Task, preliminary)
+    MGR->>DI_P: ITI-x3 Submit Task (preliminary stage)
     Note over DI_P: Requested scoped pseudonymization
     DI_P-->>MGR: 202 Accepted, Content-Location preliminary-url
 
@@ -21,7 +21,7 @@ sequenceDiagram
     MGR->>DI_P: ITI-x7 GET preliminary-url
     DI_P-->>MGR: 200 OK (preliminary output and evidence)
     Note over MGR: Validate preliminary output before dispatch
-    MGR->>DI_A: ITI-x3 Submit Task (R4 Execution Task, validated preliminary input)
+    MGR->>DI_A: ITI-x3 Submit Task (validated preliminary input)
     Note over DI_A: Requested record-level suppression<br/>and fixed generalization
     DI_A-->>MGR: 202 Accepted, Content-Location advanced-url
 

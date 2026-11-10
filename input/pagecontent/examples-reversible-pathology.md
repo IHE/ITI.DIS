@@ -6,7 +6,7 @@ In [UC-3 Clinical Pathology Order](volume-1.html#1pxx423-use-case-3-clinical-pat
 
 ## Approved Reversible Policy
 
-The Job Task declares the approved versioned canonical and the Manager resolves it from the hospital policy store. This decoded Semantic-Level policy governs the Manager-managed variant. The [compiled execution plan](volume-3.html#3pxx213-execution-plan-example) resolves the scope and expands the rule targets.
+The job submission declares the approved versioned canonical and the Manager resolves it from the hospital policy store. This decoded Semantic-Level policy governs the Manager-managed variant. The [compiled execution plan](volume-3.html#3pxx213-execution-plan-example) resolves the scope and expands the rule targets.
 
 ```json
 {
@@ -47,7 +47,7 @@ The Job Task declares the approved versioned canonical and the Manager resolves 
 
 ## Synchronous Exchange
 
-The EHR submits the R4 Job Task through ITI-x1. The Manager verifies the authorization and approved policy, expands the semantic groups into concrete R4 selectors, and submits the R4 Execution Task through ITI-x3. Both calls use synchronous processing. The worker assigns the pseudonym, removes `Patient.name`, and updates the order's `ServiceRequest.subject` to reference the pseudonymized Patient. The Manager validates that the link resolves in the result package before completing ITI-x1.
+The EHR submits the de-identification job through ITI-x1. The Manager verifies the authorization and approved policy, expands the semantic groups into concrete R4 selectors, and dispatches a de-identification task through ITI-x3. Both calls use synchronous processing. The worker assigns the pseudonym, removes `Patient.name`, and updates the order's `ServiceRequest.subject` to reference the pseudonymized Patient. The Manager validates that the link resolves in the result package before completing ITI-x1.
 
 | Step | Requester-supplied mapping | Manager-managed mapping |
 |------|---------------------------|-------------------------|

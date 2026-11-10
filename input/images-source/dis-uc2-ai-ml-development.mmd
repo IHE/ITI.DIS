@@ -4,7 +4,7 @@ sequenceDiagram
     participant DI_C as De-Identifier<br/>(R4 clinical and lab)
     participant DI_I as De-Identifier<br/>(R5 CT measurements)
 
-    DAC->>MGR: ITI-x1 Submit Job (R4 Job Task, async)
+    DAC->>MGR: ITI-x1 Submit Job (async)
     Note over MGR: Validate permit and both policies<br/>before accepting the job
     MGR-->>DAC: 202 Accepted, Content-Location job-url
     opt Acceptance response lost

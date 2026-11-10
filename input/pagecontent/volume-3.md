@@ -295,7 +295,7 @@ See the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-p
 
 ### 3:PXX.1.4 Policy Delivery and Validation
 
-A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. Each payload-set input in the ITI-x1 Job Task declares the approved policy as a versioned canonical in the `policy` subextension. The `authorization` input provides evidence that the data governance authority approved the data request and that specific policy. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
+A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. Each payload-set input in the ITI-x1 request declares the approved policy as a versioned canonical in the `policy` subextension. The `authorization` input provides evidence that the data governance authority approved the data request and that specific policy. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
 
 <a name="3pxx231-policy-content-resolution"> </a>
 
@@ -309,14 +309,14 @@ DIS assumes that the De-Identification Requester can read the exact approved pol
 
 The optional `policyContent` subextension determines how the De-ID Manager obtains the policy Library:
 
-**When `policyContent` is present (inline delivery):** The Requester carries the JWS-signed policy Library in a contained [DIS Signed Policy Binary](StructureDefinition-DIS-SignedPolicy.html) with `Binary.contentType = application/jose`. The `policyContent` subextension SHALL reference this Binary by its local fragment identifier. The Manager SHALL reject a reference that does not resolve to a DIS Signed Policy Binary contained in the submitted Job Task. The JWS lets the Manager detect changes to the policy content carried by the Requester. The De-ID Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model. The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
+**When `policyContent` is present (inline delivery):** The Requester carries the JWS-signed policy Library in a contained [DIS Signed Policy Binary](StructureDefinition-DIS-SignedPolicy.html) with `Binary.contentType = application/jose`. The `policyContent` subextension SHALL reference this Binary by its local fragment identifier. The Manager SHALL reject a reference that does not resolve to a DIS Signed Policy Binary contained in the submitted FHIR R4 `Task`. The JWS lets the Manager detect changes to the policy content carried by the Requester. The De-ID Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model. The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
 
 - `alg` — the signing algorithm (e.g., `RS256`, `ES256`)
 - `x5c` or `jwk` — the signing key or certificate chain used by the De-ID Manager to verify the signature under its configured trust model
 
 The De-ID Manager SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared versioned policy canonical. A mismatch indicates the Requester declared one policy but couriered different content; the Manager SHALL reject the job.
 
-**When `policyContent` is absent (Manager-resolved):** The Job Task declares the policy canonical and version. The De-ID Manager SHALL resolve the exact declared policy version by implementation-defined means and verify that the resolved Library URL and version match the declaration. For example:
+**When `policyContent` is absent (Manager-resolved):** The job submission declares the policy canonical and version. The De-ID Manager SHALL resolve the exact declared policy version by implementation-defined means and verify that the resolved Library URL and version match the declaration. For example:
 
 - When the URL matches a policy managed locally by the De-ID Manager (e.g., provisioned by administrative configuration), the Manager resolves it from its own store.
 - When the URL identifies an externally hosted policy, the Manager retrieves the policy through its implementation-defined trust model (e.g., TLS-protected fetch, mutual TLS, or externally stored JWS artifacts).
@@ -331,7 +331,7 @@ Locally managed policies are trusted by virtue of their administrative provision
 
 The De-ID Manager SHALL perform the following validation on the resolved policy Library, as defined in [§1:PXX.4.1](volume-1.html#1pxx41-concepts):
 
-1. **Authorization consistency** — verify that the canonical and version declared for each set in the Job Task identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
+1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
 2. **Integrity** — confirm that the obtained Library's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
 3. **Schema** — verify the Library conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS policy JSON Schema](schemas/dis-policy.schema.json). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Library.effectivePeriod` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
@@ -438,7 +438,7 @@ The De-Identifier SHALL reject a plan before execution if the source policy entr
 
 #### 3:PXX.2.1.2 Execution Plan JSON Structure and Rule Evaluation
 
-The [DIS execution plan JSON Schema](schemas/dis-execution-plan.schema.json) defines the decoded attachment. It contains `planVersion`, `ruleSetId`, `payloadBinding`, `payloadVersion` and an ordered `rules` array. The `ruleSetId`, `payloadBinding` and `payloadVersion` SHALL match the ITI-x3 Execution Task inputs. Each compiled rule identifies the source policy rule and specifies a target, an action, and action-specific parameters.
+The [DIS execution plan JSON Schema](schemas/dis-execution-plan.schema.json) defines the decoded attachment. It contains `planVersion`, `ruleSetId`, `payloadBinding`, `payloadVersion` and an ordered `rules` array. The `ruleSetId`, `payloadBinding` and `payloadVersion` SHALL match the ITI-x3 task submission inputs. Each compiled rule identifies the source policy rule and specifies a target, an action, and action-specific parameters.
 
 Table 3:PXX.2.1-2 lists the elements of each rule in the execution plan.
 
@@ -520,16 +520,16 @@ DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines
 
 ### 3:PXX.3.1 Common Payload Set Delivery
 
-The [DIS Job Task](StructureDefinition-DIS-JobTask.html) and [DIS Execution Task](StructureDefinition-DIS-ExecutionTask.html) describe the complete work submitted in ITI-x1 and ITI-x3. They use the [DIS Work Order Input codes](CodeSystem-dis-task-input.html) for `Task.input.type`. Each `payload-set` input has one manifest attachment as `Task.input.valueAttachment` and one [DIS Payload Set Metadata extension](StructureDefinition-dis-payload-set.html) on that input.
+The [De-Identification Job profile](StructureDefinition-DIS-JobTask.html) and [De-Identification Task profile](StructureDefinition-DIS-ExecutionTask.html) define the FHIR R4 `Task` request bodies for ITI-x1 and ITI-x3. They use the [DIS Work Order Input codes](CodeSystem-dis-task-input.html) for `Task.input.type`. Each `payload-set` input has one manifest attachment as `Task.input.valueAttachment` and one [DIS Payload Set Metadata extension](StructureDefinition-dis-payload-set.html) on that input.
 
-| Subextension | Value | Job Task | Execution Task |
+| Subextension | Value | ITI-x1 job submission | ITI-x3 task submission |
 |--------------|-------|----------|----------------|
 | `setId` | string | Required, unique within the job | Required, matches the assigned job set |
 | `payloadBinding` | code | Required | Required, matches the assigned job set |
 | `payloadVersion` | code | Required | Required, matches the assigned job set |
 | `manifestFormat` | code | Required | Required for the assigned manifest |
 | `policy` | canonical | Required, use `Library.url\|Library.version` | The execution plan carries the policy identity |
-| `policyContent` | Reference | Optional local reference to a contained signed policy Binary | Job Task only |
+| `policyContent` | Reference | Optional local reference to a contained signed policy Binary | ITI-x1 only |
 | `lookupTable` | Reference | Optional supplied lookup table for this set | Use the separate `lookup-table` input for an assigned lookup |
 {: .grid}
 
@@ -796,7 +796,7 @@ Table 3:PXX.3.2.2-3 lists the resources that are part of the HL7 FHIR R4 protoco
 
 | HL7 FHIR R4 Protocol Resource | Role |
 |-------------------------------|------|
-| `Task` | ITI-x1 Job Task and ITI-x3 Execution Task request bodies |
+| `Task` | Request bodies for the ITI-x1 job submission and ITI-x3 task submission |
 | `Parameters` | ITI-x1, ITI-x3, ITI-x4 and ITI-x7 success responses carrying results |
 | `Provenance` | De-identification evidence |
 | `OperationOutcome` | Error and validation reporting |

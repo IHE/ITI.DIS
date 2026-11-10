@@ -39,6 +39,16 @@ Exercise the [shared identifier and retry rules](volume-2.html#submission-retrie
 | Lose an ITI-x3 response while the Manager is cancelling the job. Repeat with an accepted assignment, a recorded rejection and an absent record. | The Manager cancels an outstanding assignment once it recovers its URL, accounts for a recorded rejection without starting work, and treats an absent record as unresolved. No recovery creates an assignment or permits result release. |
 {: .grid}
 
+### Job and Execution Task Correlation
+
+Exercise the [assignment correlation and disclosure rules](volume-2.html#assignment-correlation).
+
+| Actor and setup | Stimulus | Pass criteria |
+|---|---|---|
+| Manager with two accepted jobs and multiple assignments | Use two Requesters with the same submitted `Task.identifier` pair and reuse the same `setId`, ruleSet ID, and stage ID in both jobs. Dispatch to the same De-Identifier and deliver results out of order. Where cancellation is supported, cancel one job while both have outstanding work. | Each result, audit record, and cancellation action is associated with the correct job and assignment. The other job's processing and result remain independent. |
+| Manager and De-Identifier with an authorized parent alias | Run once with disclosure denied and once with disclosure authorized. Compare the assignment without `Task.partOf` and the assignment with an authorized identifier-only `Task.partOf`. Repeat with a literal parent URL, a missing identifier system or value, `Task.basedOn`, or `Task.groupIdentifier`. | Both valid forms are accepted. Invalid forms are rejected before task admission. The valid request discloses only the authorized assignment and any permitted opaque parent alias, and that alias conveys no job access. |
+{: .grid}
+
 ### Optional Asynchronous Cancellation
 
 Use the [DIS-CANCEL contract](volume-2.html#asynchronous-cancellation) with synthetic data. Verify the cancellation extension on the applicable job and task submission operations for each participating actor. Observe each exchange using the returned polling URL.
