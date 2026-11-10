@@ -1,1 +1,1 @@
-{"resourceType":"Patient","id":"cohort-02","name":[{"family":"ExampleTwo"}],"active":false}
+{"resourceType":"Patient","id":"cohort-02","name":[{"family":"ExampleTwo"}],"active":false,"identifier":[{"system":"https://study.example.org/identifiers/resolved-patient","value":"C002"}],"birthDate":"1973-04-02"}

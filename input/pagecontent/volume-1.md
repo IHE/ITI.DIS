@@ -386,6 +386,17 @@ Each future payload binding is developed as a self-contained specification, inde
 
 ### 1:PXX.4.2 Use Cases
 
+<p id="tPXX.4-3" class="tableTitle"><strong>Table 1:PXX.4-3 — Use Cases and Worked Examples</strong></p>
+
+| Use case | What it demonstrates |
+|----------|----------------------|
+| [UC-1 — Cross-Border Epidemiological Study](#1pxx421-use-case-1-cross-border-epidemiological-study-using-ips) | Two-stage asynchronous Bulk FHIR processing, irreversible pseudonymization, staged release Provenance, and optional cancellation. [Worked example](examples-bulk-fhir-cohort.html) |
+| [UC-2 — Multimodal AI/ML Input Preparation](#uc-2) | Separate R4 clinical and lab data and R5 CT measurements in one asynchronous job, with synchronous worker tasks and recovery of a lost acceptance. [Worked example](examples-grouped-fhir-job.html) |
+| [UC-3 — Clinical Pathology Order](#1pxx423-use-case-3-clinical-pathology-order-pseudonymous-care) | Synchronous reversible pseudonymization with a Manager-resolved Semantic-Level policy, preserving the order’s link to the patient. [Worked example](examples-reversible-pathology.html) |
+| [UC-4 — Cloud Decision Support](#1pxx424-use-case-4-ai-assisted-clinical-decision-support-cloud-deployment) | Synchronous reversible pseudonymization with a requester-carried, JWS-signed Syntax-Level policy, versioned input references, and hospital-side mapping custody. [Worked example](examples-cloud-decision-support.html) |
+| [UC-5 — Local Clinical Export](#1pxx425-use-case-5-de-identified-health-data-export-content-conformance) | Standalone de-identification of a FHIR document using a local policy, with Provenance and audit correlation. [Worked example](examples-standalone-export.html) |
+{: .grid}
+
 #### 1:PXX.4.2.1 Use Case 1: Cross-Border Epidemiological Study Using IPS+
 
 A research consortium conducts a cross-border epidemiological study combining population-based cancer-registry data with selected clinical information originally collected for healthcare delivery. The study examines incidence, treatment patterns, comorbidities, outcomes, and survival across participating jurisdictions. In this use case, IPS+ means the International Patient Summary (IPS) together with the additional clinical and registry records authorized for the study. [International Patient Summary Implementation Guide](https://hl7.org/fhir/uv/ips/2.0.1/en/index.html)
@@ -394,15 +405,15 @@ A research consortium conducts a cross-border epidemiological study combining po
 
 Clinical data remain under primary-use governance when recorded or exchanged for care. Their reuse begins only after a secondary-use request has been assessed and an authorization context has been issued. The Data Access Coordinator (DAC) coordinates participating jurisdictions, resolves authorized source-data provision, and -- acting as the De-Identification Requester -- submits a DIS job to produce a cohort dataset transformed by pseudonymization and policy-specified record-level rules for subsequent delivery to a Secure Processing Environment (SPE).
 
-The DAC submits an asynchronous R4 Job Task through ITI-x1 with the data request authorization, the signed policy, and a manifest that selects the prepared FHIR cohort. The Manager validates the authorization and policy before accepting the job. It compiles a separate plan for each of the two assigned ruleSets.
+The DAC submits an asynchronous R4 Job Task through ITI-x1 with the data request authorization, the approved policy canonical and version, and a Bulk FHIR manifest that selects the prepared cohort. The Manager resolves that exact policy version from its trusted policy store and validates it against the authorization before accepting the job. It compiles a separate plan for each of the two assigned ruleSets.
 
-The preliminary ruleSet pseudonymizes direct identifiers with irreversible, project-scoped pseudonyms within the authorized scope identified by `identity-linkage-scope`, using the same authorized scope and deployment-provisioned salt version to preserve linkage for matching source identifier pairs within the de-identified dataset. The advanced ruleSet applies policy-specified record-level suppression and fixed quasi-identifier generalization. Small-cell handling and transformations requiring cohort statistics are outside Phase 1; any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE.
+The preliminary ruleSet pseudonymizes direct identifiers with irreversible, project-scoped pseudonyms within the authorized scope identified by `identity-linkage-scope`, using the same authorized scope and deployment-provisioned salt version to preserve linkage for matching source identifier pairs within the de-identified dataset. The advanced ruleSet applies policy-specified record-level transformations such as reducing birth dates to year precision. Small-cell handling and transformations requiring cohort statistics are outside Phase 1; any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE.
 
 Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. No DIS reverse-mapping service is maintained; this does not exclude identification through auxiliary information or reproduction using retained derivation secrets.
 
 Each stage has one assigned ruleSet. The Manager sends the corresponding asynchronous R4 Execution Task through ITI-x3 and polls the assigned De-Identifier through ITI-x7. The Manager validates the preliminary output before dispatching the advanced task with that validated input. It validates the final output, rechecks release authorization, and records staged release Provenance. The DAC retrieves the cohort and its evidence through ITI-x4, then forwards the cohort to the SPE outside the DIS exchange.
 
-The [staged asynchronous example](examples-staged-async.html) shows the task sequence and release evidence. The [Bulk FHIR cohort example](examples-bulk-fhir-cohort.html) shows manifest and NDJSON delivery.
+The [UC-1 Bulk FHIR cohort example](examples-bulk-fhir-cohort.html) shows both stages, release evidence, NDJSON delivery, and an optional cancellation variant.
 
 ##### 1:PXX.4.2.1.2 Cross-Border Epidemiological Study Process Flow
 
@@ -416,21 +427,17 @@ The [staged asynchronous example](examples-staged-async.html) shows the task seq
 
 #### 1:PXX.4.2.2 Use Case 2: FHIR Input Preparation for Multimodal AI/ML
 
-An AI/ML consortium prepares a lung cancer cohort for model development or validation. The approved data include clinical records, laboratory results, and structured CT measurements. Phase 1 DIS prepares these FHIR inputs for the cohort release. Native DICOM processing is outside Phase 1. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows how a future binding could add a separate native imaging payload set to the same job.
+An AI/ML consortium prepares a lung cancer cohort for model development or validation. The approved data include clinical records, laboratory results, and structured CT measurements. Phase 1 DIS prepares these FHIR inputs for the cohort release. Native DICOM processing is outside Phase 1. The [illustrative FHIR and DICOM extension](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) shows how a future binding could add a separate native imaging payload set to the same job.
 
 ##### 1:PXX.4.2.2.1 AI/ML Method Development Use Case Description
 
 The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous R4 Job Task through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and carries CT-derived measurements as [R5 Observation](https://hl7.org/fhir/R5/observation.html) resources. The DIS requests, responses, and evidence use R4 for both sets.
 
-The Manager validates the permit and both approved policies before accepting the job. The clinical set uses two assigned ruleSets. The preliminary ruleSet assigns irreversible pseudonyms under the policy's `identity-linkage-scope`. Matching source identifier pairs produce consistent pseudonyms when the tasks use the same authorized scope, effective salt and salt version, and compatible derivation parameters. The advanced ruleSet applies fixed quasi-identifier generalization and policy-specified record-level suppression to validated preliminary output. Any dataset-level assessment or processing occurs outside DIS before release to the SPE.
+The Manager validates the permit and both approved policies before accepting the job and returning a polling URL. Each set uses one ruleSet. The R4 policy removes `Patient.name` and preserves links from the laboratory results to the output Patient. The R5 policy retains the CT measurements and removes the patient reference because the permit authorizes those measurements for independent analysis. The job selects irreversible processing. A `setId` correlates each set with its task and result within the job.
 
-The imaging set uses its own R5 policy. In this scenario, its measurements are approved for independent analysis, so the policy removes the patient reference and retains the measurement. A `setId` correlates a payload set with its tasks and results within the job.
+The Manager dispatches a synchronous R4 Execution Task through ITI-x3 for each set and validates both results. The job remains asynchronous at the Requester–Manager interface. If the acceptance response is lost, the DAC can recover the original polling URL using the same submission and the recovery header. After rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4. The DAC delivers the approved FHIR output to the SPE outside DIS.
 
-Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. Consistent pseudonyms enable longitudinal linkage within the clinical set. Any authorized retention of derivation secrets remains subject to §1:PXX.2.6.
-
-The Manager compiles one plan per assigned ruleSet and payload set, submits asynchronous R4 Execution Tasks through ITI-x3, and retrieves their results through ITI-x7. It validates the preliminary clinical result before dispatching the advanced clinical task. After validating both final results and rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4, including staged release Provenance for the clinical set. The DAC delivers the approved FHIR output to the SPE outside DIS.
-
-The [grouped FHIR job example](examples-grouped-fhir-job.html) uses sample records from the clinical, lab, and CT datasets to show how one job packages R4 and R5 payload sets. It uses one task per set. The [staged asynchronous example](examples-staged-async.html) shows the two-stage handoff and evidence separately.
+The [UC-2 mixed-version FHIR example](examples-grouped-fhir-job.html) shows submission recovery, a task and policy for each payload version, and release of both results.
 
 ##### 1:PXX.4.2.2.2 AI/ML Method Development Process Flow
 
@@ -444,7 +451,7 @@ A hospital EHR pseudonymizes patient context before sending a laboratory order t
 
 ##### 1:PXX.4.2.3.1 Clinical Pathology Order Use Case Description
 
-Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR submits a synchronous R4 Job Task through ITI-x1 with care-context authorization, an approved pseudonymization policy, and a manifest selecting the `Patient` and `ServiceRequest`.
+Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR submits a synchronous R4 Job Task through ITI-x1 with care-context authorization, the canonical and version of a hospital-approved Semantic-Level policy, and an inline manifest package selecting the `Patient` and `ServiceRequest`. The Manager resolves the declared policy version from its institutional policy store.
 
 The Manager validates the authorization and policy, then submits a synchronous R4 Execution Task through ITI-x3 with the compiled plan for one ruleSet. The De-Identifier assigns a scoped pseudonym and preserves the `ServiceRequest.subject` link to the pseudonymized `Patient`. Matching source identifier pairs yield the same pseudonym when the worker uses the same authorized scope, effective salt, and salt version. The EHR uses that consistency to correlate later lab results. The Manager returns the pseudonymized result package and evidence inline through ITI-x1.
 
@@ -464,13 +471,13 @@ A hospital EHR pseudonymizes patient data before transmitting to a cloud-hosted 
 
 ##### 1:PXX.4.2.4.1 AI-Assisted Clinical Decision Support Use Case Description
 
-A clinician triggers AI decision support for an active encounter. The EHR submits a synchronous R4 Job Task through ITI-x1 to the on-premise Manager with the approved reversible pseudonymization policy. The manifest selects the `Patient` and the authorized linked clinical resources, such as `Observation`, `Condition`, `MedicationStatement`, and `Encounter`. The Manager sends an R4 Execution Task through ITI-x3 to an on-premise De-Identifier. The output clinical references remain linked to the pseudonymized `Patient`.
+A clinician triggers AI decision support for an active encounter. The EHR submits a synchronous R4 Job Task through ITI-x1 to the on-premise Manager with a requester-carried, signed Syntax-Level R4 policy and its approved canonical and version. A versioned HTTPS manifest selects the `Patient` and the authorized linked clinical resources, such as `Observation` and `Encounter`. The Manager verifies the signature and the approved policy identity. The Manager sends an R4 Execution Task through ITI-x3 to an on-premise De-Identifier. The output clinical references remain linked to the pseudonymized `Patient`.
 
 The De-Identifier returns the output and evidence to the Manager. When it generates patient mappings, it also returns the protected `generatedLookupTable`. The Manager validates and retains the mappings before releasing the pseudonymized result and evidence to the EHR through ITI-x1. The EHR sends the pseudonymized clinical data to the cloud service outside DIS and receives recommendations referencing the pseudonym.
 
 The EHR uses an authorized, implementation-defined interaction with the Manager's mapping service to associate the AI output with the correct patient chart. The Manager retains custody of the identity table and pseudonym index and returns only the resolution result needed for that association. This interaction is outside the transactions standardized by DIS Phase 1.
 
-The identity table, pseudonym index, and confidential salts remain inside the hospital trust boundary. The [Manager-managed pathology example](examples-reversible-pathology.html) illustrates the reversible mapping and evidence flow used on the hospital side.
+The identity table, pseudonym index, and confidential salts remain inside the hospital trust boundary. The [UC-4 cloud decision support example](examples-cloud-decision-support.html) shows the signed policy, the versioned manifest, and the hospital-side mapping and evidence flow.
 
 ##### 1:PXX.4.2.4.2 AI-Assisted Clinical Decision Support Process Flow
 

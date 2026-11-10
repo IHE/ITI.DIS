@@ -17,7 +17,7 @@ Check the mandatory R4 protocol binding, applicable content requirements and req
 
 | Actor and setup | Stimulus | Pass criteria |
 |---|---|---|
-| Requester, Manager, and De-Identifier with R4 list delivery | Run the [single-Patient synchronous exchange](examples-single-r4-patient.html). Repeat with no `payload-set` input, a duplicated `setId`, an unexpected Task input code, and a Parameters body. Submit an Execution Task with its plan input missing. | The valid exchange returns HTTP 200 and one result with matching set ID, evidence and valid status. Each invalid submission returns 400 without acceptance, dispatch or a result. |
+| Requester, Manager, and De-Identifier with R4 list delivery | Authorize and submit only the [UC-2 R4 payload set](examples-grouped-fhir-job.html#grouped-fhir-submission). Omit `Prefer: respond-async` on both submissions. Repeat with no `payload-set` input, a duplicated `setId`, an unexpected Task input code, and a Parameters body. Submit an Execution Task with its plan input missing. | The valid exchange returns HTTP 200 and one result with matching set ID, evidence and valid status. Each invalid submission returns 400 without acceptance, dispatch or a result. |
 | Manager with both async options; peers with the option used on their leg | Run all supported synchronous and asynchronous combinations with the same policy and data. Poll accepted work while pending and after completion. | Only the selected legs return 202 with a polling URL associated with the submitted `Task.identifier`. Pending responses carry no result. Successful polls return the same Parameters shape as synchronous success. |
 | Worker serving an asynchronous reversible task | Poll the same URL as the assigned Manager, then as a different authenticated Manager without task access. | The assigned Manager can retrieve the authorized result. The other Manager receives an authorization error without task state, evidence, or mapping. |
 | Manager and worker after an accepted job | Return a transient ITI-x7 error, then return successful task output on a subsequent authorized poll. Repeat with a terminal task failure after another set has completed. | The transient error leaves the task unresolved. In the success run, the Manager can complete the job after validation. In the failure run, ITI-x4 returns 422 with an OperationOutcome and the Requester cannot retrieve either result set. |
@@ -84,7 +84,7 @@ Compile a policy targeting `@dates` against R4 and R5 Encounter payloads. Verify
 
 #### Source Policy Identity in an ITI-x3 Plan
 
-Dispatch the [single R4 Patient task](examples-single-r4-patient.html) with its versioned execution plan Library. Give the De-Identifier access to the plan and assigned payload. Verify that the De-Identifier can return the exact evidence URI carried by the plan in `Provenance.policy` with no retrieval of the source policy. Verify that the Manager checks that URI against the dispatched plan before release.
+Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) with its versioned execution plan Library in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Verify that the De-Identifier can return the exact evidence URI carried by the plan in `Provenance.policy` with no retrieval of the source policy. Verify that the Manager checks that URI against the dispatched plan before release.
 
 Repeat with the `derived-from` entry absent, with an unversioned canonical, with the evidence URI absent, and with two source policy entries. Each task fails before transformation and returns an OperationOutcome without a result. Supply a policy URI for a different version when assembling the plan and verify that the Manager does not dispatch it. Return successful task evidence with a different policy URI and verify that the Manager withholds job output.
 
@@ -145,7 +145,7 @@ Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a m
 
 ### Requester Validation of Staged Release Evidence
 
-Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [single-stage Patient example](examples-single-r4-patient.html) as a baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For the asynchronous run, use the [staged job walkthrough](examples-staged-async.html), including both ITI-x7 polls and recovery of an acceptance without starting duplicate work.
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the R4 set from the [UC-2 job result](Parameters-grouped-fhir-job-result.html) as the single-stage baseline and the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For the asynchronous run, adapt the [UC-1 staged cohort exchange](examples-bulk-fhir-cohort.html#submit-dispatch-and-retrieve) or use the compact [Job Task](Task-staged-async-job.html) and the [preliminary](Task-staged-async-preliminary-task.html) and [advanced](Task-staged-async-advanced-task.html) task fixtures. Exercise both ITI-x7 polls and repeat with [recovery of a lost acceptance](examples-grouped-fhir-job.html#grouped-fhir-submission).
 
 | Stimulus | Pass criteria |
 |---|---|
@@ -188,7 +188,7 @@ These checks support draft DICOM, CDA, and R6 design review. Phase 1 pass/fail c
 
 ### Mixed R5 and DICOM Job Procedure
 
-Use the [mixed payload walkthrough](examples-mixed-r5-dicom.html) once the DICOM binding is available for testing. Configure an R5-capable De-Identifier, a DICOM-capable De-Identifier, and an imaging endpoint with two authorized instances and an additional instance outside the manifest. Use one permit covering both sets and their approved policies.
+Use the [mixed payload walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) once the DICOM binding is available for testing. Configure an R5-capable De-Identifier, a DICOM-capable De-Identifier, and an imaging endpoint with two authorized instances and an additional instance outside the manifest. Use one permit covering both sets and their approved policies.
 
 | Step | Action | Expected result |
 |------|--------|-----------------|

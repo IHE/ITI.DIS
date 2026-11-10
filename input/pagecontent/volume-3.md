@@ -287,7 +287,7 @@ Within a stage, the Manager SHALL process ruleSets in the listed order for any i
 
 <a name="3pxx131-policy-rules-examples"> </a>
 
-The [Policy Rules Examples](examples-policy-rules.html) page illustrates Semantic-Level and Syntax-Level policies, including staged execution.
+See the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-policy), [UC-3 reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy), and [UC-4 signed Syntax-Level policy](examples-cloud-decision-support.html#approved-policy-and-delivery) in their respective use-case examples.
 
 <a name="3pxx23-policy-delivery-and-validation"> </a>
 
@@ -461,7 +461,7 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 #### 3:PXX.2.1.3 Execution Plan Example
 
-This decoded execution plan compiles the clinical pathology [policy example](examples-policy-rules.html#semantic-level-reversible-clinical-pathology-policy). The Manager copies the resolved institutional scope into the salted `hash` rule and expands the semantic targets to concrete paths. See the corresponding [evidence example](Provenance-dis-evidence-uc3-001.html) and [generated lookup table](DocumentReference-generated-lookup-uc3.html).
+This decoded execution plan compiles the clinical pathology [policy example](examples-reversible-pathology.html#approved-reversible-policy). The Manager copies the resolved institutional scope into the salted `hash` rule and expands the semantic targets to concrete paths. See the corresponding [evidence example](Provenance-dis-evidence-uc3-001.html) and [generated lookup table](DocumentReference-generated-lookup-uc3.html).
 
 ```json
 {
@@ -774,6 +774,8 @@ The receiving actor SHALL follow the attachment only when the DocumentReference 
 
 The List or bulk JSON manifest determines the selected output. Provenance and manifest carriers SHALL NOT be selected as clinical payload. The receiver SHALL verify that the package contents agree with the enclosing `manifestFormat`, binding and payload version, and validate evidence coverage before accepting or releasing the set. If the Manager changes how results are made available, it SHALL preserve the selected output and update the manifest and evidence targets to describe the same released set.
 
+The [mixed R4 result package](Bundle-mixed-r4-result.html) selects a bundled Patient and a hosted Observation in the same List. The [result response](Parameters-mixed-r4-result.html) carries the package inline.
+
 <a name="3pxx112-version-safe-packaging"> </a>
 
 <a name="3pxx3212-version-safe-packaging"> </a>
@@ -909,7 +911,7 @@ The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe 
 
 <a name="mixed-payload-walkthrough"> </a>
 
-See the [informative mixed R5 and DICOM job walkthrough](examples-mixed-r5-dicom.html) for an example of the proposed DICOM binding.
+See the [informative mixed R5 and DICOM job walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) for an example of the proposed DICOM binding.
 
 <a name="evidence-baseline"> </a>
 

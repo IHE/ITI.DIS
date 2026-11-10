@@ -1,0 +1,100 @@
+{
+  "resourceType": "Task",
+  "id": "uc4-cloud-decision-support-job",
+  "meta": {
+    "profile": [
+      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "https://requester.example.org/dis/job-identifiers",
+      "value": "uc4-cloud-decision-support-job"
+    }
+  ],
+  "status": "requested",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type",
+        "code": "de-identification-job"
+      }
+    ]
+  },
+  "input": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "authorization"
+          }
+        ]
+      },
+      "valueReference": {
+        "reference": "https://governance.example.org/fhir/DocumentReference/uc4-care-approval/_history/1"
+      }
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
+            "code": "payload-set"
+          }
+        ]
+      },
+      "valueAttachment": {
+        "contentType": "application/fhir+json",
+        "url": "https://hospital.example.org/fhir/List/uc4-approved-encounter/_history/1"
+      },
+      "extension": [
+        {
+          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
+          "extension": [
+            {
+              "url": "setId",
+              "valueString": "encounter-context-r4"
+            },
+            {
+              "url": "payloadBinding",
+              "valueCode": "DIS-FHIR-Payload"
+            },
+            {
+              "url": "payloadVersion",
+              "valueCode": "R4"
+            },
+            {
+              "url": "manifestFormat",
+              "valueCode": "dis-resource-list"
+            },
+            {
+              "url": "policy",
+              "valueCanonical": "https://governance.example.org/policies/uc4-cloud-decision-support|1.0"
+            },
+            {
+              "url": "policyContent",
+              "valueReference": {
+                "reference": "#approved-policy"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "contained": [
+    {
+      "resourceType": "Binary",
+      "id": "approved-policy",
+      "meta": {
+        "profile": [
+          "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-SignedPolicy"
+        ]
+      },
+      "contentType": "application/jose",
+      "data": "ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltUnBjeTExWXpRdFpYaGhiWEJzWlNJc0ltcDNheUk2ZXlKcmRIa2lPaUpTVTBFaUxDSnVJam9pTjJacVExUkdWRk5KUWxwS1Myd3dSbVZqY0ZaMVdVNTVlVTVSY2prMVRqY3lTamhXVVRaaE0xbGxhMUl6WmkxSU9UVTNUMUZQYVVrNE9EWTBXVWd4YmxBMk9GUnFTemM1WjJzNFMwMDRTMHhuVkRKdFVFTjJlV2x4T0VnMVEyaE5NM0o2ZWpod2VrbGlZbVZoYmtaNFJGQkZjMGd3WjNWM1dsTk1lak5ZTW14RWIxUlNVbDlJUkZaUFlYWkljVkpWY2pCRGJ6WnVZMmxVWmtJeGREVlhTR1pqVjNsNlNsQm5WRkF6Y0Zab1gwVTNjVkZ3YlRkalZXdE9jMFF6WlRkUVZEVXdUakpPUm5KeU4xSnBja1p5ZVRSWFZYbEVURkpxYkZNM1VYWlRjWEZMY2xsQlZrbGlVVzFUUVZSYVRFMTJURVJ3YmtoSlFYQkZRMUptVjNZMVozazJZbXhoYVRGTGRYZHpSMUJ2ZDNBelpITlVjVk5PZWxrM1JVNXRNbEo0TlV0R1ZIQjBiVXcwVkdaNllVOXFkRlZHVW14ZldFNDFOMVZZUVdsMmNXdHZUVmx1VVdzM05EZHVjbFZ6YUhCamJHRlFka3BSSWl3aVpTSTZJa0ZSUVVJaUxDSnJhV1FpT2lKa2FYTXRkV00wTFdWNFlXMXdiR1VpTENKaGJHY2lPaUpTVXpJMU5pSXNJblZ6WlNJNkluTnBaeUo5ZlEuZXlKeVpYTnZkWEpqWlZSNWNHVWlPaUpNYVdKeVlYSjVJaXdpYVdRaU9pSjFZelF0WTJ4dmRXUXRaR1ZqYVhOcGIyNHRjM1Z3Y0c5eWRDMXdiMnhwWTNraUxDSnRaWFJoSWpwN0luQnliMlpwYkdVaU9sc2lhSFIwY0hNNkx5OXdjbTltYVd4bGN5NXBhR1V1Ym1WMEwwbFVTUzlFU1ZNdlUzUnlkV04wZFhKbFJHVm1hVzVwZEdsdmJpOUVTVk10VUc5c2FXTjVJbDBzSW5abGNuTnBiMjVKWkNJNklqRWlmU3dpZFhKc0lqb2lhSFIwY0hNNkx5OW5iM1psY201aGJtTmxMbVY0WVcxd2JHVXViM0puTDNCdmJHbGphV1Z6TDNWak5DMWpiRzkxWkMxa1pXTnBjMmx2YmkxemRYQndiM0owSWl3aWRtVnljMmx2YmlJNklqRXVNQ0lzSW01aGJXVWlPaUpWUXpSRGJHOTFaRVJsWTJsemFXOXVVM1Z3Y0c5eWRGQnZiR2xqZVNJc0luTjBZWFIxY3lJNkltRmpkR2wyWlNJc0luUjVjR1VpT25zaVkyOWthVzVuSWpwYmV5SnplWE4wWlcwaU9pSm9kSFJ3Y3pvdkwzQnliMlpwYkdWekxtbG9aUzV1WlhRdlNWUkpMMFJKVXk5RGIyUmxVM2x6ZEdWdEwyUnBjeTFzYVdKeVlYSjVMWFI1Y0dVaUxDSmpiMlJsSWpvaVpHbHpMWEJ2YkdsamVTSXNJbVJwYzNCc1lYa2lPaUpFWlMxcFpHVnVkR2xtYVdOaGRHbHZiaUJ3YjJ4cFkza2dLRk5sYldGdWRHbGpMVXhsZG1Wc0lHOXlJRk41Ym5SaGVDMU1aWFpsYkNCeWRXeGxjeWtpZlYxOUxDSmtZWFJsSWpvaU1qQXlOaTB4TVMwd05sUXdNem93TURvd01Gb2lMQ0p3ZFdKc2FYTm9aWElpT2lKRmVHRnRjR3hsSUVSaGRHRWdSMjkyWlhKdVlXNWpaU0JCZFhSb2IzSnBkSGtpTENKbFptWmxZM1JwZG1WUVpYSnBiMlFpT25zaWMzUmhjblFpT2lJeU1ESTJMVEF4TFRBeElpd2laVzVrSWpvaU1qQXlOaTB4TWkwek1TSjlMQ0pwWkdWdWRHbG1hV1Z5SWpwYmV5SnplWE4wWlcwaU9pSm9kSFJ3Y3pvdkwyZHZkbVZ5Ym1GdVkyVXVaWGhoYlhCc1pTNXZjbWN2YVdSbGJuUnBabWxsY25NdmNHOXNhV041SWl3aWRtRnNkV1VpT2lKMVl6UXRZMnh2ZFdRdFpHVmphWE5wYjI0dGMzVndjRzl5ZEMxd2IyeHBZM2tpZlYwc0ltTnZiblJsYm5RaU9sdDdJbU52Ym5SbGJuUlVlWEJsSWpvaVlYQndiR2xqWVhScGIyNHZkbTVrTG1sb1pTNWthWE11Y0c5c2FXTjVLMnB6YjI0aUxDSmtZWFJoSWpvaVpYbEtkMkl5ZUhCWk0yeFhXbGhLZW1GWE9YVkphbTlwVFZNMGQwbHBkMmxqYlZaM1kyMVdlbHBYTlRCWldGSndZakkxVFZwWVdteGlRMGsyU1c1T05XSnVVbWhsUTBselNXNUtiR1J0Vm5sak1teHBZVmQ0Y0dSSWJFNWlNbEpzU1dwdmFXTnRWakphV0VwNllWZEtjMXBUU1hOSmJrSm9aVmQ0ZGxsWFVrZFpWekZ3WWtocmFVOXBTbTFoUjJ4NVNXbDNhV05IUmpWaVJ6bG9Xa1phYkdOdVRuQmlNalJwVDJsS1UwNURTWE5KYld4cldsYzFNR0ZZVWpWTVYzaHdZbTEwYUZveVZYUmpNazUyWTBkVmFVOXVjMmxrU0d4M1dsTkpOa2x1VG5aa1dFcHFXbE14Y0dKdVRqQmhXRkl4WkVkc2RtSnBTWE5KYld4cldsYzFNR0ZYV25CYVdFbHBUMjV6YVdNemJIcGtSMVowU1dwdmFXRklVakJqU0UwMlRIazViMkl6VG5kaFdGSm9Za00xYkdWSFJuUmpSM2hzVEcwNWVWcDVPWEJhUjFaMVpFZHNiV0ZYVm5samVUbHpZVmMxY2xsWFpHeE1XRTVxWWpOQ2JFbHBkMmxrYlVaelpGZFZhVTlwU21waVJ6a3hXa014YWxwSVRYUk5ha0Y1VG1sS09XWlRkMmxqYmxaeldsWk9iR1JJVFdsUGJIUTNTVzVLTVdKSFZsUmFXRkpLV2tOSk5rbHVRbnBhV0ZacllqSTFOV0pYYkRaYVV6RjNXVmhTY0ZwWE5UQkphWGRwWTI1V2MxcFlUV2xQYkhRM1NXNUtNV0pIVmtwYVEwazJTVzFvYUdNeVozUmhWMUpzWW01U2NGcHRiR3hqYVVselNXNVNhR050Wkd4a1EwazJTV3hDYUdSSGJHeGlibEYxWVZkU2JHSnVVbkJhYld4c1kybEpjMGx0Um1wa1IyeDJZbWxKTmtsdGFHaGpNbWRwVEVOS2QxbFlTbWhpVjFZd1dsaEtla2xxY0RkSmJURjJXa2RWYVU5cFNucFpWM2d3V2xkUmFVeERTbWhpUjJSMlkyMXNNR0ZITUdsUGFVcFVVMFZGZEUxcVZUSkphWGRwWTBoT2JHUlhVblppYm14MFZUTnNlbVJIVm5SSmFtOXBZVWhTTUdOSVRUWk1lVGx2WWpOT2QyRllVbWhpUXpWc1pVZEdkR05IZUd4TWJUbDVXbms1Y0ZwSFZuVmtSMnh0WVZkV2VXTjVPV3BhU0UxMFkwaE9iR1JYVW5aaWJteDBTVzR4T1V4SWMybGpibFp6V2xWc2EwbHFiMmxqYlZaMFlqTmFiRXhYTldoaVYxVnBURU5LTUZsWVNtNWFXRkZwVDJsS1VWbFlVbkJhVnpVd1RHMDFhR0pYVldsTVEwcG9XVE5TY0dJeU5HbFBhVXA1V2xjeGRtUnRWV2xtVmpFNVdGZ3dQU0o5WFN3aWRHbDBiR1VpT2lKVlF5MDBJRU5zYjNWa0lFUmxZMmx6YVc5dUlGTjFjSEJ2Y25RZ1VHOXNhV041SWl3aVpHVnpZM0pwY0hScGIyNGlPaUpCY0hCeWIzWmxaQ0J5WlhabGNuTnBZbXhsSUhCdmJHbGplU0JtYjNJZ2RHaGxJSE41Ym5Sb1pYUnBZeUJvYjNOd2FYUmhiQzF6YVdSbElHTnNiM1ZrSUdSbFkybHphVzl1SUhOMWNIQnZjblFnZDI5eWEyWnNiM2N1SW4wLlpLYlhnR0lrS2NYWWxhTVFfSkJvd3M0eDBHdm90b2pOajllWFRGT2dJcmRWX3pBaG83VjI2MFNzQjZXV01NdUVmUktNU3FCWUpQYTVtZEFUZjdlX1lLaTk2RjJ6cnNVanE3ckVYNXBMTXdxanZmeVQxcXBoRW1oT0pYVExTc1hCazRQNUhhZXdqdHFOZ2pMbDA4Ym80Ykh5bVhVNnM3OGY0cUpaankwU1NVVVVHMGFFN2pTdjZXakk2UUVKR0JVczdHSzRBZV9rZndMWk1ORmd2eElHNW9NNHpQRjlvOVNPRFBxd1NaX3VUM0ZFN05XLUQ1emt6UU5tTkNvdXdRbHdJMW04TDZHM0EyRVFneER1S0Zua2VFYXRuMEwzWDJscU9Sem9XWlRBYTE4TThjVmVVNUNhZDd5aXVSSHF4V2JQc21FVzJ1dmhycHpmV181UWJPQ0tTZw=="
+    }
+  ]
+}

@@ -21,7 +21,7 @@ Each `Task.input` has one typed value. For a payload-set input, the attachment c
 
 ## Synchronous single-Patient exchange
 
-Use the existing [synthetic R4 Patient manifest package](../input/examples/Bundle-single-r4-patient-input.json) and [policy, plan and authorization fixtures](../input/examples/Bundle-grouped-fhir-hosted-artifacts.json). The illustrative HTTPS endpoints in the Task attachments serve the same authorized manifest selection. The Manager can provide that selection through a scoped assignment endpoint. Assume the authorization covers the Patient and policy version. The policy removes the Patient's name in this synthetic example.
+Use the archived [synthetic R4 Patient manifest package](https://github.com/IHE/ITI.DIS/blob/4bd0d8bdd0ef86aa403a4ab91595fc619fec3e00/input/examples/Bundle-single-r4-patient-input.json) and [policy, plan and authorization fixtures](https://github.com/IHE/ITI.DIS/blob/4bd0d8bdd0ef86aa403a4ab91595fc619fec3e00/input/examples/Bundle-grouped-fhir-hosted-artifacts.json). The illustrative HTTPS endpoints in the Task attachments serve the same authorized manifest selection. The Manager can provide that selection through a scoped assignment endpoint. Assume the authorization covers the Patient and policy version. The policy removes the Patient's name in this synthetic example.
 
 ### 1. Requester submits the Job Task
 
@@ -209,7 +209,7 @@ Send `POST [worker-base]/$submit-dis-task` with the following body using the sam
 
 | Exchange | Expected response |
 | --- | --- |
-| De-Identifier → Manager | `200 OK` with the existing [ITI-x3 result Parameters](../input/examples/Parameters-single-r4-patient-task-result.json). The result for `patient-r4` carries the selected output and evidence bound to the exact source policy from the execution plan. |
-| Manager → Requester | `200 OK` with the existing [ITI-x1 result Parameters](../input/examples/Parameters-single-r4-patient-job-result.json). The Manager validates the result, checks release authorization and returns the result package for `patient-r4`. |
+| De-Identifier → Manager | `200 OK` with the archived [ITI-x3 result Parameters](https://github.com/IHE/ITI.DIS/blob/4bd0d8bdd0ef86aa403a4ab91595fc619fec3e00/input/examples/Parameters-single-r4-patient-task-result.json). The result for `patient-r4` carries the selected output and evidence bound to the exact source policy from the execution plan. |
+| Manager → Requester | `200 OK` with the archived [ITI-x1 result Parameters](https://github.com/IHE/ITI.DIS/blob/4bd0d8bdd0ef86aa403a4ab91595fc619fec3e00/input/examples/Parameters-single-r4-patient-job-result.json). The Manager validates the result, checks release authorization and returns the result package for `patient-r4`. |
 
-Each response is delivered on its original HTTP call. If a completed Task is exposed to an authorized caller, its output can point to the same result package. For the rejection counterpart, use a policy version outside the authorization. The Manager returns an `OperationOutcome` before acceptance or dispatch and withholds the result. [Current synchronous exchange](../input/pagecontent/examples-single-r4-patient.md) · [DIS result and evidence packaging](../input/pagecontent/volume-3.md#result-evidence-placement)
+Each response is delivered on its original HTTP call. If a completed Task is exposed to an authorized caller, its output can point to the same result package. For the rejection counterpart, use a policy version outside the authorization. The Manager returns an `OperationOutcome` before acceptance or dispatch and withholds the result. [Current DIS transaction examples](../input/pagecontent/volume-2.md#grouped-payload-parameters) · [DIS result and evidence packaging](../input/pagecontent/volume-3.md#result-evidence-placement)

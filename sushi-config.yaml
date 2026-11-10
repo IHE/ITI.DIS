@@ -57,10 +57,10 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 #  auto-oid-root: 1.3.6.1.4.1.19376.1.5....
 
 resources:
-  Task/single-r4-patient-job-request:
+  Task/uc1-bulk-cohort-job:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
-  Task/single-r4-patient-task-request:
-    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
+  Task/uc4-cloud-decision-support-job:
+    exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
   Task/grouped-fhir-job-request:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
   Task/grouped-fhir-task-patient-r4:
@@ -78,7 +78,7 @@ resources:
   Bundle/staged-r4-patient-result:
     description: "Final R4 Patient with task Provenance and Manager evidence for two validated stages."
   Bundle/bulk-r4-result:
-    description: "R4 result Bundle containing a bulk JSON manifest, two NDJSON file descriptors, and Provenance that targets those descriptors."
+    description: "R4 result Bundle containing a bulk JSON manifest, two NDJSON file descriptors, worker Provenance, and staged release Provenance."
   Parameters/bulk-r4-result:
     description: "Successful ITI-x4 response carrying the two-file cohort result package."
   Bundle/grouped-fhir-r4-hosted-result:
@@ -151,29 +151,20 @@ pages:
   fhir-semantic-group-guide.md:
     title: "FHIR PII Classification and Semantic Group Guide (Informative)"
     generation: markdown
-  examples-policy-rules.md:
-    title: "Policy Rules Examples (Informative)"
-    generation: markdown
-  examples-single-r4-patient.md:
-    title: "Synchronous Single R4 Patient (Informative)"
-    generation: markdown
   examples-grouped-fhir-job.md:
-    title: "Job with R4 and R5 Payload Sets (Informative)"
-    generation: markdown
-  examples-staged-async.md:
-    title: "Staged Asynchronous Patient Job (Informative)"
+    title: "UC-2 – Job with R4 and R5 Payload Sets (Informative)"
     generation: markdown
   examples-reversible-pathology.md:
-    title: "Reversible Clinical Pathology Order (Informative)"
+    title: "UC-3 – Reversible Clinical Pathology Order (Informative)"
+    generation: markdown
+  examples-cloud-decision-support.md:
+    title: "UC-4 – Cloud Decision Support (Informative)"
     generation: markdown
   examples-bulk-fhir-cohort.md:
-    title: "Bulk FHIR Cohort Job (Informative)"
+    title: "UC-1 – Bulk FHIR Cohort Job (Informative)"
     generation: markdown
   examples-standalone-export.md:
-    title: "Standalone Clinical Export (Informative)"
-    generation: markdown
-  examples-mixed-r5-dicom.md:
-    title: "Mixed R5 and DICOM Job (Informative)"
+    title: "UC-5 – Standalone Clinical Export (Informative)"
     generation: markdown
   draft-native-payload-bindings.md:
     title: "Draft DICOM and CDA Payload Bindings"
@@ -214,14 +205,11 @@ menu:
     De-Identification Evidence: volume-3.html#evidence-baseline
     Reversible Lookup Table and Examples: volume-3.html#3pxx5-reversible-lookup-table
   Examples:
-    Policy Rules Examples: examples-policy-rules.html
-    Synchronous Single R4 Patient: examples-single-r4-patient.html
-    Job with R4 and R5 Payload Sets: examples-grouped-fhir-job.html
-    Reversible Clinical Pathology Order: examples-reversible-pathology.html
-    Bulk FHIR Cohort Job: examples-bulk-fhir-cohort.html
-    Staged Asynchronous Patient Job: examples-staged-async.html
-    Standalone Clinical Export: examples-standalone-export.html
-    Mixed R5 and DICOM Job: examples-mixed-r5-dicom.html
+    "UC-1 – Bulk FHIR Cohort Job": examples-bulk-fhir-cohort.html
+    "UC-2 – Job with R4 and R5 Payload Sets": examples-grouped-fhir-job.html
+    "UC-3 – Reversible Clinical Pathology Order": examples-reversible-pathology.html
+    "UC-4 – Cloud Decision Support": examples-cloud-decision-support.html
+    "UC-5 – Standalone Clinical Export": examples-standalone-export.html
   Artifacts: artifacts.html
   Other:
     Draft DICOM and CDA Payload Bindings: draft-native-payload-bindings.html

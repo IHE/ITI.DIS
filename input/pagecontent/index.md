@@ -36,12 +36,11 @@ This guide is organized into the following sections:
   - [De-Identification Evidence](volume-3.html#evidence-baseline)
   - [Reversible Lookup Table and Examples](volume-3.html#3pxx5-reversible-lookup-table)
 - Examples
-  - [Policy Rules Examples](examples-policy-rules.html)
-  - [Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)
-  - [Reversible Clinical Pathology Order](examples-reversible-pathology.html)
-  - [Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
-  - [Staged Asynchronous Patient Job](examples-staged-async.html)
-  - [Standalone Clinical Export](examples-standalone-export.html)
+  - [UC-1 – Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
+  - [UC-2 – Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)
+  - [UC-3 – Reversible Clinical Pathology Order](examples-reversible-pathology.html)
+  - [UC-4 – Cloud Decision Support](examples-cloud-decision-support.html)
+  - [UC-5 – Standalone Clinical Export](examples-standalone-export.html)
 - Other
   - [Changes to Other IHE Specifications](other.html)
   - [Download and Analysis](download.html)
