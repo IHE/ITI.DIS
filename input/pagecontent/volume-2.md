@@ -15,8 +15,8 @@ ITI-x1 and ITI-x3 each define one required operation input named `workItem` of t
 
 | Transaction | Input | Successful response |
 |-------------|-------|---------------------|
-| ITI-x1 Submit Job | [DIS Job Task](StructureDefinition-DIS-JobTask.html) with one authorization and one or more payload sets. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
-| ITI-x3 Submit Task | [DIS Execution Task](StructureDefinition-DIS-ExecutionTask.html) with one assigned set and its execution instructions. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
+| ITI-x1 Submit Job | FHIR R4 `Task` conforming to [`DIS-JobTask`](StructureDefinition-DIS-JobTask.html) with one authorization and one or more payload sets. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
+| ITI-x3 Submit Task | FHIR R4 `Task` conforming to [`DIS-ExecutionTask`](StructureDefinition-DIS-ExecutionTask.html) with one assigned set and its execution instructions. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
 | ITI-x4 Retrieve Job Output | Authorized GET of the job polling URL, or DELETE when cancellable mode was confirmed. | HTTP 200 with the same body as synchronous ITI-x1 success. HTTP 202 indicates processing is pending and carries no result. |
 | ITI-x7 Retrieve Task Output | Authorized GET of the task polling URL, or DELETE when cancellable mode was confirmed. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
 {: .grid}
@@ -165,9 +165,9 @@ The De-Identification Requester sends a Submit De-Identification Job Request whe
 
 The De-Identification Requester SHALL invoke the `$submit-dis-job` operation using `POST [base]/$submit-dis-job`. The request SHALL use `Content-Type: application/fhir+json`.
 
-The request body SHALL be a [DIS Job Task](StructureDefinition-DIS-JobTask.html) with `intent = order` and `status = requested`. The following coded inputs carry the authorization and selected data.
+The request body SHALL be a FHIR R4 `Task` conforming to [`DIS-JobTask`](StructureDefinition-DIS-JobTask.html) with `intent = order` and `status = requested`. The following coded inputs carry the authorization and selected data.
 
-<p id="t3.x1.4.1.2-1" class="tableTitle"><strong>Table 2:3.x1.4.1.2-1: ITI-x1 Job Task Inputs</strong></p>
+<p id="t3.x1.4.1.2-1" class="tableTitle"><strong>Table 2:3.x1.4.1.2-1: ITI-x1 Job Submission Inputs</strong></p>
 
 | Input code | Cardinality | Value | Description |
 |------------|-------------|-------|-------------|
@@ -334,9 +334,9 @@ The De-ID Manager sends a Submit De-Identification Task Request for each ruleSet
 
 The De-ID Manager SHALL invoke the `$submit-dis-task` operation using `POST [base]/$submit-dis-task`. The request SHALL use `Content-Type: application/fhir+json`.
 
-The request body SHALL be a [DIS Execution Task](StructureDefinition-DIS-ExecutionTask.html) with `intent = order` and `status = requested`. The coded inputs identify the assigned set and execution instructions.
+The request body SHALL be a FHIR R4 `Task` conforming to [`DIS-ExecutionTask`](StructureDefinition-DIS-ExecutionTask.html) with `intent = order` and `status = requested`. The coded inputs identify the assigned set and execution instructions.
 
-<p id="t3.x3.4.1.2-1" class="tableTitle"><strong>Table 2:3.x3.4.1.2-1: ITI-x3 Execution Task Inputs</strong></p>
+<p id="t3.x3.4.1.2-1" class="tableTitle"><strong>Table 2:3.x3.4.1.2-1: ITI-x3 Task Submission Inputs</strong></p>
 
 | Input code | Cardinality | Value | Description |
 |------------|-------------|-------|-------------|
@@ -352,13 +352,13 @@ The Manager SHALL preserve the job's `setId`, binding, and version for the assig
 
 <a name="assignment-correlation"></a>
 
-**Assignment correlation and disclosure.** Before dispatching ITI-x3, the Manager SHALL record a protected association between the [scoped Job Task identifier](#submission-retries) and the scoped Execution Task identifier. The association SHALL identify the assigned De-Identifier, `setId`, `rule-set-id`, and `stage-id` when present. The Manager SHALL associate any returned polling URL with that assignment. It SHALL use this association to correlate synchronous responses, polls, recovery, failures, cancellation, and task evidence to the correct job. A `setId` identifies a payload set within one job. The Manager SHALL use the job and assignment context when different jobs reuse a `setId`.
+**Assignment correlation and disclosure.** Before dispatching ITI-x3, the Manager SHALL record a protected association between the [scoped job submission identifier](#submission-retries) and the scoped task submission identifier. The association SHALL identify the assigned De-Identifier, `setId`, `rule-set-id`, and `stage-id` when present. The Manager SHALL associate any returned polling URL with that assignment. It SHALL use this association to correlate synchronous responses, polls, recovery, failures, cancellation, and task evidence to the correct job. A `setId` identifies a payload set within one job. The Manager SHALL use the job and assignment context when different jobs reuse a `setId`.
 
-The Manager SHALL limit job information disclosed in ITI-x3 to the assigned manifest and execution inputs, the source policy identity in the execution plan, and an optional authorized parent identifier. It SHALL withhold the Job Task body, the job polling URL, the data request authorization, the approved policy artifact, and details of other assignments. The De-Identifier uses the source policy identity in the plan for evidence and executes the assigned plan.
+The Manager SHALL limit job information disclosed in ITI-x3 to the assigned manifest and execution inputs, the source policy identity in the execution plan, and an optional authorized parent identifier. It SHALL withhold the job submission body, the job polling URL, the data request authorization, the approved policy artifact, and details of other assignments. The De-Identifier uses the source policy identity in the plan for evidence and executes the assigned plan.
 
-When the applicable authorization permits the assigned De-Identifier to receive a parent identifier, the Manager MAY provide `Task.partOf` as a [logical reference]({{site.data.fhir.path}}references.html#logical) to the parent DIS Job Task. If present, `partOf.identifier` SHALL carry a Manager-assigned opaque system and value scoped to that job and De-Identifier. The Manager SHALL preserve its association with the parent job and SHALL NOT reuse the alias for another job or share it with another De-Identifier. The De-Identifier SHALL accept an otherwise valid assignment with or without this identifier. It MAY use an authorized alias and the supplied stage identifier to correlate its own assignments. The alias confers no access to the parent job and is independent of the task identifier and polling URL. DIS Execution Tasks exclude `Task.basedOn` and `Task.groupIdentifier`.
+When the applicable authorization permits the assigned De-Identifier to receive a parent identifier, the Manager MAY provide `Task.partOf` as a [logical reference]({{site.data.fhir.path}}references.html#logical) to the FHIR R4 `Task` representing the parent job. If present, `partOf.identifier` SHALL carry a Manager-assigned opaque system and value scoped to that job and De-Identifier. The Manager SHALL preserve its association with the parent job and SHALL NOT reuse the alias for another job or share it with another De-Identifier. The De-Identifier SHALL accept an otherwise valid assignment with or without this identifier. It MAY use an authorized alias and the supplied stage identifier to correlate its own assignments. The alias confers no access to the parent job and is independent of the task identifier and polling URL. ITI-x3 submissions exclude `Task.basedOn` and `Task.groupIdentifier`.
 
-The De-ID Manager SHALL set the `reversibility-mode` input in every ITI-x3 Execution Task to the job's reversibility mode. The De-Identifier SHALL apply the supplied mode.
+The De-ID Manager SHALL set the `reversibility-mode` input in every ITI-x3 submission to the job's reversibility mode. The De-Identifier SHALL apply the supplied mode.
 
 When using `lookup-table`, the Manager SHALL dispatch only a protected reference to a document with the entries needed for the assigned task. If the source contains additional entries, the Manager SHALL create a [task-scoped lookup document](volume-3.html#3pxx5-reversible-lookup-table) and track its correlation to the pinned source. The De-Identifier's credentials SHALL NOT grant access to the unrestricted table in that case. The Manager SHALL delete derived task artifacts at termination unless retention is explicitly authorized.
 
@@ -419,7 +419,7 @@ The De-Identifier SHALL return one `payloadResult` matching the dispatched `setI
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-TASK).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x7.
 
-**400 Bad Request.** The response body is an R4 `OperationOutcome` describing the malformed or nonconforming Execution Task.
+**400 Bad Request.** The response body is an R4 `OperationOutcome` describing the malformed or nonconforming task submission.
 
 **401 Unauthorized / 403 Forbidden.** The response body is an R4 `OperationOutcome` describing the authorization failure.
 

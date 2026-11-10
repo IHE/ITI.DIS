@@ -71,7 +71,7 @@ The actors in this profile are described in more detail in the sections below.
 
 #### 1:PXX.1.1.1 De-Identification Requester
 
-The De-Identification Requester submits a complete R4 Job Task to the De-ID Manager. It carries the authorization and each selected payload set with its approved policy canonical and version. In synchronous mode, the Requester receives the result for each payload set in the ITI-x1 response, either as an inline result package or as an authorized HTTPS URL to retrieve it. In asynchronous mode, the Requester polls for job status and results via ITI-x4.
+The De-Identification Requester submits a de-identification job to the De-ID Manager with the authorization and each selected payload set with its approved policy canonical and version. In synchronous mode, the Requester receives the result for each payload set in the ITI-x1 response, either as an inline result package or as an authorized HTTPS URL to retrieve it. In asynchronous mode, the Requester polls for job status and results via ITI-x4.
 
 Phase 1 does not standardize how the Requester obtains or discovers a de-identification policy. The Requester declares the approved policy for each payload set by canonical URL and version in ITI-x1. Implementers MAY use any mechanism that produces a valid policy, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
@@ -79,7 +79,7 @@ Phase 1 does not standardize how the Requester obtains or discovers a de-identif
 
 #### 1:PXX.1.1.2 De-ID Manager
 
-The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that each payload set's policy matches the policy approved in the authorization, prepares an execution plan for each assigned ruleSet and payload set, dispatches scoped R4 Execution Tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
+The De-ID Manager receives de-identification jobs via ITI-x1, validates the data request authorization and verifies that each payload set's policy matches the policy approved in the authorization, prepares an execution plan for each assigned ruleSet and payload set, dispatches de-identification tasks to De-Identifiers via ITI-x3, and returns de-identified output and provenance evidence to the Requester.
 
 The De-ID Manager retains persistent custody of Manager-managed identity mappings and reversibility records; a Requester may retain and supply its own lookup table for reversible jobs (§1:PXX.2.2). Whether these records are persisted depends on the declared reversibility mode (see [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) and [1:PXX.2.6](#1pxx26-irreversible-de-identification-option)). See [1:PXX.4.1](#1pxx41-concepts) for the policy model, four-point validation, and policy variants. See [1:PXX.5.4](#1pxx54-reversibility-material-custody) for custody obligations.
 
@@ -111,13 +111,13 @@ The transactions in this profile are summarized in the sections below.
 
 #### 1:PXX.1.2.1 Submit De-Identification Job [ITI-x1]
 
-The Requester submits an R4 Job Task containing the data request authorization and identifying the approved policy for each payload set. The De-ID Manager or Integrated actor validates the submission and orchestrates processing. In synchronous mode, the response returns one result per payload set, with each result package delivered inline or by authorized HTTPS URL. In asynchronous mode, acceptance provides a polling URL for ITI-x4.
+The Requester submits a de-identification job with the data request authorization and identifies the approved policy for each payload set. The De-ID Manager or Integrated actor validates the submission and orchestrates processing. In synchronous mode, the response returns one result per payload set, with each result package delivered inline or by authorized HTTPS URL. In asynchronous mode, acceptance provides a polling URL for ITI-x4.
 
 For more details see the detailed [transaction description](volume-2.html#23x1-submit-de-identification-job-iti-x1).
 
 #### 1:PXX.1.2.2 Submit De-Identification Task [ITI-x3]
 
-The De-ID Manager dispatches an R4 Execution Task to a De-Identifier. Each task carries the execution plan for one ruleSet applied to one payload set. In synchronous mode, the De-Identifier returns the result package inline or by authorized HTTPS URL. In asynchronous mode, acceptance provides a polling URL for ITI-x7.
+The De-ID Manager dispatches a de-identification task to a De-Identifier with the execution plan for one ruleSet applied to one payload set. In synchronous mode, the De-Identifier returns the result package inline or by authorized HTTPS URL. In asynchronous mode, acceptance provides a polling URL for ITI-x7.
 
 For more details see the detailed [transaction description](volume-2.html#23x3-submit-de-identification-task-iti-x3).
 
@@ -299,14 +299,14 @@ DIS introduces the following key concepts that provide necessary background for 
 
 #### 1:PXX.4.1.1 De-Identification Job and De-Identification Task
 
-- **De-Identification Job.** The overall de-identification work authorized for one request. It covers all selected payload sets, each with its own approved policy version, and includes coordinating the assignments and validating the results for release. For an external submission, the Requester represents the job as a **Job Task** and submits it through ITI-x1 with the data request authorization.
-- **De-Identification Task.** An assignment within a job that applies one ruleSet to one payload set or subset using one execution plan. When a policy declares stages, each assigned ruleSet belongs to one stage, which determines its place in the execution order. In distributed processing, the De-ID Manager represents the assignment as an **Execution Task** and submits it through ITI-x3. The Integrated actor performs assignments locally.
+- **De-Identification Job.** The overall de-identification work authorized for one request. It covers all selected payload sets, each with its own approved policy version, and includes coordinating the assignments and validating the results for release. The Requester submits an external job through ITI-x1 with the data request authorization.
+- **De-Identification Task.** An assignment within a job that applies one ruleSet to one payload set or subset using one execution plan. When a policy declares stages, each assigned ruleSet belongs to one stage, which determines its place in the execution order. In distributed processing, the De-ID Manager dispatches the task through ITI-x3. The Integrated actor performs assignments locally.
 
-After accepting a Job Task for distributed processing, the De-ID Manager organizes the job into one or more De-Identification Tasks. In UC-2, one job selects two payload sets, each with one ruleSet. The Manager creates one Execution Task for the R4 clinical and laboratory records and another for the R5 CT measurements. The Manager dispatches each task to its assigned De-Identifier and assembles both validated results for the original job. [UC-2 worked example](examples-grouped-fhir-job.html)
+After accepting a de-identification job for distributed processing, the De-ID Manager creates one or more de-identification tasks. In UC-2, one job selects two payload sets, each with one ruleSet. The Manager creates one task for the R4 clinical and laboratory records and another for the R5 CT measurements. The Manager dispatches each task to its assigned De-Identifier and assembles both validated results for the original job. [UC-2 worked example](examples-grouped-fhir-job.html)
 
 The Manager tracks which job, set, ruleSet, and stage each assignment belongs to. It uses that association to validate results, coordinate cancellation, and link audit records. A De-Identifier receives the information needed for its assignment. See the [assignment correlation and disclosure rules](volume-2.html#assignment-correlation).
 
-Job Task and Execution Task are profiles of the FHIR R4 `Task` resource. Each payload set declares its processing payload release independently, as described in [Cross-Version Payload Support](#1pxx232-cross-version-payload-support).
+The ITI-x1 job submission and ITI-x3 task submission each use a FHIR R4 `Task` resource conforming to the profile for that transaction. Each payload set declares its processing payload release independently, as described in [Cross-Version Payload Support](#1pxx232-cross-version-payload-support).
 
 #### 1:PXX.4.1.2 Policy, Payload, and Evidence
 
@@ -323,7 +323,7 @@ A de-identification policy is a reusable knowledge artifact. The same policy may
 
 Every ITI-x1 request declares the approved policy for each payload set by canonical URL and version. The Requester may also carry the policy content for each set.
 
-- **Policy content carried (`policyContent` present)** -- the Job Task carries the JWS-signed policy Library in a contained `Binary` resource referenced by the set. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. The Requester obtains the signed artifact through its implementation-defined mechanism.
+- **Policy content carried (`policyContent` present)** -- the job submission carries the JWS-signed policy Library in a contained `Binary` resource referenced by the set. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. The Requester obtains the signed artifact through its implementation-defined mechanism.
 - **Policy content resolved by Manager (`policyContent` absent)** -- the Manager resolves the declared policy version by implementation-defined means.
 
 A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same four-point validation. Both are approved by the joint privacy team.
@@ -420,13 +420,13 @@ A research consortium conducts a cross-border epidemiological study combining po
 
 Clinical data remain under primary-use governance when recorded or exchanged for care. Their reuse begins only after a secondary-use request has been assessed and an authorization context has been issued. The Data Access Coordinator (DAC) coordinates participating jurisdictions, resolves authorized source-data provision, and -- acting as the De-Identification Requester -- submits a DIS job to produce a cohort dataset transformed by pseudonymization and policy-specified record-level rules for subsequent delivery to a Secure Processing Environment (SPE).
 
-The DAC submits an asynchronous R4 Job Task through ITI-x1 with the data request authorization, the approved policy canonical and version, and a Bulk FHIR manifest that selects the prepared cohort. The Manager resolves that exact policy version from its trusted policy store and validates it against the authorization before accepting the job. It compiles a separate plan for each of the two assigned ruleSets.
+The DAC submits an asynchronous de-identification job through ITI-x1 with the data request authorization, the approved policy canonical and version, and a Bulk FHIR manifest that selects the prepared cohort. The Manager resolves that exact policy version from its trusted policy store and validates it against the authorization before accepting the job. It compiles a separate plan for each of the two assigned ruleSets.
 
 The preliminary ruleSet pseudonymizes direct identifiers with irreversible, project-scoped pseudonyms within the authorized scope identified by `identity-linkage-scope`, using the same authorized scope and deployment-provisioned salt version to preserve linkage for matching source identifier pairs within the de-identified dataset. The advanced ruleSet applies policy-specified record-level transformations such as reducing birth dates to year precision. Small-cell handling and transformations requiring cohort statistics are outside Phase 1; any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE.
 
 Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. No DIS reverse-mapping service is maintained; this does not exclude identification through auxiliary information or reproduction using retained derivation secrets.
 
-Each stage has one assigned ruleSet. The Manager sends the corresponding asynchronous R4 Execution Task through ITI-x3 and polls the assigned De-Identifier through ITI-x7. The Manager validates the preliminary output before dispatching the advanced task with that validated input. It validates the final output, rechecks release authorization, and records staged release Provenance. The DAC retrieves the cohort and its evidence through ITI-x4, then forwards the cohort to the SPE outside the DIS exchange.
+Each stage has one assigned ruleSet. The Manager dispatches the corresponding asynchronous de-identification task through ITI-x3 and polls the assigned De-Identifier through ITI-x7. The Manager validates the preliminary output before dispatching the advanced task with that validated input. It validates the final output, rechecks release authorization, and records staged release Provenance. The DAC retrieves the cohort and its evidence through ITI-x4, then forwards the cohort to the SPE outside the DIS exchange.
 
 The [UC-1 Bulk FHIR cohort example](examples-bulk-fhir-cohort.html) shows both stages, release evidence, NDJSON delivery, and an optional cancellation variant.
 
@@ -446,11 +446,11 @@ An AI/ML consortium prepares a lung cancer cohort for model development or valid
 
 ##### 1:PXX.4.2.2.1 AI/ML Method Development Use Case Description
 
-The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous R4 Job Task through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and carries CT-derived measurements as [R5 Observation](https://hl7.org/fhir/R5/observation.html) resources. The DIS requests, responses, and evidence use R4 for both sets.
+The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous de-identification job through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and carries CT-derived measurements as [R5 Observation](https://hl7.org/fhir/R5/observation.html) resources. The DIS requests, responses, and evidence use R4 for both sets.
 
 The Manager validates the permit and both approved policies before accepting the job and returning a polling URL. Each set uses one ruleSet. The R4 policy removes `Patient.name` and preserves links from the laboratory results to the output Patient. The R5 policy retains the CT measurements and removes the patient reference because the permit authorizes those measurements for independent analysis. The job selects irreversible processing. A `setId` correlates each set with its task and result within the job.
 
-The Manager dispatches a synchronous R4 Execution Task through ITI-x3 for each set and validates both results. The job remains asynchronous at the Requester–Manager interface. If the acceptance response is lost, the DAC can recover the original polling URL using the same submission and the recovery header. After rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4. The DAC delivers the approved FHIR output to the SPE outside DIS.
+The Manager dispatches a synchronous de-identification task through ITI-x3 for each set and validates both results. The job remains asynchronous at the Requester–Manager interface. If the acceptance response is lost, the DAC can recover the original polling URL using the same submission and the recovery header. After rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4. The DAC delivers the approved FHIR output to the SPE outside DIS.
 
 The [UC-2 mixed-version FHIR example](examples-grouped-fhir-job.html) shows submission recovery, a task and policy for each payload version, and release of both results.
 
@@ -466,9 +466,9 @@ A hospital EHR pseudonymizes patient context before sending a laboratory order t
 
 ##### 1:PXX.4.2.3.1 Clinical Pathology Order Use Case Description
 
-Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR submits a synchronous R4 Job Task through ITI-x1 with care-context authorization, the canonical and version of a hospital-approved Semantic-Level policy, and an inline manifest package selecting the `Patient` and `ServiceRequest`. The Manager resolves the declared policy version from its institutional policy store.
+Institutional policy prohibits the external lab from seeing direct patient identifiers. The EHR submits a synchronous de-identification job through ITI-x1 with care-context authorization, the canonical and version of a hospital-approved Semantic-Level policy, and an inline manifest package selecting the `Patient` and `ServiceRequest`. The Manager resolves the declared policy version from its institutional policy store.
 
-The Manager validates the authorization and policy, then submits a synchronous R4 Execution Task through ITI-x3 with the compiled plan for one ruleSet. The De-Identifier assigns a scoped pseudonym and preserves the `ServiceRequest.subject` link to the pseudonymized `Patient`. Matching source identifier pairs yield the same pseudonym when the worker uses the same authorized scope, effective salt, and salt version. The EHR uses that consistency to correlate later lab results. The Manager returns the pseudonymized result package and evidence inline through ITI-x1.
+The Manager validates the authorization and policy, then dispatches a synchronous de-identification task through ITI-x3 with the compiled plan for one ruleSet. The De-Identifier assigns a scoped pseudonym and preserves the `ServiceRequest.subject` link to the pseudonymized `Patient`. Matching source identifier pairs yield the same pseudonym when the worker uses the same authorized scope, effective salt, and salt version. The EHR uses that consistency to correlate later lab results. The Manager returns the pseudonymized result package and evidence inline through ITI-x1.
 
 The De-Identifier returns the generated lookup table to the Manager, which validates and retains the mapping before release. The EHR sends the pseudonymized order to the lab. When the result comes back with the pseudonym, the EHR uses an authorized, implementation-defined resolution interaction to associate it with the correct chart. The Manager provides only the resolution result needed for that association. The lab exchange and resolution occur outside DIS.
 
@@ -486,7 +486,7 @@ A hospital EHR pseudonymizes patient data before transmitting to a cloud-hosted 
 
 ##### 1:PXX.4.2.4.1 AI-Assisted Clinical Decision Support Use Case Description
 
-A clinician triggers AI decision support for an active encounter. The EHR submits a synchronous R4 Job Task through ITI-x1 to the on-premise Manager with a requester-carried, signed Syntax-Level R4 policy and its approved canonical and version. A versioned HTTPS manifest selects the `Patient` and the authorized linked clinical resources, such as `Observation` and `Encounter`. The Manager verifies the signature and the approved policy identity. The Manager sends an R4 Execution Task through ITI-x3 to an on-premise De-Identifier. The output clinical references remain linked to the pseudonymized `Patient`.
+A clinician triggers AI decision support for an active encounter. The EHR submits a synchronous de-identification job through ITI-x1 to the on-premise Manager with a requester-carried, signed Syntax-Level R4 policy and its approved canonical and version. A versioned HTTPS manifest selects the `Patient` and the authorized linked clinical resources, such as `Observation` and `Encounter`. The Manager verifies the signature and the approved policy identity. The Manager dispatches a synchronous de-identification task through ITI-x3 to an on-premise De-Identifier. The output clinical references remain linked to the pseudonymized `Patient`.
 
 The De-Identifier returns the output and evidence to the Manager. When it generates patient mappings, it also returns the protected `generatedLookupTable`. The Manager validates and retains the mappings before releasing the pseudonymized result and evidence to the EHR through ITI-x1. The EHR sends the pseudonymized clinical data to the cloud service outside DIS and receives recommendations referencing the pseudonym.
 
