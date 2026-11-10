@@ -107,7 +107,15 @@ Description: "Complete execution assignment submitted in ITI-x3 for one ruleSet 
 * insert DISWorkOrderSubmission
 * code = $DISWorkOrderType#de-identification-execution
 * contained 0..0
+* basedOn 0..0
+* groupIdentifier 0..0
 * partOf 0..1
+* partOf only Reference(DISJobTask)
+* partOf.reference 0..0
+* partOf.display 0..0
+* partOf.identifier 1..1
+* partOf.identifier.system 1..1
+* partOf.identifier.value 1..1
 * input contains
     payloadSet 1..1 and
     executionPlan 1..1 and

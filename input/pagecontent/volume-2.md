@@ -209,7 +209,7 @@ Before accepting a job with a supplied table, the Manager SHALL resolve and vali
 
 An unavailable, ambiguous, unauthorized or invalid table, including changed bytes under the same `masterIdentifier`, SHALL cause rejection before acceptance or terminal job failure if detected afterward. A missing required mapping SHALL have the same result. The Manager SHALL report a failure of an accepted asynchronous job through ITI-x4. It SHALL NOT add missing entries, generate substitutes, disclose source identifiers in error responses, or release partial results. Temporary copies SHALL be deleted at job termination unless Manager retention is explicitly authorized. The Requester's authoritative table remains under the repository's custody.
 
-The Manager SHALL verify that the same data request authorization covers every set and approves the policy named for each set. Before dispatch, the Manager SHALL verify that each set can be processed using the requested binding and version, its approved policy, and a supported manifest format. Each plan applies to one ruleSet and one payload set. For each set, the Manager compiles or validates the assigned policy for that set's binding and version. It correlates tasks, results, and evidence by `setId`.
+The Manager SHALL verify that the same data request authorization covers every set and approves the policy named for each set. Before dispatch, the Manager SHALL verify that each set can be processed using the requested binding and version, its approved policy, and a supported manifest format. Each plan applies to one ruleSet and one payload set. For each set, the Manager compiles or validates the assigned policy for that set's binding and version. It uses the [assignment correlation rules](#assignment-correlation) to associate tasks, results, and evidence with the job and its payload sets.
 
 The Manager SHALL verify that the data request authorization covers the identified processing target set, including the resources or files listed in a manifest. It SHALL check that references are resolvable and use the retrieval authorization and failure rules in [Volume 3](volume-3.html#obtaining-processing-targets).
 
@@ -281,7 +281,7 @@ See [DIS Security Considerations](volume-1.html#security-considerations).
 
 #### 2:3.x1.6.1 Security Audit Considerations
 
-The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL record an audit event for each ITI-x1 transaction. The audit event SHALL identify the Requester, the Manager, the policy identifier, the processing target(s), and the job outcome (success, rejection, or failure). Implementations SHOULD use [IHE Basic Audit Log Patterns (BALP)](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation. Assign an opaque correlation identifier at submission so that accepted and rejected requests can both be audited. Use that identifier or a protected audit linkage to correlate later task evidence. Audit entries SHALL exclude signed URLs, confidential salts, and lookup content.
+The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL record an audit event for each ITI-x1 transaction. The audit event SHALL identify the Requester, the Manager, the policy identifier, the processing target(s), and the job outcome (success, rejection, or failure). Implementations SHOULD use [IHE Basic Audit Log Patterns (BALP)](https://profiles.ihe.net/ITI/BALP/) for structured audit event representation. Assign an opaque correlation identifier at submission so that accepted and rejected requests can both be audited. Use that identifier or a protected audit linkage to correlate later task evidence through the [Manager's assignment association](#assignment-correlation). Audit entries SHALL exclude signed URLs, confidential salts, and lookup content.
 
 <a name="23x3-submit-de-identification-task-iti-x3"> </a>
 
@@ -348,7 +348,15 @@ The request body SHALL be a [DIS Execution Task](StructureDefinition-DIS-Executi
 | `reversibility-mode` | 1..1 | `valueCode` | The job's reversibility mode, either `irreversible` or `reversible` |
 {: .grid}
 
-The Manager SHALL preserve the job's `setId`, binding, and version for the assigned inputs. It MAY change the delivery of the same authorized content. The execution plan carries the policy identity. Any assigned lookup table is sent in its own protected input.
+The Manager SHALL preserve the job's `setId`, binding, and version for the assigned inputs. It MAY change the delivery of the same authorized content. Any assigned lookup table is sent in its own protected input.
+
+<a name="assignment-correlation"></a>
+
+**Assignment correlation and disclosure.** Before dispatching ITI-x3, the Manager SHALL record a protected association between the [scoped Job Task identifier](#submission-retries) and the scoped Execution Task identifier. The association SHALL identify the assigned De-Identifier, `setId`, `rule-set-id`, and `stage-id` when present. The Manager SHALL associate any returned polling URL with that assignment. It SHALL use this association to correlate synchronous responses, polls, recovery, failures, cancellation, and task evidence to the correct job. A `setId` identifies a payload set within one job. The Manager SHALL use the job and assignment context when different jobs reuse a `setId`.
+
+The Manager SHALL limit job information disclosed in ITI-x3 to the assigned manifest and execution inputs, the source policy identity in the execution plan, and an optional authorized parent identifier. It SHALL withhold the Job Task body, the job polling URL, the data request authorization, the approved policy artifact, and details of other assignments. The De-Identifier uses the source policy identity in the plan for evidence and executes the assigned plan.
+
+When the applicable authorization permits the assigned De-Identifier to receive a parent identifier, the Manager MAY provide `Task.partOf` as a [logical reference]({{site.data.fhir.path}}references.html#logical) to the parent DIS Job Task. If present, `partOf.identifier` SHALL carry a Manager-assigned opaque system and value scoped to that job and De-Identifier. The Manager SHALL preserve its association with the parent job and SHALL NOT reuse the alias for another job or share it with another De-Identifier. The De-Identifier SHALL accept an otherwise valid assignment with or without this identifier. It MAY use an authorized alias and the supplied stage identifier to correlate its own assignments. The alias confers no access to the parent job and is independent of the task identifier and polling URL. DIS Execution Tasks exclude `Task.basedOn` and `Task.groupIdentifier`.
 
 The De-ID Manager SHALL set the `reversibility-mode` input in every ITI-x3 Execution Task to the job's reversibility mode. The De-Identifier SHALL apply the supplied mode.
 

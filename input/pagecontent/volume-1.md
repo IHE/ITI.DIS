@@ -295,6 +295,19 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 DIS introduces the following key concepts that provide necessary background for understanding the profile.
 
+<a name="job-and-execution-task"></a>
+
+#### 1:PXX.4.1.1 Job and Execution Task
+
+- **De-identification job.** A unit of de-identification work covered by one authorization. For an external submission, the Requester submits a **Job Task** through ITI-x1. It carries that authorization and one or more payload sets, each with its own approved policy version. The Manager is responsible for the job outcome and release of its results.
+- **Execution task.** One assignment to apply one ruleSet to an assigned payload set or subset using one execution plan. In distributed processing, the Manager submits an **Execution Task** through ITI-x3 for each assignment. When a policy declares stages, each ruleSet belongs to one stage and the stage controls execution order. The Integrated actor performs assignments locally.
+
+A distributed job can have multiple Execution Tasks. The Manager tracks which job, set, ruleSet, and stage each assignment belongs to. It uses that association to validate results, coordinate cancellation, and link audit records. A De-Identifier receives the information needed for its assignment. See the [assignment correlation and disclosure rules](volume-2.html#assignment-correlation).
+
+Both work orders are FHIR R4 `Task` resources. Each set declares its processing payload release independently, as described in [Cross-Version Payload Support](#1pxx232-cross-version-payload-support).
+
+#### 1:PXX.4.1.2 Policy, Payload, and Evidence
+
 **Policy-Governed De-Identification.** DIS separates policy approval from policy execution. DIS assumes the De-Identification Requester can read the exact approved policy through an implementation-defined mechanism. The Requester declares the approved policy's canonical URL and version for each payload set. The De-ID Manager checks that both the declaration and the policy rules match the data request authorization. The Requester may carry the JWS-signed policy in `policyContent` or let the Manager resolve the declared version through its trust model.
 
 The De-ID Manager validates all policies:

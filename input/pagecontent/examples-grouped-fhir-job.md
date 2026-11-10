@@ -26,7 +26,7 @@ The Manager verifies the permit, resolves and validates both policies, and estab
 
 ## Dispatch and Complete the Tasks
 
-Send each task to `POST /fhir/$submit-dis-task`. The task request carries one payload set and a reference to the execution plan for its declared release. Both tasks use irreversible removal. The Manager pins the versions of both hosted R4 resources and preserves the exact submitted R5 bytes in the inline package.
+Send each task to `POST /fhir/$submit-dis-task`. The task request carries one payload set and a reference to the execution plan for its declared release. Both tasks use irreversible removal. The Manager pins the versions of both hosted R4 resources and preserves the exact submitted R5 bytes in the inline package. It records both assignments under the job. The sample permit authorizes the assigned R4 worker to receive an opaque parent identifier in `Task.partOf.identifier`. The R5 task omits it. Each worker can execute its assignment using the supplied inputs. See [assignment correlation and disclosure](volume-2.html#assignment-correlation).
 
 | Set | ITI-x3 request | ITI-x3 success response | Evidence targets |
 |-----|----------------|-------------------------|------------------|
