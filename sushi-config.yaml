@@ -65,7 +65,7 @@ resources:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
   Task/grouped-fhir-task-patient-r4:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
-  Task/grouped-fhir-task-encounter-r5:
+  Task/grouped-fhir-task-imaging-measurement-r5:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask
   Task/staged-async-job:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-JobTask
@@ -82,7 +82,7 @@ resources:
   Parameters/bulk-r4-result:
     description: "Successful ITI-x4 response carrying the two-file cohort result package."
   Bundle/grouped-fhir-r4-hosted-result:
-    description: "R4 result Bundle with a manifest List and Provenance for a hosted de-identified Patient."
+    description: "R4 result Bundle with a manifest List and Provenance for a hosted de-identified Patient and hemoglobin Observation."
   Bundle/mixed-r4-result:
     description: "R4 result Bundle with a manifest List and Provenance covering a bundled Patient and a hosted Observation."
   Parameters/mixed-r4-result:
@@ -98,9 +98,9 @@ groups:
       - Bundle/grouped-fhir-r5-output
       - Task/grouped-fhir-job-request
       - Task/grouped-fhir-task-patient-r4
-      - Task/grouped-fhir-task-encounter-r5
+      - Task/grouped-fhir-task-imaging-measurement-r5
       - Parameters/grouped-fhir-task-result-patient-r4
-      - Parameters/grouped-fhir-task-result-encounter-r5
+      - Parameters/grouped-fhir-task-result-imaging-measurement-r5
       - Parameters/grouped-fhir-job-result
       - OperationOutcome/grouped-fhir-job-failure
   staged-async-examples:

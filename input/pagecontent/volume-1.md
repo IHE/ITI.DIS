@@ -410,29 +410,33 @@ The [staged asynchronous example](examples-staged-async.html) shows the task seq
 
 **Figure 1:PXX.4.2.1.2-1: Use Case 1 - Cross-Border Epidemiological Study Process Flow**
 
-#### 1:PXX.4.2.2 Use Case 2: Multimodal AI/ML Method Development (HL7 FHIR Input-Preparation)
+<a name="1pxx422-use-case-2-multimodal-aiml-method-development-hl7-fhir-input-preparation"></a>
 
-An AI/ML consortium develops or validates cancer models using multimodal data -- structured clinical information, radiology, digital pathology, laboratory data, genomics, annotations, and outcomes. DIS handles the HL7 FHIR input-preparation portion of the pipeline.
+<a name="uc-2"></a>
+
+#### 1:PXX.4.2.2 Use Case 2: FHIR Input Preparation for Multimodal AI/ML
+
+An AI/ML consortium prepares a lung cancer cohort for model development or validation. The approved data include clinical records, laboratory results, and structured CT measurements. Phase 1 DIS prepares these FHIR inputs for the cohort release. Native DICOM processing is outside Phase 1. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows how a future binding could add a separate native imaging payload set to the same job.
 
 ##### 1:PXX.4.2.2.1 AI/ML Method Development Use Case Description
 
-The consortium holds a data permit identifying the approved cohort, modalities, linkage requirements, and de-identification stages. Acting as the De-Identification Requester, the DAC submits an asynchronous R4 Job Task through ITI-x1 for the structured FHIR data, including the selected EHR records, laboratory results, outcome labels, and annotations.
+The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous R4 Job Task through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and carries CT-derived measurements as [R5 Observation](https://hl7.org/fhir/R5/observation.html) resources. The DIS requests, responses, and evidence use R4 for both sets.
 
-The Manager validates the permit and approved policy before accepting the job. It compiles a separate plan for each of the two assigned ruleSets. The preliminary ruleSet assigns irreversible pseudonyms under the policy's `identity-linkage-scope`. Matching source identifier pairs produce consistent pseudonyms when the tasks use the same authorized scope, effective salt and salt version, and compatible derivation parameters. Future linkage between clinical and DICOM data also requires coordinated identity resolution and compatible derivation.
+The Manager validates the permit and both approved policies before accepting the job. The clinical set uses two assigned ruleSets. The preliminary ruleSet assigns irreversible pseudonyms under the policy's `identity-linkage-scope`. Matching source identifier pairs produce consistent pseudonyms when the tasks use the same authorized scope, effective salt and salt version, and compatible derivation parameters. The advanced ruleSet applies fixed quasi-identifier generalization and policy-specified record-level suppression to validated preliminary output. Any dataset-level assessment or processing occurs outside DIS before release to the SPE.
 
-The advanced ruleSet applies fixed quasi-identifier generalization and policy-specified record-level suppression to the HL7 FHIR payload. Any required dataset-level assessment or processing occurs outside this DIS workflow before release to the SPE.
+The imaging set uses its own R5 policy. In this scenario, its measurements are approved for independent analysis, so the policy removes the patient reference and retains the measurement. A `setId` correlates a payload set with its tasks and results within the job.
 
-Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. Consistent pseudonyms are still produced within the project scope during processing, enabling longitudinal linkage in the de-identified dataset, without a retained reverse-mapping table. Any authorized retention of derivation secrets remains subject to §1:PXX.2.6.
+Because DIS-IRREVERSIBLE is declared, the De-ID Manager does not retain identity tables or pseudonym indices after job completion. Consistent pseudonyms enable longitudinal linkage within the clinical set. Any authorized retention of derivation secrets remains subject to §1:PXX.2.6.
 
-The Manager sends one asynchronous R4 Execution Task per assigned ruleSet through ITI-x3 and retrieves the results through ITI-x7. The advanced task receives validated preliminary output. After validating the final result and rechecking release authorization, the Manager makes the FHIR output and evidence, including staged release Provenance, available through ITI-x4. The DAC delivers the approved FHIR output to the SPE outside the DIS exchange.
+The Manager compiles one plan per assigned ruleSet and payload set, submits asynchronous R4 Execution Tasks through ITI-x3, and retrieves their results through ITI-x7. It validates the preliminary clinical result before dispatching the advanced clinical task. After validating both final results and rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4, including staged release Provenance for the clinical set. The DAC delivers the approved FHIR output to the SPE outside DIS.
 
-The [staged asynchronous example](examples-staged-async.html) illustrates the stage handoff. The [grouped FHIR job example](examples-grouped-fhir-job.html) illustrates packaging different FHIR payload versions in one job.
+The [grouped FHIR job example](examples-grouped-fhir-job.html) uses sample records from the clinical, lab, and CT datasets to show how one job packages R4 and R5 payload sets. It uses one task per set. The [staged asynchronous example](examples-staged-async.html) shows the two-stage handoff and evidence separately.
 
 ##### 1:PXX.4.2.2.2 AI/ML Method Development Process Flow
 
-<p><a href="dis-uc2-ai-ml-development.png"><img src="dis-uc2-ai-ml-development.png" alt="AI and ML method development process flow" width="784" style="max-width: 100%; height: auto;" /></a></p>
+<p><a href="dis-uc2-ai-ml-development.png"><img src="dis-uc2-ai-ml-development.png" alt="Multimodal AI and ML FHIR input preparation process flow" width="784" style="max-width: 100%; height: auto;" /></a></p>
 
-**Figure 1:PXX.4.2.2.2-1: Use Case 2 - AI/ML Method Development (HL7 FHIR Input-Preparation) Process Flow**
+**Figure 1:PXX.4.2.2.2-1: Use Case 2 - FHIR Input Preparation for Multimodal AI/ML Process Flow**
 
 #### 1:PXX.4.2.3 Use Case 3: Clinical Pathology Order (Pseudonymous Care)
 

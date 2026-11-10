@@ -1,17 +1,18 @@
 sequenceDiagram
     participant DAC as De-Identification Requester<br/>(DAC)
     participant MGR as De-ID Manager
-    participant DI_P as De-Identifier<br/>(Preliminary)
-    participant DI_A as De-Identifier<br/>(Advanced)
+    participant DI_P as De-Identifier<br/>(Preliminary clinical)
+    participant DI_A as De-Identifier<br/>(Advanced clinical)
+    participant DI_I as De-Identifier<br/>(Imaging measurement)
 
-    Note over DAC,MGR: Permit and approved policy available<br/>Policy declares the authorized linkage scope
+    Note over DAC,MGR: Permit and approved policies available<br/>R4 clinical set and R5 imaging measurement set
     DAC->>MGR: ITI-x1 Submit Job (R4 Job Task, async)
-    Note over MGR: Validate authorization and policy before acceptance
+    Note over MGR: Validate authorization and both policies<br/>before accepting the job
     Note over DAC,MGR: If admission fails, return a synchronous error and stop
     MGR-->>DAC: 202 Accepted, Content-Location job-url
 
-    Note over MGR: Compile one plan per assigned ruleSet and payload set
-    MGR->>DI_P: ITI-x3 Submit Task (R4 Execution Task, preliminary)
+    Note over MGR: Compile one plan per assigned ruleSet<br/>and payload set
+    MGR->>DI_P: ITI-x3 Submit Task (R4 Execution Task, preliminary clinical)
     Note over DI_P: Requested pseudonymization<br/>under the authorized linkage scope
     DI_P-->>MGR: 202 Accepted, Content-Location preliminary-url
 
@@ -20,14 +21,20 @@ sequenceDiagram
 
     MGR->>DI_P: ITI-x7 GET preliminary-url
     DI_P-->>MGR: 200 OK (preliminary output and evidence)
-    Note over MGR: Validate preliminary output before dispatch
-    MGR->>DI_A: ITI-x3 Submit Task (R4 Execution Task, validated preliminary input)
+    Note over MGR: Validate preliminary output<br/>before advanced dispatch
+    MGR->>DI_A: ITI-x3 Submit Task (R4 Execution Task, validated preliminary clinical input)
     Note over DI_A: Requested fixed generalization<br/>and record-level suppression
     DI_A-->>MGR: 202 Accepted, Content-Location advanced-url
 
+    MGR->>DI_I: ITI-x3 Submit Task (R4 Execution Task, R5 measurement)
+    Note over DI_I: Requested removal<br/>of the patient reference
+    DI_I-->>MGR: 202 Accepted, Content-Location imaging-url
+
     MGR->>DI_A: ITI-x7 GET advanced-url
-    DI_A-->>MGR: 200 OK (final task output and evidence)
-    Note over MGR: Validate final output and recheck release authorization<br/>Record staged release Provenance
+    DI_A-->>MGR: 200 OK (final clinical output and evidence)
+    MGR->>DI_I: ITI-x7 GET imaging-url
+    DI_I-->>MGR: 200 OK (final measurement and evidence)
+    Note over MGR: Validate both sets and recheck authorization<br/>Record staged release Provenance for the clinical set
     DAC->>MGR: ITI-x4 GET job-url
-    MGR-->>DAC: 200 OK (R4 Parameters with cohort and evidence)
-    Note over DAC: Deliver the released FHIR cohort to the SPE (outside DIS)
+    MGR-->>DAC: 200 OK (R4 Parameters with both sets and evidence)
+    Note over DAC: Deliver both FHIR sets to the SPE<br/>(outside DIS)

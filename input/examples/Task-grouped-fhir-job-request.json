@@ -88,7 +88,7 @@
       },
       "valueAttachment": {
         "contentType": "application/fhir+json",
-        "data": "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6Imdyb3VwZWQtZmhpci1yNS1pbnB1dCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1NYW5pZmVzdFBhY2thZ2UiXX0sInR5cGUiOiJjb2xsZWN0aW9uIiwiZW50cnkiOlt7ImZ1bGxVcmwiOiJ1cm46dXVpZDpkMDU1YTEzYS00ODM0LTU5NmEtOGY4OC1iOTA5ZDBkZmQ3YzgiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJMaXN0IiwiaWQiOiJncm91cGVkLWZoaXItcjUtaW5wdXQtbGlzdCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1SZXNvdXJjZU1hbmlmZXN0Il19LCJzdGF0dXMiOiJjdXJyZW50IiwibW9kZSI6InNuYXBzaG90IiwiZW50cnkiOlt7Iml0ZW0iOnsicmVmZXJlbmNlIjoidXJuOnV1aWQ6YTcyM2I0YWUtOGQxZS01YWUyLWFmNDYtYTEwYWMxZDcyYzFlIn19XX19LHsiZnVsbFVybCI6InVybjp1dWlkOmE3MjNiNGFlLThkMWUtNWFlMi1hZjQ2LWExMGFjMWQ3MmMxZSIsInJlc291cmNlIjp7InJlc291cmNlVHlwZSI6IkRvY3VtZW50UmVmZXJlbmNlIiwiaWQiOiJncm91cGVkLWZoaXItcjUtaW5wdXQtd3JhcHBlciIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1QYXlsb2FkV3JhcHBlciJdfSwic3RhdHVzIjoiY3VycmVudCIsImNvbnRlbnQiOlt7ImF0dGFjaG1lbnQiOnsiY29udGVudFR5cGUiOiJhcHBsaWNhdGlvbi9maGlyK2pzb247IGZoaXJWZXJzaW9uPTUuMCIsImRhdGEiOiJleUp5WlhOdmRYSmpaVlI1Y0dVaU9pSkZibU52ZFc1MFpYSWlMQ0pwWkNJNkltZHliM1Z3WldRdFptaHBjaTFsYm1OdmRXNTBaWEl0YVc1d2RYUWlMQ0p6ZEdGMGRYTWlPaUpqYjIxd2JHVjBaV1FpTENKemRXSnFaV04wSWpwN0luSmxabVZ5Wlc1alpTSTZJbEJoZEdsbGJuUXZaWGhoYlhCc1pTMXlOUzF6ZFdKcVpXTjBJbjBzSW1GamRIVmhiRkJsY21sdlpDSTZleUp6ZEdGeWRDSTZJakl3TWpZdE1EZ2lmWDA9In19XX19XX0="
+        "data": "eyJyZXNvdXJjZVR5cGUiOiJCdW5kbGUiLCJpZCI6Imdyb3VwZWQtZmhpci1yNS1pbnB1dCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1NYW5pZmVzdFBhY2thZ2UiXX0sInR5cGUiOiJjb2xsZWN0aW9uIiwiZW50cnkiOlt7ImZ1bGxVcmwiOiJ1cm46dXVpZDpkMDU1YTEzYS00ODM0LTU5NmEtOGY4OC1iOTA5ZDBkZmQ3YzgiLCJyZXNvdXJjZSI6eyJyZXNvdXJjZVR5cGUiOiJMaXN0IiwiaWQiOiJncm91cGVkLWZoaXItcjUtaW5wdXQtbGlzdCIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1SZXNvdXJjZU1hbmlmZXN0Il19LCJzdGF0dXMiOiJjdXJyZW50IiwibW9kZSI6InNuYXBzaG90IiwiZW50cnkiOlt7Iml0ZW0iOnsicmVmZXJlbmNlIjoidXJuOnV1aWQ6YTcyM2I0YWUtOGQxZS01YWUyLWFmNDYtYTEwYWMxZDcyYzFlIn19XX19LHsiZnVsbFVybCI6InVybjp1dWlkOmE3MjNiNGFlLThkMWUtNWFlMi1hZjQ2LWExMGFjMWQ3MmMxZSIsInJlc291cmNlIjp7InJlc291cmNlVHlwZSI6IkRvY3VtZW50UmVmZXJlbmNlIiwiaWQiOiJncm91cGVkLWZoaXItcjUtaW5wdXQtd3JhcHBlciIsIm1ldGEiOnsicHJvZmlsZSI6WyJodHRwczovL3Byb2ZpbGVzLmloZS5uZXQvSVRJL0RJUy9TdHJ1Y3R1cmVEZWZpbml0aW9uL0RJUy1QYXlsb2FkV3JhcHBlciJdfSwic3RhdHVzIjoiY3VycmVudCIsImNvbnRlbnQiOlt7ImF0dGFjaG1lbnQiOnsiY29udGVudFR5cGUiOiJhcHBsaWNhdGlvbi9maGlyK2pzb247IGZoaXJWZXJzaW9uPTUuMCIsImRhdGEiOiJleUp5WlhOdmRYSmpaVlI1Y0dVaU9pSlBZbk5sY25aaGRHbHZiaUlzSW1sa0lqb2laM0p2ZFhCbFpDMW1hR2x5TFhSMWJXOXlMV2x1Y0hWMElpd2ljM1JoZEhWeklqb2labWx1WVd3aUxDSmpZWFJsWjI5eWVTSTZXM3NpWTI5a2FXNW5JanBiZXlKemVYTjBaVzBpT2lKb2RIUndPaTh2ZEdWeWJXbHViMnh2WjNrdWFHdzNMbTl5Wnk5RGIyUmxVM2x6ZEdWdEwyOWljMlZ5ZG1GMGFXOXVMV05oZEdWbmIzSjVJaXdpWTI5a1pTSTZJbWx0WVdkcGJtY2lmVjE5WFN3aVkyOWtaU0k2ZXlKMFpYaDBJam9pVEc5dVoyVnpkQ0JrYVdGdFpYUmxjaUJ2WmlCMFlYSm5aWFFnYkdWemFXOXVJRzFsWVhOMWNtVmtJRzl1SUVOVUluMHNJbk4xWW1wbFkzUWlPbnNpY21WbVpYSmxibU5sSWpvaVVHRjBhV1Z1ZEM5bGVHRnRjR3hsTFhJMUxYTjFZbXBsWTNRaWZTd2lkbUZzZFdWUmRXRnVkR2wwZVNJNmV5SjJZV3gxWlNJNk1qZ3NJblZ1YVhRaU9pSnRiU0lzSW5ONWMzUmxiU0k2SW1oMGRIQTZMeTkxYm1sMGMyOW1iV1ZoYzNWeVpTNXZjbWNpTENKamIyUmxJam9pYlcwaWZYMD0ifX1dfX1dfQ=="
       },
       "extension": [
         {
@@ -96,7 +96,7 @@
           "extension": [
             {
               "url": "setId",
-              "valueString": "encounter-r5"
+              "valueString": "imaging-measurement-r5"
             },
             {
               "url": "payloadBinding",
@@ -112,7 +112,7 @@
             },
             {
               "url": "policy",
-              "valueCanonical": "https://governance.example.org/policies/encounter-subject-removal|1.0"
+              "valueCanonical": "https://governance.example.org/policies/imaging-subject-removal|1.0"
             }
           ]
         }
