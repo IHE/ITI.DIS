@@ -52,7 +52,7 @@ The tables describe the R4 work-order inputs and result parameters. Each success
 
 ### ITI-x1 Job Submission
 
-The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The R4 Job Task carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
+The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
 
 | Metadata or manifest of each `payload-set` input | Clinical set | Imaging set |
 |--------------------------------|--------------|-------------|
@@ -87,7 +87,7 @@ The Manager resolves the permit and checks both policy assignments. It resolves 
 
 ### ITI-x3 Task Dispatch and Execution
 
-The Manager sends one `POST /fhir/$submit-dis-task` to the assigned De-Identifier for each set. This example uses one ruleSet per set. Each R4 Execution Task carries one `payload-set` input with a manifest attachment and its `setId`, `payloadBinding`, `payloadVersion`, and `manifestFormat` metadata. The `execution-plan`, `rule-set-id`, and `reversibility-mode` inputs identify the task instructions. Both policies select `irreversible` in this example.
+The Manager sends one `POST /fhir/$submit-dis-task` to the assigned De-Identifier for each set. This example uses one ruleSet per set. The FHIR R4 `Task` for each assignment carries one `payload-set` input with a manifest attachment and its `setId`, `payloadBinding`, `payloadVersion`, and `manifestFormat` metadata. The `execution-plan`, `rule-set-id`, and `reversibility-mode` inputs identify the task instructions. Both policies select `irreversible` in this example.
 
 | Task field | Clinical task | Imaging task |
 |------------|---------------|--------------|
@@ -135,7 +135,7 @@ The first walkthrough assumes independent result sets. A later example requiring
 
 ### Hosted R5 Submission Variant
 
-Post this R4 Job Task directly to ITI-x1 with `Prefer: respond-async`. Both payload sets use hosted manifests. The R5 wrapper locates the Patient through its attachment URL. The example DICOM edition is illustrative. The final DICOM option will declare its supported edition codes.
+Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both payload sets use hosted manifests. The R5 wrapper locates the Patient through its attachment URL. The example DICOM edition is illustrative. The final DICOM option will declare its supported edition codes.
 
 ```json
 {
@@ -294,7 +294,7 @@ This check uses synthetic data for the mixed job. The imaging fixtures are DICOM
 
 | Check | Observed result |
 |------|-----------------|
-| Job and task packaging | Check the R4 ITI-x1 and ITI-x3 requests against the respective Job Task and Execution Task profiles and operation contracts. The clinical task carries the same R5 payload bytes. |
+| Job and task packaging | Check the R4 ITI-x1 and ITI-x3 requests against the respective [De-Identification Job](StructureDefinition-DIS-JobTask.html) and [De-Identification Task](StructureDefinition-DIS-ExecutionTask.html) profiles and operation contracts. The clinical task carries the same R5 payload bytes. |
 | Imaging selection | The versioned List and ImagingStudy resolve to the same two authorized SOP Instance UIDs on both passes. The check reads the selected files from offline WADO-RS multipart response fixtures. It excludes the third instance and rejects a response containing the other selected instance in place of the requested one. |
 | Result and evidence resolution | The clinical evidence identifies the bundled R4 wrapper. The imaging evidence references the R4 result index, which resolves to exactly two Part 10 files with the expected replacement UIDs. |
 | Failed-job response | With one required input unavailable, the failed ITI-x4 fixture contains only an OperationOutcome. A counterexample that returns only the clinical result fails the release check. |

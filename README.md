@@ -90,7 +90,7 @@ flowchart TB
 
 The outer box represents the Integrated De-ID Manager/De-Identifier, which combines both roles into a single actor. When integrated, ITI-x3 and ITI-x7 are internal and not externalized as transactions.
 
-Each ITI-x1 request posts one R4 Job Task with one authorization and one or more payload-set inputs. ITI-x3 posts a scoped R4 Execution Task. Successful results use R4 Parameters. The same manifest-based wire format applies to single-set and multi-set jobs. See the [transaction matrix](input/pagecontent/volume-2.md#grouped-payload-parameters).
+ITI-x1 submits a de-identification job as a FHIR R4 `Task` with one authorization and one or more payload-set inputs. ITI-x3 submits a de-identification task as a FHIR R4 `Task` scoped to one assignment. Successful results use R4 `Parameters`. The same manifest-based wire format applies to single-set and multi-set jobs. See the [transaction matrix](input/pagecontent/volume-2.md#grouped-payload-parameters).
 
 ## Policy Model
 

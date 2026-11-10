@@ -1,0 +1,11 @@
+{
+  "name": "ihe.iti.dis.template",
+  "version": "0.0.1",
+  "type": "fhir.template",
+  "license": "CC0-1.0",
+  "description": "DIS definitions page layout extending the IHE FHIR template",
+  "base": "ihe.fhir.template",
+  "dependencies": {
+    "ihe.fhir.template": "current"
+  }
+}
