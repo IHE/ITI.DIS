@@ -386,6 +386,17 @@ Each future payload binding is developed as a self-contained specification, inde
 
 ### 1:PXX.4.2 Use Cases
 
+<p id="tPXX.4-3" class="tableTitle"><strong>Table 1:PXX.4-3 — Use Cases and Worked Examples</strong></p>
+
+| Use case | What it demonstrates |
+|----------|----------------------|
+| [UC-1 — Cross-Border Epidemiological Study](#1pxx421-use-case-1-cross-border-epidemiological-study-using-ips) | Two-stage asynchronous Bulk FHIR processing, irreversible pseudonymization, staged release Provenance, and optional cancellation. [Worked example](examples-bulk-fhir-cohort.html) |
+| [UC-2 — Multimodal AI/ML Input Preparation](#uc-2) | Separate R4 clinical and lab data and R5 CT measurements in one asynchronous job, with synchronous worker tasks and recovery of a lost acceptance. [Worked example](examples-grouped-fhir-job.html) |
+| [UC-3 — Clinical Pathology Order](#1pxx423-use-case-3-clinical-pathology-order-pseudonymous-care) | Synchronous reversible pseudonymization with a Manager-resolved Semantic-Level policy, preserving the order’s link to the patient. [Worked example](examples-reversible-pathology.html) |
+| [UC-4 — Cloud Decision Support](#1pxx424-use-case-4-ai-assisted-clinical-decision-support-cloud-deployment) | Synchronous reversible pseudonymization with a requester-carried, JWS-signed Syntax-Level policy, versioned input references, and hospital-side mapping custody. [Worked example](examples-cloud-decision-support.html) |
+| [UC-5 — Local Clinical Export](#1pxx425-use-case-5-de-identified-health-data-export-content-conformance) | Standalone de-identification of a FHIR document using a local policy, with Provenance and audit correlation. [Worked example](examples-standalone-export.html) |
+{: .grid}
+
 #### 1:PXX.4.2.1 Use Case 1: Cross-Border Epidemiological Study Using IPS+
 
 A research consortium conducts a cross-border epidemiological study combining population-based cancer-registry data with selected clinical information originally collected for healthcare delivery. The study examines incidence, treatment patterns, comorbidities, outcomes, and survival across participating jurisdictions. In this use case, IPS+ means the International Patient Summary (IPS) together with the additional clinical and registry records authorized for the study. [International Patient Summary Implementation Guide](https://hl7.org/fhir/uv/ips/2.0.1/en/index.html)
