@@ -26,6 +26,8 @@ The proposals use the [common manifest contract](volume-3.html#payload-set-deliv
 
 A DICOM wrapper would use `application/dicom` for the native instance.
 
+The informative examples include a [DICOM study index](ImagingStudy-study-42.html) with its [WADO-RS endpoint](Endpoint-wado-42.html), and a [hosted CDA document index](DocumentReference-draft-cda-document-index.html).
+
 ## Open Binding Work
 
 For DIS-DICOM1, the binding specification needs to publish supported SOP Classes, Transfer Syntaxes, and the exact edition codes. It needs to define DICOMweb authorization, approved [PS3.15 confidentiality profile and options](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html), tag and sequence selectors, pixel handling, UID integrity, and DICOM result and evidence validation.

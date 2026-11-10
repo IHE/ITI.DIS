@@ -40,6 +40,7 @@ Title: "bulk-r4-result"
 Instance: uc1-bulk-cohort-job
 InstanceOf: DISDeIdentificationJob
 Usage: #example
+Description: "UC-1 submission for the asynchronous staged de-identification of Bulk FHIR files."
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "uc1-bulk-cohort-job"
 * status = #requested

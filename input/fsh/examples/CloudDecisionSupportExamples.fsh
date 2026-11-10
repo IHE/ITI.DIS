@@ -3,6 +3,7 @@
 Instance: uc4-cloud-decision-support-job
 InstanceOf: DISDeIdentificationJob
 Usage: #example
+Description: "UC-4 synchronous job submission carrying the signed cloud decision support policy."
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "uc4-cloud-decision-support-job"
 * status = #requested

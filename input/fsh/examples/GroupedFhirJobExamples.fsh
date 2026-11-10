@@ -14,6 +14,7 @@ RuleSet: GroupedR5ResultAttachment(path)
 Instance: grouped-fhir-hosted-artifacts
 InstanceOf: Bundle
 Usage: #example
+Description: "Synthetic authorization, policies, plans and hosted R4 resources used in the UC-2 mixed-version exchange."
 * type = #collection
 * entry[0].fullUrl = "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input"
 * entry[=].resource = grouped-fhir-r4-input
@@ -41,6 +42,7 @@ Usage: #example
 Instance: grouped-fhir-job-failure
 InstanceOf: OperationOutcome
 Usage: #example
+Description: "Terminal failure returned by the Manager when a required UC-2 payload set cannot be processed."
 * issue.severity = #error
 * issue.code = #not-found
 * issue.diagnostics = "A required hosted resource became unavailable after job acceptance."
@@ -48,6 +50,7 @@ Usage: #example
 Instance: grouped-fhir-job-request
 InstanceOf: DISDeIdentificationJob
 Usage: #example
+Description: "UC-2 job submission with one R4 clinical set and one R5 imaging measurement set."
 * identifier.system = "https://requester.example.org/dis/job-identifiers"
 * identifier.value = "grouped-fhir-job-request"
 * status = #requested
@@ -72,6 +75,7 @@ Usage: #example
 Instance: grouped-fhir-job-result
 InstanceOf: Parameters
 Usage: #example
+Description: "Completed UC-2 job response carrying the R4 clinical and R5 imaging measurement results."
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"
 * parameter[=].part[=].valueString = "patient-r4"
@@ -111,6 +115,7 @@ Usage: #example
 Instance: grouped-fhir-r5-input
 InstanceOf: DISManifestPackage
 Usage: #example
+Description: "R4 manifest package with a wrapper carrying the serialized R5 input Observation."
 * type = #collection
 * entry[0].fullUrl = "urn:uuid:d055a13a-4834-596a-8f88-b909d0dfd7c8"
 * entry[=].resource = grouped-fhir-r5-input-list
@@ -120,6 +125,7 @@ Usage: #example
 Instance: grouped-fhir-r5-output
 InstanceOf: DISResultPackage
 Usage: #example
+Description: "R4 result package with a wrapper carrying the de-identified R5 Observation and its evidence."
 * type = #collection
 * entry[0].fullUrl = "urn:uuid:0f1c69f4-b155-51f1-97d0-517b47711bb1"
 * entry[=].resource = grouped-fhir-r5-output-list
@@ -131,6 +137,7 @@ Usage: #example
 Instance: grouped-fhir-task-imaging-measurement-r5
 InstanceOf: DISDeIdentificationTask
 Usage: #example
+Description: "UC-2 task submission for the R5 imaging measurement set."
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "grouped-fhir-task-imaging-measurement-r5"
 * status = #requested
@@ -149,6 +156,7 @@ Usage: #example
 Instance: grouped-fhir-task-patient-r4
 InstanceOf: DISDeIdentificationTask
 Usage: #example
+Description: "UC-2 task submission for the R4 Patient and hemoglobin Observation."
 * identifier.system = "https://dis.example.org/dis/assignment-identifiers"
 * identifier.value = "grouped-fhir-task-patient-r4"
 * status = #requested
@@ -169,6 +177,7 @@ Usage: #example
 Instance: grouped-fhir-task-result-imaging-measurement-r5
 InstanceOf: Parameters
 Usage: #example
+Description: "Successful synchronous task result for the UC-2 R5 imaging measurement set."
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"
 * parameter[=].part[=].valueString = "imaging-measurement-r5"
@@ -187,6 +196,7 @@ Usage: #example
 Instance: grouped-fhir-task-result-patient-r4
 InstanceOf: Parameters
 Usage: #example
+Description: "Successful synchronous task result for the UC-2 R4 clinical set."
 * parameter[0].name = "payloadResult"
 * parameter[=].part[0].name = "setId"
 * parameter[=].part[=].valueString = "patient-r4"
@@ -249,6 +259,9 @@ Usage: #inline
 * code = http://loinc.org#718-7
 * code.text = "Hemoglobin"
 * subject = Reference(https://source.example.org/fhir/r4/Patient/grouped-fhir-patient-input/_history/1)
+* effectiveDateTime = "2026-10-01T09:00:00Z"
+* performer.type = "Organization"
+* performer.display = "Synthetic clinical laboratory"
 * valueQuantity = 12.4 'g/dL' "g/dL"
 
 Instance: grouped-fhir-hemoglobin-output
@@ -261,6 +274,9 @@ Usage: #inline
 * code = http://loinc.org#718-7
 * code.text = "Hemoglobin"
 * subject = Reference(https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output/_history/1)
+* effectiveDateTime = "2026-10-01T09:00:00Z"
+* performer.type = "Organization"
+* performer.display = "Synthetic clinical laboratory"
 * valueQuantity = 12.4 'g/dL' "g/dL"
 
 Instance: grouped-fhir-patient-input
