@@ -2,7 +2,7 @@
 **Informative example.** This synthetic job illustrates the version-specific packaging in [Use Case 2](volume-1.html#uc-2) using one task per set. The two policies demonstrate selected field removals. Release of real data requires a policy appropriate to the approved use and the identifying content in the input.
 </div>
 
-The cohort job has two payload sets. One contains **R4 clinical records and laboratory results** and the other contains **R5 CT-derived measurements**. The walkthrough uses a hosted Patient and a linked lab result as sample records for the first set and an inline CT measurement for the second set. Each set uses its own policy and declared FHIR version. The permit authorizes independent analysis of the CT measurements. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows a separate native imaging payload. The Job Task, Execution Tasks, Parameters, manifests, wrappers, and Provenance all use R4.
+The cohort job has two payload sets. One contains **R4 clinical records and laboratory results** and the other contains **R5 CT-derived measurements**. The walkthrough uses a hosted Patient and a linked lab result as sample records for the first set and an inline CT measurement for the second set. Each set uses its own policy and declared FHIR version. The permit authorizes independent analysis of the CT measurements. The [illustrative FHIR and DICOM extension](examples-mixed-r5-dicom.html) shows how a separate payload set could carry native CT images. The Job Task, Execution Tasks, Parameters, manifests, wrappers, and Provenance all use R4.
 
 <a name="grouped-fhir-submission"> </a>
 
@@ -13,7 +13,7 @@ Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$su
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
 | `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Syntax-Level R4 policy removes `Patient.name`. |
-| `imaging-r5` | An [inline R4 manifest package](Bundle-grouped-fhir-r5-input.html) contains a List and a wrapper whose attachment carries the serialized R5 Observation. | Syntax-Level R5 policy removes `Observation.subject`. |
+| `imaging-measurement-r5` | An [inline R4 manifest package](Bundle-grouped-fhir-r5-input.html) contains a List and a wrapper whose attachment carries the serialized R5 Observation. | Syntax-Level R5 policy removes `Observation.subject`. |
 {: .grid}
 
 The Manager verifies the permit, resolves and validates both policies, and establishes the authorized target sets. On acceptance, it returns `202 Accepted` with `Content-Location: https://dis.example.org/jobs/job-51`. See [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1).
@@ -27,7 +27,7 @@ Send each task to `POST /fhir/$submit-dis-task`. The task request carries one pa
 | Set | ITI-x3 request | ITI-x3 success response | Evidence targets |
 |-----|----------------|-------------------------|------------------|
 | `patient-r4` | [Execution Task for the R4 clinical set](Task-grouped-fhir-task-patient-r4.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-patient-r4.html) | Versioned HTTPS references to the result Patient and hemoglobin Observation selected by the hosted result List. |
-| `imaging-r5` | [Execution Task for the R5 imaging measurement](Task-grouped-fhir-task-imaging-r5.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-imaging-r5.html) | Provenance in the [result package](Bundle-grouped-fhir-r5-output.html) targets the selected R4 wrapper by its Bundle entry URL. |
+| `imaging-measurement-r5` | [Execution Task for the R5 imaging measurement](Task-grouped-fhir-task-imaging-measurement-r5.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-imaging-measurement-r5.html) | Provenance in the [result package](Bundle-grouped-fhir-r5-output.html) targets the selected R4 wrapper by its Bundle entry URL. |
 {: .grid}
 
 Both synchronous task responses use `200 OK` and include the corresponding `payloadResult` with R4 Provenance. In the sample R4 records, a hemoglobin result of 12.4 g/dL remains linked to the de-identified Patient. In the sample R5 record, a CT lesion diameter of 28 mm is retained and the source patient reference is removed. The wrapper attachment still carries an [R5 Observation](https://hl7.org/fhir/R5/observation.html). See [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).

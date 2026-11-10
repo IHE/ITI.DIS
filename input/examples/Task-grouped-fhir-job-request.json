@@ -96,7 +96,7 @@
           "extension": [
             {
               "url": "setId",
-              "valueString": "imaging-r5"
+              "valueString": "imaging-measurement-r5"
             },
             {
               "url": "payloadBinding",

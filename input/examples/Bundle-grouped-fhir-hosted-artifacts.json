@@ -174,10 +174,10 @@
       }
     },
     {
-      "fullUrl": "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-r5",
+      "fullUrl": "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-measurement-r5",
       "resource": {
         "resourceType": "Library",
-        "id": "grouped-fhir-policy-imaging-r5",
+        "id": "grouped-fhir-policy-imaging-measurement-r5",
         "meta": {
           "profile": [
             "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Policy"
@@ -207,7 +207,7 @@
         "identifier": [
           {
             "system": "https://governance.example.org/identifiers/policy",
-            "value": "grouped-fhir-policy-imaging-r5"
+            "value": "grouped-fhir-policy-imaging-measurement-r5"
           }
         ],
         "publisher": "Example governance authority",
@@ -218,17 +218,17 @@
       }
     },
     {
-      "fullUrl": "https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-r5",
+      "fullUrl": "https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-measurement-r5",
       "resource": {
         "resourceType": "Library",
-        "id": "grouped-fhir-plan-imaging-r5",
+        "id": "grouped-fhir-plan-imaging-measurement-r5",
         "meta": {
           "profile": [
             "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
           ],
           "versionId": "1"
         },
-        "url": "https://dis.example.org/fhir/plans/imaging-r5",
+        "url": "https://dis.example.org/fhir/plans/imaging-measurement-r5",
         "version": "1.0",
         "name": "GroupedFHIRPlanR5",
         "status": "active",
@@ -255,7 +255,7 @@
             "extension": [
               {
                 "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-policy-evidence-uri",
-                "valueUri": "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-r5/_history/1"
+                "valueUri": "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-measurement-r5/_history/1"
               }
             ]
           }
@@ -275,7 +275,7 @@
           {
             "attachment": {
               "contentType": "application/json",
-              "data": "eyJleGFtcGxlT25seSI6dHJ1ZSwicmVxdWVzdGVyIjoiZXhhbXBsZS1yZXF1ZXN0ZXIiLCJwdXJwb3NlIjoiSWxsdXN0cmF0ZSBwcmVwYXJhdGlvbiBvZiBpbmRlcGVuZGVudCBGSElSIGlucHV0cyBmb3IgbXVsdGltb2RhbCBBSS9NTCIsInBheWxvYWRzIjpbeyJzZXRJZCI6InBhdGllbnQtcjQiLCJzb3VyY2UiOiJodHRwczovL3NvdXJjZS5leGFtcGxlLm9yZy9maGlyL3I0L0xpc3QvZ3JvdXBlZC1maGlyLXI0LWlucHV0L19oaXN0b3J5LzEiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwiLCJwb2xpY3lWZXJzaW9uIjoiMS4wIn0seyJzZXRJZCI6ImltYWdpbmctcjUiLCJzb3VyY2UiOiJCdW5kbGUvZ3JvdXBlZC1maGlyLXI1LWlucHV0L09ic2VydmF0aW9uL2dyb3VwZWQtZmhpci10dW1vci1pbnB1dCIsInBvbGljeSI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9pbWFnaW5nLXN1YmplY3QtcmVtb3ZhbCIsInBvbGljeVZlcnNpb24iOiIxLjAifV19"
+              "data": "eyJleGFtcGxlT25seSI6dHJ1ZSwicmVxdWVzdGVyIjoiZXhhbXBsZS1yZXF1ZXN0ZXIiLCJwdXJwb3NlIjoiSWxsdXN0cmF0ZSBwcmVwYXJhdGlvbiBvZiBpbmRlcGVuZGVudCBGSElSIGlucHV0cyBmb3IgbXVsdGltb2RhbCBBSS9NTCIsInBheWxvYWRzIjpbeyJzZXRJZCI6InBhdGllbnQtcjQiLCJzb3VyY2UiOiJodHRwczovL3NvdXJjZS5leGFtcGxlLm9yZy9maGlyL3I0L0xpc3QvZ3JvdXBlZC1maGlyLXI0LWlucHV0L19oaXN0b3J5LzEiLCJwb2xpY3kiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwiLCJwb2xpY3lWZXJzaW9uIjoiMS4wIn0seyJzZXRJZCI6ImltYWdpbmctbWVhc3VyZW1lbnQtcjUiLCJzb3VyY2UiOiJCdW5kbGUvZ3JvdXBlZC1maGlyLXI1LWlucHV0L09ic2VydmF0aW9uL2dyb3VwZWQtZmhpci10dW1vci1pbnB1dCIsInBvbGljeSI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9pbWFnaW5nLXN1YmplY3QtcmVtb3ZhbCIsInBvbGljeVZlcnNpb24iOiIxLjAifV19"
             }
           }
         ]

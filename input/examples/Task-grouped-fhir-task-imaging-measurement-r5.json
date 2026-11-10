@@ -1,6 +1,6 @@
 {
   "resourceType": "Task",
-  "id": "grouped-fhir-task-imaging-r5",
+  "id": "grouped-fhir-task-imaging-measurement-r5",
   "meta": {
     "profile": [
       "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionTask"
@@ -9,7 +9,7 @@
   "identifier": [
     {
       "system": "https://dis.example.org/dis/assignment-identifiers",
-      "value": "grouped-fhir-task-imaging-r5"
+      "value": "grouped-fhir-task-imaging-measurement-r5"
     }
   ],
   "status": "requested",
@@ -42,7 +42,7 @@
           "extension": [
             {
               "url": "setId",
-              "valueString": "imaging-r5"
+              "valueString": "imaging-measurement-r5"
             },
             {
               "url": "payloadBinding",
@@ -70,7 +70,7 @@
         ]
       },
       "valueReference": {
-        "reference": "https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-r5/_history/1"
+        "reference": "https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-measurement-r5/_history/1"
       }
     },
     {

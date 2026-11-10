@@ -60,7 +60,7 @@
       "fullUrl": "urn:uuid:9bdffaab-3a1c-5c28-8843-2f4c388c3842",
       "resource": {
         "resourceType": "Provenance",
-        "id": "grouped-fhir-evidence-imaging-r5",
+        "id": "grouped-fhir-evidence-imaging-measurement-r5",
         "meta": {
           "profile": [
             "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Evidence"
@@ -81,7 +81,7 @@
           ]
         },
         "policy": [
-          "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-r5/_history/1"
+          "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-measurement-r5/_history/1"
         ],
         "agent": [
           {
@@ -122,7 +122,7 @@
             "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-audit-correlation",
             "valueIdentifier": {
               "system": "https://dis.example.org/identifiers/audit",
-              "value": "job-51-imaging-r5"
+              "value": "job-51-imaging-measurement-r5"
             }
           }
         ]
