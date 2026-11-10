@@ -5,6 +5,7 @@ CodeSystem: DISWorkOrderType
 Id: dis-work-order-type
 Title: "DIS Work Order Types"
 Description: "Identifies the two kinds of submitted DIS work orders."
+* ^experimental = false
 * ^caseSensitive = true
 * ^content = #complete
 * #de-identification-job "De-identification job"
@@ -14,6 +15,7 @@ CodeSystem: DISTaskInput
 Id: dis-task-input
 Title: "DIS Work Order Inputs"
 Description: "Identifies each input to a DIS work order."
+* ^experimental = false
 * ^caseSensitive = true
 * ^content = #complete
 * #authorization "Data request authorization"

@@ -9,6 +9,7 @@ Description: "Codes classifying the type of DIS Library artifact: de-identificat
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #dis-policy "De-identification policy (Semantic-Level or Syntax-Level rules)"
 * #dis-execution-plan "Execution plan (payload-specific compiled rules)"
 
@@ -20,6 +21,7 @@ Description: "Activity codes recorded in DIS Provenance evidence resources."
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #dis-task "DIS De-Identification Task"
 
 
@@ -30,6 +32,7 @@ Description: "Overall outcome status of a DIS de-identification task."
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-outcome-status"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #complete "De-identification task completed successfully"
 * #error "De-identification task failed"
 
@@ -41,6 +44,7 @@ Description: "Reversibility state of de-identification transformations applied i
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-reversibility"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #irreversible "No DIS-maintained reverse-mapping capability; does not guarantee prevention of identification"
 * #reversible "Transformation can be reversed with access to the identity table"
 
@@ -52,6 +56,7 @@ Description: "Validation result for de-identified output produced by a DIS task.
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-validation-status"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #valid "Output passed validation"
 * #invalid "Output failed validation"
 
@@ -63,6 +68,7 @@ Description: "Per-element outcome codes recorded in the DIS transformation summa
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-transformation-outcome"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #applied "Action was applied to the element"
 * #skipped "Element was not present in the resource"
 * #error "Action failed for this element"
@@ -82,36 +88,37 @@ function patterns.
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-action"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * ^property[+].code = #technique
 * ^property[=].description = "ISO/IEC 20889:2018 de-identification technique implemented by this action"
-* ^property[=].type = #code
+* ^property[=].type = #Coding
 * #remove "Remove the element entirely from the resource"
 * #remove ^property[+].code = #technique
-* #remove ^property[=].valueCode = #local-suppression
+* #remove ^property[=].valueCoding = DisIsoTechnique#local-suppression
 * #replace "Replace content with a fixed value or apply an authoritative reversible lookup mapping"
 * #replace ^property[+].code = #technique
-* #replace ^property[=].valueCode = #masking
+* #replace ^property[=].valueCoding = DisIsoTechnique#masking
 * #replace ^property[+].code = #technique
-* #replace ^property[=].valueCode = #pseudonymization
+* #replace ^property[=].valueCoding = DisIsoTechnique#pseudonymization
 * #keep "Preserve the element unchanged in the de-identified output"
 * #hash "Salted or unsalted digest under the execution plan."
 * #hash ^property[+].code = #technique
-* #hash ^property[=].valueCode = #hashing
+* #hash ^property[=].valueCoding = DisIsoTechnique#hashing
 * #truncate-date "Reduce date precision by truncating to year or year-month"
 * #truncate-date ^property[+].code = #technique
-* #truncate-date ^property[=].valueCode = #rounding
+* #truncate-date ^property[=].valueCoding = DisIsoTechnique#rounding
 * #date-shift "Shift dates by a consistent per-patient offset under the declared date-shift capability"
 * #date-shift ^property[+].code = #technique
-* #date-shift ^property[=].valueCode = #noise-addition
+* #date-shift ^property[=].valueCoding = DisIsoTechnique#noise-addition
 * #round "Bin a numeric value to the nearest multiple of the step parameter"
 * #round ^property[+].code = #technique
-* #round ^property[=].valueCode = #rounding
+* #round ^property[=].valueCoding = DisIsoTechnique#rounding
 * #truncate "Keep the first N characters of a string value"
 * #truncate ^property[+].code = #technique
-* #truncate ^property[=].valueCode = #generalization
+* #truncate ^property[=].valueCoding = DisIsoTechnique#generalization
 * #redact "Remove the narrative content from a resource"
 * #redact ^property[+].code = #technique
-* #redact ^property[=].valueCode = #local-suppression
+* #redact ^property[=].valueCoding = DisIsoTechnique#local-suppression
 
 
 CodeSystem: DisIsoTechnique
@@ -125,6 +132,7 @@ uses a subset; the full CodeSystem provides vocabulary for future phases.
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-iso-technique"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #local-suppression "Local suppression (ISO/IEC 20889 §9.3.3)"
 * #masking "Masking (ISO/IEC 20889 §9.3.2)"
 * #hashing "Hashing (ISO/IEC 20889 §9.4.3.3)"
@@ -193,6 +201,7 @@ Description: "Document types for identified DIS operational artifacts."
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type"
 * ^status = #active
 * ^experimental = false
+* ^caseSensitive = true
 * #lookup-table "DIS reversible lookup table"
 
 CodeSystem: DisLinkageScopeType
@@ -200,6 +209,7 @@ Id: dis-linkage-scope-type
 Title: "DIS Linkage Scope Type"
 Description: "Authorized boundaries for consistent DIS pseudonyms."
 * ^status = #draft
+* ^experimental = false
 * ^caseSensitive = true
 * ^content = #complete
 * #job "Job"
@@ -211,6 +221,7 @@ Id: dis-linkage-scope-type-vs
 Title: "DIS Linkage Scope Types"
 Description: "Scope types for DIS policies and lookup tables."
 * ^status = #draft
+* ^experimental = false
 * include codes from system DisLinkageScopeType
 
 
