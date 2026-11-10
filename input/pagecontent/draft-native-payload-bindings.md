@@ -28,6 +28,8 @@ A DICOM wrapper would use `application/dicom` for the native instance.
 
 ## Open Binding Work
 
+The experimental DICOM study index inherits two extensible [FHIR R4 ImagingStudy bindings](https://hl7.org/fhir/R4/imagingstudy.html#terminology) that the online IG Publisher cannot resolve as FHIR ValueSet resources. These are RadLex Playbook on `ImagingStudy.procedureCode` and the DICOM SOP Class UID table on `ImagingStudy.series.instance.sopClass`. Verify code selection against the referenced sources during draft binding review.
+
 For DIS-DICOM1, the binding specification needs to publish supported SOP Classes, Transfer Syntaxes, and the exact edition codes. It needs to define DICOMweb authorization, approved [PS3.15 confidentiality profile and options](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html), tag and sequence selectors, pixel handling, UID integrity, and DICOM result and evidence validation.
 
 For DIS-CDA1, the binding specification needs to publish the supported [CDA R2](https://hl7.org/cda/stds/online-navigation/infrastructure/cda/cda.htm) document types and templates. It needs to define document retrieval authorization, header, structured entry and narrative selectors, embedded content handling, document validation, and evidence mapping.

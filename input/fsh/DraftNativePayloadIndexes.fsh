@@ -8,6 +8,7 @@ Id: DIS-DICOMStudyIndex
 Title: "DIS DICOM Study Index"
 Description: "FHIR R4 index of the DICOM instances selected for a DIS input or result set. The study, series, and SOP Instance UIDs and the applicable WADO-RS endpoint locate the native instances."
 * ^status = #draft
+* ^experimental = true
 * identifier 1..*
 * obeys dis-dicom-study-uid
 * series 1..*
@@ -25,6 +26,7 @@ Id: DIS-CDADocumentIndex
 Title: "DIS CDA Document Index"
 Description: "FHIR R4 index of one native CDA document selected for a DIS input or result set. The attachment carries the original XML or identifies its retrieval endpoint."
 * ^status = #draft
+* ^experimental = true
 * status = #current
 * content 1..1
 * content.attachment.contentType 1..1

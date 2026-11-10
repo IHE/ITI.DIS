@@ -165,7 +165,7 @@ Place an installed FHIR IG Publisher jar at `input-cache/publisher.jar`. Build t
 java -jar input-cache/publisher.jar -ig .
 ```
 
-Read `output/qa.html` for validation and link diagnostics. The draft source includes narrative in `input/pagecontent`, conformance definitions in `input/fsh`, and downloadable content schemas in `input/images/schemas`.
+Keep the Publisher's terminology service enabled for the publication build. An offline build with `-tx n/a` cannot verify external codes such as UN M49 jurisdiction and UCUM units. Read `output/qa.html` for validation and link diagnostics. The draft source includes narrative in `input/pagecontent`, conformance definitions in `input/fsh`, and downloadable content schemas in `input/images/schemas`.
 
 Edit the authoritative FHIR Semantic Group Binding table in Volume 3. Check its group codes against the DIS Semantic Group CodeSystem before publishing changes. The informative catalog CSV is in `input/images/bindings` and its guide is in `input/pagecontent`.
 
