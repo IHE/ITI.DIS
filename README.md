@@ -1,10 +1,10 @@
-# IHE De-Identification Services (DIS) — Phase 1
+# IHE De-Identification Services (DIS)
 
 [CI Build — rendered Implementation Guide](https://build.fhir.org/ig/IHE/ITI.DIS/branches/master/index.html)
 
 **ITI.DIS** is a joint work item of the IHE [IT Infrastructure (ITI)](https://www.ihe.net/ihe_domains/it_infrastructure/), [Quality, Research, and Public Health (QRPH)](https://www.ihe.net/ihe_domains/quality_research_and_public_health/), and [Patient Care Coordination (PCC)](https://www.ihe.net/ihe_domains/patient_care_coordination/) domains, with ITI as the lead domain.
 
-**This repository focuses on Phase 1 scope** — a complete, testable interoperability specification for policy-governed de-identification of HL7 FHIR health data. Additional payload bindings (CDA, DICOM, HL7 v2) and advanced capabilities (re-identification, push delivery, policy retrieval) are planned for future phases, with preservation of Phase 1 contracts as a design objective.
+This repository contains the draft IHE supplement for policy-governed de-identification of HL7 FHIR health data.
 
 ## Problem Statement
 
@@ -12,17 +12,17 @@ Health data sharing is expanding across clinical care, secondary research, publi
 
 DIS addresses this by providing a governed, auditable path from authorization to delivery — reducing reliance on manual processes and local one-off agreements.
 
-## What Phase 1 Delivers
+## Profile Scope
 
 - **Four actors** — De-ID Manager, De-Identifier, De-Identification Requester, Integrated De-ID Manager/De-Identifier
 - **Four transactions** — ITI-x1 (Submit De-Identification Job), ITI-x3 (Submit De-Identification Task), ITI-x4 (Retrieve Job Output), ITI-x7 (Retrieve Task Output)
 - **A minimum de-id evidence baseline** — 9-element evidence structure carried in HL7 FHIR Provenance
-- **A single HL7 FHIR payload binding (DIS-FHIR-Payload)** — covering HL7 FHIR R4/R5/R6 resources, Bundles, and Bulk Data
+- **A single HL7 FHIR payload binding (DIS-FHIR-Payload)** — covering HL7 FHIR R4 and R5 resources, Bundles, and Bulk Data
 - **Synchronous and asynchronous job patterns** — inline output for single-patient workflows, deferred output with polling for multi-patient cohorts
 
 ## Use Cases
 
-The following use cases motivate the Phase 1 design. Full narratives, pre-conditions, and process flows are defined in [Volume 1 Section 1:PXX.4.2](input/pagecontent/volume-1.md#1pxx42-use-cases).
+The following use cases motivate the DIS design. Full narratives, pre-conditions, and process flows are defined in [Volume 1 Section 1:PXX.4.2](input/pagecontent/volume-1.md#1pxx42-use-cases).
 
 | UC | Name | Pattern |
 |----|------|---------|
@@ -34,9 +34,9 @@ The following use cases motivate the Phase 1 design. Full narratives, pre-condit
 
 ## Architecture Overview
 
-Phase 1 processes only HL7 FHIR R4, R5, and R6 data. Its workflow resources and APIs use HL7 FHIR R4, independently of the version of the clinical data being de-identified.
+DIS defines processing for HL7 FHIR R4 and R5 data. Its workflow resources and APIs use HL7 FHIR R4, independently of the version of the clinical data being de-identified.
 
-The rules for workflow messages, such as job submission, task dispatch, and status reporting, form the **protocol binding**, which is part of the mandatory baseline. The separate **payload binding** (DIS-FHIR-Payload) specifies how clinical data formats and versions are identified, packaged, and matched to supported capabilities. R6 payload support follows the ballot draft identified by Volume 1 and remains subject to confirmation upon final publication. HL7 FHIR R5 and R6 data are carried as serialized content explicitly labelled with their HL7 FHIR version, not embedded as native resources in an HL7 FHIR R4 envelope.
+The rules for workflow messages, such as job submission, task dispatch, and status reporting, form the **protocol binding**, which is part of the mandatory baseline. The separate **payload binding** (DIS-FHIR-Payload) specifies how clinical data formats and versions are identified, packaged, and matched to supported capabilities. HL7 FHIR R5 payloads travel as serialized content in attachments carried or referenced by R4 resources.
 
 Future payload bindings, such as DIS-DICOM1 and DIS-CDA1, could add non-FHIR formats while retaining the HL7 FHIR R4 workflow. These bindings are outside the current scope.
 
@@ -62,7 +62,7 @@ The following table defines the four DIS actors and their responsibilities.
 
 ### Transactions
 
-The following table defines the four Phase 1 transactions.
+The following table defines the four DIS transactions.
 
 | Transaction | Pattern | Purpose |
 |-------------|---------|---------|
@@ -99,13 +99,13 @@ DIS separates policy definition from policy execution. DIS assumes that the Requ
 - **Requester-carried content** — optional `policyContent` references a JWS-signed policy Library carried in a contained Binary. The Manager verifies the signature and matches the Library's URL and version to the declaration.
 - **Manager-resolved content** — when `policyContent` is absent, the Manager resolves the declared version by implementation-defined means, such as a trusted local store or external retrieval.
 
-The Manager validates **authorization consistency**, **integrity**, **schema conformance**, and **currency** before acceptance or dispatch. Semantic-Level policies use format-neutral semantic groups and are compiled into payload-specific execution plans. Syntax-Level policies use concrete paths for a declared payload family and version; the Manager validates and packages them as execution plans. Phase 1 uses flat, ordered rules, with one task per ruleSet and optional stage ordering; full policy composition is deferred.
+The Manager validates **authorization consistency**, **integrity**, **schema conformance**, and **currency** before acceptance or dispatch. Semantic-Level policies use format-neutral semantic groups and are compiled into payload-specific execution plans. Syntax-Level policies use concrete paths for a declared payload family and version; the Manager validates and packages them as execution plans. The baseline execution plan uses flat, ordered rules, with one task per ruleSet and optional stage ordering; full policy composition is deferred.
 
 For full details, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Section 1:PXX.5.3](input/pagecontent/volume-1.md#1pxx53-policy-carrier-integrity).
 
 ## Transformation Actions
 
-Phase 1 defines nine operational actions in the `core` action family: `remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`. Actions are classified by ISO/IEC 20889:2018 techniques; technique categories are distinct from executable action codes. All actions operate at the record level with policy-specified parameters. Dataset-level statistical disclosure control is deferred to a future phase.
+DIS defines nine operational actions in the `core` action family: `remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`. Actions are classified by ISO/IEC 20889:2018 techniques; technique categories are distinct from executable action codes. All actions operate at the record level with policy-specified parameters. Dataset-level statistical disclosure control is outside this supplement.
 
 For transformation scope and exclusions, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts).
 
@@ -113,7 +113,7 @@ For transformation scope and exclusions, see [Volume 1 Section 1:PXX.4.1](input/
 
 DIS defines two conformance layers. **Content conformance** covers the full de-identification pipeline — policy validation, compilation, execution, and evidence production — and is claimed by the Integrated De-ID Manager/De-Identifier, which can operate standalone without external transactions. **Transaction conformance** applies when actors communicate via standardized DIS transactions (ITI-x1, ITI-x3, ITI-x4, ITI-x7).
 
-All DIS actors implement the HL7 FHIR R4 protocol binding as a mandatory baseline. Options include DIS-FHIR-Payload (required in Phase 1 as the only payload binding), DIS-ASYNC-JOB (asynchronous job processing between Requester and Manager), DIS-ASYNC-TASK (asynchronous task processing between Manager and De-Identifier), DIS-CANCEL (optional cancellation of accepted asynchronous work), and DIS-IRREVERSIBLE/DIS-REVERSIBLE (at least one required by the Manager, De-Identifier, and Integrated actor).
+All DIS actors support the mandatory FHIR payload binding (DIS-FHIR-Payload) for their roles. External transactions use the HL7 FHIR R4 protocol binding. Actor options include DIS-ASYNC-JOB, DIS-ASYNC-TASK, and DIS-CANCEL. Job and task asynchrony can be selected independently for ordinary processing. Cancellation depends on asynchronous support for the applicable exchanges. Each Manager, De-Identifier, and Integrated actor declares at least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE.
 
 For the full declaration definitions, conformance layers, actor-option matrix, and dependency rules, see [Volume 1 Section 1:PXX.2](input/pagecontent/volume-1.md#1pxx2-dis-actor-options) and [Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts).
 
@@ -121,27 +121,27 @@ For the full declaration definitions, conformance layers, actor-option matrix, a
 
 - **ISO/IEC 20889:2018** — De-identification technique taxonomy
 - **ISO 25237:2017** — Pseudonymization guidance
-- **HL7 FHIR R4** — Initial DIS workflow APIs, resources, and conformance artifacts
-- **HL7 FHIR R4/R5/R6** — Independently versioned processing payloads
+- **HL7 FHIR R4** — DIS workflow APIs, resources, and conformance artifacts
+- **HL7 FHIR R4 and R5** — Independently versioned processing payloads
 - **IHE ATNA / IUA** — Security, identity, authorization, audit
 - **SMART on FHIR Backend Services** — System-to-system authorization
 - **W3C PROV-O** — Provenance modeling
 
 ## Payload Binding Framework
 
-DIS separates the protocol binding from the payload binding. Phase 1 defines DIS-FHIR-Payload as the initial payload binding, covering HL7 FHIR R4, R5, and R6 processing payloads. Future payload bindings (e.g., DIS-DICOM1, DIS-CDA1, DIS-V2-1) can be developed independently without changes to the HL7 FHIR R4 protocol binding.
+DIS separates the protocol binding from the payload binding. DIS-FHIR-Payload covers HL7 FHIR R4 and R5 processing payloads. Future payload bindings (e.g., DIS-DICOM1, DIS-CDA1, DIS-V2-1) can be developed independently without changes to the HL7 FHIR R4 protocol binding.
 
 For the payload binding architecture, extension model, and illustrative future bindings, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Volume 3 FHIR Payload Binding](input/pagecontent/volume-3.md#fhir-payload-binding).
 
-## Phase 1 Expansion Path
+## Potential Extensions
 
-DIS aims for additive expansion that preserves existing Phase 1 contracts where possible:
+DIS aims for additive expansion that preserves existing contracts where possible:
 
 - **Core additions** — Policy Authority actor, ITI-x5 push delivery, ITI-x6 re-identification, full DIS-EXE1 composable policy model (policy composition, condition evaluation, cross-element constraints, conflict resolution strategies, and selector specificity rules)
 - **Payload bindings** — DIS-DICOM1, DIS-CDA1, DIS-V2-1, DIS-OMOP1 (each self-contained, developed independently within the payload binding framework above)
 - **Advanced capabilities** — Dataset-level statistical disclosure control, cross-community federation
 
-Compatibility with Phase 1 is a design objective, supported by explicit versioning and regression tests. Future additions should preserve existing contracts where possible. Any incompatible change must identify affected contracts, its impact on existing implementations and conformance claims, and migration requirements. Conformance is assessed against the declared profile version and supported options; it is not an unconditional guarantee of conformance to future versions.
+Explicit versioning and regression tests support compatibility as the profile evolves. Any incompatible change must identify affected contracts, its impact on existing implementations and conformance claims, and migration requirements. Conformance is assessed against the declared profile version and supported options; it is not an unconditional guarantee of conformance to future versions.
 
 ## Contact
 

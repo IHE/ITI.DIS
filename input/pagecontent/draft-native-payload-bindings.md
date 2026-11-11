@@ -1,5 +1,5 @@
 <div markdown="1" class="stu-note">
-**Draft design material.** This page preserves proposed DICOM and CDA bindings for review. Phase 1 conformance uses DIS-FHIR-Payload.
+**Draft design material.** This page preserves proposed DICOM and CDA bindings for review. Conformance to this supplement uses DIS-FHIR-Payload.
 </div>
 
 The proposals use the [common manifest contract](volume-3.html#payload-set-delivery) and [payload set parameters](volume-2.html#grouped-payload-parameters). The [illustrative mixed FHIR and DICOM walkthrough](#illustrative-mixed-fhir-and-dicom-job) shows the proposed DICOM exchange.

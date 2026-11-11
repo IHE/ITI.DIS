@@ -94,7 +94,7 @@ resources:
 groups:
   grouped-fhir-job-examples:
     name: "Examples for a Job with R4 and R5 Payload Sets"
-    description: "Informative artifacts for a Phase 1 FHIR-only job."
+    description: "Informative artifacts for a FHIR-only job."
     resources:
       - Bundle/grouped-fhir-hosted-artifacts
       - Bundle/grouped-fhir-r5-input
@@ -133,7 +133,7 @@ groups:
       - Provenance/standalone-export-evidence
   draft-native-payload-indexes:
     name: "Draft DICOM and CDA Index Profiles and Examples"
-    description: "Proposed binding artifacts for review. Phase 1 conformance uses DIS-FHIR-Payload."
+    description: "Proposed binding artifacts for review. Conformance to this supplement uses DIS-FHIR-Payload."
     resources:
       - StructureDefinition/DIS-DICOMStudyIndex
       - StructureDefinition/DIS-CDADocumentIndex

@@ -61,10 +61,9 @@
     "payloadVersion": {
       "enum": [
         "R4",
-        "R5",
-        "R6"
+        "R5"
       ],
-      "description": "R6 support is provisional under the profile's payload version rules."
+      "description": "FHIR release of the processing payload."
     },
     "ruleSets": {
       "type": "array",

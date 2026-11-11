@@ -1,7 +1,7 @@
 
 The De-Identification Services (DIS) Profile defines interoperability requirements for policy-governed de-identification of HL7 FHIR health data. It defines four actors -- De-ID Manager, De-Identifier, De-Identification Requester, and Integrated De-ID Manager/De-Identifier -- four transactions (ITI-x1 Submit De-Identification Job, ITI-x3 Submit De-Identification Task, ITI-x4 Retrieve Job Output, and ITI-x7 Retrieve Task Output), a baseline policy execution model with flat, ordered rules, a minimum de-identification evidence baseline, and a FHIR payload binding (DIS-FHIR-Payload).
 
-The Integrated actor may operate standalone with content conformance only, or support external jobs through ITI-x1 and, when DIS-ASYNC-JOB is declared, ITI-x4. DIS uses an R4 protocol binding and independently versioned R4/R5/R6 payloads; R6 support is provisional as described in Volume 1. Full composable execution plans are deferred.
+The Integrated actor may operate standalone with content conformance only, or support external jobs through ITI-x1 and, when DIS-ASYNC-JOB is declared, ITI-x4. DIS uses an R4 protocol binding and independently versioned R4 and R5 payloads. Full composable execution plans are deferred.
 
 DIS addresses the lack of a standard, interoperable workflow for how de-identification is requested, executed, validated, and delivered. It provides a governed, auditable path from authorization to delivery -- reducing reliance on manual processes and local one-off agreements. DIS starts after data request authorization has been established; it does not standardize permit lifecycle or data-request authorization.
 

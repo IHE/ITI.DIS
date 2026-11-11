@@ -11,7 +11,7 @@ This draft checklist follows [Volume 1](volume-1.html), the authoritative profil
 - De-Identifier: ITI-x3; ITI-x7 when DIS-ASYNC-TASK is declared.
 - Integrated De-ID Manager/De-Identifier: content conformance in standalone mode; ITI-x1 when external job submission is supported, and ITI-x4 when DIS-ASYNC-JOB is declared. ITI-x3 and ITI-x7 do not apply.
 
-Check the mandatory R4 protocol binding, applicable content requirements and required actor groupings against Volume 1. All actors require DIS-FHIR-Payload in Phase 1. Processing actors declare at least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE. Test async job and task options independently and reject unsupported capability combinations before dispatch.
+Check the mandatory R4 protocol binding on external transactions, the applicable content requirements and the required actor groupings against Volume 1. Check DIS-FHIR-Payload support for each actor and at least one declared reversibility option for each processing actor. Test asynchronous job and task options independently. For actors declaring DIS-CANCEL, verify the asynchronous dependencies in [Table 1:PXX.2-2](volume-1.html#tPXX.2-2). Reject unsupported capability combinations before dispatch.
 
 ### Wire and Release Procedures
 
@@ -92,7 +92,7 @@ Configure the Requester with access to the approved policy and the Manager with 
 | Submit a job with two sets under different approved policies. Give both policies the same reversibility mode, then repeat with one policy declaring the other mode and approval for that policy. | With a common mode, every ITI-x3 task submission carries that mode. With mixed modes, ITI-x1 returns HTTP 422 with an OperationOutcome before acceptance or dispatch and returns no result. |
 | Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
 
-Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside Phase 1.
+Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside the scope of this supplement.
 
 Compile a policy targeting `@dates` against R4 and R5 Encounter payloads. Verify that the plan uses `Encounter.period` for R4 and `Encounter.actualPeriod` for R5, that the plans preserve source rule and selector order, and that no semantic group references remain. Use an unknown group or a release with no binding and verify that the Manager fails compilation before dispatch. For a choice selector, verify that a dateTime or Period value is selected and a free-text value is outside the selection. Compile separate rules for `@birth-dates`, `@dates`, and `@subject-demographics` using binding version 0.2.0 for R4 and R5. Verify that only the `@birth-dates` rule emits a selector for `Patient.birthDate`.
 
@@ -123,7 +123,7 @@ Use the action definitions in [Volume 3](volume-3.html#transformation-actions). 
 
 ### Payload, Evidence and Release
 
-Cover R4 workflow resources with independently versioned R4/R5/R6 payloads. R6 feasibility is provisional and assessed separately from Phase 1. Verify declared-version validation and version-safe packaging; R5/R6 resources must not be embedded as native resources in R4 envelopes.
+Cover R4 workflow resources with independently versioned R4 and R5 payloads. Verify declared-version validation and confirm that R5 payloads are carried or referenced by R4 wrappers. Verify that a request for a payload release outside the supported binding is rejected before dispatch.
 
 Submit one inline R4 Patient through a manifest package and verify that the List selects exactly the intended Patient. Verify that ITI-x3 carries the assigned set and that the returned result and evidence preserve its `setId`. Reject a Task with no `payload-set` input, a Task using a `processingTarget` or `resourceManifest` input code, a manifest with an unauthorized entry, and a payload whose release conflicts with the declared `payloadVersion`. Verify stable selection across retries and verify that task and job result manifests resolve to authorized de-identified resources. For bulk input, cover a complete authorized manifest, a dataset outside the approved scope, and missing files or expired access. Verify that a required input failure withholds all job output, including access through result endpoints.
 
@@ -190,7 +190,7 @@ Check the DIS-LookupTable DocumentReference and DIS-LookupTableContent Binary pr
 
 Use synthetic fixtures. Validate available FHIR artifacts and examples, compile FSH, check links and diagrams, and build the guide. Record actor, declared options, preconditions, inputs, observable expected behavior and pass/fail criteria for each procedure. Standalone Integrated actor review includes pipeline behavior as well as output/evidence inspection. Artifact validity alone does not demonstrate operational interoperability or de-identification adequacy.
 
-The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-push-delivery) remains open. Phase 1 assesses the standalone UC-5 case through content conformance.
+The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-push-delivery) remains open. The standalone UC-5 case is assessed through content conformance.
 
 ### Published Lookup Table Examples
 
@@ -198,7 +198,7 @@ Validate the [published lookup table examples](volume-3.html#3pxx52-worked-mappi
 
 ## Informative Future Binding Feasibility
 
-These checks support draft DICOM, CDA, and R6 design review. Phase 1 pass/fail criteria use published R4 or R5 payloads. The draft CDA check resolves an authorized DocumentReference to one CDA document and rejects the wrong index type.
+These checks support the draft DICOM and CDA design review. DIS conformance tests use published R4 or R5 processing payloads. The draft CDA check resolves an authorized DocumentReference to one CDA document and rejects the wrong index type.
 
 ### Mixed R5 and DICOM Job Procedure
 

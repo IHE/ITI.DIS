@@ -22,6 +22,6 @@ sequenceDiagram
 
     EHR->>LAB: Send pseudonymized order (outside DIS)
     LAB-->>EHR: Lab result referencing pseudonym (outside DIS)
-    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS Phase 1)
+    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS)
     MGR-->>EHR: Resolution result needed for patient association (no mapping-table export)
     Note over EHR: File lab result to patient chart

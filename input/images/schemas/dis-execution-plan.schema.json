@@ -18,8 +18,7 @@
     "payloadVersion": {
       "enum": [
         "R4",
-        "R5",
-        "R6"
+        "R5"
       ]
     },
     "rules": {

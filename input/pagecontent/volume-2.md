@@ -404,7 +404,7 @@ The De-Identifier SHALL apply the [shared identifier and retry rules](#submissio
 
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
-Before accepting the task, the De-Identifier SHALL verify that the task's processing combination and required actions are within its declared capabilities. For the Phase 1 FHIR payload binding, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an unsupported combination or action with HTTP 422 and an R4 OperationOutcome.
+Before accepting the task, the De-Identifier SHALL verify that the task's processing combination and required actions are within its declared capabilities. For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an unsupported combination or action with HTTP 422 and an R4 OperationOutcome.
 
 The De-Identifier SHALL retrieve the assigned processing targets using the [retrieval authorization rules](volume-3.html#obtaining-processing-targets) and verify the declared payload release before transformation.
 
@@ -445,7 +445,7 @@ The De-Identifier returns one of the HTTP status codes described below.
 | `validationStatus` | 1..1 | code | Per-task validation outcome |
 {: .grid}
 
-The De-Identifier SHALL return one `payloadResult` matching the dispatched `setId`, binding, and version, with its evidence. For the Phase 1 FHIR payload binding, the result `manifestFormat` SHALL match the assigned input manifest format. The Manager SHALL reject a task result with a different manifest format. This rule also applies to ITI-x7 success.
+The De-Identifier SHALL return one `payloadResult` matching the dispatched `setId`, binding, and version, with its evidence. For DIS-FHIR-Payload, the result `manifestFormat` SHALL match the assigned input manifest format. The Manager SHALL reject a task result with a different manifest format. This rule also applies to ITI-x7 success.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-TASK).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x7.
 
@@ -473,7 +473,7 @@ In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager S
 
 ### 2:3.x3.5 CapabilityStatement Resource
 
-The [De-Identifier capability requirements](CapabilityStatement-DIS-De-Identifier.html) identify the system-level operation. A De-Identifier implementing this transaction SHALL declare `$submit-dis-task` and its supported processing combinations on its implementation CapabilityStatement. Each [DIS Processing Capability](StructureDefinition-dis-processing-capability.html) instance declares one binding, release, input manifest format, result manifest format and reversibility mode, with the actions the actor supports together. For the Phase 1 FHIR payload binding, an advertised entry SHALL use the same code for `inputFormat` and `resultFormat`. The Manager SHALL match the whole combination and all required actions within a single entry before dispatch. The implementation SHALL document parameter restrictions and any separately negotiated protected transformation inputs in the CapabilityStatement documentation for the operation.
+The [De-Identifier capability requirements](CapabilityStatement-DIS-De-Identifier.html) identify the system-level operation. A De-Identifier implementing this transaction SHALL declare `$submit-dis-task` and its supported processing combinations on its implementation CapabilityStatement. Each [DIS Processing Capability](StructureDefinition-dis-processing-capability.html) instance declares one binding, release, input manifest format, result manifest format and reversibility mode, with the actions the actor supports together. For DIS-FHIR-Payload, an advertised entry SHALL use the same code for `inputFormat` and `resultFormat`. The Manager SHALL match the whole combination and all required actions within a single entry before dispatch. The implementation SHALL document parameter restrictions and any separately negotiated protected transformation inputs in the CapabilityStatement documentation for the operation.
 
 The De-ID Manager implementing this transaction SHALL provide a CapabilityStatement Resource indicating that it can invoke the `$submit-dis-task` operation.
 

@@ -25,6 +25,6 @@ sequenceDiagram
     AI-->>EHR: AI recommendation referencing pseudonym (outside DIS)
     deactivate AI
 
-    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS Phase 1)
+    EHR->>MGR: Authorized pseudonym resolution request (implementation-defined, outside DIS)
     MGR-->>EHR: Resolution result needed for patient association (no mapping-table export)
     Note over EHR: File AI result to patient chart

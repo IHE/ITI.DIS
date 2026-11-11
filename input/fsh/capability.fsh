@@ -3,7 +3,7 @@
 Extension: DISProcessingCapability
 Id: dis-processing-capability
 Title: "DIS Processing Capability"
-Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. For the Phase 1 FHIR payload binding, the input and result formats match. The actions listed are supported together for that combination."
+Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. For DIS-FHIR-Payload, the input and result formats match. The actions listed are supported together for that combination."
 * ^context[0].type = #element
 * ^context[0].expression = "CapabilityStatement"
 * value[x] 0..0
