@@ -43,3 +43,7 @@ Both synchronous task responses use `200 OK` and include the corresponding `payl
 The Requester polls `GET https://dis.example.org/jobs/job-51` with authorized credentials. A poll before completion returns `202 Accepted` with no result body. After both task results pass validation and the Manager rechecks release authorization, it returns `200 OK` with the [ITI-x4 result](Parameters-grouped-fhir-job-result.html). The response contains one `payloadResult` per submitted set, with each set's manifest and evidence. The Requester delivers both approved FHIR sets to the Secure Processing Environment outside DIS.
 
 In the failure variant, the versioned Patient becomes inaccessible after acceptance. The imaging measurement task may already have succeeded. The Manager fails the job and returns the [example OperationOutcome](OperationOutcome-grouped-fhir-job-failure.html) with HTTP 422 on the next authorized poll. Both result sets are withheld. See [ITI-x4](volume-2.html#23x4-retrieve-job-output-iti-x4).
+
+## Job Cancellation
+
+If the Requester sends an authorized DELETE before either synchronous task is dispatched, the Manager can accept cancellation and prevent dispatch. While a synchronous task is outstanding, the same request receives HTTP 409 with an OperationOutcome and the job continues. After those tasks reach known terminal states, the Requester can try again while the job is still active. See [job cancellation](volume-2.html#job-cancellation).

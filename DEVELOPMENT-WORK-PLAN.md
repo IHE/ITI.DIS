@@ -31,7 +31,7 @@ D01–D11 are agreed. The findings above record the original review baseline; ag
 
 The draft uses a FHIR R4 `Task` as the request body for de-identification jobs in ITI-x1 and de-identification tasks in ITI-x3. The job submission carries one authorization and one or more payload-set inputs. The task submission carries exactly one assigned set and its execution instructions. Move the approved policy and any supplied lookup reference into the payload-set metadata extension on the corresponding job input. Successful responses use `payloadResult` in R4 Parameters. Use manifests for input and result selection and correlate results by set ID. The published draft must call out this wire change for implementers. Committee disposition is pending. The [transaction matrix](input/pagecontent/volume-2.md#grouped-payload-parameters) and [UC-2 grouped FHIR example](input/pagecontent/examples-grouped-fhir-job.md) define the editorial baseline for updating examples and procedures.
 
-The draft includes optional asynchronous cancellation within ITI-x4 and ITI-x7. The [DIS-CANCEL design review](input/pagecontent/issues.md#asynchronous-job-and-task-cancellation) tracks the wire details and unresolved recovery question.
+DIS-ASYNC-JOB includes job cancellation in ITI-x4. DIS-CANCEL adds optional task cancellation in ITI-x7. The [cancellation design review](input/pagecontent/issues.md#asynchronous-job-and-task-cancellation) tracks the wire details and unresolved recovery question.
 
 ### Agreed Bulk Data scope and binding follow-up
 
