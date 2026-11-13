@@ -80,7 +80,7 @@ The draft [DIS Policy](StructureDefinition-DIS-Policy.html) and [DIS Execution P
 
 ### 3:PXX.1.2 Transformation Actions
 
-Policy rules select transformation actions. The compiled execution plan applies the same action definitions to concrete targets. This section defines the Phase 1 core action family (`core`) for DIS-FHIR-Payload. Every De-Identifier declaring DIS-FHIR-Payload SHALL support all actions in the `core` family.
+Policy rules select transformation actions. The compiled execution plan applies the same action definitions to concrete targets. This section defines the core action family (`core`) for DIS-FHIR-Payload. Every De-Identifier declaring DIS-FHIR-Payload SHALL support all actions in the `core` family.
 
 <a name="3pxx131-action-catalog"> </a>
 
@@ -88,9 +88,9 @@ Policy rules select transformation actions. The compiled execution plan applies 
 
 #### 3:PXX.1.2.1 Action Catalog
 
-Table 3:PXX.1.2-1 lists the Phase 1 core transformation actions.
+Table 3:PXX.1.2-1 lists the core transformation actions.
 
-<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.1.2-1: Phase 1 Core Transformation Actions</strong></p>
+<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.1.2-1: Core Transformation Actions</strong></p>
 
 | Action Code | Description | Applicable HL7 FHIR Datatypes | Deterministic | Parameters |
 |-------------|-------------|-------------------------------|---------------|------------|
@@ -229,8 +229,8 @@ Table 3:PXX.1.3-1 lists the top-level elements of the policy rules JSON.
 | `representationLevel` | 1..1 | code | `semantic` or `syntax` |
 | `reversibilityMode` | 1..1 | code | `irreversible` or `reversible`. All policies used in a job declare the same mode. |
 | `identity-linkage-scope` | 0..1 | object | Authorized scope for lookup-backed replacement or salted hashing. Required when either is used. A `job` scope declares only `type`. A `source-institution` or `cross-community` scope declares `type` and an `identifier` with `system` and `value`. |
-| `payloadFamily` | 0..1 | string | Required for Syntax-Level policies. Phase 1 uses `fhir`. Semantic-Level policies omit this field. |
-| `payloadVersion` | 0..1 | string | Required for Syntax-Level policies. Use `R4`, `R5`, or provisional `R6` under the payload version rules. Semantic-Level policies omit this field. |
+| `payloadFamily` | 0..1 | string | Required for Syntax-Level policies. DIS-FHIR-Payload uses `fhir`. Semantic-Level policies omit this field. |
+| `payloadVersion` | 0..1 | string | Required for Syntax-Level policies. Use `R4` or `R5` under the payload version rules. Semantic-Level policies omit this field. |
 | `ruleSets` | 1..* | array | Named groups of de-identification rules |
 | `stages` | 0..* | array | Optional ordered list of execution stages referencing ruleSet IDs. If present, the list contains at least one stage. |
 {: .grid}
@@ -376,7 +376,7 @@ For each applicable payload set, each ruleSet produces one execution plan Librar
 
 ### 3:PXX.1.6 Policy Lifecycle
 
-Phase 1 does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
+DIS does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
 The following lifecycle states are supported through `Library.status`:
 
@@ -512,7 +512,7 @@ Patient pseudonymization transforms the business identifier pair in `Patient.ide
 
 ## 3:PXX.3 Payload Bindings
 
-DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines the native format and version and how content is carried or resolved through the protocol. The common delivery contract applies to every payload set. The FHIR binding specifies the Phase 1 payload content.
+DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines the native format and version and how content is carried or resolved through the protocol. The common delivery contract applies to every payload set. The FHIR binding specifies the supported payload content.
 
 <a name="payload-set-delivery"> </a>
 
@@ -553,7 +553,7 @@ The `fhir-bulk-data` format uses the JSON [bulk file manifest](#3pxx3224-bulk-fi
 
 Use an R4 `Bundle` of type `collection` when the manifest and its targets or indexes travel together. It SHALL contain exactly one List declaring the DIS Resource Manifest profile. Each entry in that List SHALL use either an absolute HTTPS FHIR REST reference to an R4 resource or a `urn:uuid` reference matching exactly one `Bundle.entry.fullUrl` in the same package. A standalone List SHALL use absolute HTTPS references. Only the List's selected entries determine the payload set. Other Bundle entries may support resolution under the selected binding.
 
-A bundled R4 resource can be the target itself or a wrapper or index. The package SHALL carry non-R4 bytes inside the attachment of an R4 resource. It SHALL NOT embed a native R5 or R6 resource as a Bundle entry.
+A bundled R4 resource can be the target itself or a wrapper or index. The package SHALL carry non-R4 bytes inside the attachment of an R4 resource. Each Bundle entry SHALL be an R4 resource.
 
 <a name="3pxx32-authorization-and-stable-retrieval"> </a>
 
@@ -573,7 +573,7 @@ The Manager SHALL establish the authorized target set before dispatch, including
 
 The FHIR payload binding (`DIS-FHIR-Payload`) defines how actors identify, carry, retrieve, address, and validate FHIR processing payloads. The [execution plan](#execution-plan-content) and [evidence](#evidence-baseline) sections define the associated task and result artifacts.
 
-DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports processing payloads in HL7 FHIR R4, R5, and R6 without requiring a corresponding version of the protocol binding. This independence is achieved through version identification, version-safe packaging, and version-neutral element addressing. As specified in Volume 1, R6 support is based on the ballot draft and will be confirmed upon final publication.
+DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports HL7 FHIR R4 and R5 processing payloads over the same R4 protocol binding through version identification, version-safe packaging, and version-neutral element addressing.
 
 The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing language. The [common delivery contract](#payload-set-delivery) defines the manifest and package used in each exchange.
 
@@ -599,7 +599,7 @@ The declared payload release determines the element selectors, traversal of the 
 
 ##### 3:PXX.3.2.1.1 FHIR Release and Capability Matching
 
-For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request that omits it and SHALL use the same declaration in ITI-x3. A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
+For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request if the declaration is absent or specifies a release other than `R4` or `R5`. The Manager SHALL use the same declaration in ITI-x3. A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
 
 <a name="3pxx121-element-addressing"> </a>
 
@@ -638,7 +638,7 @@ The [R4/R5 PII path catalog](bindings/dis-fhir-pii-path-catalog-0.2.0.csv) and [
 
 Binding version 0.2.0 assigns `Patient.birthDate` to `birth-dates` in both R4 and R5. When migrating a policy from version 0.1.0, review rules targeting `@dates` or `@subject-demographics` and add an explicit `@birth-dates` rule if the policy still governs birth date. If both older groups targeted birth date, resolve the intended action during migration.
 
-Policies may use the applicable date actions or remove the birth date. If the policy needs to preserve age relative to a shifted event, use the same date-shift scope for both. Deriving an age band is a separate transformation that requires a reference event or date, band boundaries, handling for partial birth dates, and an output destination. The Phase 1 core action family does not define age-band derivation.
+Policies may use the applicable date actions or remove the birth date. If the policy needs to preserve age relative to a shifted event, use the same date-shift scope for both. Deriving an age band is a separate transformation that requires a reference event or date, band boundaries, handling for partial birth dates, and an output destination. The core action family does not define age-band derivation.
 
 <a name="tPXX.3.2.2-1"> </a>
 
@@ -665,11 +665,7 @@ The FHIR payload binding defines group membership. A policy selects groups and a
 
 The `dates` group covers the listed structured temporal values. Its choice selectors constrain the selected FHIR types using `ofType()`. Free-text dates, ages, ranges, and schedules expressed as `Timing` are outside this binding. Other paths, including extensions and other references, require separate policy coverage as applicable. The binding does not establish that a policy covers all identifying content in a payload.
 
-Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.3.2.1-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the Phase 1 groups.
-
-<div markdown="1" class="stu-note">
-**Editorial Note:** This draft defines the proposed Phase 1 membership for R4 and R5. An R6 Semantic Group Binding remains pending.
-</div>
+Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.3.2.1-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the groups in Table 3:PXX.3.2.1-1.
 
 <a name="3pxx123-resource-traversal"> </a>
 
@@ -754,10 +750,10 @@ Table 3:PXX.3.2.2-2 shows how a List entry identifies the payload.
 | Binding and version | Resource selected by a List entry | Payload selected |
 |---------------------|------------------------------------|------------------|
 | DIS-FHIR-Payload R4 | An R4 resource, or an R4 [DIS Payload Wrapper](StructureDefinition-DIS-PayloadWrapper.html) | The resource itself or, for a wrapper, the R4 content carried or located by its attachment |
-| DIS-FHIR-Payload R5 or R6 | R4 DIS Payload Wrapper | The serialized R5 or R6 resource carried or located by the wrapper's attachment |
+| DIS-FHIR-Payload R5 | R4 DIS Payload Wrapper | The serialized R5 resource carried or located by the wrapper's attachment |
 {: .grid}
 
-**Payload wrapper.** The wrapper is a profiled R4 DocumentReference with one attachment. Its `data` carries the payload bytes inline, or its `url` locates the payload at an authorized HTTPS endpoint. Exactly one SHALL be present. A FHIR wrapper SHALL use `application/fhir+json` or `application/fhir+xml`. The receiving actor SHALL retrieve or decode the payload and validate it against the containing set's binding and version. If the FHIR media-type release parameter is present, it SHALL agree with `payloadVersion`. Any HTTP negotiation for R5 or R6 occurs on retrieval of the attachment content. The manifest, package, and wrapper exchanges use R4.
+**Payload wrapper.** The wrapper is a profiled R4 DocumentReference with one attachment. Its `data` carries the payload bytes inline, or its `url` locates the payload at an authorized HTTPS endpoint. Exactly one SHALL be present. A FHIR wrapper SHALL use `application/fhir+json` or `application/fhir+xml`. The receiving actor SHALL retrieve or decode the payload and validate it against the containing set's binding and version. If the FHIR media-type release parameter is present, it SHALL agree with `payloadVersion`. Any HTTP negotiation for R5 occurs on retrieval of the attachment content. The manifest, package, and wrapper exchanges use R4.
 
 The receiving actor SHALL follow the attachment only when the DocumentReference declares and conforms to the DIS Payload Wrapper profile. A DocumentReference claiming that profile but failing validation SHALL cause a set failure. To deliver a resource that itself declares the wrapper profile as a FHIR payload, serialize it inside a separate wrapper. An inline R5 DocumentReference is therefore carried as R5 bytes in the R4 wrapper, just like any other R5 resource.
 
@@ -782,7 +778,7 @@ The [mixed R4 result package](Bundle-mixed-r4-result.html) selects a bundled Pat
 
 ##### 3:PXX.3.2.2.3 Version-Safe Packaging of Inline and Hosted Resources
 
-The DIS transaction envelope and manifest package use HL7 FHIR R4. For R5 and provisional R6, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
+The DIS transaction envelope and manifest package use HL7 FHIR R4. For R5, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
 
 <a name="protocol-resources-remain-hl7-fhir-r4"> </a>
 
@@ -811,7 +807,7 @@ Table 3:PXX.3.2.2-3 lists the resources that are part of the HL7 FHIR R4 protoco
 
 ##### 3:PXX.3.2.2.4 Bulk File Manifests and Authorized Retrieval
 
-For an asynchronous cohort job, the Requester supplies an HTTPS URI identifying a JSON manifest that lists prepared input files. Each line of a listed NDJSON file contains one complete resource in the declared payload release. [Volume 1](volume-1.html) defines the Phase 1 boundary for bulk data input and output.
+For an asynchronous cohort job, the Requester supplies an HTTPS URI identifying a JSON manifest that lists prepared input files. Each line of a listed NDJSON file contains one complete resource in the declared payload release. [Volume 1](volume-1.html) defines the scope for bulk data input and output.
 
 DIS uses the file listing conventions of the [HL7 Bulk Data Access IG STU 3](https://hl7.org/fhir/uv/bulkdata/STU3/en/export.html#response---output-manifest). For a manifest prepared for DIS, the required fields are `requiresAccessToken` (boolean) and `output` (array of file entries). Each entry SHALL identify the resource type in `type` and the file location in `url` as an absolute HTTPS URL. The manifest SHALL enumerate the complete dataset in one file listing. It may omit export-specific metadata such as `request` and `transactionTime`. The job's `payloadVersion` applies to all listed input files. A manifest with continuation links or reported export errors SHALL be rejected for processing under this binding.
 
@@ -907,7 +903,7 @@ For inline submission, carry the following R4 collection as the serialized `Task
 
 ### 3:PXX.3.3 Proposed DICOM and CDA Bindings (Informative)
 
-The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe proposed mappings to the FHIR R4 envelope. Phase 1 conformance uses DIS-FHIR-Payload.
+The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe proposed mappings to the FHIR R4 envelope. Conformance to this supplement uses DIS-FHIR-Payload.
 
 <a name="mixed-payload-walkthrough"> </a>
 
@@ -974,7 +970,7 @@ The `Provenance.agent` entry for the De-Identifier SHALL use `Provenance.agent.t
 
 De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. Evidence does not depend on the payload's HL7 FHIR version because:
 
-- `Provenance.target` identifies a native R4 result or, for R5 and R6, the R4 wrapper carrying or locating the result.
+- `Provenance.target` identifies a native R4 result or, for R5, the R4 wrapper carrying or locating the result.
 - For a resource list, each `Provenance.target.reference` SHALL match a selected List item. For a bundled output, the reference SHALL resolve to exactly one entry by `Bundle.entry.fullUrl` in the same result package. For a hosted output, use the HTTPS reference selected by the List.
 - For bulk, each `Provenance.target.reference` SHALL identify a selected DIS Bulk Result File descriptor by its Bundle entry `fullUrl`. The evidence targets the R4 descriptor rather than the NDJSON URL directly.
 - Each selected output entry or file SHALL be covered by at least one evidence target. The receiver SHALL reject missing, unresolved, ambiguous, or unselected targets before accepting or releasing the result.

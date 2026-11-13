@@ -78,7 +78,7 @@ CodeSystem: DisAction
 Id: dis-action
 Title: "DIS Transformation Action"
 Description: """
-Transformation action codes from the DIS Phase 1 core action family.
+Transformation action codes from the DIS core action family.
 Each action is a concrete, deterministic function with
 well-defined parameters and testable output. Actions are classified by
 their ISO/IEC 20889:2018 de-identification technique via the technique
@@ -126,8 +126,8 @@ Id: dis-iso-technique
 Title: "ISO/IEC 20889 De-Identification Technique"
 Description: """
 De-identification technique codes from ISO/IEC 20889:2018 §9. Used as
-the technique classification for DIS transformation actions. Phase 1
-uses a subset; the full CodeSystem provides vocabulary for future phases.
+the technique classification for DIS transformation actions. The core action family
+uses a subset. The full CodeSystem also provides vocabulary for possible additions.
 """
 * ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-iso-technique"
 * ^status = #active

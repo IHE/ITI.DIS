@@ -1,6 +1,6 @@
 ## Significant Changes
 
-The current drafting baseline is [Volume 1](volume-1.html). Supporting content reflects four actors, four transactions, policy, execution plan, FHIR payload, evidence, and lookup table specifications, the nine core transformation actions, and independently versioned R4/R5/R6 payloads over an R4 protocol binding. R6 support remains provisional as described in Volume 1.
+The current drafting baseline is [Volume 1](volume-1.html). Supporting content reflects four actors, four transactions, policy, execution plan, FHIR payload, evidence, and lookup table specifications, the nine core transformation actions, and independently versioned R4 and R5 payloads over an R4 protocol binding.
 
 ## Issues
 
@@ -10,12 +10,33 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 
 ### Open Issues
 
+- [Additional payload binding conformance](#additional-payload-binding-conformance)
+- [FHIR R6 processing payloads](#fhir-r6-processing-payloads)
+- [Key-based reversible pseudonymization](#key-based-reversible-pseudonymization)
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
 - [Asynchronous job and task cancellation](#asynchronous-job-and-task-cancellation)
 - [IUA grouping and authorization denials](#iua-grouping-and-denial-responses)
 - [Future policy management transaction](#future-policy-management-transaction)
 - **Draft contract review:** confirm the payload set transaction contract, capability declarations, stage ordering, and release authorization. Complete detailed conformance procedures and validate them against the agreed baseline.
+
+<a name="additional-payload-binding-conformance"> </a>
+
+#### Additional Payload Binding Conformance
+
+DIS-FHIR-Payload is the mandatory payload binding in this supplement. If DIS adds a binding for another data format, determine whether an actor may claim DIS conformance by supporting that binding alone or must also support DIS-FHIR-Payload. Define what peers must declare and which binding they must share for a job or task exchange.
+
+<a name="fhir-r6-processing-payloads"> </a>
+
+#### FHIR R6 Processing Payloads
+
+This supplement assesses conformance with published FHIR R4 or R5 processing payloads. Evaluate R6 processing over the same R4 workflow protocol when the R6 definitions are stable. This requires release-specific validation, semantic group mappings, capability matching, and worked examples with conformance tests.
+
+<a name="key-based-reversible-pseudonymization"> </a>
+
+#### Key-Based Reversible Pseudonymization
+
+Evaluate key-based reversal as an additional arrangement under DIS-REVERSIBLE. Define who holds the key, who is authorized to reverse a pseudonym, and what the Manager and De-Identifier must exchange or declare when implemented by different vendors. Determine whether that behavior requires a shared capability declaration and how to test it.
 
 <a name="data-recipient-and-push-delivery"> </a>
 
@@ -29,15 +50,15 @@ An alternative design would introduce a **Data Recipient** actor and an optional
 - Standardize the output delivery step that UC-1, UC-2, and UC-5 currently describe as outside DIS
 - Separate the job-initiation role (Requester) from the output-consumption role (Data Recipient), reflecting deployments where the exporting system and the downstream consumer are different systems
 
-Considerations include Phase 1 scope, overlap with MHD Document Source grouping (see [Volume 1 MHD grouping](volume-1.html#1pxx63-ihe-mhd---mobile-access-to-health-documents)), additional specification and testing surface, and whether a content-only connectathon test is sufficient for the standalone Integrated actor.
+Considerations include the scope of this supplement, overlap with MHD Document Source grouping (see [Volume 1 MHD grouping](volume-1.html#1pxx63-ihe-mhd---mobile-access-to-health-documents)), additional specification and testing surface, and whether a content-only connectathon test is sufficient for the standalone Integrated actor.
 
-**The committee is asked to discuss whether a Data Recipient actor and push-delivery transaction should be included in Phase 1.**
+**The committee is asked to discuss whether a Data Recipient actor and push-delivery transaction should be included in this supplement.**
 
 <a name="asynchronous-job-and-task-cancellation"> </a>
 
 #### Asynchronous Job and Task Cancellation
 
-**Phase 1 editorial draft.** The draft [DIS-CANCEL option](volume-1.html#asynchronous-cancellation-option) adds optional cancellation to [ITI-x4 Retrieve Job Output](volume-2.html#23x4-retrieve-job-output-iti-x4) and [ITI-x7 Retrieve Task Output](volume-2.html#23x7-retrieve-task-output-iti-x7). Each transaction would carry a cancellation message between its existing actors. The Requester would control its job through the Manager, which would coordinate cancellation across the De-Identifiers assigned to that job. [IHE ITI-22 §3.22.4.3](https://profiles.ihe.net/ITI/TF/Volume2/ITI-22.html) is a precedent for including an optional cancellation message in an existing transaction.
+**Editorial draft.** The draft [DIS-CANCEL option](volume-1.html#asynchronous-cancellation-option) adds optional cancellation to [ITI-x4 Retrieve Job Output](volume-2.html#23x4-retrieve-job-output-iti-x4) and [ITI-x7 Retrieve Task Output](volume-2.html#23x7-retrieve-task-output-iti-x7). Each transaction would carry a cancellation message between its existing actors. The Requester would control its job through the Manager, which would coordinate cancellation across the De-Identifiers assigned to that job. [IHE ITI-22 §3.22.4.3](https://profiles.ihe.net/ITI/TF/Volume2/ITI-22.html) is a precedent for including an optional cancellation message in an existing transaction.
 
 | Exchange | Proposed message | Effect of acceptance |
 |---|---|---|
@@ -75,7 +96,7 @@ The committee needs to confirm which IUA groupings are required on each leg, inc
 
 #### Future Policy Management Transaction
 
-A future phase could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. Phase 1 uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3.html#3pxx16-policy-lifecycle).
+A future revision could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. DIS uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3.html#3pxx16-policy-lifecycle).
 
 ### Closed Issues
 
