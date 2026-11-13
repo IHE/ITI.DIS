@@ -113,7 +113,7 @@ For transformation scope and exclusions, see [Volume 1 Section 1:PXX.4.1](input/
 
 DIS defines two conformance layers. **Content conformance** covers the full de-identification pipeline — policy validation, compilation, execution, and evidence production — and is claimed by the Integrated De-ID Manager/De-Identifier, which can operate standalone without external transactions. **Transaction conformance** applies when actors communicate via standardized DIS transactions (ITI-x1, ITI-x3, ITI-x4, ITI-x7).
 
-All DIS actors support the mandatory FHIR payload binding (DIS-FHIR-Payload) for their roles. External transactions use the HL7 FHIR R4 protocol binding. Actor options include DIS-ASYNC-JOB, DIS-ASYNC-TASK, and DIS-CANCEL. Job and task asynchrony can be selected independently for ordinary processing. Cancellation depends on asynchronous support for the applicable exchanges. Each Manager, De-Identifier, and Integrated actor declares at least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE.
+All DIS actors support the mandatory FHIR payload binding (DIS-FHIR-Payload) for their roles. External transactions use the HL7 FHIR R4 protocol binding. Options include DIS-ASYNC-JOB (asynchronous job processing between Requester and Manager), DIS-ASYNC-TASK (asynchronous task processing between Manager and De-Identifier), DIS-CANCEL (optional cancellation of accepted asynchronous work), and DIS-IRREVERSIBLE/DIS-REVERSIBLE (at least one required by the Manager, De-Identifier, and Integrated actor).
 
 For the full declaration definitions, conformance layers, actor-option matrix, and dependency rules, see [Volume 1 Section 1:PXX.2](input/pagecontent/volume-1.md#1pxx2-dis-actor-options) and [Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts).
 

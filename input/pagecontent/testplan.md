@@ -11,7 +11,7 @@ This draft checklist follows [Volume 1](volume-1.html), the authoritative profil
 - De-Identifier: ITI-x3; ITI-x7 when DIS-ASYNC-TASK is declared.
 - Integrated De-ID Manager/De-Identifier: content conformance in standalone mode; ITI-x1 when external job submission is supported, and ITI-x4 when DIS-ASYNC-JOB is declared. ITI-x3 and ITI-x7 do not apply.
 
-Check the mandatory R4 protocol binding on external transactions, the applicable content requirements and the required actor groupings against Volume 1. Check DIS-FHIR-Payload support for each actor and at least one declared reversibility option for each processing actor. Test asynchronous job and task options independently. For actors declaring DIS-CANCEL, verify the asynchronous dependencies in [Table 1:PXX.2-2](volume-1.html#tPXX.2-2). Reject unsupported capability combinations before dispatch.
+Check the mandatory R4 protocol binding on external transactions, the applicable content requirements and the required actor groupings against Volume 1. Check DIS-FHIR-Payload support for each actor and at least one declared reversibility option for each processing actor. Test async job and task options independently and reject unsupported capability combinations before dispatch.
 
 ### Wire and Release Procedures
 
