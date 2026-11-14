@@ -13,6 +13,19 @@ The decoded attachment SHALL be one UTF-8 JSON object. It SHALL use the [DIS ver
 
 Use the compact terms and value forms defined here. An artifact or rule `uid` SHALL be an absolute IRI and unique within its artifact. Unless a compact value is explicitly prescribed, IRI fields carry an absolute IRI without a compact prefix. A policy or plan's `uid` SHALL identify one immutable attachment revision and be bound to the carrier's `Library.url` and `Library.version`. Unless marked optional, listed properties are required. Arrays specified as nonempty SHALL contain at least one entry. A receiver SHALL reject duplicate JSON members, unknown properties or terms, unsupported values or conditions, unresolved required references, and inconsistent identifiers. Policy inheritance, ODRL conflict strategies, prohibitions, permission duties, and obligation consequences are outside this profile. Version 1 uses no alternate wire encoding for the three artifacts.
 
+## DIS ODRL vocabulary
+
+The [DIS ODRL vocabulary, version 1 (RDF Turtle)](schemas/dis-odrl-v1.ttl) declares the DIS profile identifiers, actions, operands, properties, and selector collection sources. The JSON-LD context expands the compact IRIs. The requirements below define permitted term use, cardinalities, and value forms. See the [W3C ODRL profile mechanism](https://www.w3.org/TR/odrl-model/#profile-mechanism).
+
+| Profile | Allowed DIS actions | Profile-specific terms and usage |
+| --- | --- | --- |
+| Data Request Authorization | `dis:deIdentify` in a permission | Use the Agreement properties and constraint operands defined in [Agreement for organizational data request authorization](#odrl-authorization). |
+| De-Identification Policy | `dis:remove`, `dis:replace`, `dis:keep`, `dis:hash`, `dis:truncate-date`, `dis:date-shift`, `dis:round`, `dis:truncate`, and `dis:redact` in obligations | Use policy representation, rule sets, and optional stages. Use `dis:semanticGroup` for Semantic-Level selectors or the binding's concrete selector for Syntax-Level selectors. |
+| Execution Plan | The same nine transformation actions in obligations | Use concrete selectors, the assigned payload set, the explicit compiled rule order, and `dis:sourceRule`. A compiled salted hash rule uses the resolved linkage scope. |
+{: .grid}
+
+The action and procedure definitions in [Volume 3](volume-3.html#transformation-actions) apply to both Sets. Vocabulary declarations describe terms and their relationships. Receivers use the exact action IRIs allowed by the declared DIS profile when validating an exchange.
+
 <a name="odrl-authorization"> </a>
 
 ## Agreement for organizational data request authorization
