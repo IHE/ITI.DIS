@@ -198,6 +198,18 @@ For each core action, specify valid and invalid parameters, applicable data type
 
 Use the action definitions in [Volume 3](volume-3.html#transformation-actions). Cover scope and salt compatibility, date-shift consistency, derivation versions, rotation, collision handling and capability matching. Test protected parameter return/reuse only when an explicit capability contract permits it.
 
+### FHIRPath Selectors and Rule Overlap
+
+Use the [FHIRPath addressing requirements](volume-3.html#fhirpath-element-addressing) and [plan evaluation rules](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation). In the input resources, give each Observation a valid `status` and `code`. Give the Patient two valid identifiers with distinct systems and values. Run the applicable cases against each supported FHIR payload release. A standalone Integrated actor compiles and executes the same cases locally.
+
+| Case | Procedure | Pass criteria |
+|---|---|---|
+| Typed choice and empty match | Submit two Observations, one with `valueQuantity` of 72 kg and one with `valueString` of `unknown`. Apply `remove` to `Observation.value.ofType(Quantity)`. Repeat with the unqualified selector `Observation.value`. | The typed selector removes only the quantity. The string Observation succeeds unchanged. The unqualified selector removes both values. |
+| Invalid selector target | In a syntax-level policy, use `Observation.value[x]` for a rule target. In a separate run, use `Patient.identifier.count()`. | The Manager rejects the selector before dispatch in both runs. |
+| First match on a repeated element | First apply `keep` to `Patient.identifier.where(system = 'https://example.org/approved-id')`, then apply `remove` to `Patient.identifier`. Give one of the two identifiers the approved system. | The full approved identifier remains unchanged. The other identifier is removed. |
+| Conflicting ancestor and descendant actions | Apply `remove` to `Patient.identifier` and `keep` to `Patient.identifier.value` on the same Patient. Repeat with the two rules reversed. | The De-Identifier fails the task with an OperationOutcome and returns no partial output in either order. The Manager withholds job output. |
+{: .grid}
+
 ### Payload, Evidence and Release
 
 Cover R4 workflow resources with independently versioned R4 and R5 payloads. Verify declared-version validation and exercise inline R5 in an R4 wrapper and hosted R5 both directly and through a wrapper. Verify that a request for a payload release outside the supported binding is rejected before dispatch.
