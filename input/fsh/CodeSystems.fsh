@@ -2,18 +2,6 @@
 
 // ── CodeSystems ──────────────────────────────────────────────────────────────
 
-CodeSystem: DisLibraryType
-Id: dis-library-type
-Title: "DIS Library Type"
-Description: "Codes classifying the type of DIS Library artifact: de-identification policy or execution plan."
-* ^url = "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type"
-* ^status = #active
-* ^experimental = false
-* ^caseSensitive = true
-* #dis-policy "De-identification policy (Semantic-Level or Syntax-Level rules)"
-* #dis-execution-plan "Execution plan (payload-specific compiled rules)"
-
-
 CodeSystem: DisActivity
 Id: dis-activity
 Title: "DIS Activity"

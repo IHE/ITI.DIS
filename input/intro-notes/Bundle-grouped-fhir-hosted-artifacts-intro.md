@@ -6,7 +6,7 @@ This Bundle carries an [ODRL Agreement](odrl-content.html#decoded-authorization-
 
 ### R5 ODRL De-Identification Policy Set
 
-This JSON-LD is the decoded `Library.content.data` of `grouped-fhir-policy-imaging-report-r5`.
+This JSON-LD is the decoded `Contract.rule.contentAttachment.data` of `grouped-fhir-policy-imaging-report-r5`.
 
 ```json
 {
@@ -54,7 +54,7 @@ This JSON-LD is the decoded `Library.content.data` of `grouped-fhir-policy-imagi
 
 ### R5 ODRL Execution Plan Set
 
-This JSON-LD is the decoded `Library.content.data` of `grouped-fhir-plan-imaging-report-r5`.
+This JSON-LD is the decoded `Contract.rule.contentAttachment.data` of `grouped-fhir-plan-imaging-report-r5`.
 
 ```json
 {

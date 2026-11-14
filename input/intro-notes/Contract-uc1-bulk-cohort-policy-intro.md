@@ -2,13 +2,13 @@
 
 ### Decoded ODRL De-Identification Policy Set
 
-This JSON-LD is the decoded Base64 content of `Library.content.data` in this example.
+This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.data` in this example.
 
 ```json
 {
   "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
   "@type": "Set",
-  "uid": "https://governance.example.org/policies/staged-patient/versions/1.0",
+  "uid": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0",
   "profile": "dis:DeIdentificationPolicy",
   "dis:representationLevel": "syntax",
   "dis:reversibilityMode": "irreversible",
@@ -17,16 +17,16 @@ This JSON-LD is the decoded Base64 content of `Library.content.data` in this exa
   "dis:identity-linkage-scope": {
     "@type": "@json",
     "@value": {
-      "type": "source-institution",
+      "type": "cross-community",
       "identifier": {
-        "system": "https://hospital.example.org/identifiers/linkage-scope",
-        "value": "lab-project-2026"
+        "system": "https://study.example.org/identifiers/linkage-scope",
+        "value": "epi-cohort-2026"
       }
     }
   },
   "obligation": [
     {
-      "uid": "https://governance.example.org/policies/staged-patient/versions/1.0#hash-identifier",
+      "uid": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0#hash-identifier",
       "target": {
         "@type": "AssetCollection",
         "source": "dis:fhir-elements",
@@ -55,14 +55,14 @@ This JSON-LD is the decoded Base64 content of `Library.content.data` in this exa
             "leftOperand": "dis:pseudonymSystem",
             "operator": "eq",
             "rightOperand": {
-              "@id": "https://hospital.example.org/identifiers/pseudonym"
+              "@id": "https://study.example.org/identifiers/pseudonym"
             }
           }
         ]
       }
     },
     {
-      "uid": "https://governance.example.org/policies/staged-patient/versions/1.0#remove-name",
+      "uid": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0#remove-name",
       "target": {
         "@type": "AssetCollection",
         "source": "dis:fhir-elements",
@@ -75,7 +75,7 @@ This JSON-LD is the decoded Base64 content of `Library.content.data` in this exa
       "action": "dis:remove"
     },
     {
-      "uid": "https://governance.example.org/policies/staged-patient/versions/1.0#birth-year",
+      "uid": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0#birth-year",
       "target": {
         "@type": "AssetCollection",
         "source": "dis:fhir-elements",
@@ -106,10 +106,10 @@ This JSON-LD is the decoded Base64 content of `Library.content.data` in this exa
         "dis:ruleOrder": {
           "@list": [
             {
-              "@id": "https://governance.example.org/policies/staged-patient/versions/1.0#hash-identifier"
+              "@id": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0#hash-identifier"
             },
             {
-              "@id": "https://governance.example.org/policies/staged-patient/versions/1.0#remove-name"
+              "@id": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0#remove-name"
             }
           ]
         }
@@ -119,7 +119,7 @@ This JSON-LD is the decoded Base64 content of `Library.content.data` in this exa
         "dis:ruleOrder": {
           "@list": [
             {
-              "@id": "https://governance.example.org/policies/staged-patient/versions/1.0#birth-year"
+              "@id": "https://governance.example.org/policies/uc1-bulk-cohort/versions/1.0#birth-year"
             }
           ]
         }

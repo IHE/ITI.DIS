@@ -11,7 +11,7 @@ The decoded attachment SHALL be one UTF-8 JSON object. It SHALL use the [DIS ver
 | Execution Plan | `Set` | `dis:ExecutionPlan` |
 {: .grid}
 
-Use the compact terms and value forms defined here. An artifact or rule `uid` SHALL be an absolute IRI and unique within its artifact. Unless a compact value is explicitly prescribed, IRI fields carry an absolute IRI without a compact prefix. A policy or plan's `uid` SHALL identify one immutable attachment revision and be bound to the carrier's `Library.url` and `Library.version`. Unless marked optional, listed properties are required. Arrays specified as nonempty SHALL contain at least one entry. A receiver SHALL reject duplicate JSON members, unknown properties or terms, unsupported values or conditions, unresolved required references, and inconsistent identifiers. Policy inheritance, ODRL conflict strategies, prohibitions, permission duties, and obligation consequences are outside this profile. Version 1 uses no alternate wire encoding for the three artifacts.
+Use the compact terms and value forms defined here. An artifact or rule `uid` SHALL be an absolute IRI and unique within its artifact. Unless a compact value is explicitly prescribed, IRI fields carry an absolute IRI without a compact prefix. A policy or plan's `uid` SHALL identify one immutable attachment revision and be bound to the carrier's `Contract.url` and `Contract.version`. Unless marked optional, listed properties are required. Arrays specified as nonempty SHALL contain at least one entry. A receiver SHALL reject duplicate JSON members, unknown properties or terms, unsupported values or conditions, unresolved required references, and inconsistent identifiers. Policy inheritance, ODRL conflict strategies, prohibitions, permission duties, and obligation consequences are outside this profile. Version 1 uses no alternate wire encoding for the three artifacts.
 
 ## DIS ODRL vocabulary
 
@@ -36,7 +36,7 @@ The Agreement contains an immutable `uid`, a `dis:approvedRequest` identifying t
 | --- | --- | --- |
 | `purpose` | `eq` | One IRI reference identifying the approved purpose. |
 | `dateTime` | `gteq` and `lt` | Exactly one of each operator with an `xsd:dateTime` value in UTC. Start is inclusive and end is exclusive. Start SHALL precede end. |
-| `dis:approvedPolicy` | `eq` | One string in `Library.url\|Library.version` form. |
+| `dis:approvedPolicy` | `eq` | One string in `Contract.url\|Contract.version` form. |
 | `dis:payloadBinding`, `dis:payloadVersion` | `eq` | One string for each operand, matching the applicable DIS payload binding and release. |
 | `recipient` | `eq` | One IRI reference identifying the organization entitled to receive results. |
 | `dis:resultDestination` | `eq` | Optional. One IRI reference identifying an authorized HTTPS service base. Every referenced result endpoint and redirect SHALL remain within that service boundary. |
@@ -263,7 +263,7 @@ This Agreement is the decoded attachment in the [UC-2 Data Request Authorization
 
 ### De-Identification Policy Set Example
 
-This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Library. The `patient-r4` permission approves version `1.0` of that Library. The policy selects `Patient.name` for removal.
+This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Contract. The `patient-r4` permission approves version `1.0` of that Contract. The policy selects `Patient.name` for removal.
 
 ```json
 {
@@ -311,7 +311,7 @@ This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Polic
 
 ### Execution Plan Set Example
 
-This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Execution Plan Library referenced by the [ITI-x3 de-identification task](Task-grouped-fhir-task-patient-r4.html). It binds the selector to the assigned manifest and links the compiled obligation to the source policy rule.
+This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Execution Plan Contract referenced by the [ITI-x3 de-identification task](Task-grouped-fhir-task-patient-r4.html). It binds the selector to the assigned manifest and links the compiled obligation to the source policy rule.
 
 ```json
 {

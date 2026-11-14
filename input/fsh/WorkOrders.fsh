@@ -69,7 +69,7 @@ Profile: DISSignedPolicy
 Parent: Binary
 Id: DIS-SignedPolicy
 Title: "DIS Signed Policy"
-Description: "Contained JWS-signed policy Library carried in a job submission."
+Description: "Contained JWS-signed policy Contract carried in a job submission."
 * id 1..1
 * contentType = #"application/jose" (exactly)
 * data 1..1
@@ -145,6 +145,8 @@ Description: "FHIR R4 representation of a de-identification task submitted throu
 * input[payloadSet].extension[payloadSet].extension[lookupTable] 0..0
 * input[executionPlan].type = $DISTaskInput#execution-plan
 * input[executionPlan].value[x] only Reference(DISExecutionPlan)
+* input[executionPlan].value[x].reference 1..1
+* input[executionPlan].value[x].reference obeys dis-versioned-contract-reference
 * input[ruleSetId].type = $DISTaskInput#rule-set-id
 * input[ruleSetId].value[x] only string
 * input[stageId].type = $DISTaskInput#stage-id

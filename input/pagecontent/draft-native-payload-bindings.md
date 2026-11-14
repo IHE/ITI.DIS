@@ -99,7 +99,7 @@ The Manager sends one `POST /fhir/$submit-dis-task` to the assigned De-Identifie
 |------------|---------------|--------------|
 | `setId` in payload-set metadata | `clinical` | `images` |
 | `valueAttachment` in the payload-set input | Same inline manifest package and original R5 bytes | `url = https://index.example.org/fhir/List/images-42/_history/1`, with authorized access to the versioned study index and Endpoint and to the two assigned instances |
-| `execution-plan` reference | `https://dis.example.org/fhir/Library/plan-clinical-42/_history/1` | `https://dis.example.org/fhir/Library/plan-images-42/_history/1` |
+| `execution-plan` reference | `https://dis.example.org/fhir/Contract/plan-clinical-42/_history/1` | `https://dis.example.org/fhir/Contract/plan-images-42/_history/1` |
 | `rule-set-id` string | `clinical-direct-identifiers` | `imaging-confidentiality` |
 {: .grid}
 
