@@ -177,6 +177,9 @@ pages:
   draft-encryption-based-pseudonymization.md:
     title: "Draft Encryption-Based Pseudonymization"
     generation: markdown
+  draft-odrl-content.md:
+    title: "Draft ODRL Content for DIS"
+    generation: markdown
   testplan.md:
     title: "Test Plan"
     generation: markdown
@@ -222,6 +225,7 @@ menu:
   Other:
     Draft DICOM and CDA Payload Bindings: draft-native-payload-bindings.html
     Draft Encryption-Based Pseudonymization: draft-encryption-based-pseudonymization.html
+    Draft ODRL Content for DIS: draft-odrl-content.html
     Changes to Other IHE Specifications: other.html
     Download and Analysis: download.html
     Test Plan: testplan.html

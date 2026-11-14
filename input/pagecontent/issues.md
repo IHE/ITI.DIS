@@ -11,6 +11,7 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 ### Open Issues
 
 - [FHIR R6 processing payloads](#fhir-r6-processing-payloads)
+- [Organizational data request authorization and ODRL content](draft-odrl-content.html) · [Issue #57](https://github.com/IHE/ITI.DIS/issues/57)
 - [Key-based reversible pseudonymization](#key-based-reversible-pseudonymization)
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
