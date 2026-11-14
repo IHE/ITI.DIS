@@ -190,6 +190,12 @@ Exercise the published salted and unsalted test vectors. Verify matching output 
 
 For reversible patient hashing, verify the inline `generatedLookupTable` in synchronous ITI-x3 and asynchronous ITI-x7 completion. Validate the original-to-pseudonym pairs, resolved scope and Manager retention before release. Check that the supplied-table and irreversible patient workflows do not return a generated patient table. Verify that mapping artifacts and confidential salts stay out of recipient output, evidence, logs and errors.
 
+### Encryption-Based Pseudonymization (Informative Proposal)
+
+For the [proposed encryption method](volume-3.html#encryption-based-patient-pseudonymization), run the [synthetic FF1 vector](volume-3.html#ff1-interoperability-vector) with two independent De-Identifiers. Check the exact output identifier pair, including leading zeroes, and verify that an authorized decryptor can recover the original value. Repeat with another approved identifier format, with a retry using the pinned configuration, and with changes to the scope or key version. Check that equivalent assignments use matching pseudonyms and that the output namespace follows the approved configuration.
+
+Verify the protected lookup table on synchronous ITI-x3 and successful asynchronous ITI-x7 responses. Check that the Manager can resolve the pseudonym by lookup and withholds release when the mapping is missing, invalid, unauthorized, or conflicting. Exercise an unsupported configuration, a changed configuration on retry, an unavailable key version, and an identifier outside the approved format. Check that key material and mappings are excluded from recipient output, evidence, logs, and errors.
+
 ### Persistent Lookup Table References
 
 Check the DIS-LookupTable DocumentReference and DIS-LookupTableContent Binary profiles. Exercise literal and version-specific references, exact-version identifier resolution, inline JSON and Binary attachments, stable business identifiers and content-version masterIdentifier, policy/content scope agreement, current-status admission, unavailable or unauthorized retrieval, ambiguous identifiers, and changed bytes under a pinned identifier. Verify a job/retry uses one pinned snapshot and task subsets use distinct derived document identifiers with transforms provenance. Delete temporary snapshots and derived task artifacts without deleting the Requester's authoritative repository.
