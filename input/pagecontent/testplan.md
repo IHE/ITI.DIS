@@ -87,11 +87,19 @@ Apply the [actor grouping table](volume-1.html#required-groupings) and the [shar
 
 Use a profiled Agreement with two permissions selecting distinct sets and exact policy revisions. Confirm that the Manager checks the Agreement before synchronous processing or asynchronous acceptance. Repeat with a malformed or non-versioned authorization reference, a missing permission, an untrusted issuer, a different purpose or policy revision, a substituted input version, and an unrecognized required operand. Expect HTTP 400 for malformed inputs and HTTP 403 for a well-formed grant whose conditions the Manager cannot establish. Verify that none of these failures dispatches a task. Revoke the grant after acceptance or attempt retrieval from an unapproved recipient identity or result destination, and verify that the Manager withholds results, evidence and download access.
 
-<a name="authorization-contract-discovery"> </a>
+<a name="authorization-contract-validation"> </a>
 
-#### Authorization Contract Discovery
+#### Authorization Contract Validation
 
-For publishers that provide [Authorization Contracts](volume-3.html#data-request-authorization-contract), inspect the [UC-2 Contract](Contract-grouped-fhir-authorization-contract.html). Verify that its single rule contains an inline attachment with content type `application/ld+json`, Base64 data, and no URL. Decode the data and verify that it contains the same Agreement bytes as the job's DocumentReference. Compare the mirrored Agreement identifier and issuer with the embedded Agreement. Verify a one-to-one match of the permission IDs, purpose, ISO classification, validity bounds, parties, and approved policy versions. Search by Agreement identifier on a server declaring that search. Repeat with a changed policy version, swapped R4 and R5 policies, an omitted permission, malformed JSON-LD, or a reference in place of the inline attachment. The publisher withholds an invalid or inconsistent Contract from discovery. Verify that a Requester uses the exact DocumentReference in ITI-x1 and that the Manager enforces the Agreement's exclusive upper time bound even when the Contract is available.
+| Actor and stimulus | Pass criteria |
+|---|---|
+| Inspect the Requester's [UC-2 job](Task-grouped-fhir-job-request.html) and resolve its version-specific [Contract reference](Contract-grouped-fhir-authorization-contract.html). | The Contract id and version match the reference. The single rule contains inline Base64 data with content type `application/ld+json` and no URL. The decoded Agreement identifies both selected permissions and binds each set to its approved policy version. |
+| Submit a job with an unversioned Contract reference or a DocumentReference as the authorization input. Repeat with an inline rule that contains malformed JSON-LD or a reference in place of the attachment. | The Manager returns HTTP 400 and does not accept the job or dispatch a task. |
+| Submit a job referencing a Contract whose identifier differs from the embedded Agreement's `uid`. | The Manager returns HTTP 400 and does not accept the job or dispatch a task. |
+| Check the publisher's Contract against the embedded Agreement. Repeat with a changed or swapped policy version or an omitted mirrored permission. | The publisher identifies inconsistent mirrored terms and corrects the Contract before making it available. |
+| Return a different resource id or version when the Manager resolves the reference. Repeat with a matching Contract for which the Manager cannot establish current Agreement status. | The Manager returns HTTP 403 and does not accept the job or dispatch a task. |
+| Submit or attempt result retrieval at the Agreement's exclusive upper time bound. | The Manager denies submission or result release, respectively. |
+| On a server that declares support for searching by Agreement identifier, search for the issued Contract using that identifier. | The server returns the authorized Contract revision where the identifier matches. |
 
 #### Purpose Classification
 

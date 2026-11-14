@@ -199,7 +199,7 @@ The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification 
 
 | Input code | Cardinality | Value | Description |
 |------------|-------------|-------|-------------|
-| `authorization` | 1..1 | `valueReference` | Absolute HTTPS version-specific reference to the [DIS Data Request Authorization](volume-3.html#data-request-authorization) document |
+| `authorization` | 1..1 | `valueReference` | Absolute HTTPS version-specific reference to the [DIS Data Request Authorization Contract](volume-3.html#data-request-authorization) |
 | `payload-set` | 1..* | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | One manifest with the set's binding, version, permission IRI, requested purpose IRI, approved policy and any permitted supplied lookup reference |
 {: .grid}
 
@@ -215,7 +215,7 @@ To request asynchronous job processing when both actors support DIS-ASYNC-JOB, t
 
 The De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL apply the [shared identifier and retry rules](#submission-retries). The following actions apply to a new submission.
 
-The Manager SHALL obtain and validate the referenced ODRL Agreement under [Volume 3 §3:PXX.6](volume-3.html#data-request-authorization). It SHALL evaluate the permission identified by each set and compare the requested purpose and policy with the exact values approved by that permission. The Manager SHALL return HTTP 400 for a missing or malformed authorization reference, Agreement or permission, including an unsupported expression. It SHALL return HTTP 403 for an authenticated Requester if the grant cannot be resolved or verified or if an authorization check fails, including unavailable current status or unverifiable coverage. The Manager SHALL return an OperationOutcome and SHALL NOT accept the job, dispatch a task, or return results.
+The Manager SHALL resolve and validate the exact Contract version and its embedded ODRL Agreement under [Volume 3 §3:PXX.6](volume-3.html#data-request-authorization). It SHALL evaluate the permission identified by each set and compare the requested purpose and policy with the exact values approved by that permission. The Manager SHALL return HTTP 400 for a missing or malformed authorization reference, Contract, Agreement or permission, including an Agreement identifier mismatch or an unsupported expression. It SHALL return HTTP 403 for an authenticated Requester if it cannot retrieve and verify the exact referenced Contract revision or establish that the grant is trusted, currently effective and covers the job. The Manager SHALL return an OperationOutcome and SHALL NOT accept the job, dispatch a task, or return results.
 
 The Manager SHALL obtain the policy content. When `policyContent` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared versioned policy canonical. When `policyContent` is absent, the Manager SHALL resolve the policy identified by the declared canonical and version by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
 

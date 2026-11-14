@@ -2,7 +2,8 @@ Instance: grouped-fhir-authorization-contract
 InstanceOf: DISDataRequestAuthorizationContract
 Usage: #example
 Title: "UC-2 Data Request Authorization Contract"
-Description: "Discovery and display of the exact Agreement revision for the two UC-2 payload sets."
+Description: "The issued Agreement revision authorizing both UC-2 payload sets."
+* meta.versionId = "2"
 * identifier.value = "https://governance.example.org/permits/grouped-fhir-permit/versions/2"
 * title = "Multimodal research data preparation"
 * authority.identifier.value = "https://governance.example.org/organizations/approval-authority"

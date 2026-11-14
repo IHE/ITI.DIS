@@ -10,7 +10,7 @@ The cohort job has two payload sets. One contains **R4 clinical records and labo
 
 Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one version-specific authorization reference identifies the ODRL Agreement covering both sets. Each payload set carries the matching permission IRI and requested purpose. See the [decoded ODRL Agreement](odrl-content.html#decoded-authorization-example). Both permissions classify the approved project under ISO/TS 14265:2024 code `4.2`. The job continues to identify the project by its specific purpose IRI. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 manifests for both releases and the R4 clinical resources at their example locations. The Requester sends the R4 `Task` directly as the ITI-x1 request body.
 
-The [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorization-contract.html) displays both permissions for discovery. Its inline rule attachment carries the same complete Agreement revision as the DocumentReference used by the de-identification job. Each term shows its own approved policy version.
+The [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorization-contract.html) carries the complete Agreement in its inline rule attachment. The de-identification job references this exact Contract version and selects one permission for each payload set. Each term shows its own approved policy version.
 
 ### Payload Sets and Approved Policies
 

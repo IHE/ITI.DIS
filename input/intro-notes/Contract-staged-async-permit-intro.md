@@ -2,7 +2,7 @@
 
 ### Decoded ODRL Agreement
 
-This JSON-LD is the decoded Base64 content of `DocumentReference.content.attachment.data` in this example.
+This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.data` in this example.
 
 ```json
 {

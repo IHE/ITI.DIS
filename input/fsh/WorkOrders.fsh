@@ -104,7 +104,7 @@ Description: "FHIR R4 representation of the de-identification job submitted thro
 * input contains authorization 1..1 and payloadSet 1..*
 * input[authorization].type = $DISTaskInput#authorization
 * input[authorization].value[x] 1..1
-* input[authorization].value[x] only Reference(DISDataRequestAuthorization)
+* input[authorization].value[x] only Reference(DISDataRequestAuthorizationContract)
 * input[authorization].value[x].reference 1..1
 * input[authorization] obeys dis-work-order-authorization
 * insert DISWorkOrderPayloadSet
@@ -171,9 +171,9 @@ Severity: #error
 Expression: "reference.matches('^#[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-work-order-authorization
-Description: "Authorization references the exact version of a DocumentReference using an absolute HTTPS URL."
+Description: "Authorization references the exact version of a DIS Data Request Authorization Contract using an absolute HTTPS URL."
 Severity: #error
-Expression: "value.ofType(Reference).reference.matches('^https://[^?# ]+/DocumentReference/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
+Expression: "value.ofType(Reference).reference.matches('^https://[^?# ]+/Contract/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-absolute-iri
 Description: "The identifier is an absolute IRI."

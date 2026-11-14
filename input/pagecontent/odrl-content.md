@@ -114,7 +114,7 @@ These JSON-LD examples show the decoded attachments for the [mixed-release excha
 
 ### Data Request Authorization Agreement Example
 
-This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentReference in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). It includes both permissions selected by the [ITI-x1 de-identification job](Task-grouped-fhir-job-request.html). Both permissions classify the approved project to develop a healthcare algorithm under code `4.2` (health technology innovation).
+This Agreement is the decoded attachment in the [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorization-contract.html). It includes both permissions selected by the [ITI-x1 de-identification job](Task-grouped-fhir-job-request.html). Both permissions classify the approved project to develop a healthcare algorithm under code `4.2` (health technology innovation).
 
 ```json
 {

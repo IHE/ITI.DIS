@@ -69,7 +69,9 @@ Profile: DISDataRequestAuthorizationContract
 Parent: Contract
 Id: DIS-DataRequestAuthorizationContract
 Title: "DIS Data Request Authorization Contract"
-Description: "Readable and searchable representation of one exact DIS Data Request Authorization Agreement revision."
+Description: "One issued revision of a DIS Data Request Authorization. Carries the complete ODRL Agreement and mirrors selected terms for display and search."
+* id 1..1
+* meta.versionId 1..1
 * identifier 1..1
 * identifier.system 1..1
 * identifier.system = "urn:ietf:rfc:3986" (exactly)

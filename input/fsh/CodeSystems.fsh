@@ -204,7 +204,6 @@ Description: "Document types for identified DIS operational artifacts."
 * ^experimental = false
 * ^caseSensitive = true
 * #lookup-table "DIS reversible lookup table"
-* #data-request-authorization "DIS data request authorization"
 
 CodeSystem: DisLinkageScopeType
 Id: dis-linkage-scope-type
