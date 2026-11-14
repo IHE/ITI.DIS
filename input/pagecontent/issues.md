@@ -19,6 +19,7 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
 - [Asynchronous job and task cancellation](#asynchronous-job-and-task-cancellation)
 - [IUA grouping and authorization denials](#iua-grouping-and-denial-responses)
+- [Contract profiles for policy, execution plan and signed disclosure](#policy-plan-and-signed-disclosure)
 - [Future policy management transaction](#future-policy-management-transaction)
 - **Draft contract review:** confirm the payload set transaction contract, capability declarations, stage ordering, and release authorization. Complete detailed conformance procedures and validate them against the agreed baseline.
 
@@ -59,6 +60,26 @@ The [DIS-ASYNC-JOB option](volume-1.html#1pxx24-asynchronous-job-processing-opti
 The current grouping table lists Authorization Client or Resource Server for the Manager and Integrated actor. For exchanges that use IUA, the Requester presents a token to the Manager or externally invoked Integrated actor on the job leg. The distributed Manager presents a token to the De-Identifier on the task leg. [ITI-72 §3.72.4.3](https://profiles.ihe.net/ITI/IUA/) assigns HTTP 401 when token verification, scope matching, or IUA access policy enforcement fails. DIS also specifies HTTP 403 when an authenticated caller lacks permission to poll or cancel a work item.
 
 The committee needs to confirm which IUA groupings are required on each leg, including the Manager's distinct roles and the externally invoked Integrated actor. It also needs to define how DIS distinguishes an IUA access denial from a work item authorization denial, or align the status codes for requests governed by both requirements. The denial must protect work item state, outputs, and evidence regardless of the response code.
+
+<a name="policy-plan-and-signed-disclosure"> </a>
+
+#### Contract Profiles for Policy, Execution Plan and Signed Disclosure
+
+This design for review extends the [Data Request Authorization Contract](volume-3.html#data-request-authorization-contract) to the policy and execution plan. Each artifact carries its complete ODRL expression in one inline `Contract.rule.contentAttachment`. Selected Contract fields mirror the embedded rules for display and search. ITI-x1 uses the Agreement for authorization and ITI-x3 uses the compiled Set for the assigned de-identification task.
+
+| Contract profile | ODRL content and relationship |
+|---|---|
+| Data Request Authorization | An issued Agreement. Each permission identifies the exact version of the policy it approves. That reference incorporates the signed policy into the authorization for the selected payload set and allows the same policy revision to be approved in multiple Agreements. |
+| De-Identification Policy | A reusable Set of transformation duties. Each revision has a policy identity and version. The approval relationship is established by the permission that names the policy revision. |
+| De-Identification Execution Plan | A compiled Set of transformation duties for one de-identification task. It names the exact source policy revision and binds the Manager's assignment to the De-Identifier, the payload set and manifest, and the rule set and stage where applicable. The Manager retains the link from the assignment to the exact authorization revision and permission. |
+
+The Manager verifies both the signed Agreement and the signed policy against trusted signers, then matches the verified policy identity and version to the selected permission. It establishes that the job is covered before processing and verifies current authorization for the recipient and destination before release. The signature binding needs to protect the content and the revision identifiers used to select it. [FHIR R4 Contract rule]({{site.data.fhir.path}}contract-definitions.html#Contract.rule) and [JSON Web Signature](https://www.rfc-editor.org/rfc/rfc7515) provide mechanisms for carrying and verifying the signed content.
+
+The execution plan acts as a subcontract for the assigned processing. The Manager records the exact authorization Contract version and the permission `uid` with the assignment. These identify the parent authorization when several grants use the same reusable policy. A profiled `Contract.supportingInfo` reference can identify the exact source policy Contract version. The profile would need to specify which assignment links are exchanged and which are retained by the Manager. The ITI-x3 assignment gives the De-Identifier the plan and the source policy identity needed for evidence. The Manager can correlate the returned task evidence with the exact plan it dispatched and the approved policy version.
+
+The disclosed job result includes the original signed authorization and the signed policy revision or revisions applied, with the existing result evidence. The recipient's authorization covers those documents and the dataset. An issuer can provide a separately signed disclosure copy when the original contains terms the recipient is unauthorized to see. The result package keeps policy and authorization documents outside the manifest's clinical payload selection. The execution plan serves the Manager and De-Identifier and can contain concrete selectors and protected parameters.
+
+The follow-on profile work needs to define the signed representation, version-specific policy and assignment references, and the result package entries. ITI-x1 and ITI-x3 currently bind the policy and plan to Library resources. Changing those carriers affects their profiles, examples, provenance references and conformance tests.
 
 <a name="future-policy-management-transaction"> </a>
 
