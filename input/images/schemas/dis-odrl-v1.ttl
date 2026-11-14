@@ -135,61 +135,61 @@ dis:value
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Replacement value"@en ;
     skos:definition "Nonempty fixed value used by the replace action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:source
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Replacement source"@en ;
     skos:definition "Lookup table selected as the source of replacement values."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:mode
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Hash mode"@en ;
     skos:definition "Salted or unsalted digest recipe for the hash action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:algorithm
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Hash algorithm"@en ;
     skos:definition "Digest algorithm used by the hash action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:pseudonymSystem
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Pseudonym system"@en ;
     skos:definition "Identifier system for the pseudonyms produced by the selected hash rule."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:precision
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Date precision"@en ;
     skos:definition "Year or year-month precision retained by the truncate-date action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:maxOffsetDays
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Maximum offset in days"@en ;
     skos:definition "Maximum absolute number of days by which the date-shift action may shift a value."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:scope
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Date shift scope"@en ;
     skos:definition "Consistency scope for the date-shift action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:step
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Rounding step"@en ;
     skos:definition "Positive interval between multiples used by the round action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:length
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Truncation length"@en ;
     skos:definition "Positive number of leading characters retained by the truncate action."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 # DIS properties
 
@@ -343,7 +343,7 @@ dis:identity-linkage-scope
     a owl:DatatypeProperty, odrl:LeftOperand, skos:Concept ;
     rdfs:label "Identity linkage scope"@en ;
     skos:definition "Authorized scope declared in a policy or resolved for a compiled salted hash rule."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> ;
     rdfs:range rdf:JSON .
 
 # Selector collection sources

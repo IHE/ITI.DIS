@@ -74,20 +74,22 @@ Both Sets carry `obligation` as a nonempty array of ODRL Duty rules. Each obliga
 
 The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI and one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the concrete path as a string. For a plan, use an assignment-specific manifest IRI as the source and the same concrete selector operand for the binding. Every obligation in a plan SHALL use the same source IRI for the manifest in the de-identification task. For inline manifests the Manager SHALL mint an assignment-specific absolute IRI and use it consistently across all targets in the plan. For referenced manifests it SHALL use the assigned manifest URL. The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
 
-The action SHALL be a `dis:` action IRI for an action code listed in [Volume 3](volume-3.html#transformation-actions). For an action with parameters, use an object containing `rdf:value` as an IRI reference to the action and a nonempty `refinement` array. Each refinement has a `dis:` left operand named for the parameter, the operator `eq`, and the right operand from the parameter table. Encode actions without parameters as the action IRI string. Reject duplicates, extraneous parameters and actions outside the declared binding. Action applicability and parameter dependencies in Volume 3 also apply.
+### Action parameters
 
-| Action | Parameters and JSON value form |
-| --- | --- |
-| `remove`, `keep`, `redact` | No parameters. |
-| `replace` | Exactly one of `dis:value` (nonempty string) or `dis:source` (string `lookupTable`). |
-| `hash` | `dis:mode` (string `salted` or `unsalted`) and `dis:algorithm` (string `SHA-256`). `dis:pseudonymSystem` is an IRI reference and is required for `Identifier` targets. A compiled salted rule SHALL also carry `dis:identity-linkage-scope` as the JSON literal described below. Omit that refinement in the policy and in an unsalted plan rule. |
-| `truncate-date` | `dis:precision` (string `year` or `year-month`). |
-| `date-shift` | `dis:maxOffsetDays` (nonnegative integer) and optional `dis:scope` (nonempty consistency scope string). |
-| `round` | `dis:step` (positive JSON number). |
-| `truncate` | `dis:length` (positive integer). |
+The action SHALL be one of the [DIS transformation action IRIs](volume-3.html#transformation-actions). For `remove`, `keep`, or `redact`, encode `action` as the action IRI string. For the other actions, `action` SHALL be an object with one `rdf:value` IRI reference such as `{"@id":"dis:truncate-date"}` and a nonempty `refinement` array. Use one refinement per supplied parameter. Each refinement SHALL contain exactly one `leftOperand` from the table, the operator `eq`, and the listed `rightOperand` value form. The order of action refinements has no significance. Receivers SHALL reject duplicate operands, missing required parameters, extraneous parameters, and invalid operators, types, or values.
+
+| Action | Policy rule parameters | Compiled plan rule parameters |
+| --- | --- | --- |
+| `remove`, `keep`, `redact` | None. | None. |
+| `replace` | Exactly one of `dis:value` (nonempty string) or `dis:source` (the string `lookupTable`). The lookup mode requires a reversible policy and its authorized linkage scope. | Same selection. In lookup mode, ITI-x3 carries the assigned lookup table reference in the `lookup-table` input. |
+| `hash` | `dis:mode` (string `salted` or `unsalted`) and `dis:algorithm` (string `SHA-256`). Supply `dis:pseudonymSystem` as an IRI reference for `Identifier` targets. Patient business identifiers require `salted`. Salted hashing requires a policy-level linkage scope. | Preserve the approved parameters. For `salted`, include the compiled `dis:identity-linkage-scope` refinement. For `unsalted`, omit that refinement. |
+| `truncate-date` | `dis:precision` (string `year` or `year-month`). | Same parameter. |
+| `date-shift` | `dis:maxOffsetDays` (nonnegative JSON integer) and optional `dis:scope` (nonblank consistency scope string). A policy-level linkage scope is required if the rule omits `dis:scope`. | Preserve `dis:maxOffsetDays` and any explicit `dis:scope`. If the rule omits `dis:scope`, the Manager SHALL ensure the applicable date-shift capability binds the assignment to the resolved policy linkage scope. Apply the [date-shift capability rules](volume-3.html#date-shift). |
+| `round` | `dis:step` (positive JSON number). | Same parameter. |
+| `truncate` | `dis:length` (positive JSON integer). | Same parameter. |
 {: .grid}
 
-A linkage scope is a JSON-LD JSON literal of the form `{"@type":"@json","@value":{"type":"...","identifier":{"system":"...","value":"..."}}}`. Its type uses the DIS linkage scope code, and the identifier uses the exact authorized scope system and value. Omit the identifier only for an unresolved policy scope of type `job`. No secret material is carried in these refinements.
+For a `dis:pseudonymSystem` value use `{"@id":"..."}` with an absolute IRI. For linkage scope use a JSON-LD JSON literal of the form `{"@type":"@json","@value":{"type":"...","identifier":{"system":"...","value":"..."}}}`. Use one of the [DIS linkage scope codes](volume-3.html#3pxx13-policy-rules-json-structure), an absolute IRI for `system`, and a nonblank string for `value`. A policy scope with type `job` SHALL omit `identifier`. A policy scope with another type and every compiled salted hash scope SHALL include it. Keep salts, date-shift seeds, and actual offsets in the protected mechanisms defined by the applicable capability.
 
 ### De-Identification Policy Set
 
