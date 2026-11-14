@@ -999,7 +999,7 @@ The publisher SHALL generate the Contract from the referenced Agreement revision
 | `term.offer.party` | One Organization reference with role `requester` for the assignee and one with role `result-recipient` for the authorized recipient. Use the same IRI identifier form as for `authority`. |
 | [DIS Approved Purpose](StructureDefinition-dis-approved-purpose.html) on `term` | Exact approved purpose IRI. |
 | [DIS Purpose Classification](StructureDefinition-dis-purpose-classification.html) on `term` | One Coding for each distinct ISO classification code when supplied in the permission. Copy the system, edition, and code. |
-| [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact `Library.url\|Library.version` value approved by the permission. |
+| [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact approved policy URL and version joined by a vertical bar. |
 
 The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. It SHALL withhold or remove a Contract from discovery if verification fails. If the issuer revises the Agreement, the publisher SHALL create and verify a representation referencing that exact new revision before advertising the revised terms. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
 

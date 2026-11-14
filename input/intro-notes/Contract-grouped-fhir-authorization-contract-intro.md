@@ -10,5 +10,5 @@ This example mirrors the two permissions in the [UC-2 Agreement](odrl-content.ht
 
 | Permission | Approved de-identification policy |
 | --- | --- |
-| `patient-r4` | `https://governance.example.org/policies/patient-name-removal\|1.0` |
-| `imaging-report-r5` | `https://governance.example.org/policies/imaging-report-subject-removal\|1.0` |
+| `patient-r4` | `https://governance.example.org/policies/patient-name-removal` &#124; `1.0` |
+| `imaging-report-r5` | `https://governance.example.org/policies/imaging-report-subject-removal` &#124; `1.0` |
