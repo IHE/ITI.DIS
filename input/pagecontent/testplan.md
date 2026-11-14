@@ -89,6 +89,18 @@ Use a profiled Agreement with two permissions selecting distinct sets and exact 
 
 <a name="authorization-contract-validation"> </a>
 
+#### Result Recipient Eligibility
+
+Use a single Agreement with two selected permissions and distinct payload sets. Apply the [recipient eligibility rules](volume-3.html#job-result-recipient) to the original Requester and any retrieval delegate. Use a fresh job identifier for each submission.
+
+| Actor and setup | Stimulus | Pass criteria |
+|---|---|---|
+| Requester and Manager with one recipient organization across both sets | Submit a synchronous job as a caller authorized to receive both sets. Repeat as a caller authorized to submit but ineligible to receive them. | The first caller receives the complete validated result. The second receives HTTP 403 and an R4 OperationOutcome before processing or dispatch. |
+| Requester submits for another recipient organization | Submit an asynchronous job with an explicit retrieval delegate authorized to receive both sets for that organization. After processing completes, poll as the delegate and as the original Requester who can poll but lacks release authority. | The eligible delegate receives both sets. The original Requester receives HTTP 403 and an R4 OperationOutcome without output, evidence or download access. |
+| Requester submits for another organization with no eligible retrieval delegate | Submit the same asynchronous job with permission to submit but no caller eligible for the complete result. | The Manager returns HTTP 403 with an R4 OperationOutcome before HTTP 202 or task dispatch. |
+| Agreement names different recipient organizations for the two selected permissions | Submit the two sets together in both processing modes. | The Manager returns HTTP 403 with an R4 OperationOutcome before processing or dispatch. Neither organization receives a partial result for that job. |
+| Delegate becomes ineligible after asynchronous admission | Revoke the delegate's result authority while preserving poll access. Poll after completion. Repeat with a synchronous result replay after the submitting caller has lost release authority while retaining permission to recover the submission. | Both exchanges withhold every set, evidence and download access. A poll denial leaves the recorded processing outcome intact. |
+
 #### Authorization Contract Validation
 
 | Actor and stimulus | Pass criteria |
