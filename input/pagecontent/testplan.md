@@ -201,7 +201,7 @@ Test a De-Identification Requester with synchronous ITI-x1 and repeat with a com
 
 ### Reversible Lookup Mapping
 
-Cover both mandatory DIS-REVERSIBLE arrangements: absent table causes Manager mapping creation/maintenance and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent patient identifier replacement and valid output references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
+Cover both mandatory DIS-REVERSIBLE arrangements: salted hashing without a supplied table causes Manager mapping creation, maintenance, and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent patient identifier replacement and valid output references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
 
 ### Cross-Community Consistency Prerequisites
 
@@ -213,11 +213,16 @@ Exercise the published salted and unsalted test vectors. Verify matching output 
 
 For reversible patient hashing, verify the inline `generatedLookupTable` in synchronous ITI-x3 and asynchronous ITI-x7 completion. Validate the original-to-pseudonym pairs, resolved scope and Manager retention before release. Check that the supplied-table and irreversible patient workflows do not return a generated patient table. Verify that mapping artifacts and confidential salts stay out of recipient output, evidence, logs and errors.
 
-### Encryption-Based Pseudonymization (Informative Proposal)
+### Encryption-Based Pseudonymization
 
-For the [proposed encryption method](draft-encryption-based-pseudonymization.html), run the [synthetic FF1 vector](draft-encryption-based-pseudonymization.html#ff1-interoperability-vector) with two independent De-Identifiers. Check the exact output identifier pair, including leading zeroes, and verify that the Manager's authorized reversal process can recover the original resolved value using the provisioned key and the pinned context. Repeat with another approved identifier format, with a retry using the pinned configuration, and with changes to the scope or key version. Check that equivalent assignments use matching pseudonyms and that the output namespace follows the approved configuration.
+Use the [AES-FF1 vector](draft-encryption-based-pseudonymization.html#ff1-interoperability-vector) with a Manager and two independent De-Identifiers. Provision the vector's public test key to the test actors for the assigned operations and publish matching capability entries.
 
-Repeat the matching and reversal checks for deterministic AES-SIV when a binding is available. Check rejection of tampered AES-SIV ciphertext and mismatched associated data. Verify that the Manager detects a key version unavailable to its reversal process or an assigned De-Identifier, or an unsupported configuration, before dispatch. Exercise a changed configuration on retry and an identifier outside the approved format. Check that an encrypt-only worker and an unauthorized caller cannot decrypt. Inspect synchronous ITI-x3 and successful asynchronous ITI-x7 responses for leakage of key material, local key handles, or generated lookup tables for the encryption method. Check that keys and handles stay out of recipient output, evidence, logs, and errors.
+| Stimulus | Pass criteria |
+| --- | --- |
+| Submit the approved reversible policy with the vector configuration. Dispatch both assignments and retry with the same pinned context. | Both workers produce `0863301760` under the configured namespace with valid references. The Manager's authorized reversal recovers `0000000014`. A worker result carries no generated table for encrypted identifiers. |
+| Repeat with a missing configuration capability, an unavailable or unauthorized key version, and a supplied lookup table for the same payload set. | The Manager rejects each job before dispatch. |
+| Send a task with a substituted configuration, scope, or namespace that conflicts with its authorized context, or an unavailable or unauthorized key. Repeat with an out-of-domain input identifier. | The De-Identifier rejects the inconsistent or unauthorized assignment or fails the out-of-domain input without partial output. |
+| Repeat after a key rotation with a new output namespace. Attempt reversal with an unauthorized caller and with a value lacking trusted provenance. Inspect task results, evidence, and errors. | Authorized reversal uses the exact pinned context for each namespace. Unauthorized or unverified reversal fails. Key bytes and local key handles are absent from exchanged artifacts and diagnostics. |
 
 ### Persistent Lookup Table References
 

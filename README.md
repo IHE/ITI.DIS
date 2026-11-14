@@ -151,7 +151,7 @@ Explicit versioning and regression tests support compatibility as the profile ev
 
 ## Reversible Mapping Arrangements
 
-DIS-REVERSIBLE supports Manager-managed and Requester-supplied mappings. Without a supplied table, the Manager creates or maintains and persists the mapping needed for reversal. With a supplied table, it uses that table for direct identifiers and need not persist it. Missing required entries cause rejection before acceptance or terminal failure afterward; no generated fallback or partial output is permitted. Lookup-backed `replace` retains the nine-action vocabulary. See Volume 1 §1:PXX.2.2 and Volume 3 §3:PXX.1.7.
+DIS-REVERSIBLE supports Manager-managed and Requester-supplied mappings. For Manager-managed hashing, the Manager creates or maintains and persists the mapping needed for reversal. For optional AES-FF1 it retains the protected configuration, scope and key-version association needed for authorized reversal. With a supplied table, it uses that table for direct identifiers and need not persist it. Missing required entries cause rejection before acceptance or terminal failure afterward; no generated fallback or partial output is permitted. Lookup-backed `replace` is a core action. AES-FF1 adds the optional `encrypt` action. See Volume 1 §1:PXX.2.2 and Volume 3 §3:PXX.1.7.
 
 The approved policy declares the linkage scope. The Manager validates the scope and copies it into salted execution rules. The De-Identifier’s deployment manages the confidential 16-byte salt and its version. Cross-community identity resolution and salt coordination remain deployment prerequisites. See Volume 1 §1:PXX.4.1 and Volume 3 §3:PXX.1.3.3.
 

@@ -4,6 +4,8 @@ The current drafting baseline is [Volume 1](volume-1.html). Supporting content r
 
 The [ODRL content](odrl-content.html) addresses the authorization language and policy and plan formats discussed in [issue #57](https://github.com/IHE/ITI.DIS/issues/57). The issue also records the [comparison with APPC, PCF, and FHIR R4 Consent](https://github.com/IHE/ITI.DIS/issues/57#issuecomment-6866785277).
 
+The [AES-FF1 binding](draft-encryption-based-pseudonymization.html) specifies the optional encryption method tracked in [issue #50](https://github.com/IHE/ITI.DIS/issues/50).
+
 ## Issues
 
 ### Submit an Issue
@@ -13,7 +15,6 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 ### Open Issues
 
 - [FHIR R6 processing payloads](#fhir-r6-processing-payloads)
-- [Key-based reversible pseudonymization](#key-based-reversible-pseudonymization)
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
 - [Asynchronous job and task cancellation](#asynchronous-job-and-task-cancellation)
@@ -26,14 +27,6 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 #### FHIR R6 Processing Payloads
 
 This supplement assesses conformance with published FHIR R4 or R5 processing payloads. Evaluate R6 processing over the same R4 workflow protocol when the R6 definitions are stable. This requires release-specific validation, semantic group mappings, capability matching, and worked examples with conformance tests.
-
-<a name="key-based-reversible-pseudonymization"> </a>
-
-#### Key-Based Reversible Pseudonymization
-
-The [proposed DIS-REVERSIBLE method](draft-encryption-based-pseudonymization.html) uses deterministic encryption to generate patient pseudonyms. Independent De-Identifiers must produce the same pseudonym for the same resolved identity within the authorized linkage scope. The deployment provisions the matching scope-specific key version before dispatch so the De-Identifiers can encrypt and the Manager can decrypt when authorized. [Issue #50](https://github.com/IHE/ITI.DIS/issues/50) tracks the binding, key provisioning assumptions, and conformance tests.
-
-For the proposed FF1 method, the published NIST SP 800-38G defines the algorithm. The February 2025 second public draft of Revision 1 is an informative reference for policy authors, including its proposed minimum FF1 domain of one million values. [NIST SP 800-38G](https://csrc.nist.gov/pubs/sp/800/38/g/upd1/final) · [NIST SP 800-38G Rev. 1, second public draft](https://csrc.nist.gov/pubs/sp/800/38/g/r1/2pd)
 
 <a name="data-recipient-and-push-delivery"> </a>
 
