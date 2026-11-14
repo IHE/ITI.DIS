@@ -304,7 +304,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 **Semantic-Level policies.** The De-ID Manager SHALL resolve each `@` group reference using the [Semantic Group Binding](#3pxx3213-semantic-group-bindings) for the declared payload family and release. If a referenced group has no binding for that release, the Manager SHALL fail compilation before dispatch.
 
-**Syntax-Level policies.** The De-ID Manager verifies that all rule targets are valid element paths for the declared `payloadFamily` and `payloadVersion`. For HL7 FHIR payloads, this means each target is a valid FHIRPath expression for the declared HL7 FHIR version. The Manager verifies that the policy's declared `payloadFamily` and `payloadVersion` are consistent with the `payloadBinding` and `payloadVersion` in the ITI-x1 request. The Manager preserves concrete paths without semantic group expansion or version-conditional path mapping.
+**Syntax-Level policies.** The De-ID Manager verifies that all rule targets are valid element paths for the declared `payloadFamily` and `payloadVersion`. For HL7 FHIR payloads, the Manager SHALL validate each target against the [FHIRPath element addressing rules](#fhirpath-element-addressing) for the declared FHIR release before dispatch. The Manager verifies that the policy's declared `payloadFamily` and `payloadVersion` are consistent with the `payloadBinding` and `payloadVersion` in the ITI-x1 request. The Manager preserves concrete paths without semantic group expansion or version-conditional path mapping.
 
 <a name="execution-plan-assembly"> </a>
 
@@ -358,7 +358,9 @@ The plan SHALL identify its source policy with exactly one `Contract.supportingI
 
 The decoded plan attachment SHALL conform to the [DIS ODRL Execution Plan Set](odrl-content.html#execution-plan-set). Each compiled obligation SHALL identify its source policy obligation, a concrete selector and its resolved action parameters. The De-Identifier SHALL check the plan's set, rule-set, stage, binding and release declarations against the task before processing. It SHALL reject a plan that cannot be validated, including unrecognized selectors, actions or parameters.
 
-Within one plan, evaluate selectors on the input resource before applying mutations. When multiple rules select the same element instance, apply the first matching rule and skip later matches for that instance. Reject the plan for that resource when independently selected ancestor and descendant actions conflict, such as keeping a child while removing its parent. This first-match-wins evaluation enables execution plans to specify exceptions before general rules (e.g., keep a specific identifier before removing all identifiers).
+Within one plan, the De-Identifier SHALL evaluate all selectors against the input resource before applying any action. A selector that matches no elements on a resource contributes no action for that resource. If several rules select the same concrete element instance, the De-Identifier SHALL use the first matching rule in the plan's rule order for that instance. Each occurrence of a repeated element is a distinct instance. This lets a policy keep an entire selected `Patient.identifier` occurrence before removing the other occurrences.
+
+After resolving same-element matches, the De-Identifier SHALL check the selected ancestor and descendant targets for conflicting actions. If one action prevents the other from producing its defined result, the De-Identifier SHALL fail the task without returning partial output. For example, removing a `Patient.identifier` conflicts with keeping its `value`. Keeping a composite element also conflicts with modifying a descendant that would change the kept element. The outcome in these cases is the same regardless of rule order. The Integrated actor SHALL apply the same evaluation and failure rules during local execution.
 
 Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths. Semantic group references (`@` prefix) SHALL have been expanded by the De-ID Manager during policy compilation. The presence of an unresolved `@` reference in a dispatched execution plan is a conformance error.
 
@@ -495,6 +497,8 @@ For each combination that includes `date-shift`, the processing actor SHALL docu
 
 <a name="3pxx3221-element-addressing"> </a>
 
+<a name="fhirpath-element-addressing"> </a>
+
 ##### 3:PXX.3.2.1.2 FHIRPath Element Addressing
 
 DIS-FHIR-Payload uses FHIRPath expressions as the element addressing language. Execution plan rules and semantic group definitions reference HL7 FHIR elements using FHIRPath-compatible path expressions rooted at the resource type.
@@ -504,9 +508,9 @@ An element path SHALL be one of the following forms:
 - **Resource-rooted path** -- a FHIRPath expression starting with a resource type (e.g., `Patient.name`, `Observation.value`). The path identifies one or more elements within a single resource instance.
 - **Semantic group reference** -- a reference to a named semantic group (e.g., `@subject-identifiers`). The `@` prefix distinguishes a semantic group reference from a FHIRPath expression. The group expands to its member paths at policy compilation time (see [§3:PXX.1.5](#3pxx15-policy-compilation)).
 
-When a path targets an element with child elements (e.g., `Patient.name` which contains `HumanName.family`, `HumanName.given`, `HumanName.prefix`, `HumanName.suffix`, `HumanName.text`, `HumanName.period`), the action applies to the targeted element and all its children unless the execution plan specifies a more specific child path.
+A concrete selector SHALL identify locations of existing FHIR elements within the input resource, including individual occurrences of repeating elements. A filter such as `where()` may narrow the selection. Standalone calculated results such as `Patient.identifier.count()` are invalid transformation targets. A selector SHALL NOT follow a reference to select a target in another resource. The action definition determines which parts of a selected element it changes. If rules also select descendants, apply the [plan evaluation rules](#3pxx212-execution-plan-json-structure-and-rule-evaluation).
 
-Choice-type elements use the `[x]` notation (e.g., `Observation.value`). The De-Identifier SHALL apply the rule to whichever concrete type is present in the resource instance.
+In FHIRPath, write the base name of a choice element, such as `Observation.value`. To select a specific type, use a type restriction such as `Observation.value.ofType(Quantity)`. It selects `valueQuantity` when present and yields no match for `valueString`. `Observation.value[x]` is the element definition label. `valueQuantity` is the FHIR JSON property name. For an unqualified selector such as `Observation.value`, the De-Identifier SHALL apply the action to the actual selected type under the action's type requirements. See the HL7 FHIRPath choice rules for [R4](https://hl7.org/fhir/R4/fhirpath.html#polymorphism-in-fhir) and [R5](https://hl7.org/fhir/R5/fhirpath.html#polymorphism-in-fhir).
 
 Semantic-Level policies use the same group codes across releases. The [Semantic Group Binding](#3pxx3213-semantic-group-bindings) supplies release-specific selectors during compilation. For example, `@dates` selects the encounter period through `Encounter.period` in R4 and `Encounter.actualPeriod` in R5.
 
