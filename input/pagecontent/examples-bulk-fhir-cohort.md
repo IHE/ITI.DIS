@@ -6,6 +6,8 @@ The Data Access Coordinator submits one asynchronous R4 job for an authorized re
 
 ## Approved Policy
 
+The de-identification job references the [synthetic Data Request Authorization](DocumentReference-uc1-cohort-permit.html) and selects the permission that binds its set to the approved policy version.
+
 The job submission declares `https://governance.example.org/policies/uc1-bulk-cohort|1.0`. The Manager resolves this [approved R4 Syntax-Level policy](Library-uc1-bulk-cohort-policy.html) through its trusted policy store and validates it against the authorization.
 
 | Stage | Assigned ruleSet | Result |

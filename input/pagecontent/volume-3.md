@@ -5,6 +5,7 @@ Volume 3 defines the content used by the DIS workflow. [Volume 1](volume-1.html)
 
 | Topic | Content defined here |
 |---|---|
+| [Data Request Authorization](#data-request-authorization) | Organizational grant checked at admission and result release |
 | [De-Identification Policy](#de-identification-policy) | Approved policy artifact, transformation actions, rule sets, validation, and compilation |
 | [De-Identification Execution Plan](#execution-plan-content) | Resolved task rules and FHIR integrity constraints |
 | [Payload Bindings](#payload-bindings) | Common manifest contract, FHIR payload releases, and links to proposed native-format bindings |
@@ -30,7 +31,7 @@ The policy artifact is an HL7 FHIR R4 Library resource, part of the protocol lay
 
 ### 3:PXX.1.1 Policy Library Resource Structure
 
-A DIS policy is carried as an HL7 FHIR R4 `Library` resource. The Library resource provides versioned metadata about the policy; the policy rules are carried as a DIS-specific JSON format within `Library.content`. Policies and execution plans both use Library but are distinguished by `Library.type` coding.
+A DIS policy is carried as an HL7 FHIR R4 `Library` resource. The Library resource provides versioned metadata about the policy; the policy rules are carried as an [ODRL Set](odrl-content.html#de-identification-policy-set) within `Library.content`. Policies and execution plans both use Library but are distinguished by `Library.type` coding.
 
 Table 3:PXX.1.1-1 lists the required Library resource elements for a DIS policy.
 
@@ -53,9 +54,9 @@ Table 3:PXX.1.1-1 lists the required Library resource elements for a DIS policy.
 | `Library.jurisdiction` | 0..* | Geographic jurisdictions where the policy is applicable |
 | `Library.effectivePeriod` | 1..1 | Period during which the policy is valid; used for currency validation |
 | `Library.relatedArtifact` | 0..* | References to related artifacts (e.g., related policies, derived execution plans) |
-| `Library.content` | 1..1 | Attachment containing the policy rules JSON |
-| `Library.content.contentType` | 1..1 | SHALL be `application/vnd.ihe.dis.policy+json` |
-| `Library.content.data` | 1..1 | Base64-encoded policy rules JSON |
+| `Library.content` | 1..1 | Attachment containing the policy ODRL Set |
+| `Library.content.contentType` | 1..1 | SHALL be `application/ld+json` |
+| `Library.content.data` | 1..1 | Base64-encoded policy Set in JSON-LD |
 {: .grid}
 
 Table 3:PXX.1.1-2 lists the `Library.type` codings used to distinguish DIS Library artifacts.
@@ -239,74 +240,13 @@ The proposed third method under DIS-REVERSIBLE uses policy-selected deterministi
 
 <a name="3pxx12-policy-rules-json-structure"> </a>
 
-### 3:PXX.1.3 Policy Rules JSON Structure
+<a name="3pxx13-policy-rules-json-structure"> </a>
 
-The [DIS policy JSON Schema](schemas/dis-policy.schema.json) defines the structure of the decoded JSON in `Library.content.data`. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines the structure of the enclosing FHIR Library. The policy rules use one of two representation levels:
+### 3:PXX.1.3 Policy Rules and Ordering
 
-- **Semantic-Level** — rules use semantic group references (prefixed with `@`) and action codes. The policy is format-neutral and requires compilation into a payload-specific execution plan before dispatch. This is the default representation for reusable, cross-format policies.
-- **Syntax-Level** — rules use concrete element paths (e.g., FHIRPath expressions for HL7 FHIR, DICOM tag paths for DICOM) and action codes. The policy is specific to a payload family and version, and is directly executable after validation. A Syntax-Level policy requires `payloadFamily` and `payloadVersion` declarations.
+The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
 
-Both levels use the same JSON structure, delivery modes, and four-point validation. The `@` prefix on rule targets is the syntactic marker distinguishing Semantic-Level from Syntax-Level rules. A De-Identifier SHALL never receive rules containing unresolved `@` references — that would indicate a compilation failure.
-
-A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities.
-
-Table 3:PXX.1.3-1 lists the top-level elements of the policy rules JSON.
-
-<p id="tPXX.1.3-1" class="tableTitle"><strong>Table 3:PXX.1.3-1: Policy Rules JSON — Top-Level Elements</strong></p>
-
-| Element | Cardinality | Type | Description |
-|---------|-------------|------|-------------|
-| `policyVersion` | 1..1 | string | Policy rules JSON format version. Use `1.0` for this schema. `Library.version` identifies the policy revision. |
-| `representationLevel` | 1..1 | code | `semantic` or `syntax` |
-| `reversibilityMode` | 1..1 | code | `irreversible` or `reversible`. All policies used in a job declare the same mode. |
-| `identity-linkage-scope` | 0..1 | object | Authorized scope for lookup-backed replacement or salted hashing. Required when either is used. A `job` scope declares only `type`. A `source-institution` or `cross-community` scope declares `type` and an `identifier` with `system` and `value`. |
-| `payloadFamily` | 0..1 | string | Required for Syntax-Level policies. DIS-FHIR-Payload uses `fhir`. Semantic-Level policies omit this field. |
-| `payloadVersion` | 0..1 | string | Required for Syntax-Level policies. Use `R4` or `R5` under the payload version rules. Semantic-Level policies omit this field. |
-| `ruleSets` | 1..* | array | Named groups of de-identification rules |
-| `stages` | 0..* | array | Optional ordered list of execution stages referencing ruleSet IDs. If present, the list contains at least one stage. |
-{: .grid}
-
-Each ruleSet in the `ruleSets` array contains the elements listed in Table 3:PXX.1.3-2.
-
-<p id="tPXX.1.3-2" class="tableTitle"><strong>Table 3:PXX.1.3-2: Policy Rules JSON — RuleSet Elements</strong></p>
-
-| Element | Cardinality | Type | Description |
-|---------|-------------|------|-------------|
-| `ruleSetId` | 1..1 | string | Unique identifier for the ruleSet within the policy |
-| `description` | 0..1 | string | Human-readable description of the ruleSet |
-| `rules` | 1..* | array | Ordered list of rules for this ruleSet |
-{: .grid}
-
-Each rule in the `rules` array contains the elements listed in Table 3:PXX.1.3-3.
-
-<p id="tPXX.1.3-3" class="tableTitle"><strong>Table 3:PXX.1.3-3: Policy Rules JSON — Rule Elements</strong></p>
-
-| Element | Cardinality | Type | Description |
-|---------|-------------|------|-------------|
-| `ruleId` | 1..1 | string | Unique identifier for the rule within the policy |
-| `target` | 1..1 | string | Semantic group reference (prefixed with `@`) for Semantic-Level policies, or a concrete element path (e.g., FHIRPath expression) for Syntax-Level policies |
-| `action` | 1..1 | code | Action code from the core action family (see [§3:PXX.1.2](#transformation-actions)) |
-| `parameters` | 0..1 | object | Action-specific parameters as key-value pairs |
-{: .grid}
-
-Semantic-Level policy rules use semantic group references (e.g., `@subject-identifiers`) rather than element paths. This keeps the policy format-neutral. The De-ID Manager expands semantic group references to payload-specific element paths during compilation (see [§3:PXX.1.5](#3pxx15-policy-compilation)).
-
-Syntax-Level policy rules use concrete element paths appropriate to the declared `payloadFamily`. For HL7 FHIR payloads, these are FHIRPath expressions (e.g., `Patient.identifier`, `Patient.name`). The De-ID Manager validates that all rule targets are valid paths for the declared payload family and version.
-
-Rules within a ruleSet are evaluated in order; first-match-wins evaluation applies, consistent with execution plan evaluation (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)).
-
-The schema checks which parameters an action accepts. Lookup-backed `replace` requires reversible mode and is mutually exclusive with fixed replacement. A salted `hash` rule uses the policy scope. For a patient business identifier target, the Manager SHALL require `mode` of `salted` and a `pseudonymSystem`, including when a target is expressed as a FHIRPath selector. The Manager SHALL validate its authorization and resolve a `job` scope to a stable scope identifier for the job and its retries. For other scope types, the Manager SHALL copy the authorized `system` and `value` as supplied in the approved policy. The scope level and identifier SHALL be copied into each applicable compiled rule. Date-shift derivation and its protected inputs remain a separate capability contract.
-
-Each stage in the optional `stages` array contains the elements listed in Table 3:PXX.1.3-4.
-
-<p id="tPXX.1.3-4" class="tableTitle"><strong>Table 3:PXX.1.3-4: Policy Rules JSON — Stage Elements</strong></p>
-
-| Element | Cardinality | Type | Description |
-|---------|-------------|------|-------------|
-| `stageId` | 1..1 | string | Stage identifier (e.g., `preliminary`, `advanced`) |
-| `description` | 0..1 | string | Human-readable description of the stage |
-| `ruleSetRefs` | 1..* | array of string | Ordered list of ruleSet IDs assigned to this stage |
-{: .grid}
+A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement or salted hashing. Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
 
 The Manager SHALL dispatch each stage after validating all results from the preceding stage. A later stage SHALL receive the validated outputs from the preceding stage, together with any unchanged resources needed for its authorized input set. It SHALL NOT receive the original versions of transformed resources or the preceding stage's protected mappings unless separately required and authorized for its task. The last stage's validated output, including unchanged resources, is the basis for the released set.
 
@@ -364,9 +304,9 @@ Locally managed policies are trusted by virtue of their administrative provision
 
 The De-ID Manager SHALL perform the following validation on the resolved policy Library.
 
-1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
+1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy bound by the selected permission in the [Data Request Authorization Agreement](#data-request-authorization).
 2. **Integrity** — confirm that the obtained Library's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
-3. **Schema** — verify the Library conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS policy JSON Schema](schemas/dis-policy.schema.json). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
+3. **Schema** — verify the Library conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Library.effectivePeriod` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
 <a name="3pxx24-policy-compilation"> </a>
@@ -399,7 +339,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 #### 3:PXX.1.5.2 Assemble the Plan and Check Capabilities
 
-**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The Manager assembles the resolved or validated rules into execution plan JSON (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Library resource with `Library.type` coding `dis-execution-plan`.
+**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The Manager assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Library resource with `Library.type` coding `dis-execution-plan`.
 
 **Capability verification.** The De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
 
@@ -439,7 +379,7 @@ This section defines the structure of DIS-FHIR-Payload execution plans carried w
 
 #### 3:PXX.2.1.1 Library Resource Structure
 
-A DIS-FHIR-Payload execution plan is carried as a content attachment in an HL7 FHIR R4 `Library` resource. The Library resource provides metadata about the plan; the plan content is a DIS-specific JSON format.
+A DIS-FHIR-Payload execution plan is carried as a content attachment in an HL7 FHIR R4 `Library` resource. The Library resource provides metadata about the plan; the plan content is a compiled [ODRL Set](odrl-content.html#execution-plan-set).
 
 Table 3:PXX.2.1-1 lists the required Library resource elements.
 
@@ -456,9 +396,9 @@ Table 3:PXX.2.1-1 lists the required Library resource elements.
 | `Library.type` | 1..1 | SHALL use coding `https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type\|dis-execution-plan` |
 | `Library.date` | 1..1 | Date the plan was compiled |
 | `Library.description` | 0..1 | Human-readable description |
-| `Library.content` | 1..1 | Attachment containing the execution plan JSON |
-| `Library.content.contentType` | 1..1 | SHALL be `application/vnd.ihe.dis.execution-plan+json` |
-| `Library.content.data` | 1..1 | Base64-encoded execution plan JSON |
+| `Library.content` | 1..1 | Attachment containing the compiled ODRL Set |
+| `Library.content.contentType` | 1..1 | SHALL be `application/ld+json` |
+| `Library.content.data` | 1..1 | Base64-encoded plan Set in JSON-LD |
 {: .grid}
 
 <a name="execution-plan-source-policy"> </a>
@@ -471,22 +411,11 @@ The De-Identifier SHALL reject a plan before execution if the source policy entr
 
 <a name="3pxx212-execution-plan-json-structure"> </a>
 
-#### 3:PXX.2.1.2 Execution Plan JSON Structure and Rule Evaluation
+<a name="3pxx212-execution-plan-json-structure-and-rule-evaluation"> </a>
 
-The [DIS execution plan JSON Schema](schemas/dis-execution-plan.schema.json) defines the decoded attachment. It contains `planVersion`, `ruleSetId`, `payloadBinding`, `payloadVersion` and an ordered `rules` array. The `ruleSetId`, `payloadBinding` and `payloadVersion` SHALL match the ITI-x3 task submission inputs. Each compiled rule identifies the source policy rule and specifies a target, an action, and action-specific parameters.
+#### 3:PXX.2.1.2 Execution Plan Structure and Rule Evaluation
 
-Table 3:PXX.2.1-2 lists the elements of each rule in the execution plan.
-
-<p id="tPXX.2.1-2" class="tableTitle"><strong>Table 3:PXX.2.1-2: Execution Plan Rule Elements</strong></p>
-
-| Element | Cardinality | Type | Description |
-|---------|-------------|------|-------------|
-| `ruleId` | 1..1 | string | Unique identifier for the compiled rule within the plan |
-| `sourceRuleId` | 1..1 | string | Identifier of the approved policy rule from which this rule was compiled |
-| `target` | 1..1 | string | FHIRPath expression identifying the target element(s). Semantic group references (`@`) SHALL have been expanded during compilation; they SHALL NOT appear in dispatched execution plans. |
-| `action` | 1..1 | code | Action code from the core action family (see [§3:PXX.1.2](#transformation-actions)) |
-| `parameters` | 0..1 | object | Action-specific parameters as key-value pairs |
-{: .grid}
+The decoded plan attachment SHALL conform to the [DIS ODRL Execution Plan Set](odrl-content.html#execution-plan-set). Each compiled obligation SHALL identify its source policy obligation, a concrete selector and its resolved action parameters. The De-Identifier SHALL check the plan's set, rule-set, stage, binding and release declarations against the task before processing. It SHALL reject a plan that cannot be validated, including unrecognized selectors, actions or parameters.
 
 Within one plan, evaluate selectors on the input resource before applying mutations. When multiple rules select the same element instance, apply the first matching rule and skip later matches for that instance. Reject the plan for that resource when independently selected ancestor and descendant actions conflict, such as keeping a child while removing its parent. This first-match-wins evaluation enables execution plans to specify exceptions before general rules (e.g., keep a specific identifier before removing all identifiers).
 
@@ -496,46 +425,7 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 #### 3:PXX.2.1.3 Execution Plan Example
 
-This decoded execution plan compiles the clinical pathology [policy example](examples-reversible-pathology.html#approved-reversible-policy). The Manager copies the resolved institutional scope into the salted `hash` rule and expands the semantic targets to concrete paths. See the corresponding [evidence example](Provenance-dis-evidence-uc3-001.html) and [generated lookup table](DocumentReference-generated-lookup-uc3.html).
-
-```json
-{
-  "planVersion": "1.0",
-  "ruleSetId": "direct-identifiers",
-  "payloadBinding": "DIS-FHIR-Payload",
-  "payloadVersion": "R4",
-  "rules": [
-    {
-      "ruleId": "R01",
-      "sourceRuleId": "P01",
-      "target": "Patient.identifier",
-      "action": "hash",
-      "parameters": {
-        "mode": "salted",
-        "algorithm": "SHA-256",
-        "pseudonymSystem": "https://hospital.example.org/identifiers/pseudonym",
-        "identity-linkage-scope": {
-          "type": "source-institution",
-          "identifier": {
-            "system": "https://hospital.example.org/identifiers/linkage-scope",
-            "value": "lab-project-2026"
-          }
-        }
-      }
-    },
-    {
-      "ruleId": "R02",
-      "sourceRuleId": "P02",
-      "target": "Patient.name",
-      "action": "remove"
-    }
-  ]
-}
-```
-
-<a name="3pxx224-fhir-reference-integrity"> </a>
-
-<a name="3pxx134-fhir-reference-integrity"> </a>
+See the [UC-2 compiled plans](examples-grouped-fhir-job.html#grouped-fhir-submission) for the two FHIR processing releases and the [UC-3 clinical pathology workflow](examples-reversible-pathology.html) for an example involving a supplied lookup table.
 
 ### 3:PXX.2.2 FHIR Reference Integrity
 
@@ -1077,3 +967,15 @@ These synthetic, informative FHIR R4 examples accompany the [lookup table bindin
 | [Task-scoped lookup table](DocumentReference-lookup-task-s1.html) | A supplied table subset with its own identifiers and a `transforms` relationship to the version of the source DocumentReference. |
 | [Generated lookup table](DocumentReference-generated-lookup-uc3.html) | The patient identifier mapping generated by the clinical pathology salted hash example and returned to the Manager. |
 {: .grid}
+
+<a name="data-request-authorization"> </a>
+
+## 3:PXX.6 Data Request Authorization
+
+The [DIS Data Request Authorization profile](StructureDefinition-DIS-DataRequestAuthorization.html) carries the organizational grant used by ITI-x1. It SHALL contain exactly one inline [DIS ODRL Agreement](#odrl-authorization) in `DocumentReference.content.attachment.data`, encoded as Base64 with `contentType = application/ld+json`. Set `masterIdentifier.system` to `urn:ietf:rfc:3986` and `masterIdentifier.value` to the Agreement's version-specific `uid`. The Requester SHALL send an absolute HTTPS FHIR version-specific reference ending in `/DocumentReference/{id}/_history/{vid}`. The Manager SHALL verify that the resolved resource and version match the reference and that a trusted authority issued the Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued content.
+
+Before acceptance or synchronous processing the Manager SHALL establish that the grant is currently effective. The Manager SHALL use a trusted status source for the exact Agreement revision. The method for obtaining status is deployment-defined. A historical DocumentReference with `status = current` is insufficient on its own. If status cannot be established, or if the grant is expired, revoked or superseded, the Manager SHALL deny the job. The Manager SHALL check current authorization again before releasing the result, evidence or download access, including on retries and asynchronous retrieval.
+
+For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The Manager SHALL authorize result access only for the named recipient organization through an authenticated caller entitled to retrieve that job under ITI-x1 or ITI-x4, and through any specified result destination. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy.
+
+Before revealing results, the Manager SHALL verify that the time and recipient constraints still apply. It SHALL enforce destination restrictions on both direct and referenced access. When an output service controls retrieval, the Manager SHALL ensure that the service enforces those restrictions and current release authorization for the same result.

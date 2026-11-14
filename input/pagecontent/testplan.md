@@ -85,7 +85,9 @@ Apply the [actor grouping table](volume-1.html#required-groupings) and the [shar
 
 ### Policy Admission and Execution
 
-Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, schema conformance and currency before acceptance or dispatch.
+Use a profiled Agreement with two permissions selecting distinct sets and exact policy revisions. Confirm that the Manager checks the Agreement before synchronous processing or asynchronous acceptance. Repeat with a malformed or non-versioned authorization reference, a missing permission, an untrusted issuer, a different purpose or policy revision, a substituted input version, and an unrecognized required operand. Expect HTTP 400 for malformed inputs and HTTP 403 for a well-formed grant whose conditions the Manager cannot establish. Verify that none of these failures dispatches a task. Revoke the grant after acceptance or attempt retrieval from an unapproved recipient identity or result destination, and verify that the Manager withholds results, evidence and download access.
+
+Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, content conformance and currency before acceptance or dispatch.
 
 | Stimulus | Pass criteria |
 |---|---|
@@ -93,6 +95,8 @@ Configure the Requester with access to the approved policy and the Manager with 
 | Substitute a different valid policy or version for one payload set. | The Manager returns an authorization consistency error with no acceptance, dispatch or result. |
 | Submit a job with two sets under different approved policies. Give both policies the same reversibility mode, then repeat with one policy declaring the other mode and approval for that policy. | With a common mode, every ITI-x3 task submission carries that mode. With mixed modes, ITI-x1 returns HTTP 422 with an OperationOutcome before acceptance or dispatch and returns no result. |
 | Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
+
+Exchange a compiled ODRL Set in the R4 Execution Plan Library. Reverse the serialized obligation array while preserving the explicit rule order and verify identical outputs. Change the rule-order list to reference an absent or repeated obligation, substitute the payload-set or stage ID, and repeat with an unresolved semantic group, an unknown action parameter or an unsupported context. Verify that the De-Identifier returns HTTP 400 without accepting the task, performing transformations, or returning a result.
 
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside the scope of this supplement.
 

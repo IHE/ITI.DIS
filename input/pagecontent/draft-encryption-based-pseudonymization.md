@@ -47,3 +47,32 @@ Use public test key bytes `000102030405060708090a0b0c0d0e0f101112131415161718191
 | Resolved input identifier value | `0000000014` |
 | Output `Identifier.system` | `https://example.org/dis/pseudonyms/cohort-01-v1` |
 | Output `Identifier.value` | `0863301760` |
+
+## Candidate ODRL action syntax (Informative)
+
+If the committee adopts the optional encryption method in [issue #50](https://github.com/IHE/ITI.DIS/issues/50), DIS would define `dis:encrypt` as an action on a transformation obligation under DIS-REVERSIBLE. The same action IRI would apply in policy and plan. Each refinement would use `eq` and the value form in the table. See the [DIS ODRL content binding](odrl-content.html#sets-for-policy-and-plan).
+
+| Action refinement | De-Identification Policy | Execution Plan |
+| --- | --- | --- |
+| `dis:encryptionMethod` | Required method code, such as `AES-FF1`. | Same approved method. |
+| `dis:configurationVersion` | Required IRI identifying an immutable configuration revision. | Same configuration revision, pinned for the assignment. |
+| `dis:resolvedLinkageScope` | The policy declares the authorized linkage scope using the existing DIS scope model. | Required IRI identifying the exact resolved scope. The binding must define its mapping to the DIS scope type and identifier. |
+| `dis:pseudonymSystem` | Defined in the approved configuration. | Required IRI equal to the approved output namespace. |
+| `dis:keyVersion` | Selected during plan compilation under the approved scope and deployment policy. | Required non-secret identifier for the provisioned key version. |
+
+The following is an action fragment for a compiled obligation targeting an approved patient identifier. The same structure in the policy carries the method and configuration refinements. The configuration defines the identifier format and the method-specific tweak or associated-data rules. Key bytes and local key handles remain in the protected deployments.
+
+```json
+{
+  "rdf:value": {"@id": "dis:encrypt"},
+  "refinement": [
+    {"leftOperand": "dis:encryptionMethod", "operator": "eq", "rightOperand": "AES-FF1"},
+    {"leftOperand": "dis:configurationVersion", "operator": "eq", "rightOperand": {"@id": "https://example.org/configurations/ff1-decimal10/versions/1"}},
+    {"leftOperand": "dis:resolvedLinkageScope", "operator": "eq", "rightOperand": {"@id": "https://example.org/linkage-scopes/research-42"}},
+    {"leftOperand": "dis:pseudonymSystem", "operator": "eq", "rightOperand": {"@id": "https://example.org/pseudonyms/research-42/v1"}},
+    {"leftOperand": "dis:keyVersion", "operator": "eq", "rightOperand": "research-42-ff1-v1"}
+  ]
+}
+```
+
+Before dispatch, the proposed binding would require the Manager to verify configuration compatibility and key-version availability for encryption and authorized reversal. A conflict with a supplied lookup table for the same identifiers would prevent dispatch. For testing, use the existing informative FF1 vector and add an exchange case that verifies the compiled parameters, matching outputs from independent De-Identifiers, authorized reversal, and rejection when the selected key version is unavailable. [FF1 interoperability vector](draft-encryption-based-pseudonymization.html#ff1-interoperability-vector)

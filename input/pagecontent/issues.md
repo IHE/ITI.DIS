@@ -2,6 +2,8 @@
 
 The current drafting baseline is [Volume 1](volume-1.html). Supporting content reflects four actors, four transactions, policy, execution plan, FHIR payload, evidence, and lookup table specifications, the nine core transformation actions, and independently versioned R4 and R5 payloads over an R4 protocol binding.
 
+The [ODRL content](odrl-content.html) addresses the authorization language and policy and plan formats discussed in [issue #57](https://github.com/IHE/ITI.DIS/issues/57). The issue also records the [comparison with APPC, PCF, and FHIR R4 Consent](https://github.com/IHE/ITI.DIS/issues/57#issuecomment-6866785277).
+
 ## Issues
 
 ### Submit an Issue
@@ -11,7 +13,6 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 ### Open Issues
 
 - [FHIR R6 processing payloads](#fhir-r6-processing-payloads)
-- [Organizational data request authorization and ODRL content](draft-odrl-content.html) · [Issue #57](https://github.com/IHE/ITI.DIS/issues/57)
 - [Key-based reversible pseudonymization](#key-based-reversible-pseudonymization)
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.

@@ -177,8 +177,8 @@ pages:
   draft-encryption-based-pseudonymization.md:
     title: "Draft Encryption-Based Pseudonymization"
     generation: markdown
-  draft-odrl-content.md:
-    title: "Draft ODRL Content for DIS"
+  odrl-content.md:
+    title: "DIS ODRL Content"
     generation: markdown
   testplan.md:
     title: "Test Plan"
@@ -210,6 +210,8 @@ menu:
     "Retrieve Job Output [ITI-x4]": volume-2.html#23x4-retrieve-job-output-iti-x4
     "Retrieve Task Output [ITI-x7]": volume-2.html#23x7-retrieve-task-output-iti-x7
   Volume 3:
+    Data Request Authorization: volume-3.html#data-request-authorization
+    DIS ODRL Content: odrl-content.html
     De-Identification Policy: volume-3.html#de-identification-policy
     De-Identification Execution Plan: volume-3.html#execution-plan-content
     Payload Bindings: volume-3.html#payload-bindings
@@ -225,7 +227,6 @@ menu:
   Other:
     Draft DICOM and CDA Payload Bindings: draft-native-payload-bindings.html
     Draft Encryption-Based Pseudonymization: draft-encryption-based-pseudonymization.html
-    Draft ODRL Content for DIS: draft-odrl-content.html
     Changes to Other IHE Specifications: other.html
     Download and Analysis: download.html
     Test Plan: testplan.html

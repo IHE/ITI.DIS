@@ -63,7 +63,7 @@ Id: DIS-Policy
 Title: "DIS Policy"
 Description: """
 DIS de-identification policy artifact. A Library resource carrying a versioned
-policy governing de-identification transformations. The policy rules JSON is
+ODRL Set governing de-identification transformations. The JSON-LD is
 carried in Library.content as base64-encoded data. A policy may be delivered
 inline as JWS-signed content in a Binary contained in the ITI-x1 job submission
 or resolved by the De-ID Manager from its own trust model. Policies are
@@ -84,8 +84,9 @@ distinguished from execution plans by Library.type coding dis-policy.
 * effectivePeriod 1..1
 * content 1..1
 * content.contentType 1..1
-* content.contentType = #"application/vnd.ihe.dis.policy+json"
+* content.contentType = #"application/ld+json" (exactly)
 * content.data 1..1
+* content.url 0..0
 
 
 // ── DIS-ExecutionPlan ─────────────────────────────────────────────────────────
@@ -96,7 +97,7 @@ Id: DIS-ExecutionPlan
 Title: "DIS Execution Plan"
 Description: """
 DIS execution plan artifact. A Library resource carrying a payload-specific,
-compiled set of transformation rules dispatched by the De-ID Manager to a
+compiled ODRL Set of transformation obligations dispatched by the De-ID Manager to a
 De-Identifier via ITI-x3. Execution plans are derived from a DIS-Policy and
 contain only concrete element paths — semantic group references are expanded
 during compilation. Execution plans are distinguished from policies by
@@ -114,8 +115,9 @@ Library.type coding dis-execution-plan.
 * date 1..1
 * content 1..1
 * content.contentType 1..1
-* content.contentType = #"application/vnd.ihe.dis.execution-plan+json"
+* content.contentType = #"application/ld+json" (exactly)
 * content.data 1..1
+* content.url 0..0
 
 * relatedArtifact ^slicing.discriminator.type = #value
 * relatedArtifact ^slicing.discriminator.path = "type"
@@ -132,6 +134,26 @@ Invariant: dis-source-policy-version
 Description: "The source policy reference includes its canonical URL and Library version."
 Severity: #error
 Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^|]+[|][^|]+$')"
+
+Profile: DISDataRequestAuthorization
+Parent: DocumentReference
+Id: DIS-DataRequestAuthorization
+Title: "DIS Data Request Authorization"
+Description: "The immutable revision of an organizational approval. The inline attachment carries a DIS ODRL Agreement."
+* id 1..1
+* meta.versionId 1..1
+* masterIdentifier 1..1
+* masterIdentifier.system 1..1
+* masterIdentifier.system = "urn:ietf:rfc:3986" (exactly)
+* masterIdentifier.value 1..1
+* masterIdentifier.value obeys dis-absolute-iri
+* type 1..1
+* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type#data-request-authorization
+* content 1..1
+* content.attachment.contentType 1..1
+* content.attachment.contentType = #"application/ld+json" (exactly)
+* content.attachment.data 1..1
+* content.attachment.url 0..0
 
 // ── Persistent, referenceable lookup table ──────────────────────────────────
 Profile: DISLookupTable

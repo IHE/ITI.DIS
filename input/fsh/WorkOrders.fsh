@@ -29,13 +29,15 @@ Description: "Identifies each input to a DIS work order."
 Extension: DISPayloadSet
 Id: dis-payload-set
 Title: "DIS Payload Set Metadata"
-Description: "Associates the binding, version and selection format with the manifest carried by one Task input. A job input also identifies its approved policy and any optional policy content or supplied lookup table."
+Description: "Associates the binding, version and selection format with the manifest carried by one Task input. A job input also identifies its Agreement permission, purpose, approved policy and any optional policy content or supplied lookup table."
 Context: Task.input
 * extension contains
     setId 1..1 and
     payloadBinding 1..1 and
     payloadVersion 1..1 and
     manifestFormat 1..1 and
+    permission 0..1 and
+    purpose 0..1 and
     policy 0..1 and
     policyContent 0..1 and
     lookupTable 0..1
@@ -48,6 +50,12 @@ Context: Task.input
 * extension[manifestFormat].value[x] 1..1
 * extension[manifestFormat].value[x] only code
 * extension[manifestFormat].value[x] obeys dis-work-order-manifest-format
+* extension[permission].value[x] 1..1
+* extension[permission].value[x] only uri
+* extension[permission].value[x] obeys dis-absolute-iri
+* extension[purpose].value[x] 1..1
+* extension[purpose].value[x] only uri
+* extension[purpose].value[x] obeys dis-absolute-iri
 * extension[policy].value[x] 1..1
 * extension[policy].value[x] only canonical
 * extension[policy].value[x] obeys dis-source-policy-version
@@ -89,15 +97,19 @@ Profile: DISDeIdentificationJob
 Parent: Task
 Id: DIS-DeIdentificationJob
 Title: "De-Identification Job"
-Description: "FHIR R4 representation of the de-identification job submitted through ITI-x1. Each payload set declares the exact approved policy version."
+Description: "FHIR R4 representation of the de-identification job submitted through ITI-x1. Each payload set identifies the applicable Agreement permission, purpose and exact approved policy version."
 * insert DISWorkOrderSubmission
 * code = $DISWorkOrderType#de-identification-job
 * contained only DISSignedPolicy
 * input contains authorization 1..1 and payloadSet 1..*
 * input[authorization].type = $DISTaskInput#authorization
-* input[authorization].value[x] only Reference or Attachment
+* input[authorization].value[x] 1..1
+* input[authorization].value[x] only Reference(DISDataRequestAuthorization)
+* input[authorization].value[x].reference 1..1
 * input[authorization] obeys dis-work-order-authorization
 * insert DISWorkOrderPayloadSet
+* input[payloadSet].extension[payloadSet].extension[permission] 1..1
+* input[payloadSet].extension[payloadSet].extension[purpose] 1..1
 * input[payloadSet].extension[payloadSet].extension[policy] 1..1
 * obeys dis-work-order-unique-sets
 
@@ -126,6 +138,8 @@ Description: "FHIR R4 representation of a de-identification task submitted throu
     reversibilityMode 1..1 and
     lookupTable 0..1
 * insert DISWorkOrderPayloadSet
+* input[payloadSet].extension[payloadSet].extension[permission] 0..0
+* input[payloadSet].extension[payloadSet].extension[purpose] 0..0
 * input[payloadSet].extension[payloadSet].extension[policy] 0..0
 * input[payloadSet].extension[payloadSet].extension[policyContent] 0..0
 * input[payloadSet].extension[payloadSet].extension[lookupTable] 0..0
@@ -157,9 +171,14 @@ Severity: #error
 Expression: "reference.matches('^#[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-work-order-authorization
-Description: "Authorization supplies a resource reference or an inline attachment with a content type."
+Description: "Authorization references the exact version of a DocumentReference using an absolute HTTPS URL."
 Severity: #error
-Expression: "value.ofType(Reference).reference.exists() or (value.ofType(Attachment).contentType.exists() and value.ofType(Attachment).data.exists() and value.ofType(Attachment).url.empty())"
+Expression: "value.ofType(Reference).reference.matches('^https://[^?# ]+/DocumentReference/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
+
+Invariant: dis-absolute-iri
+Description: "The identifier is an absolute IRI."
+Severity: #error
+Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^ ]+$')"
 
 Invariant: dis-work-order-unique-sets
 Description: "Set identifiers are unique within the job."

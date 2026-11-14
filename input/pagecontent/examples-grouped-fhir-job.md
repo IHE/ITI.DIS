@@ -8,7 +8,7 @@ The cohort job has two payload sets. One contains **R4 clinical records and labo
 
 ## Submit the Job
 
-Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one authorization reference identifies the permit covering both sets and their policy versions. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 manifests for both releases and the R4 clinical resources at their example locations. The Requester sends the R4 `Task` directly as the ITI-x1 request body.
+Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one version-specific authorization reference identifies the ODRL Agreement covering both sets. Each payload set carries the matching permission IRI and requested purpose. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 manifests for both releases and the R4 clinical resources at their example locations. The Requester sends the R4 `Task` directly as the ITI-x1 request body.
 
 ### Payload Sets and Approved Policies
 

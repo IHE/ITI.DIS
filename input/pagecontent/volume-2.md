@@ -163,6 +163,7 @@ Table 2:3.x1.2-1 lists the actors and their roles in this transaction.
 
 ### 2:3.x1.3 Referenced Standards
 
+- [W3C ODRL 2.2](https://www.w3.org/TR/odrl-model/) — DIS authorization and transformation content
 - [HL7 FHIR R4]({{site.data.fhir.path}}) — HL7 FHIR Release 4.0.1
 - [HL7 FHIR R4 RESTful API]({{site.data.fhir.path}}http.html) — FHIR RESTful interactions
 - [HL7 FHIR R4 Operations]({{site.data.fhir.path}}operations.html) — FHIR operation framework
@@ -198,11 +199,11 @@ The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification 
 
 | Input code | Cardinality | Value | Description |
 |------------|-------------|-------|-------------|
-| `authorization` | 1..1 | `valueReference` or `valueAttachment` | Authorization evidence, either an externally hosted resource or an inline attachment with a declared content type |
-| `payload-set` | 1..* | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | One manifest with the set's binding, version, approved policy and any permitted supplied lookup reference |
+| `authorization` | 1..1 | `valueReference` | Absolute HTTPS version-specific reference to the [DIS Data Request Authorization](volume-3.html#data-request-authorization) document |
+| `payload-set` | 1..* | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | One manifest with the set's binding, version, permission IRI, requested purpose IRI, approved policy and any permitted supplied lookup reference |
 {: .grid}
 
-The authorization is evidence that a governance authority approved the data request, including the policy applicable to each set. Its internal structure is determined by the deployment's authorization mechanism. Each set SHALL have a unique `setId` and declare its approved policy as a versioned canonical (`Library.url|Library.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives the job's reversibility mode from the common mode declared by the approved policies and obtains each set's linkage scope from its policy.
+Each set SHALL have a unique `setId`, a `permission` IRI equal to the applicable Agreement permission's `uid`, a `purpose` IRI, and the approved policy as a versioned canonical (`Library.url|Library.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives the job's reversibility mode from the common mode declared by the approved policies and obtains each set's linkage scope from its policy.
 
 To request asynchronous job processing when both actors support DIS-ASYNC-JOB, the Requester SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -214,15 +215,13 @@ To request asynchronous job processing when both actors support DIS-ASYNC-JOB, t
 
 The De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL apply the [shared identifier and retry rules](#submission-retries). The following actions apply to a new submission.
 
-The Manager SHALL obtain and validate the data request authorization. For an authorization input with a reference, the Manager resolves the referenced resource. For an inline attachment, the Manager processes the content according to the declared `contentType`. The authorization is evidence that a data governance authority approved a data request that specifies the data scope, purpose, and the de-identification policy to be applied. If the authorization is absent, expired, or does not cover the requested processing targets, the Manager SHALL reject the job with an OperationOutcome.
-
-For each set, the Manager SHALL verify that the declared versioned canonical identifies the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment). A mismatch indicates the Requester is presenting a policy that was not approved for this data request; the Manager SHALL reject the job with an OperationOutcome.
+The Manager SHALL obtain and validate the referenced ODRL Agreement under [Volume 3 §3:PXX.6](volume-3.html#data-request-authorization). It SHALL evaluate the permission identified by each set and compare the requested purpose and policy with the exact values approved by that permission. The Manager SHALL return HTTP 400 for a missing or malformed authorization reference, Agreement or permission, including an unsupported expression. It SHALL return HTTP 403 for an authenticated Requester if the grant cannot be resolved or verified or if an authorization check fails, including unavailable current status or unverifiable coverage. The Manager SHALL return an OperationOutcome and SHALL NOT accept the job, dispatch a task, or return results.
 
 The Manager SHALL obtain the policy content. When `policyContent` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared versioned policy canonical. When `policyContent` is absent, the Manager SHALL resolve the policy identified by the declared canonical and version by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
 
 The Manager SHALL perform three-point policy content validation:
 
-1. **Schema** — verify that the policy conforms to the applicable policy schema.
+1. **Structure** — verify the Library and decoded ODRL Set against the applicable DIS profiles.
 2. **Currency** — verify that the policy has not expired or been revoked.
 3. **Integrity** — verify that the obtained rules are the exact content bound to the approved version under the [policy validation rules](volume-3.html#3pxx132-policy-validation). Apply the JWS verification above for carried content and the deployment's resolution trust model for Manager-resolved content.
 
@@ -272,7 +271,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of the
 
 <a name="job-result-release"> </a>
 
-The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them. This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set. For a distributed result set that uses multiple stages, the Manager SHALL include [staged release evidence](volume-3.html#staged-release-evidence) in the set's result package.
+The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them under the [current grant and recipient checks](volume-3.html#data-request-authorization). This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set. For a distributed result set that uses multiple stages, the Manager SHALL include [staged release evidence](volume-3.html#staged-release-evidence) in the set's result package.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-JOB).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x4.
 
@@ -336,6 +335,7 @@ Table 2:3.x3.2-1 lists the actors and their roles in this transaction.
 
 ### 2:3.x3.3 Referenced Standards
 
+- [W3C ODRL 2.2](https://www.w3.org/TR/odrl-model/) — DIS authorization and transformation content
 - [HL7 FHIR R4]({{site.data.fhir.path}}) — HL7 FHIR Release 4.0.1
 - [HL7 FHIR R4 RESTful API]({{site.data.fhir.path}}http.html) — FHIR RESTful interactions
 - [HL7 FHIR R4 Operations]({{site.data.fhir.path}}operations.html) — FHIR operation framework
@@ -403,11 +403,13 @@ The De-Identifier SHALL apply the [shared identifier and retry rules](#submissio
 
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
+Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Library, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan. It SHALL verify that the plan's targets all select within the assigned manifest.
+
 Before accepting the task, the De-Identifier SHALL verify that the task's processing combination and required actions are within its declared capabilities. For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an unsupported combination or action with HTTP 422 and an R4 OperationOutcome.
 
 The De-Identifier SHALL retrieve the assigned processing targets using the [retrieval authorization rules](volume-3.html#obtaining-processing-targets) and verify the declared payload release before transformation.
 
-The De-Identifier SHALL apply supplied patient mappings or generate patient pseudonyms according to the execution plan. It SHALL verify that the decoded plan conforms to the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation) and that its ruleSet, payload binding and payload version agree with the task. It SHALL obtain and validate the deployment-provisioned salt for each salted hash rule before transformation. A missing or invalid salt SHALL fail the task without partial output.
+The De-Identifier SHALL apply supplied patient mappings or generate patient pseudonyms according to the execution plan. It SHALL obtain and validate the deployment-provisioned salt for each salted hash rule before transformation. A missing or invalid salt SHALL fail the task without partial output.
 
 When the `lookup-table` input is present, the De-Identifier SHALL resolve and validate the assigned protected DocumentReference and pin its exact content as specified in Volume 3 §3:PXX.5. Retrieval or pinning failure SHALL fail the task. It SHALL use only its supplied entries for lookup-backed replacement, SHALL fail a task with a missing required entry without returning partial output, and SHALL delete all task-local copies at task termination. It SHALL NOT delete the authoritative source repository document. It SHALL NOT generate fallback mappings. The Manager SHALL withhold all job output on such a task failure.
 
@@ -540,7 +542,7 @@ The caller SHALL include credentials authenticating the original Requester or an
 
 Upon receipt of a Retrieve Job Output Request, the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL return the current status of the referenced job.
 
-For accepted cancellation, the Manager SHALL apply the [shared cancellation responses](#asynchronous-cancellation). The Manager SHALL enforce authorization on retrieval. Only the original De-Identification Requester, or an explicitly authorized delegate, SHALL be permitted to retrieve the status or output of a given job. The Manager SHALL reject unauthorized retrieval requests with an appropriate error.
+For accepted cancellation, the Manager SHALL apply the [shared cancellation responses](#asynchronous-cancellation). The Manager SHALL enforce authorization on retrieval. Only the original De-Identification Requester, or an explicitly authorized delegate, SHALL be permitted to retrieve the status of a given job. Before returning or enabling access to output, the Manager SHALL apply the [current grant and recipient checks](volume-3.html#data-request-authorization). The Manager SHALL reject unauthorized retrieval requests with an appropriate error.
 
 When the job is still in progress, the Manager SHALL indicate in-progress status and SHOULD include retry-after guidance to help the Requester pace its polling.
 
