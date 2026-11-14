@@ -12,7 +12,7 @@
       "const": "1"
     },
     "identity-linkage-scope": {
-      "$ref": "dis-policy.schema.json#/$defs/resolvedScope"
+      "$ref": "#/$defs/resolvedScope"
     },
     "entries": {
       "type": "array",
@@ -57,6 +57,41 @@
         "sourceValue",
         "targetSystem",
         "targetValue"
+      ]
+    },
+    "nonBlankString": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "job",
+            "source-institution",
+            "cross-community"
+          ]
+        },
+        "identifier": {
+          "$ref": "#/$defs/scopeIdentifier"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "resolvedScope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/scope"
+        },
+        {
+          "required": [
+            "identifier"
+          ]
+        }
       ]
     }
   }

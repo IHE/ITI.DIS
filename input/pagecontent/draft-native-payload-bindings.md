@@ -56,13 +56,15 @@ The tables describe the R4 work-order inputs and result parameters. Each success
 
 ### ITI-x1 Job Submission
 
-The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
+The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42/_history/1`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
 
 | Metadata or manifest of each `payload-set` input | Clinical set | Imaging set |
 |--------------------------------|--------------|-------------|
 | `setId.valueString` | `clinical` | `images` |
 | `payloadBinding.valueCode` | `DIS-FHIR-Payload` | `DIS-DICOM1` |
 | `payloadVersion.valueCode` | `R5` | `2026d` (illustrative DICOM edition code) |
+| `permission.valueUri` | `https://governance.example.org/permits/permit-42/versions/1#clinical` | `https://governance.example.org/permits/permit-42/versions/1#images` |
+| `purpose.valueUri` | `https://governance.example.org/purposes/multimodal-research` | `https://governance.example.org/purposes/multimodal-research` |
 | `policy.valueCanonical` | `https://governance.example.org/policies/fhir-research\|1.0` | `https://governance.example.org/policies/dicom-research\|1.0` |
 | `manifestFormat.valueCode` | `dis-resource-list` | `dis-resource-list` |
 | `Task.input.valueAttachment.contentType` | `application/fhir+json` | `application/fhir+json` |
@@ -177,7 +179,7 @@ Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both p
         ]
       },
       "valueReference": {
-        "reference": "https://governance.example.org/fhir/DocumentReference/permit-42"
+        "reference": "https://governance.example.org/fhir/DocumentReference/permit-42/_history/1"
       }
     },
     {
@@ -216,6 +218,14 @@ Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both p
             {
               "url": "policy",
               "valueCanonical": "https://governance.example.org/policies/fhir-research|1.0"
+            },
+            {
+              "url": "permission",
+              "valueUri": "https://governance.example.org/permits/permit-42/versions/1#clinical"
+            },
+            {
+              "url": "purpose",
+              "valueUri": "https://governance.example.org/purposes/multimodal-research"
             }
           ]
         }
@@ -257,6 +267,14 @@ Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both p
             {
               "url": "policy",
               "valueCanonical": "https://governance.example.org/policies/dicom-research|1.0"
+            },
+            {
+              "url": "permission",
+              "valueUri": "https://governance.example.org/permits/permit-42/versions/1#images"
+            },
+            {
+              "url": "purpose",
+              "valueUri": "https://governance.example.org/purposes/multimodal-research"
             }
           ]
         }

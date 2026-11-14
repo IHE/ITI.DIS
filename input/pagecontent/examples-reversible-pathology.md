@@ -6,42 +6,94 @@ In [UC-3 Clinical Pathology Order](volume-1.html#1pxx423-use-case-3-clinical-pat
 
 ## Approved Reversible Policy
 
-The job submission declares the approved versioned canonical and the Manager resolves it from the hospital policy store. This decoded Semantic-Level policy governs the Manager-managed variant. The [compiled execution plan](volume-3.html#3pxx213-execution-plan-example) resolves the scope and expands the rule targets.
+The job submission declares the approved versioned canonical and the Manager resolves it from the hospital policy store. This decoded Semantic-Level policy governs the Manager-managed variant. The Manager resolves the scope and expands the rule targets when compiling the [execution plan Set](odrl-content.html#execution-plan-set).
 
 ```json
 {
-  "policyVersion": "1.0",
-  "representationLevel": "semantic",
-  "reversibilityMode": "reversible",
-  "identity-linkage-scope": {
-    "type": "source-institution",
-    "identifier": {
-      "system": "https://hospital.example.org/identifiers/linkage-scope",
-      "value": "lab-project-2026"
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@type": "Set",
+  "uid": "https://hospital.example.org/policies/pathology/versions/1",
+  "profile": "dis:DeIdentificationPolicy",
+  "dis:representationLevel": "semantic",
+  "dis:reversibilityMode": "reversible",
+  "dis:identity-linkage-scope": {
+    "@type": "@json",
+    "@value": {
+      "type": "source-institution",
+      "identifier": {
+        "system": "https://hospital.example.org/identifiers/linkage-scope",
+        "value": "lab-project-2026"
+      }
     }
   },
-  "ruleSets": [
+  "obligation": [
     {
-      "ruleSetId": "direct-identifiers",
-      "rules": [
-        {
-          "ruleId": "P01",
-          "target": "@subject-business-identifiers",
-          "action": "hash",
-          "parameters": {
-            "mode": "salted",
-            "algorithm": "SHA-256",
-            "pseudonymSystem": "https://hospital.example.org/identifiers/pseudonym"
-          }
-        },
-        {
-          "ruleId": "P02",
-          "target": "@subject-names",
-          "action": "remove"
+      "uid": "https://hospital.example.org/policies/pathology/versions/1#P01",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "dis:semantic-elements",
+        "refinement": {
+          "leftOperand": "dis:semanticGroup",
+          "operator": "eq",
+          "rightOperand": "@subject-business-identifiers"
         }
-      ]
+      },
+      "action": {
+        "rdf:value": {
+          "@id": "dis:hash"
+        },
+        "refinement": [
+          {
+            "leftOperand": "dis:mode",
+            "operator": "eq",
+            "rightOperand": "salted"
+          },
+          {
+            "leftOperand": "dis:algorithm",
+            "operator": "eq",
+            "rightOperand": "SHA-256"
+          },
+          {
+            "leftOperand": "dis:pseudonymSystem",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "https://hospital.example.org/identifiers/pseudonym"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "uid": "https://hospital.example.org/policies/pathology/versions/1#P02",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "dis:semantic-elements",
+        "refinement": {
+          "leftOperand": "dis:semanticGroup",
+          "operator": "eq",
+          "rightOperand": "@subject-names"
+        }
+      },
+      "action": "dis:remove"
     }
-  ]
+  ],
+  "dis:ruleSets": {
+    "@list": [
+      {
+        "dis:ruleSetId": "direct-identifiers",
+        "dis:ruleOrder": {
+          "@list": [
+            {
+              "@id": "https://hospital.example.org/policies/pathology/versions/1#P01"
+            },
+            {
+              "@id": "https://hospital.example.org/policies/pathology/versions/1#P02"
+            }
+          ]
+        }
+      }
+    ]
+  }
 }
 ```
 

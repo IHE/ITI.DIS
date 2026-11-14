@@ -6,6 +6,8 @@ An EHR prepares the authorized data for one encounter before sending them to a c
 
 ## Approved Policy and Delivery
 
+The de-identification job references the [synthetic Data Request Authorization](DocumentReference-uc4-care-approval.html) and selects the permission that binds its set to the approved policy version.
+
 The EHR declares `https://governance.example.org/policies/uc4-cloud-decision-support|1.0` and carries the approved, JWS-signed [R4 Syntax-Level policy Library](Library-uc4-cloud-decision-support-policy.html). The payload-set metadata's `policyContent` references `#approved-policy`, the contained R4 Binary with `contentType = application/jose`. Its `data` decodes to the compact JWS. The JWS header includes the synthetic verification key. The Manager uses its configured trust model to verify the signature and checks the signed Library's canonical URL and version against the authorization and job submission.
 
 The policy targets `Patient.identifier` for reversible salted pseudonymization within the authorized `cloud-cds-2026` linkage scope and removes `Patient.name`. The Manager validates these concrete R4 paths and packages the approved rules in the execution plan. The selected Encounter and Observations retain references that resolve to the pseudonymized Patient. A real release needs approved rules covering any additional identifying content in its selected resources.
