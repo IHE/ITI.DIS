@@ -249,7 +249,7 @@ When the policy is authored at the Semantic-Level (using semantic group referenc
 
 The Manager SHALL verify that the policy's linkage scope is authorized for the job and resolve it before dispatch. For a job-level scope it SHALL bind a unique scope identifier to the job and reuse it on retries. A supplied job-level table may provide that identifier when it can be bound to this job only. The Manager SHALL copy the resolved scope into each salted hash or encryption rule and check a supplied table against its authorized scope.
 
-The Manager SHALL dispatch de-identification tasks to one or more De-Identifiers via ITI-x3, or execute the plan internally if it is an Integrated De-ID Manager/De-Identifier. The Manager SHALL NOT dispatch a task to a De-Identifier whose declared capabilities are incompatible with the task's payload binding or required transformation actions.
+The Manager SHALL dispatch de-identification tasks to one or more De-Identifiers via ITI-x3, or execute the plan internally if it is an Integrated De-ID Manager/De-Identifier. The Manager SHALL dispatch only to a De-Identifier that meets the [reversibility option and processing capability checks](volume-3.html#fhir-processing-capabilities).
 
 In synchronous mode, the Manager SHALL return de-identified output and provenance evidence in the response upon completion of all tasks.
 
@@ -305,7 +305,7 @@ In asynchronous mode (DIS-ASYNC-JOB), on a 202 Accepted response, the Requester 
 
 ### 2:3.x1.5 CapabilityStatement Resource
 
-The [De-ID Manager](CapabilityStatement-DIS-Manager.html) and [Integrated De-ID Manager/De-Identifier](CapabilityStatement-DIS-Integrated.html) implementing this transaction SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) indicating that the `$submit-dis-job` operation is implemented.
+The [De-ID Manager](CapabilityStatement-DIS-Manager.html) and [Integrated De-ID Manager/De-Identifier](CapabilityStatement-DIS-Integrated.html) implementing this transaction SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) indicating that the `$submit-dis-job` operation is implemented. An externally invoked Integrated actor SHALL also include the [separate reversibility and processing declarations](volume-3.html#fhir-processing-capabilities).
 
 The [De-Identification Requester](CapabilityStatement-DIS-Requester.html) implementing this transaction SHALL provide a CapabilityStatement Resource indicating that it can invoke the `$submit-dis-job` operation.
 
@@ -363,7 +363,7 @@ Figure 2:3.x3.4-1 shows the interaction for the Submit De-Identification Task tr
 
 ##### 2:3.x3.4.1.1 Trigger Events
 
-The De-ID Manager sends a Submit De-Identification Task Request for each ruleSet after successfully validating the policy and compiling the execution plan. The Manager SHALL verify the De-Identifier's declared capabilities before dispatching the task and SHALL NOT dispatch a task whose payload binding or required transformation actions fall outside the De-Identifier's declared capabilities.
+The De-ID Manager sends a Submit De-Identification Task Request for each ruleSet after successfully validating the policy and compiling the execution plan. Before dispatching, the Manager SHALL verify the [reversibility option and processing capabilities](volume-3.html#fhir-processing-capabilities) of the De-Identifier.
 
 ##### 2:3.x3.4.1.2 Message Semantics
 
@@ -411,7 +411,7 @@ Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL
 
 Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Contract, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL verify that the resolved plan matches the referenced resource revision, that its identifier matches the Set revision `uid`, and that it identifies the authenticated Manager and the assigned De-Identifier. It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan. It SHALL verify that the plan's targets all select within the assigned manifest. It SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the Execution Plan Contract before acceptance or synchronous processing. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
 
-Before accepting the task, the De-Identifier SHALL verify that the task's processing combination, required actions and parameters are within its declared capabilities. For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an otherwise valid assignment that requires an unsupported combination, action or parameter with HTTP 422 and an R4 OperationOutcome.
+Before accepting the task, the De-Identifier SHALL verify the task's reversibility mode separately from its processing combination, required actions and parameters under the [FHIR processing capability rules](volume-3.html#fhir-processing-capabilities). For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an otherwise valid assignment that requires an unsupported mode, combination, action or parameter with HTTP 422 and an R4 OperationOutcome.
 
 The De-Identifier SHALL retrieve the assigned processing targets using the [retrieval authorization rules](volume-3.html#obtaining-processing-targets) and verify the declared payload release before transformation.
 
@@ -460,7 +460,7 @@ The De-Identifier SHALL return one `payloadResult` matching the dispatched `setI
 
 **401 Unauthorized / 403 Forbidden.** Apply the [shared authorization denial rules](#transaction-authorization).
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's processing combination, required transformation actions or parameters fall outside the De-Identifier's declared capabilities or that asynchronous processing is unavailable.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's reversibility mode, processing combination, required transformation actions or parameters fall outside the De-Identifier's declared capabilities or that asynchronous processing is unavailable.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the execution failure. No partial output is returned.
 
@@ -480,7 +480,7 @@ In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager S
 
 ### 2:3.x3.5 CapabilityStatement Resource
 
-The [De-Identifier capability requirements](CapabilityStatement-DIS-De-Identifier.html) identify the system-level operation. A De-Identifier implementing this transaction SHALL declare `$submit-dis-task` and its supported processing combinations on its implementation CapabilityStatement. The [FHIR processing capability rules](volume-3.html#fhir-processing-capabilities) define the minimum core support and the single-entry assignment match. The implementation SHALL document parameter restrictions, date-shift derivation support and any separately negotiated protected transformation inputs in the CapabilityStatement documentation for the operation. In the processing combination, advertise `action = encrypt` only with `reversibilityMode = reversible` and list each supported immutable configuration IRI in `encryptionConfiguration`. The Manager SHALL match the exact IRI in the same processing combination. Key versions are confirmed under the [AES-FF1 binding](draft-encryption-based-pseudonymization.html).
+The [De-Identifier capability requirements](CapabilityStatement-DIS-De-Identifier.html) identify the system-level operation. A De-Identifier implementing this transaction SHALL declare `$submit-dis-task`, its supported reversibility options and its processing combinations on its implementation CapabilityStatement. The [FHIR processing capability rules](volume-3.html#fhir-processing-capabilities) define the action and reversibility checks. The implementation SHALL document parameter restrictions, date-shift derivation support and any separately negotiated protected transformation inputs in the CapabilityStatement documentation for the operation. A De-Identifier advertising `action = encrypt` SHALL separately declare support for the reversible option and list each supported immutable configuration IRI in the processing entry’s `encryptionConfiguration`. The Manager SHALL use `encrypt` only for reversible assignments and SHALL match the exact IRI in the selected processing entry. Key versions are confirmed under the [AES-FF1 binding](draft-encryption-based-pseudonymization.html).
 
 The De-ID Manager implementing this transaction SHALL provide a CapabilityStatement Resource indicating that it can invoke the `$submit-dis-task` operation.
 
