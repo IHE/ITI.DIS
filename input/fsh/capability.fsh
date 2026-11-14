@@ -78,6 +78,7 @@ Title: "DIS De-ID Manager"
 * insert DISCapabilityRequirements(DISManager)
 * description = "The Manager receives de-identification jobs in ITI-x1 and submits de-identification tasks in ITI-x3. Both request bodies are FHIR R4 Task resources. With DIS-ASYNC-JOB it handles ITI-x4 polling and job cancellation requests. With DIS-ASYNC-TASK it initiates ITI-x7 polling and can request task cancellation."
 * rest[0].mode = #server
+* rest[0].security.service[0] = http://profiles.ihe.net/fhir/ihe.securityTypes/CodeSystem/securityTypes#IUA
 * rest[0].operation[0].name = "submit-dis-job"
 * rest[0].operation[0].definition = Canonical(submit-dis-job)
 * rest[1].mode = #client
@@ -91,6 +92,7 @@ Title: "DIS De-Identifier"
 * insert DISCapabilityRequirements(DISDeIdentifier)
 * description = "The De-Identifier receives a de-identification task as a FHIR R4 Task in ITI-x3 and publishes its compatible processing capabilities. With DIS-ASYNC-TASK it handles ITI-x7 polling and task cancellation requests."
 * rest[0].mode = #server
+* rest[0].security.service[0] = http://profiles.ihe.net/fhir/ihe.securityTypes/CodeSystem/securityTypes#IUA
 * rest[0].operation[0].name = "submit-dis-task"
 * rest[0].operation[0].definition = Canonical(submit-dis-task)
 
@@ -101,5 +103,6 @@ Title: "DIS Integrated De-ID Manager/De-Identifier"
 * insert DISCapabilityRequirements(DISIntegrated)
 * description = "Standalone operation claims content conformance. When external submission is supported, the Integrated actor declares the ITI-x1 server operation and accepts a de-identification job as a FHIR R4 Task. With DIS-ASYNC-JOB it handles ITI-x4 polling and job cancellation requests for externally submitted jobs."
 * rest[0].mode = #server
+* rest[0].security.service[0] = http://profiles.ihe.net/fhir/ihe.securityTypes/CodeSystem/securityTypes#IUA
 * rest[0].operation[0].name = "submit-dis-job"
 * rest[0].operation[0].definition = Canonical(submit-dis-job)

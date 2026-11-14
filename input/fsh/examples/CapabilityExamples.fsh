@@ -39,6 +39,7 @@ Description: "Synthetic deployment supporting asynchronous and cancellable ITI-x
 * extension[1].extension[6].url = "encryptionConfiguration"
 * extension[1].extension[6].valueUri = "https://example.org/configurations/ff1-decimal10/versions/1"
 * rest[0].mode = #server
+* rest[0].security.service[0] = http://profiles.ihe.net/fhir/ihe.securityTypes/CodeSystem/securityTypes#IUA
 * rest[0].operation[0].name = "submit-dis-task"
 * rest[0].operation[0].definition = Canonical(submit-dis-task)
 * rest[0].operation[0].documentation = "Terminal polling outcomes and submission replay records are each retained for at least 24 hours. The maximum pending cancellation interval is 10 minutes. Cancellation outcomes are retained for at least 24 hours."

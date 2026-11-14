@@ -258,16 +258,19 @@ An actor from this profile (Column 1) SHALL implement all applicable transaction
 | DIS Actor | Actor to be grouped with | Reference | Content Bindings Reference |
 |-----------|--------------------------|-----------|---------------------------|
 | De-Identification Requester | ATNA / Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+| De-Identification Requester | IUA / Authorization Client for ITI-x1 and applicable ITI-x4 interactions | [IUA](https://profiles.ihe.net/ITI/IUA/) | -- |
 | De-ID Manager | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
-| De-ID Manager | IUA / Authorization Client or Resource Server | [ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html) | -- |
+| De-ID Manager | IUA / Resource Server for ITI-x1 and applicable ITI-x4 interactions | [IUA](https://profiles.ihe.net/ITI/IUA/) | -- |
+| De-ID Manager | IUA / Authorization Client for ITI-x3 and applicable ITI-x7 interactions | [IUA](https://profiles.ihe.net/ITI/IUA/) | -- |
 | De-Identifier | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
+| De-Identifier | IUA / Resource Server for ITI-x3 and applicable ITI-x7 interactions | [IUA](https://profiles.ihe.net/ITI/IUA/) | -- |
 | Integrated De-ID Manager/De-Identifier | ATNA / Secure Node or Secure Application | [ITI TF-1: 9](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) | -- |
-| Integrated De-ID Manager/De-Identifier | IUA / Authorization Client or Resource Server | [ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html) | -- |
+| Integrated De-ID Manager/De-Identifier, when externally invoked | IUA / Resource Server for ITI-x1 and applicable ITI-x4 interactions | [IUA](https://profiles.ihe.net/ITI/IUA/) | -- |
 {: .grid}
 
 DIS actors SHALL use the ATNA groupings specified in Table 1:PXX.3-1. The Requester groups with Secure Application. The Manager, De-Identifier, and Integrated actor each group with Secure Node or Secure Application.
 
-The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be grouped with IUA Authorization Client or Resource Server to ensure that system-to-system authorization is enforced for job submission (ITI-x1) and output retrieval (ITI-x4). Implementations SHOULD use SMART Backend Services for automated system-to-system workflows.
+The IUA groupings apply to the external DIS transactions the actor supports. A standalone Integrated actor makes its content conformance claim without an external job interface. Apply the [shared transaction authorization rules](volume-2.html#transaction-authorization) to submission, recovery, polling and cancellation.
 
 <a name="overview"> </a>
 
@@ -440,7 +443,7 @@ The [required actor grouping table](#required-groupings) identifies the ATNA rol
 
 ### 1:PXX.5.2 Authorization
 
-The De-ID Manager and the Integrated De-ID Manager/De-Identifier SHALL be grouped with IUA Authorization Client or Resource Server ([ITI TF-1: 34](https://profiles.ihe.net/ITI/TF/Volume1/ch-34.html)). System-to-system authorization for automated workflows SHOULD use SMART Backend Services with OAuth 2.0 client credentials grants. The De-ID Manager or Integrated De-ID Manager/De-Identifier SHALL verify that the Requester is authorized under the submitted data request authorization before accepting a job. The [shared transaction authorization rules](volume-2.html#transaction-authorization) apply to submission, recovery, polling, cancellation, and result release.
+The [required actor grouping table](#required-groupings) defines the IUA roles for external DIS transactions. Mutual TLS provides peer authentication. IUA governs access to the transaction, and DIS applies the data grant and work item authorization. The De-ID Manager or Integrated De-ID Manager/De-Identifier SHALL verify that the Requester is authorized under the submitted data request authorization before accepting a job. The [shared transaction authorization rules](volume-2.html#transaction-authorization) apply to submission, recovery, polling, cancellation, and result release.
 
 ### 1:PXX.5.3 Policy Integrity
 
@@ -472,7 +475,7 @@ DIS actors SHALL record ATNA audit events according to the transaction-specific 
 
 ### 1:PXX.6.1 IHE IUA - Internet User Authorization
 
-The [required actor grouping table](#required-groupings) defines the current IUA grouping requirements. On an exchange using IUA, the Authorization Client presents the access token and the Resource Server validates it and enforces the applicable access policy. [ITI-72](https://profiles.ihe.net/ITI/IUA/) defines how the client presents the token and how the server checks it. The [open security decision](issues.html#iua-grouping-and-denial-responses) records the remaining actor-role and denial-response alignment.
+The [required actor grouping table](#required-groupings) assigns the IUA roles. [ITI-72](https://profiles.ihe.net/ITI/IUA/) defines token presentation and validation. Volume 2 specifies the [authorization checks and response codes](volume-2.html#transaction-authorization) for external DIS transactions.
 
 ### 1:PXX.6.2 IHE ATNA / BALP - Audit Trail and Node Authentication / Basic Audit Log Patterns
 

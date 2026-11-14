@@ -44,7 +44,12 @@ See the [UC-2 job with R4 and R5 payload sets](examples-grouped-fhir-job.html) f
 
 ## Shared Transaction Authorization and Audit
 
-For each request, the responder SHALL authenticate the caller and authorize the specific action and work item before disclosing work item state or changing it. The data request authorization governs the approved data scope and policy. Access credentials identify and authorize the actor for the transaction or for the specific service hosting referenced data. Apply the [referenced input and result access rules](volume-3.html#3pxx32-authorization-and-stable-retrieval) when data travels by reference.
+The initiating actor SHALL present an IUA access token under [ITI-72](https://profiles.ihe.net/ITI/IUA/) on each external DIS submission, recovery request, poll and cancellation request. The responder SHALL apply ITI-72 before the DIS work item check and before disclosing or changing work item state. A FHIR server supporting DIS transactions SHALL declare IUA in `CapabilityStatement.rest.security.service` on the applicable server REST entry using code `IUA` from `http://profiles.ihe.net/fhir/ihe.securityTypes/CodeSystem/securityTypes`.
+
+- **HTTP 401.** Return this response if the token is missing or fails the ITI-72 checks, including token verification, applicable scope or audience checks, or enforcement of IUA access policy.
+- **HTTP 403.** After ITI-72 succeeds, return this response if the additional DIS authorization check denies the action. This includes denial under the submitted data request authorization or the rules for job or task access, recovery, cancellation or release.
+
+In either case, the responder SHALL return an R4 `OperationOutcome` and SHALL leave work item state unchanged. The data request authorization governs the approved data scope and policy. Access credentials identify and authorize the actor for the transaction or for the specific service hosting referenced data. Apply the [referenced input and result access rules](volume-3.html#3pxx32-authorization-and-stable-retrieval) when data travels by reference.
 
 Before polling or cancelling, the initiator SHALL verify that the polling URL identifies an HTTPS endpoint authorized to serve that work item on behalf of the original responder. If a redirect is used, the initiator SHALL verify the destination before sending credentials or issuing the request there. It SHALL use credentials valid for the destination. An authorization denial SHALL omit work item state, results, evidence, and protected transformation material.
 
@@ -122,7 +127,7 @@ Every asynchronous job or task accepted through ITI-x1 or ITI-x3 supports cancel
 
 ### Cancellation and polling responses
 
-The initiator SHALL send an authorized `DELETE` with an empty body to the exact `Content-Location` returned at submission. The receiver SHALL enforce cancellation authorization independently of polling authorization. It SHALL return HTTP 401 for missing or invalid credentials and HTTP 403 for an authenticated caller without cancellation permission. These responses SHALL include an R4 `OperationOutcome` without changing the work item state or disclosing cancellation details. The following responses apply to authorized cancellation requests and authorized polls of the same URL. Responses for pending, cancelled, or unconfirmed cancellation SHALL contain `Cache-Control: no-store` and SHALL withhold all results for the work item. The receiver SHALL document its maximum pending confirmation interval and minimum terminal cancellation status retention period in the corresponding server operation's CapabilityStatement documentation. The confirmation interval starts when cancellation is accepted. The retention period starts when the receiver first records `cancelled` or `unconfirmed`. The receiver SHALL keep the polling URL available through both intervals.
+The initiator SHALL send an authorized `DELETE` with an empty body to the exact `Content-Location` returned at submission. The receiver SHALL enforce cancellation authorization independently of polling authorization. It SHALL apply the [shared authorization denial rules](#transaction-authorization) and withhold cancellation details on a denial. The following responses apply to authorized cancellation requests and authorized polls of the same URL. Responses for pending, cancelled, or unconfirmed cancellation SHALL contain `Cache-Control: no-store` and SHALL withhold all results for the work item. The receiver SHALL document its maximum pending confirmation interval and minimum terminal cancellation status retention period in the corresponding server operation's CapabilityStatement documentation. The confirmation interval starts when cancellation is accepted. The retention period starts when the receiver first records `cancelled` or `unconfirmed`. The receiver SHALL keep the polling URL available through both intervals.
 
 | State or outcome | Response to cancellation request | Response to subsequent poll |
 |---|---|---|
@@ -278,7 +283,7 @@ The Manager SHALL return one `payloadResult` per submitted `setId`, with the cor
 
 **400 Bad Request.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the malformed request.
 
-**401 Unauthorized / 403 Forbidden.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the authorization failure.
+**401 Unauthorized / 403 Forbidden.** Apply the [shared authorization denial rules](#transaction-authorization).
 
 **422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` identifying the failed policy validation point, reporting that the approved policies declare different reversibility modes, indicating that the requested asynchronous mode is unavailable, or reporting that the requested AES-FF1 configuration or scoped key version is unavailable for an assigned operation.
 
@@ -453,7 +458,7 @@ The De-Identifier SHALL return one `payloadResult` matching the dispatched `setI
 
 **400 Bad Request.** The response body is an R4 `OperationOutcome` describing the malformed or nonconforming task submission.
 
-**401 Unauthorized / 403 Forbidden.** The response body is an R4 `OperationOutcome` describing the authorization failure.
+**401 Unauthorized / 403 Forbidden.** Apply the [shared authorization denial rules](#transaction-authorization).
 
 **422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's processing combination or required transformation actions fall outside the De-Identifier's declared capabilities or that asynchronous processing is unavailable.
 
@@ -567,7 +572,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) uses the HTTP poll
 
 **422 Unprocessable Entity — Terminal processing failure.** On an authorized poll, the responder SHALL return an R4 `OperationOutcome` when the accepted work item has failed. It SHALL withhold every result for that work item.
 
-**Other 4xx/5xx — Polling error.** The responder SHALL return an R4 `OperationOutcome` without a result. An invalid or unauthorized poll, an expired polling URL, or an endpoint outage does not report terminal processing failure. Use HTTP 401 for missing or invalid credentials and HTTP 403 when the caller lacks authority to poll or receive the completed result.
+**Other 4xx/5xx — Polling error.** The responder SHALL return an R4 `OperationOutcome` without a result. An invalid or unauthorized poll, an expired polling URL, or an endpoint outage does not report terminal processing failure. Apply the [shared authorization denial rules](#transaction-authorization).
 
 ##### 2:3.x4.4.2.3 Expected Actions
 
@@ -681,7 +686,7 @@ The De-Identifier uses the HTTP polling mechanics of the draft HL7 FHIR R4 Async
 
 **422 Unprocessable Entity — Terminal processing failure.** On an authorized poll, the responder SHALL return an R4 `OperationOutcome` when the accepted work item has failed. It SHALL withhold every result for that work item.
 
-**Other 4xx/5xx — Polling error.** The responder SHALL return an R4 `OperationOutcome` without a result. An invalid or unauthorized poll, an expired polling URL, or an endpoint outage does not report terminal processing failure. Use HTTP 401 for missing or invalid credentials and HTTP 403 for credentials that do not authorize the poll.
+**Other 4xx/5xx — Polling error.** The responder SHALL return an R4 `OperationOutcome` without a result. An invalid or unauthorized poll, an expired polling URL, or an endpoint outage does not report terminal processing failure. Apply the [shared authorization denial rules](#transaction-authorization).
 
 ##### 2:3.x7.4.2.3 Expected Actions
 

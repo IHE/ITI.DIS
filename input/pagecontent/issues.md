@@ -6,6 +6,12 @@ The [ODRL content](odrl-content.html) addresses the authorization language and p
 
 The [AES-FF1 binding](draft-encryption-based-pseudonymization.html) specifies the optional encryption method tracked in [issue #50](https://github.com/IHE/ITI.DIS/issues/50).
 
+<a name="iua-grouping-and-denial-responses"> </a>
+
+#### IUA Grouping and Authorization Denials
+
+The draft assigns [IUA roles by interface](volume-1.html#required-groupings). [Volume 2](volume-2.html#transaction-authorization) uses HTTP 401 for ITI-72 denials and HTTP 403 for a DIS authorization denial after ITI-72 succeeds.
+
 ## Issues
 
 ### Submit an Issue
@@ -18,7 +24,6 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
 - **[DICOM and CDA binding conformance](draft-native-payload-bindings.html):** complete native policy and plan schemas, capabilities, output and evidence mappings, and cross-set linkage rules for use cases that require shared identifiers.
 - [Asynchronous job and task cancellation](#asynchronous-job-and-task-cancellation)
-- [IUA grouping and authorization denials](#iua-grouping-and-denial-responses)
 - [Contract signatures and disclosure](#policy-plan-and-signed-disclosure)
 - [Future policy management transaction](#future-policy-management-transaction)
 - **Draft contract review:** confirm the payload set transaction contract, capability declarations, stage ordering, and release authorization. Complete detailed conformance procedures and validate them against the agreed baseline.
@@ -52,14 +57,6 @@ Considerations include the scope of this supplement, overlap with MHD Document S
 The [DIS-ASYNC-JOB option](volume-1.html#1pxx24-asynchronous-job-processing-option) includes cancellation through [ITI-x4](volume-2.html#job-cancellation). The Manager checks eligibility when the Requester asks to cancel. An outstanding synchronous task blocks job cancellation until its terminal outcome is known. The [DIS-ASYNC-TASK option](volume-1.html#1pxx25-asynchronous-task-processing-option) includes cancellation through [ITI-x7](volume-2.html#task-cancellation) for all accepted asynchronous tasks.
 
 **Decisions for committee review.** Review the [draft cancellation wire contract](volume-2.html#asynchronous-cancellation), including the polling outcomes and the declared confirmation and retention intervals. The [submission recovery rules](volume-2.html#submission-retries) define a recovery-only request for a lost task acceptance. Cancellation remains unconfirmed while work is unresolved. If the responder confirms cancellation while the polling URL remains available, the draft reports the confirmed outcome at that URL.
-
-<a name="iua-grouping-and-denial-responses"> </a>
-
-#### IUA Grouping and Authorization Denials
-
-The current grouping table lists Authorization Client or Resource Server for the Manager and Integrated actor. For exchanges that use IUA, the Requester presents a token to the Manager or externally invoked Integrated actor on the job leg. The distributed Manager presents a token to the De-Identifier on the task leg. [ITI-72 §3.72.4.3](https://profiles.ihe.net/ITI/IUA/) assigns HTTP 401 when token verification, scope matching, or IUA access policy enforcement fails. DIS also specifies HTTP 403 when an authenticated caller lacks permission to poll or cancel a work item.
-
-The committee needs to confirm which IUA groupings are required on each leg, including the Manager's distinct roles and the externally invoked Integrated actor. It also needs to define how DIS distinguishes an IUA access denial from a work item authorization denial, or align the status codes for requests governed by both requirements. The denial must protect work item state, outputs, and evidence regardless of the response code.
 
 <a name="policy-plan-and-signed-disclosure"> </a>
 
