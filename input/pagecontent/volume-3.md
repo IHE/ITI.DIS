@@ -105,6 +105,25 @@ Table 3:PXX.1.2-1 lists the core transformation actions.
 | `redact` | Remove the narrative content from a resource | `Narrative` (`DomainResource.text`) | Yes | None |
 {: .grid}
 
+Each DIS action code carries a `technique` property that identifies its ISO/IEC 20889:2018 classification. The classifications describe the techniques behind the executable DIS actions. The action design draws on RSNA CTP DICOM Anonymizer function patterns.
+
+<p id="tPXX.1.2-2" class="tableTitle"><strong>Table 3:PXX.1.2-2: Core Transformation Actions — ISO/IEC 20889 Classification</strong></p>
+
+| ISO/IEC 20889 §9 Category | ISO Technique | DIS Action | Function |
+|---|---|---|---|
+| §9.3 Suppression | Local suppression (§9.3.3) | `remove` | `(element) → ∅` |
+| §9.3 Suppression | Local suppression (§9.3.3) | `redact` | `(narrative) → ∅` |
+| §9.3 Suppression / §9.4 Pseudonymization | Masking (§9.3.2) / lookup-table pseudonymization (§9.4.3.2) | `replace` | Fixed replacement or authoritative lookup-backed replacement |
+| §9.4 Pseudonymization | Hashing (§9.4.3.3) | `hash` | `(value, mode, algorithm, scope?) → digest` |
+| §9.6 Generalization | Rounding (§9.6.2) | `truncate-date` | `(date, precision) → truncated` |
+| §9.6 Generalization | Rounding (§9.6.2) | `round` | `(value, step) → binned` |
+| §9.6 Generalization | Generalization (§9.6) | `truncate` | `(value, length) → shortened` |
+| §9.7 Randomization | Noise addition (§9.7.2) | `date-shift` | `(date, scope, maxDays) → shifted` |
+| — | — | `keep` | `(element) → element` |
+{: .grid}
+
+ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic/format-preserving/homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE.
+
 <a name="3pxx132-action-definitions"> </a>
 
 <a name="3pxx222-action-definitions"> </a>
@@ -157,6 +176,8 @@ Date shifting preserves temporal ordering and intervals between events for the s
 
 For `Period` elements, shift each present bound by the same offset. If a date or dateTime has insufficient precision to determine a day, the De-Identifier SHALL fail the task when a date-shift rule selects it.
 
+Date-shift reference dates and offsets are protected transformation parameters. The linkage scope identifies where consistency is authorized. Derivation from purpose-specific seeds is preferred. Accepting precomputed parameters is an optional De-Identifier capability. If a generated parameter must be reused, an explicit capability contract SHALL define how it is returned to the Manager through a protected channel, retained as authorized, and reused in later tasks. See [reversibility material custody](volume-1.html#1pxx54-reversibility-material-custody).
+
 ##### round
 
 The `round` action bins a numeric value to the nearest multiple of the `step` parameter. The rounding centers at zero. When a value is exactly halfway between two multiples, select the multiple farther from zero.
@@ -198,6 +219,8 @@ For each `Patient.identifier` targeted by the rule, require a nonempty source `s
 
 Serialize the array without whitespace, escape quotation marks, backslashes and control characters as required by JSON, emit other Unicode characters directly, preserve forward slashes, use the short JSON escapes for backspace, tab, newline, form feed and carriage return, and use lowercase Unicode escapes for the remaining control characters U+0000–U+001F. Perform no Unicode normalization and reject unpaired surrogates. Encode the resulting text as UTF-8 without a byte-order mark. Append the 16 raw salt bytes to the UTF-8 bytes, then compute SHA-256 over the concatenation. Set `Identifier.system` to the rule's `pseudonymSystem` and `Identifier.value` to the complete 32-byte digest as 64 lowercase hexadecimal characters. Scope and identifier values use exact string matching. Cross-community identity resolution and salt coordination remain deployment prerequisites. On detecting a digest collision between distinct source identifier pairs within the job, fail the job without partial output.
 
+Matching pseudonyms require the same source identifier pair, resolved scope, and effective salt. Deployments claiming cross-community consistency SHALL establish cross-community identity resolution, scope authorization, and coordination of the effective salt, version, and lifecycle.
+
 Salted test vector. The exact UTF-8 message is `["DIS-patient-identifier-v1","source-institution","https://hospital.example.org/identifiers/linkage-scope","lab-project-2026","https://hospital.example.org/identifiers/mrn","A123"]`. Append the 16 public test bytes `000102030405060708090a0b0c0d0e0f` (hexadecimal). The expected digest is `8162610a149e7b6700513fa3f0ceff46328e2b584fd3d351e4d5c2775a42ff0c`. Deployments generate their own confidential salts.
 
 <a name="lookup-backed-assignment"> </a>
@@ -218,6 +241,8 @@ The [DIS policy JSON Schema](schemas/dis-policy.schema.json) defines the structu
 - **Syntax-Level** — rules use concrete element paths (e.g., FHIRPath expressions for HL7 FHIR, DICOM tag paths for DICOM) and action codes. The policy is specific to a payload family and version, and is directly executable after validation. A Syntax-Level policy requires `payloadFamily` and `payloadVersion` declarations.
 
 Both levels use the same JSON structure, delivery modes, and four-point validation. The `@` prefix on rule targets is the syntactic marker distinguishing Semantic-Level from Syntax-Level rules. A De-Identifier SHALL never receive rules containing unresolved `@` references — that would indicate a compilation failure.
+
+A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities.
 
 Table 3:PXX.1.3-1 lists the top-level elements of the policy rules JSON.
 
@@ -293,6 +318,8 @@ See the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-p
 
 <a name="3pxx13-policy-delivery-and-validation"> </a>
 
+<a name="3pxx14-policy-delivery-and-validation"> </a>
+
 ### 3:PXX.1.4 Policy Delivery and Validation
 
 A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. Each payload-set input in the ITI-x1 request declares the approved policy as a versioned canonical in the `policy` subextension. The `authorization` input provides evidence that the data governance authority approved the data request and that specific policy. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
@@ -329,7 +356,7 @@ Locally managed policies are trusted by virtue of their administrative provision
 
 #### 3:PXX.1.4.2 Policy Validation
 
-The De-ID Manager SHALL perform the following validation on the resolved policy Library, as defined in [§1:PXX.4.1](volume-1.html#1pxx41-concepts):
+The De-ID Manager SHALL perform the following validation on the resolved policy Library.
 
 1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy approved in the data request authorization. The mechanism for extracting the approved policy identity from the authorization is implementation-defined (it depends on the authorization format used in the deployment).
 2. **Integrity** — confirm that the obtained Library's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
@@ -361,6 +388,8 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 **Semantic-Level policies.** The De-ID Manager SHALL resolve each `@` group reference using the [Semantic Group Binding](#3pxx3213-semantic-group-bindings) for the declared payload family and release. If a referenced group has no binding for that release, the Manager SHALL fail compilation before dispatch.
 
 **Syntax-Level policies.** The De-ID Manager verifies that all rule targets are valid element paths for the declared `payloadFamily` and `payloadVersion`. For HL7 FHIR payloads, this means each target is a valid FHIRPath expression for the declared HL7 FHIR version. The Manager verifies that the policy's declared `payloadFamily` and `payloadVersion` are consistent with the `payloadBinding` and `payloadVersion` in the ITI-x1 request. The Manager preserves concrete paths without semantic group expansion or version-conditional path mapping.
+
+<a name="execution-plan-assembly"> </a>
 
 #### 3:PXX.1.5.2 Assemble the Plan and Check Capabilities
 
@@ -514,6 +543,12 @@ Patient pseudonymization transforms the business identifier pair in `Patient.ide
 
 DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines the native format and version and how content is carried or resolved through the protocol. The common delivery contract applies to every payload set. The FHIR binding specifies the supported payload content.
 
+<a name="payload-binding-framework"> </a>
+
+### Payload Binding Requirements
+
+A payload binding defines how DIS applies to a particular format. It specifies the content model and element addressing, the mapping of DIS actions to that format, how to obtain inputs and deliver results, how to represent evidence, how to identify and validate versions and match capabilities, and how to carry or reference the data in the FHIR R4 workflow envelope. Each additional binding defines these requirements independently. The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) illustrate this structure.
+
 <a name="payload-set-delivery"> </a>
 
 <a name="3pxx3-common-payload-set-delivery"> </a>
@@ -535,7 +570,7 @@ The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.
 
 The manifest attachment SHALL identify its content type and contain exactly one of inline `data` or an absolute HTTPS `url`. The receiving actor SHALL apply the declared binding, version and manifest format when resolving and validating the payload. Volume 2 specifies the [submission and result exchanges](volume-2.html#grouped-payload-parameters).
 
-A job contains one or more payload sets. Each set uses one binding and version and carries one manifest at each exchange. Successful responses carry the manifest and evidence together in a result package. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The selected binding defines the native data, retrieval rules, execution plan, validation, and evidence mapping.
+A job contains one or more payload sets. The same payload-set encoding applies to a single-set job. Each set uses one binding and version and carries one manifest at each exchange. Successful responses carry the manifest and evidence together in a result package. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The selected binding defines the native data, retrieval rules, execution plan, validation, and evidence mapping.
 
 The [shared payload set parameters](volume-2.html#grouped-payload-parameters) define how the transactions carry a payload set.
 
