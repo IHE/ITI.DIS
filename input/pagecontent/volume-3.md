@@ -258,7 +258,7 @@ Within a stage, the Manager SHALL process ruleSets in the listed order for any i
 
 <a name="3pxx131-policy-rules-examples"> </a>
 
-See the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-policy), [UC-3 reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy), and [UC-4 signed Syntax-Level policy](examples-cloud-decision-support.html#approved-policy-and-delivery) in their respective use-case examples.
+See the [decoded ODRL Policy Set](odrl-content.html#decoded-policy-example) for a Syntax-Level policy used in UC-2. See also the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-policy), [UC-3 reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy), and [UC-4 signed Syntax-Level policy](examples-cloud-decision-support.html#approved-policy-and-delivery) in their respective use-case examples.
 
 <a name="3pxx23-policy-delivery-and-validation"> </a>
 
@@ -425,7 +425,7 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 #### 3:PXX.2.1.3 Execution Plan Example
 
-See the [UC-2 compiled plans](examples-grouped-fhir-job.html#grouped-fhir-submission) for the two FHIR processing releases and the [UC-3 clinical pathology workflow](examples-reversible-pathology.html) for an example involving a supplied lookup table.
+See the [decoded ODRL Execution Plan Set](odrl-content.html#decoded-plan-example) for the R4 clinical assignment and the [UC-2 walkthrough](examples-grouped-fhir-job.html#grouped-fhir-dispatch) for the two FHIR processing releases and the [UC-3 clinical pathology workflow](examples-reversible-pathology.html) for an example involving a supplied lookup table.
 
 ### 3:PXX.2.2 FHIR Reference Integrity
 
@@ -972,7 +972,7 @@ These synthetic, informative FHIR R4 examples accompany the [lookup table bindin
 
 ## 3:PXX.6 Data Request Authorization
 
-The [DIS Data Request Authorization profile](StructureDefinition-DIS-DataRequestAuthorization.html) carries the organizational grant used by ITI-x1. It SHALL contain exactly one inline [DIS ODRL Agreement](#odrl-authorization) in `DocumentReference.content.attachment.data`, encoded as Base64 with `contentType = application/ld+json`. Set `masterIdentifier.system` to `urn:ietf:rfc:3986` and `masterIdentifier.value` to the Agreement's version-specific `uid`. The Requester SHALL send an absolute HTTPS FHIR version-specific reference ending in `/DocumentReference/{id}/_history/{vid}`. The Manager SHALL verify that the resolved resource and version match the reference and that a trusted authority issued the Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued content.
+The [DIS Data Request Authorization profile](StructureDefinition-DIS-DataRequestAuthorization.html) carries the organizational grant used by ITI-x1. It SHALL contain exactly one inline [DIS ODRL Agreement](#odrl-authorization) in `DocumentReference.content.attachment.data`, encoded as Base64 with `contentType = application/ld+json`. Set `masterIdentifier.system` to `urn:ietf:rfc:3986` and `masterIdentifier.value` to the Agreement's version-specific `uid`. The Requester SHALL send an absolute HTTPS FHIR version-specific reference ending in `/DocumentReference/{id}/_history/{vid}`. The Manager SHALL verify that the resolved resource and version match the reference and that a trusted authority issued the Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued content. See the [decoded ODRL Agreement example](odrl-content.html#decoded-authorization-example).
 
 Before acceptance or synchronous processing the Manager SHALL establish that the grant is currently effective. The Manager SHALL use a trusted status source for the exact Agreement revision. The method for obtaining status is deployment-defined. A historical DocumentReference with `status = current` is insufficient on its own. If status cannot be established, or if the grant is expired, revoked or superseded, the Manager SHALL deny the job. The Manager SHALL check current authorization again before releasing the result, evidence or download access, including on retries and asynchronous retrieval.
 
