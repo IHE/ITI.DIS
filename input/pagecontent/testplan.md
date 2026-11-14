@@ -87,6 +87,16 @@ Apply the [actor grouping table](volume-1.html#required-groupings) and the [shar
 
 Use a profiled Agreement with two permissions selecting distinct sets and exact policy revisions. Confirm that the Manager checks the Agreement before synchronous processing or asynchronous acceptance. Repeat with a malformed or non-versioned authorization reference, a missing permission, an untrusted issuer, a different purpose or policy revision, a substituted input version, and an unrecognized required operand. Expect HTTP 400 for malformed inputs and HTTP 403 for a well-formed grant whose conditions the Manager cannot establish. Verify that none of these failures dispatches a task. Revoke the grant after acceptance or attempt retrieval from an unapproved recipient identity or result destination, and verify that the Manager withholds results, evidence and download access.
 
+#### Purpose Classification
+
+| Stimulus | Pass criteria |
+|---|---|
+| Submit the same authorized purpose in jobs that refer to individually issued Agreements with the [purpose classification](odrl-content.html#purpose-classification) omitted, present with one code, and present with several distinct codes. Exercise a heading code, `D4`, `7.1`, and `7.2`. | Classification is optional. Each valid code is accepted without changing the authorization decision. |
+| Use a different specific purpose IRI that the issuer classifies under the same ISO code as the approved purpose. Repeat with `7.1` and `7.2`. | The Manager returns HTTP 403 and does not accept the job or dispatch a task. |
+| Repeat with a malformed classification in a referenced Agreement. Use an unsupported edition or system, an unknown code, a numeric code, duplicate codes, and an empty array. | The Manager returns HTTP 400 and does not accept the job or dispatch a task. |
+
+#### Policy and Plan Validation
+
 Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, content conformance and currency before acceptance or dispatch.
 
 | Stimulus | Pass criteria |
