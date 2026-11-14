@@ -255,19 +255,17 @@ DIS assumes that the De-Identification Requester can read the exact approved pol
 
 The optional `policyContent` subextension determines how the De-ID Manager obtains the policy Contract:
 
-**When `policyContent` is present (inline delivery):** The Requester carries the JWS-signed policy Contract in a contained [DIS Signed Policy Binary](StructureDefinition-DIS-SignedPolicy.html) with `Binary.contentType = application/jose`. The `policyContent` subextension SHALL reference this Binary by its local fragment identifier. The Manager SHALL reject a reference that does not resolve to a DIS Signed Policy Binary contained in the submitted FHIR R4 `Task`. The JWS lets the Manager detect changes to the policy content carried by the Requester. The De-ID Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model. The JWS payload is the JSON serialization of the Contract resource. The JWS header SHALL include:
+**When `policyContent` is present (inline delivery):** The subextension SHALL reference a contained [DIS Policy Content Binary](StructureDefinition-DIS-PolicyContent.html) by its local fragment identifier. `Binary.data` SHALL carry the UTF-8 JSON serialization of the complete FHIR R4 Policy Contract with `Binary.contentType = application/fhir+json`. The Manager SHALL reject an unresolved reference or invalid carrier and SHALL verify the decoded Contract's canonical URL and version against the declaration.
 
-- `alg` — the signing algorithm (e.g., `RS256`, `ES256`)
-- `x5c` or `jwk` — the signing key or certificate chain used by the De-ID Manager to verify the signature under its configured trust model
+**When `policyContent` is absent (Manager-resolved):** The Manager SHALL resolve the exact declared Policy Contract by implementation-defined trusted means and verify its canonical URL and version. Both delivery modes use the same applicable deployment signature requirements.
 
-The De-ID Manager SHALL confirm that `Contract.url` and `Contract.version` inside the JWS payload match the declared versioned policy canonical. A mismatch indicates the Requester declared one policy but couriered different content; the Manager SHALL reject the job.
+<a name="contract-signatures"> </a>
 
-**When `policyContent` is absent (Manager-resolved):** The job submission declares the policy canonical and version. The De-ID Manager SHALL resolve the exact declared policy version by implementation-defined means and verify that the resolved Contract URL and version match the declaration. For example:
+#### Contract signatures and disclosure
 
-- When the URL matches a policy managed locally by the De-ID Manager (e.g., provisioned by administrative configuration), the Manager resolves it from its own store.
-- When the URL identifies an externally hosted policy, the Manager retrieves the policy through its implementation-defined trust model (e.g., TLS-protected fetch, mutual TLS, or externally stored JWS artifacts).
+A DIS digital signature on a Contract SHALL be carried in [`Contract.signer.signature`]({{site.data.fhir.path}}contract-definitions.html#Contract.signer.signature). A deployment determines which signatures it requires on Data Request Authorization and Policy Contracts at ITI-x1 and on Execution Plan Contracts at ITI-x3. It configures the accepted signature format, signed bytes, trusted keys and signer authority. When a signature is required, the receiving actor SHALL reject an absent or unverifiable signature and verify that the signer is authorized to sign for `Contract.signer.party`. Apply the same rules to Requester-carried and Manager-resolved policies. The [UC-4 example](examples-cloud-decision-support.html#signature-verification) illustrates one configuration.
 
-Locally managed policies are trusted by virtue of their administrative provisioning; the Manager is not required to verify a JWS signature at each job submission.
+A deployment also determines whether to make signed authorization or policy Contracts available with a job result and how to handle unavailable or restricted supporting Contracts. The Manager SHALL apply the deployment's disclosure rules together with the [current grant and recipient checks](#data-request-authorization) before releasing the result or any supporting Contract. When supplied as part of a result package, supporting Contracts remain outside the clinical output manifest. Transformation Provenance records processing and release evidence.
 
 <a name="3pxx232-policy-validation"> </a>
 
@@ -278,7 +276,7 @@ Locally managed policies are trusted by virtue of their administrative provision
 The De-ID Manager SHALL perform the following validation on the resolved policy Contract.
 
 1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy bound by the selected permission in the [Data Request Authorization Agreement](#data-request-authorization).
-2. **Integrity** — confirm that the obtained Contract's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
+2. **Integrity** — confirm that the obtained Contract's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Apply the [deployment signature requirements](#contract-signatures) and establish trust in the exact policy revision. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
 3. **Schema** — verify the Contract conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Contract.applies` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
@@ -403,7 +401,7 @@ The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.
 | `payloadVersion` | code | Required | Required, matches the assigned job set |
 | `manifestFormat` | code | Required | Required for the assigned manifest |
 | `policy` | canonical | Required, use `Contract.url\|Contract.version` | The execution plan carries the policy identity |
-| `policyContent` | Reference | Optional local reference to a contained signed policy Binary | ITI-x1 only |
+| `policyContent` | Reference | Optional local reference to a contained Policy Content Binary | ITI-x1 only |
 | `lookupTable` | Reference | Optional supplied lookup table for this set | Use the separate `lookup-table` input for an assigned lookup |
 {: .grid}
 

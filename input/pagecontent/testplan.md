@@ -111,11 +111,11 @@ Use a profiled Agreement with two permissions selecting distinct sets and exact 
 
 #### Policy and Plan Validation
 
-Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, content conformance and currency before acceptance or dispatch.
+Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both Requester-carried and Manager-resolved Policy Contracts. Verify authorization consistency, integrity, content conformance and currency before acceptance or dispatch.
 
 | Stimulus | Pass criteria |
 |---|---|
-| Submit the authorized canonical URL and version with the approved signed content. Repeat with the Manager resolving the same approved version. | Both modes use the exact approved rules. The Requester can read the same approved version in both cases. |
+| Submit the authorized canonical URL and version with the approved Policy Contract. Repeat with the Manager resolving the same approved version. | Both modes use the exact approved rules. The Requester can read the same approved version in both cases. |
 | Substitute a different valid policy or version for one payload set. | The Manager returns an authorization consistency error with no acceptance, dispatch or result. |
 | Submit a job with two sets under different approved policies. Give both policies the same reversibility mode, then repeat with one policy declaring the other mode and approval for that policy. | With a common mode, every ITI-x3 task submission carries that mode. With mixed modes, ITI-x1 returns HTTP 422 with an OperationOutcome before acceptance or dispatch and returns no result. |
 | Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
@@ -134,6 +134,12 @@ Check the [ODRL action parameter binding](odrl-content.html#action-parameters) i
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside the scope of this supplement.
 
 Compile a policy targeting `@dates` against R4 and R5 Encounter payloads. Verify that the plan uses `Encounter.period` for R4 and `Encounter.actualPeriod` for R5, that the plans preserve source rule and selector order, and that no semantic group references remain. Use an unknown group or a release with no binding and verify that the Manager fails compilation before dispatch. For a choice selector, verify that a dateTime or Period value is selected and a free-text value is outside the selection. Compile separate rules for `@birth-dates`, `@dates`, and `@subject-demographics` using binding version 0.2.0 for R4 and R5. Verify that only the `@birth-dates` rule emits a selector for `Patient.birthDate`.
+
+#### Deployment signature and disclosure settings
+
+Use the [UC-4 verification example](examples-cloud-decision-support.html#signature-verification) with policy signatures required. Verify successful admission with the original signed policy in both delivery modes. Repeat with the signature absent, an altered Contract version or ODRL attachment, and an untrusted signer. Each case SHALL fail admission without dispatch. Repeat with an unsigned policy and signatures not required. The Manager still checks the exact approved content and current authorization. When the deployment requires authorization or execution-plan signatures, exercise missing and invalid signatures before job or task acceptance, respectively.
+
+Run successful synchronous and asynchronous cases with supporting Contract disclosure enabled and disabled. Verify that a permitted supporting Contract is separate from the selected clinical payload. In a deployment that requires a supporting Contract and withholds results when access is denied, verify that an ineligible recipient receives neither the restricted Contract nor the result.
 
 #### Source Policy Identity in an ITI-x3 Plan
 
