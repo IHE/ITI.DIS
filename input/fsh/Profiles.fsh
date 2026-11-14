@@ -1,5 +1,22 @@
 // DIS Profiles
 
+Extension: DISTargetFhirVersion
+Id: dis-target-fhir-version
+Title: "DIS Target FHIR Release"
+Description: "FHIR release to request and validate when resolving a direct DIS payload reference. DIS uses 5.0 for a hosted R5 resource."
+* ^context[0].type = #element
+* ^context[0].expression = "List.entry.item"
+* ^context[1].type = #element
+* ^context[1].expression = "Provenance.target"
+* value[x] 1..1
+* value[x] only code
+* valueCode = #5.0 (exactly)
+
+Invariant: dis-target-fhir-version-vread
+Description: "A release-qualified target SHALL be an absolute HTTPS FHIR version-specific read URL."
+Severity: #error
+Expression: "extension.where(url = 'https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-target-fhir-version').empty() or (reference.exists() and reference.matches('^https://[^?#/]+(/[^?#]+)?/[A-Z][A-Za-z0-9]*/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$'))"
+
 // ── DIS-Evidence ─────────────────────────────────────────────────────────────
 
 Profile: DISEvidence
@@ -24,6 +41,8 @@ transformation summary records the per-element actions applied.
     DisTransformationSummaryExt named transformationSummary 0..1
 * id 1..1
 * target 1..*
+* target.extension contains DISTargetFhirVersion named targetFhirVersion 0..1
+* target obeys dis-target-fhir-version-vread
 * recorded 1..1
 * policy 1..*
 * activity 1..1
@@ -164,7 +183,7 @@ Id: DIS-ResourceManifest
 Title: "DIS Resource Manifest"
 Description: """
 An explicit snapshot of references for one DIS payload set. A FHIR set lists
-R4 payload resources or wrappers that carry or locate FHIR payload bytes.
+R4 payload resources, wrappers that carry or locate FHIR payload bytes, or release-qualified references to hosted R5 resources.
 DICOM and CDA sets list R4 indexes or wrappers for the native objects. A manifest can enumerate inputs or results.
 """
 * ^status = #active
@@ -177,7 +196,8 @@ DICOM and CDA sets list R4 indexes or wrappers for the native objects. A manifes
 * entry 1..*
 * entry.deleted = false
 * entry.item.reference 1..1
-* entry.item obeys dis-resource-manifest-entry-reference
+* entry.item.extension contains DISTargetFhirVersion named targetFhirVersion 0..1
+* entry.item obeys dis-resource-manifest-entry-reference and dis-target-fhir-version-vread
 
 Invariant: dis-resource-manifest-profile
 Description: "A DIS Resource Manifest SHALL declare its profile in meta.profile."
@@ -300,6 +320,8 @@ Description: "Manager-authored Provenance for the authorized release of the fina
 * extension contains DisValidatedStageExt named validatedStage 2..*
 * id 1..1
 * target 1..*
+* target.extension contains DISTargetFhirVersion named targetFhirVersion 0..1
+* target obeys dis-target-fhir-version-vread
 * target.reference 1..1
 * recorded 1..1
 * policy 1..1
