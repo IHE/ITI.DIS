@@ -3,7 +3,7 @@
 Extension: DISProcessingCapability
 Id: dis-processing-capability
 Title: "DIS Processing Capability"
-Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. For DIS-FHIR-Payload, the input and result formats match. The actions listed are supported together for that combination."
+Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. For DIS-FHIR-Payload, the input and result formats match. The actions listed are supported together for that combination. At least one combination per declared reversibility mode supports all core actions."
 * ^context[0].type = #element
 * ^context[0].expression = "CapabilityStatement"
 * value[x] 0..0
@@ -27,6 +27,7 @@ Description: "One compatible payload binding, release, input manifest format, re
 * extension[reversibilityMode].value[x] only code
 * extension[action].value[x] 1..1
 * extension[action].value[x] only code
+* extension[action].value[x] from DisActionVS (required)
 * extension[encryptionConfiguration].value[x] 1..1
 * extension[encryptionConfiguration].value[x] only uri
 * extension[encryptionConfiguration].value[x] obeys dis-ff1-configuration-uri

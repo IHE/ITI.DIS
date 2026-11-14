@@ -180,6 +180,14 @@ Submit an ITI-x1 job containing an R4 Encounter set and an R5 Encounter set with
 | One release has no applicable selector binding | Restore approval for both sets. In a controlled test, make the binding for `@dates` unavailable for R5 while keeping the R4 binding and processing capabilities available. | The Manager detects the missing R5 binding during compilation and dispatches no tasks for the job. It reports the failure through the applicable job response and releases neither set. |
 {: .grid}
 
+### Processing Capability Declarations
+
+| Actor and setup | Stimulus | Pass criteria |
+|---|---|---|
+| De-Identifier or Integrated actor claiming each of its reversibility options | Inspect the [processing capability declaration](volume-3.html#fhir-processing-capabilities). Use the [De-Identifier CapabilityStatement example](CapabilityStatement-example-async-de-identifier.html). | For each declared mode, at least one R4 or R5 combination includes all nine core actions. The reversible core combination supports supplied lookup mapping and salted hashing with Manager-managed mappings. Additional entries may advertise subsets. |
+| Manager with several candidate processing combinations | Submit an assignment that requires actions split across entries with different supported formats or releases. Repeat with a single entry that supports the complete assignment. Send an unsupported assignment directly to the De-Identifier. | The Manager dispatches only the compatible assignment. The De-Identifier rejects the unsupported direct submission with HTTP 422 before processing. |
+| Processing actor advertising `date-shift` | Inspect the documented derivation method and version, scope forms, patient identity inputs and offset limit. Try a compatible assignment and one outside the declared limit. For a policy that requires consistency across tasks, repeat with incompatible worker derivation inputs. | The Manager dispatches only when the declared and provisioned capabilities satisfy the policy. Compatible workers apply the same authorized shift where required. |
+
 ### Transformation Actions
 
 For each core action, specify valid and invalid parameters, applicable data types, expected transformed values and failure outcomes:

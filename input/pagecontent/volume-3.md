@@ -54,7 +54,7 @@ A DIS policy is carried in a profiled FHIR R4 `Contract`. An authorization permi
 
 ### 3:PXX.1.2 Transformation Actions
 
-Policy rules select transformation actions. The compiled execution plan applies the same action definitions to concrete targets. This section defines the core action family (`core`) for DIS-FHIR-Payload. Every De-Identifier declaring DIS-FHIR-Payload SHALL support all actions in the `core` family.
+Policy rules select transformation actions. The compiled execution plan applies the same action definitions to concrete targets. This section defines the core action family (`core`) for DIS-FHIR-Payload. The [processing capability requirements](#fhir-processing-capabilities) define how a De-Identifier or Integrated actor supports and declares the core actions.
 
 <a name="3pxx131-action-catalog"> </a>
 
@@ -144,13 +144,13 @@ The `truncate-date` action reduces the precision of the targeted date value to t
 
 ##### date-shift
 
-Date shifting requires a separately declared, purpose-specific derivation capability. The De-Identifier SHALL use patient hashing salts only for the authorized hash rules. The `date-shift` action shifts the targeted date or time value by a per-patient offset. The offset is deterministically derived from the scope-derived seed material and the patient identifier, ensuring that all dates for the same patient within the same consistency scope are shifted by the same offset. The offset magnitude SHALL NOT exceed the `maxOffsetDays` parameter. The direction (forward or backward) is determined by the derivation.
+Date shifting requires purpose-specific derivation under the [declared processing capability](#fhir-processing-capabilities). The De-Identifier SHALL use patient hashing salts only for the authorized hash rules. The `date-shift` action shifts the targeted date or time value by a per-patient offset. The offset is deterministically derived from the scope-derived seed material and the patient identifier, ensuring that all dates for the same patient within the same consistency scope are shifted by the same offset. The offset magnitude SHALL NOT exceed the `maxOffsetDays` parameter. The direction (forward or backward) is determined by the derivation.
 
 Date shifting preserves temporal ordering and intervals between events for the same patient. The De-Identifier SHALL apply the same offset to all `date`, `dateTime`, `instant`, and `Period` elements for a given patient within a single task.
 
 For `Period` elements, shift each present bound by the same offset. If a date or dateTime has insufficient precision to determine a day, the De-Identifier SHALL fail the task when a date-shift rule selects it.
 
-Date-shift reference dates and offsets are protected transformation parameters. The linkage scope identifies where consistency is authorized. Derivation from purpose-specific seeds is preferred. Accepting precomputed parameters is an optional De-Identifier capability. If a generated parameter must be reused, an explicit capability contract SHALL define how it is returned to the Manager through a protected channel, retained as authorized, and reused in later tasks. See [reversibility material custody](volume-1.html#1pxx54-reversibility-material-custody).
+Date-shift reference dates and offsets are protected transformation parameters. The linkage scope identifies where consistency is authorized. Support for derivation is required in a combination that establishes core conformance. Accepting precomputed parameters is an optional De-Identifier capability. If a generated parameter must be reused, an explicit capability contract SHALL define how it is returned to the Manager through a protected channel, retained as authorized, and reused in later tasks. See [reversibility material custody](volume-1.html#1pxx54-reversibility-material-custody).
 
 ##### round
 
@@ -312,7 +312,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 **Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Contract resource with `Contract.type` coding `dis-execution-plan`.
 
-**Capability verification.** The De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
+**Capability verification.** The De-ID Manager SHALL verify that the complete assignment is supported by the target De-Identifier's [declared processing capabilities](#fhir-processing-capabilities) before dispatch. The Integrated actor applies the same check before local execution.
 
 For each applicable payload set, each ruleSet produces one execution plan Contract, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. Before dispatch, the Manager SHALL identify the exact source policy as specified in [Execution Plan Contract Structure](#execution-plan-source-policy).
 
@@ -472,6 +472,16 @@ The declared payload release determines the element selectors, traversal of the 
 ##### 3:PXX.3.2.1.1 FHIR Release and Capability Matching
 
 For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request if the declaration is absent or specifies a release other than `R4` or `R5`. The Manager SHALL use the same declaration in ITI-x3. A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
+
+<a name="fhir-processing-capabilities"> </a>
+
+##### FHIR processing capabilities
+
+For each reversibility option it declares, the De-Identifier or Integrated actor SHALL support and declare at least one R4 or R5 processing combination with all nine [core actions](#transformation-actions), as applicable to that mode. It MAY declare additional combinations with a subset of actions. In reversible mode the core combination SHALL support both task-scoped lookup-backed replacement and salted hashing with Manager-managed mappings. Apply the [reversibility option requirements](volume-1.html#1pxx22-reversible-pseudonymization-option) to the selected policy. AES-FF1 is an optional reversible capability.
+
+Each [DIS Processing Capability](StructureDefinition-dis-processing-capability.html) entry describes one combination of binding, release, input and result manifest format, reversibility mode and the actions supported together. For DIS-FHIR-Payload the input and result manifest formats in an entry SHALL match. De-Identifiers and externally invoked Integrated actors SHALL publish the entries in their implementation CapabilityStatement. A standalone Integrated actor SHALL make the same declaration available for inspection as part of its content conformance claim. The Requester and Manager declare support for their transaction roles as specified in Volume 2. The De-ID Manager SHALL find a single entry that matches the assignment and supports every action it requires. If no matching entry supports the assignment and its parameters, the Manager SHALL withhold dispatch.
+
+For each combination that includes `date-shift`, the processing actor SHALL document the supported derivation method and version, supported scope forms, patient identity inputs and limits for `maxOffsetDays`. The De-ID Manager SHALL verify compatibility with the assignment before dispatch and establish compatible derivation inputs across workers when the policy requires a consistent shift across tasks. The Integrated actor applies these checks locally. Provisioning of derivation material is deployment-defined. Confidential seeds and offsets are protected under the [custody rules](volume-1.html#1pxx54-reversibility-material-custody).
 
 <a name="3pxx121-element-addressing"> </a>
 
