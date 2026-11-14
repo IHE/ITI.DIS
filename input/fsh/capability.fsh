@@ -3,7 +3,7 @@
 Extension: DISProcessingCapability
 Id: dis-processing-capability
 Title: "DIS Processing Capability"
-Description: "One compatible payload binding, release, input manifest format, result manifest format, and reversibility mode. For DIS-FHIR-Payload, the input and result formats match. The actions listed are supported together for that combination. At least one combination per declared reversibility mode supports all core actions."
+Description: "One compatible payload binding, release, input manifest format and result manifest format, with the actions supported together for that combination. For DIS-FHIR-Payload, the input and result formats match. Reversibility options are declared separately."
 * ^context[0].type = #element
 * ^context[0].expression = "CapabilityStatement"
 * value[x] 0..0
@@ -12,7 +12,6 @@ Description: "One compatible payload binding, release, input manifest format, re
     release 1..1 and
     inputFormat 1..1 and
     resultFormat 1..1 and
-    reversibilityMode 1..1 and
     action 1..* and
     encryptionConfiguration 0..*
 * extension[binding].value[x] 1..1
@@ -23,8 +22,6 @@ Description: "One compatible payload binding, release, input manifest format, re
 * extension[inputFormat].value[x] only code
 * extension[resultFormat].value[x] 1..1
 * extension[resultFormat].value[x] only code
-* extension[reversibilityMode].value[x] 1..1
-* extension[reversibilityMode].value[x] only code
 * extension[action].value[x] 1..1
 * extension[action].value[x] only code
 * extension[action].value[x] from DisActionVS (required)
@@ -34,14 +31,25 @@ Description: "One compatible payload binding, release, input manifest format, re
 * obeys dis-ff1-capability
 
 Invariant: dis-ff1-capability
-Description: "The encrypt action requires reversible mode and at least one supported configuration revision. Other combinations omit encryption configurations."
+Description: "The encrypt action requires at least one supported configuration revision. Other combinations omit encryption configurations. Configuration revisions are distinct."
 Severity: #error
-Expression: "(extension.where(url = 'action').value.where($this = 'encrypt').exists() = extension.where(url = 'encryptionConfiguration').exists()) and (extension.where(url = 'encryptionConfiguration').empty() or extension.where(url = 'reversibilityMode').value = 'reversible') and extension.where(url = 'encryptionConfiguration').value.isDistinct()"
+Expression: "(extension.where(url = 'action').value.where($this = 'encrypt').exists() = extension.where(url = 'encryptionConfiguration').exists()) and extension.where(url = 'encryptionConfiguration').value.isDistinct()"
 
 Invariant: dis-ff1-configuration-uri
 Description: "An AES-FF1 configuration revision uses an absolute HTTPS IRI."
 Severity: #error
 Expression: "$this.matches('^https://[^?# ]+(/[^?# ]+)+$')"
+
+
+Extension: DISReversibilitySupport
+Id: dis-reversibility-support
+Title: "DIS Reversibility Support"
+Description: "A reversibility mode supported by the processing actor under the corresponding Volume 1 option. Declare one extension per supported mode on the implementation CapabilityStatement."
+* ^context[0].type = #element
+* ^context[0].expression = "CapabilityStatement"
+* value[x] 1..1
+* value[x] only code
+* valueCode from DisReversibilityVS (required)
 
 
 Extension: DISAsyncSupport

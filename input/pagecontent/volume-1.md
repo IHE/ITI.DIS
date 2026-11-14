@@ -89,7 +89,7 @@ The De-ID Manager retains persistent custody of Manager-managed identity mapping
 
 The De-Identifier executes assigned de-identification tasks received via ITI-x3. It applies supplied lookup mappings or derives pseudonyms and other transformation values under the execution plan. Its deployment manages the confidential salts for scoped patient identifier hashing. The Manager validates authorization and scope, and retains mappings when required for reversal. For reversible Manager-managed patient hashing, the De-Identifier returns the generated mappings in a protected DIS Lookup Table. It deletes task-local mapping material at task termination. The Integrated actor performs both roles internally.
 
-A De-Identifier SHALL declare its supported [FHIR processing combinations](volume-3.html#fhir-processing-capabilities), including releases, manifest formats, reversibility modes, actions and applicable transformation parameters. The De-ID Manager SHALL verify compatibility before dispatching an ITI-x3 task.
+A De-Identifier SHALL declare its [reversibility options and FHIR processing capabilities](volume-3.html#fhir-processing-capabilities). The De-ID Manager SHALL verify both declarations before dispatching an ITI-x3 task.
 
 <a name="integrated-de-id-manager-de-identifier"> </a>
 
@@ -103,7 +103,7 @@ The Integrated De-ID Manager/De-Identifier MAY operate standalone without extern
 
 The Integrated De-ID Manager/De-Identifier follows the same mapping arrangements and custody obligations as the De-ID Manager, including locally supplied lookup tables in standalone mode. Whether these records are persisted depends on the declared reversibility mode. Manager-managed persistent mappings remain within the integrated actor's trust boundary; supplied lookup tables follow §1:PXX.2.2.
 
-An Integrated De-ID Manager/De-Identifier SHALL declare its [FHIR processing combinations](volume-3.html#fhir-processing-capabilities) and check compatibility before local execution. Staged execution is performed internally; the integrated actor compiles and executes each ruleSet (and stage, when staging is declared) in sequence without externalizing the dispatch.
+An Integrated De-ID Manager/De-Identifier SHALL declare its [reversibility options and FHIR processing capabilities](volume-3.html#fhir-processing-capabilities) and check compatibility before local execution. Staged execution is performed internally; the integrated actor compiles and executes each ruleSet (and stage, when staging is declared) in sequence without externalizing the dispatch.
 
 ### 1:PXX.1.2 Transaction Descriptions
 
