@@ -60,18 +60,18 @@ Context: Task.input
 * extension[policy].value[x] only canonical
 * extension[policy].value[x] obeys dis-source-policy-version
 * extension[policyContent].value[x] 1..1
-* extension[policyContent].value[x] only Reference(DISSignedPolicy)
+* extension[policyContent].value[x] only Reference(DISPolicyContent)
 * extension[policyContent].value[x] obeys dis-work-order-local-policy
 * extension[lookupTable].value[x] 1..1
 * extension[lookupTable].value[x] only Reference(DISLookupTable)
 
-Profile: DISSignedPolicy
+Profile: DISPolicyContent
 Parent: Binary
-Id: DIS-SignedPolicy
-Title: "DIS Signed Policy"
-Description: "Contained JWS-signed policy Contract carried in a job submission."
+Id: DIS-PolicyContent
+Title: "DIS Policy Content Binary"
+Description: "Contained Binary carrying a serialized FHIR R4 Policy Contract in a job submission."
 * id 1..1
-* contentType = #"application/jose" (exactly)
+* contentType = #"application/fhir+json" (exactly)
 * data 1..1
 
 RuleSet: DISWorkOrderSubmission
@@ -100,7 +100,7 @@ Title: "De-Identification Job"
 Description: "FHIR R4 representation of the de-identification job submitted through ITI-x1. Each payload set identifies the applicable Agreement permission, purpose and exact approved policy version."
 * insert DISWorkOrderSubmission
 * code = $DISWorkOrderType#de-identification-job
-* contained only DISSignedPolicy
+* contained only DISPolicyContent
 * input contains authorization 1..1 and payloadSet 1..*
 * input[authorization].type = $DISTaskInput#authorization
 * input[authorization].value[x] 1..1
@@ -168,7 +168,7 @@ Severity: #error
 Expression: "$this = 'dis-resource-list' or $this = 'fhir-bulk-data'"
 
 Invariant: dis-work-order-local-policy
-Description: "Supplied signed policy content points to a contained Binary."
+Description: "Supplied policy content points to a contained Binary."
 Severity: #error
 Expression: "reference.matches('^#[A-Za-z0-9.-]{1,64}$')"
 
