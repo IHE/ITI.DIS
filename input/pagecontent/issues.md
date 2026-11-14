@@ -31,6 +31,8 @@ This supplement assesses conformance with published FHIR R4 or R5 processing pay
 
 The proposed DIS-REVERSIBLE method uses deterministic encryption to generate patient pseudonyms. Independent De-Identifiers must produce the same pseudonym for the same resolved identity within the authorized linkage scope. The De-Identifier returns the generated mappings through the protected lookup-table output, and the Manager uses those mappings for authorized resolution. [Issue #50](https://github.com/IHE/ITI.DIS/issues/50) tracks the binding, key provisioning assumptions, and conformance tests.
 
+For the proposed FF1 method, the published NIST SP 800-38G defines the algorithm. The February 2025 second public draft of Revision 1 is an informative reference for policy authors, including its proposed minimum FF1 domain of one million values. [NIST SP 800-38G](https://csrc.nist.gov/pubs/sp/800/38/g/upd1/final) · [NIST SP 800-38G Rev. 1, second public draft](https://csrc.nist.gov/pubs/sp/800/38/g/r1/2pd)
+
 <a name="data-recipient-and-push-delivery"> </a>
 
 #### Data Recipient Actor and Push Delivery
