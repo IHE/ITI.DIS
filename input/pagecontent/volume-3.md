@@ -122,7 +122,7 @@ Each DIS action code carries a `technique` property that identifies its ISO/IEC 
 | — | — | `keep` | `(element) → element` |
 {: .grid}
 
-ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic/format-preserving/homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE.
+ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic, format-preserving, and homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE. The [encryption proposal](#encryption-based-patient-pseudonymization) is described below for review.
 
 <a name="3pxx132-action-definitions"> </a>
 
@@ -205,7 +205,7 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 #### 3:PXX.1.2.3 Patient Identifier Pseudonymization
 
-Two actions can assign pseudonyms to patient business identifiers. Salted `hash` derives the pseudonym from the source identifier and linkage scope. Lookup-backed `replace` uses a mapping supplied for the authorized scope.
+Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. The proposed third method derives the pseudonym through [deterministic encryption](#encryption-based-patient-pseudonymization) and returns the generated mapping for authorized reversal.
 
 **Salted hash derivation.**
 
@@ -228,6 +228,16 @@ Salted test vector. The exact UTF-8 message is `["DIS-patient-identifier-v1","so
 **Lookup-backed assignment.**
 
 The De-Identifier uses the supplied [lookup table](#3pxx5-reversible-lookup-table) to replace `Patient.identifier`. `sourceSystem` and `sourceValue` are the original `Identifier.system` and `Identifier.value`. `targetSystem` and `targetValue` are the pseudonym identifier pair. The De-Identifier SHALL match both source fields exactly, without implicit normalization, and replace both target fields. A supplied table may map multiple approved source identifiers to one assigned pseudonym for the same patient. The table authority and Manager SHALL ensure that a shared target pair is authorized for the same patient. A missing or conflicting source mapping SHALL fail the job without partial output.
+
+<a name="encryption-based-patient-pseudonymization"> </a>
+
+##### Encryption-based derivation (Informative Proposal)
+
+The approved de-identification policy would select deterministic encryption as an optional method under DIS-REVERSIBLE. The De-Identifier would encrypt the resolved patient business identifier and use the result as the pseudonym under the approved output namespace. AES-FF1 is the first candidate for identifiers that must preserve their original alphabet and length. For FF1, the policy would specify the AES key size, ordered alphabet, allowed lengths, handling of prefixes, separators and check digits where applicable, and the exact derivation of the tweak that binds encryption to the linkage context. Policy authors should follow [NIST SP 800-38G](https://csrc.nist.gov/pubs/sp/800/38/g/upd1/final) and consult [the second public draft of Revision 1](https://csrc.nist.gov/pubs/sp/800/38/g/r1/2pd) for updated domain-size guidance.
+
+The Manager would validate and pin the effective configuration, resolved linkage scope, and non-secret key-version identifier for assignments and their retries. Independent De-Identifiers must produce the same pseudonym for the same resolved patient identity within the authorized scope. They use the same effective configuration, key and tweak. If source identifiers differ, the deployment first resolves them to the common identity input. The deployment provisions the key through its authorized arrangements and keeps key material out of DIS transactions.
+
+For Manager-managed reversal, the De-Identifier would return the original-to-pseudonym pairs in the protected [`generatedLookupTable`](#3pxx5-reversible-lookup-table). The Manager would validate and retain the authorized mappings before releasing the job result and could resolve a pseudonym by lookup without holding the encryption key. The policy and execution-plan encoding for encryption is under review in [issue #50](https://github.com/IHE/ITI.DIS/issues/50).
 
 <a name="3pxx22-policy-rules-json-structure"> </a>
 
@@ -535,7 +545,7 @@ This decoded execution plan compiles the clinical pathology [policy example](exa
 
 The De-Identifier SHALL ensure that references between retained resources resolve correctly in the de-identified output. In a Bundle, this includes keeping `Bundle.entry.fullUrl` values and internal references consistent with the resource identities in the output. Handle references to removed resources and external references according to the approved policy. The De-Identifier SHALL fail the task without partial output if it cannot produce a valid result under the declared FHIR version and policy.
 
-Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. The lookup-table and hash bindings define that transformation. The output packaging rules govern FHIR resource identities and references.
+Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods and the encryption proposal. The output packaging rules govern FHIR resource identities and references.
 
 <a name="payload-bindings"> </a>
 
