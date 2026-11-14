@@ -296,6 +296,33 @@ dis:sourceRule
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> ;
     rdfs:range odrl:Duty .
 
+dis:purposeClassification
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Purpose classification"@en ;
+    skos:definition "Optional classification of the specific purpose approved by an Agreement permission."@en ;
+    rdfs:domain odrl:Permission ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+dis:classificationSystem
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Classification system"@en ;
+    skos:definition "IRI identifying the publication that defines the purpose classification codes."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+dis:classificationVersion
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Classification version"@en ;
+    skos:definition "Edition of the identified purpose classification system."@en ;
+    rdfs:range xsd:string ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+dis:classificationCode
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Classification code"@en ;
+    skos:definition "Case-sensitive string identifying a purpose heading or category in the stated edition."@en ;
+    rdfs:range xsd:string ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
 # Terms used as properties and as left operands
 
 dis:payloadBinding
