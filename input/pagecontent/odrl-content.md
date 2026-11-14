@@ -31,6 +31,30 @@ The Agreement contains an immutable `uid`, a `dis:approvedRequest` identifying t
 
 A permission SHALL carry the conditions above in a `constraint` array and all conditions SHALL hold. An IRI reference in a right operand uses the explicit `{"@id": "..."}` form. The scope identified by the target defines eligible data sources and selection criteria or identifies exact eligible resources or files and versions. The scope can precede extraction. The Manager SHALL verify the scope and its binding to the grant under the [admission and release rules](volume-3.html#data-request-authorization). An optional `dis:parentAliasRecipient` IRI reference on a permission identifies a worker organization authorized to receive the alias for that set. Absence of the property grants no such disclosure.
 
+### Purpose classification
+
+A permission MAY include one `dis:purposeClassification` object to classify the purpose in its required `purpose` constraint. The issuer selects the applicable headings or categories from [ISO/TS 14265:2024, Clause 6, Table 1](https://www.iso.org/standard/83447.html). A permission without this object is valid.
+
+| Property | Value form |
+| --- | --- |
+| `dis:classificationSystem` | One IRI reference in `{"@id":"..."}` form. Use `https://www.iso.org/standard/83447.html` as the DIS identifier for the ISO publication. |
+| `dis:classificationVersion` | One string equal to `2024`. |
+| `dis:classificationCode` | A nonempty array of distinct, case-sensitive code strings from the table below. Array order has no significance. |
+
+| ISO heading | Accepted codes, including the heading code |
+| --- | --- |
+| Person centred care | `1.0`, `1.1`, `1.2`, `1.3`, `1.4`, `1.5`, `1.6` |
+| Health service management and quality assurance | `2.0`, `2.1`, `2.2`, `2.3`, `2.4`, `2.5`, `2.6` |
+| Population and public health | `3.0`, `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6` |
+| Clinical research | `4.0`, `4.1`, `4.2`, `4.3`, `D4` |
+| Education and training | `5.0`, `5.1`, `5.2` |
+| Compliance with legal obligations | `6.0`, `6.1`, `6.2` |
+| Not stated | `7.0`, `7.1`, `7.2` |
+
+`D4` is the code printed for health systems evaluations in the 2024 table. Use the codes exactly as listed, including the trailing zero in a heading code.
+
+The De-ID Manager SHALL validate the object when present. The object SHALL contain exactly the three properties listed above. An unsupported system or edition, an unknown code, a numeric value, a duplicate code, or an empty code array makes the Agreement invalid. The classification describes the issuer's approved purpose. The Manager SHALL still evaluate the `purpose` constraint by matching the job's purpose IRI to the selected permission's approved purpose IRI. A shared classification, including any `7.x` code, SHALL NOT satisfy that match, widen the grant, or substitute for the approved purpose IRI. No lookup of the ISO publication is needed to process the Agreement.
+
 ## Sets for policy and plan
 
 Both Sets carry `obligation` as a nonempty array of ODRL Duty rules. Each obligation has a unique absolute IRI `uid`, exactly one `target` and one `action`. An obligation SHALL NOT carry its own assigner or assignee. The eligible role performs each obligation. The Manager compiles the Policy obligations, and the De-Identifier or Integrated actor applies the compiled Plan obligations to its assigned inputs.
@@ -72,20 +96,20 @@ These JSON-LD examples show the decoded attachments for the [mixed-release excha
 
 ### Data Request Authorization Agreement Example
 
-This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentReference in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). It includes both permissions selected by the [ITI-x1 de-identification job](Task-grouped-fhir-job-request.html).
+This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentReference in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). It includes both permissions selected by the [ITI-x1 de-identification job](Task-grouped-fhir-job-request.html). Both permissions classify the approved project to develop a healthcare algorithm under code `4.2` (health technology innovation).
 
 ```json
 {
   "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
   "@type": "Agreement",
-  "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/1",
+  "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/2",
   "profile": "dis:DataRequestAuthorization",
   "dis:approvedRequest": {
     "@id": "https://governance.example.org/requests/grouped-fhir-job-request/versions/1"
   },
   "permission": [
     {
-      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/1#patient-r4",
+      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/2#patient-r4",
       "assigner": "https://governance.example.org/organizations/approval-authority",
       "assignee": "https://coordinator.example.org/organizations/requester",
       "action": "dis:deIdentify",
@@ -139,10 +163,19 @@ This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentRe
       ],
       "dis:parentAliasRecipient": {
         "@id": "https://dis.example.org/organizations/example-worker"
+      },
+      "dis:purposeClassification": {
+        "dis:classificationSystem": {
+          "@id": "https://www.iso.org/standard/83447.html"
+        },
+        "dis:classificationVersion": "2024",
+        "dis:classificationCode": [
+          "4.2"
+        ]
       }
     },
     {
-      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/1#imaging-report-r5",
+      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/2#imaging-report-r5",
       "assigner": "https://governance.example.org/organizations/approval-authority",
       "assignee": "https://coordinator.example.org/organizations/requester",
       "action": "dis:deIdentify",
@@ -193,7 +226,16 @@ This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentRe
             "@id": "https://coordinator.example.org/organizations/requester"
           }
         }
-      ]
+      ],
+      "dis:purposeClassification": {
+        "dis:classificationSystem": {
+          "@id": "https://www.iso.org/standard/83447.html"
+        },
+        "dis:classificationVersion": "2024",
+        "dis:classificationCode": [
+          "4.2"
+        ]
+      }
     }
   ]
 }
