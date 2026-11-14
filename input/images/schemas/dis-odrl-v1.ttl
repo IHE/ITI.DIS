@@ -54,7 +54,8 @@ dis:replace
     rdfs:label "Replace"@en ;
     skos:definition "Replace the selected content with a fixed value or apply an authoritative reversible lookup mapping."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#replace> ;
-    odrl:includedIn odrl:use .
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:value, dis:source .
 
 dis:keep
     a odrl:Action, skos:Concept ;
@@ -68,35 +69,40 @@ dis:hash
     rdfs:label "Hash"@en ;
     skos:definition "Replace the selected value with a digest using the specified salted or unsalted recipe."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#hash> ;
-    odrl:includedIn odrl:use .
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:mode, dis:algorithm, dis:pseudonymSystem, dis:identity-linkage-scope .
 
 dis:truncate-date
     a odrl:Action, skos:Concept ;
     rdfs:label "Truncate date"@en ;
     skos:definition "Reduce date precision to the specified year or year-month granularity."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#truncate-date> ;
-    odrl:includedIn odrl:use .
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:precision .
 
 dis:date-shift
     a odrl:Action, skos:Concept ;
     rdfs:label "Date shift"@en ;
     skos:definition "Shift selected dates by a consistent per-patient offset within the specified bound."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#date-shift> ;
-    odrl:includedIn odrl:use .
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:maxOffsetDays, dis:scope .
 
 dis:round
     a odrl:Action, skos:Concept ;
     rdfs:label "Round"@en ;
     skos:definition "Round the selected numeric value to the nearest multiple of the specified step."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#round> ;
-    odrl:includedIn odrl:use .
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:step .
 
 dis:truncate
     a odrl:Action, skos:Concept ;
     rdfs:label "Truncate"@en ;
     skos:definition "Retain the specified number of leading characters of the selected string."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#truncate> ;
-    odrl:includedIn odrl:use .
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:length .
 
 dis:redact
     a odrl:Action, skos:Concept ;
@@ -104,6 +110,16 @@ dis:redact
     skos:definition "Replace selected FHIR narrative with the fixed redaction placeholder."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#redact> ;
     odrl:includedIn odrl:use .
+
+# Vocabulary metadata
+
+dis:actionParameter
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Action parameter"@en ;
+    skos:definition "Links an action to a left operand permitted in a DIS action refinement under at least one of the policy or execution plan profiles."@en ;
+    rdfs:domain odrl:Action ;
+    rdfs:range odrl:LeftOperand ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 # Constraint and refinement left operands
 

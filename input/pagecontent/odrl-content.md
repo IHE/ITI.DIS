@@ -76,6 +76,8 @@ The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI and 
 
 ### Action parameters
 
+In the RDF vocabulary, `dis:actionParameter` links each action to its available refinement operands. The links identify parameters allowed in the policy, the execution plan, or both. This property is vocabulary metadata only. In JSON-LD action expressions, send parameter values using `refinement` and apply the profile-specific requirements below.
+
 The action SHALL be one of the [DIS transformation action IRIs](volume-3.html#transformation-actions). For `remove`, `keep`, or `redact`, encode `action` as the action IRI string. For the other actions, `action` SHALL be an object with one `rdf:value` IRI reference such as `{"@id":"dis:truncate-date"}` and a nonempty `refinement` array. Use one refinement per supplied parameter. Each refinement SHALL contain exactly one `leftOperand` from the table, the operator `eq`, and the listed `rightOperand` value form. The order of action refinements has no significance. Receivers SHALL reject duplicate operands, missing required parameters, extraneous parameters, and invalid operators, types, or values.
 
 | Action | Policy rule parameters | Compiled plan rule parameters |
