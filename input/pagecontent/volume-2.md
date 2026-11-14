@@ -11,14 +11,14 @@ The following transactions are specified in this volume:
 
 ## Shared Work Orders and Payload Sets
 
-ITI-x1 and ITI-x3 each define one required operation input named `workItem` of type `Task`. The sender SHALL POST the applicable profiled R4 Task directly as the request body. The body carries one complete work order. Successful HTTP 200 responses use R4 `Parameters`. Polling GET requests have no body. The optional [cancellation contract](#asynchronous-cancellation) defines DELETE messages at the same polling URLs.
+ITI-x1 and ITI-x3 each define one required operation input named `workItem` of type `Task`. The sender SHALL POST the applicable profiled R4 Task directly as the request body. The body carries one complete work order. Successful HTTP 200 responses use R4 `Parameters`. Polling GET requests have no body. The [asynchronous cancellation contract](#asynchronous-cancellation) defines DELETE messages at the same polling URLs.
 
 | Transaction | Input | Successful response |
 |-------------|-------|---------------------|
 | ITI-x1 Submit De-Identification Job | FHIR R4 `Task` conforming to the [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.html) with one authorization and one or more payload sets. | HTTP 200 with one `payloadResult` per submitted set and one `validationStatus`, or HTTP 202 with `Content-Location` and an empty body for an accepted async job. |
 | ITI-x3 Submit De-Identification Task | FHIR R4 `Task` conforming to the [De-Identification Task profile](StructureDefinition-DIS-DeIdentificationTask.html) with one assigned set and its execution instructions. | HTTP 200 with one `payloadResult` and one `validationStatus`, plus a protected `generatedLookupTable` when required, or HTTP 202 with `Content-Location` and an empty body for an accepted async task. |
 | ITI-x4 Retrieve Job Output | Authorized GET or DELETE of an asynchronous job polling URL. | HTTP 200 with the same body as synchronous ITI-x1 success. HTTP 202 indicates processing is pending and carries no result. |
-| ITI-x7 Retrieve Task Output | Authorized GET of the task polling URL, or DELETE when cancellable mode was confirmed. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
+| ITI-x7 Retrieve Task Output | Authorized GET or DELETE of an asynchronous task polling URL. | HTTP 200 with the same body as synchronous ITI-x3 success. HTTP 202 indicates processing is pending and carries no result. |
 {: .grid}
 
 The sender SHALL assign a business identifier with a system and value to the work order. The receiver SHALL correlate work and handle retries according to the [shared identifier and retry rules](#submission-retries). For asynchronous acceptance, it SHALL associate the polling URL with the accepted work order and its identifier. Access to the polling URL requires the authorization defined for ITI-x4 or ITI-x7.
@@ -58,7 +58,7 @@ Audit records SHALL distinguish a new submission, a recovery request, a poll, a 
 
 ### Capability declaration
 
-An actor declaring DIS-ASYNC-JOB or DIS-ASYNC-TASK SHALL include one [DIS Asynchronous Processing Support extension](StructureDefinition-dis-async-support.html) with `valueBoolean = true` on the corresponding `CapabilityStatement.rest.operation` entry of its implementation CapabilityStatement. The operation definition and REST mode identify the exchange and role.
+An actor declaring DIS-ASYNC-JOB or DIS-ASYNC-TASK SHALL include one [DIS Asynchronous Processing Support extension](StructureDefinition-dis-async-support.html) with `valueBoolean = true` on the corresponding `CapabilityStatement.rest.operation` entry of its implementation CapabilityStatement. The extension declares support for polling and cancellation in ITI-x4 or ITI-x7. The operation definition and REST mode identify the exchange and role.
 
 | Option | Operation entry | Client | Server |
 |---|---|---|---|
@@ -72,7 +72,7 @@ An implementation SHALL omit the extension on entries for which it does not supp
 {
   "name": "submit-dis-task",
   "definition": "https://profiles.ihe.net/ITI/DIS/OperationDefinition/submit-dis-task",
-  "documentation": "Terminal polling outcomes and submission replay records are each retained for at least 24 hours.",
+  "documentation": "Terminal polling outcomes and submission replay records are each retained for at least 24 hours. The maximum pending cancellation interval is 10 minutes. Cancellation outcomes are retained for at least 24 hours.",
   "extension": [
     {
       "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-async-support",
@@ -92,7 +92,7 @@ For ITI-x4 and ITI-x7, the responder SHALL keep the polling URL usable while pro
 
 These rules apply to ITI-x1 and ITI-x3. The receiver SHALL identify a submission by the receiving deployment and operation, the authenticated submitting actor, and the exact `Task.identifier.system` and `Task.identifier.value` pair. Credential changes that still authenticate the same actor preserve that scope. The submitter SHALL assign a fresh pair for each distinct work order in that scope. The business identifier is independent of the FHIR logical ID and polling URL.
 
-A retry is equivalent when it preserves the scope, the exact FHIR JSON body bytes after HTTP content decoding, and the original selection for `Prefer: respond-async`. For ITI-x3, it also preserves the selection for `DIS-Cancellation: required`. The sender SHALL preserve the original body bytes for retries. The receiver MAY retain a protected fingerprint of those bytes for comparison.
+A retry is equivalent when it preserves the scope, the exact FHIR JSON body bytes after HTTP content decoding, and the original selection for `Prefer: respond-async`. The sender SHALL preserve the original body bytes for retries. The receiver MAY retain a protected fingerprint of those bytes for comparison.
 
 The receiver SHALL enforce a single admission per scoped identifier, including for concurrent requests. It SHALL record the binding before starting work and make an asynchronous acceptance and its original polling URL recoverable before sending HTTP 202. An ordinary equivalent repeat uses the recorded submission. An authorized repeat with changed bytes or processing selections SHALL return HTTP 409 with an R4 `OperationOutcome` indicating an identifier conflict.
 
@@ -101,7 +101,7 @@ To recover an uncertain submission outcome, the sender SHALL POST the equivalent
 | Recorded state | Response to an authorized equivalent repeat |
 |---|---|
 | Initial admission or synchronous execution is pending | HTTP 409 with `DIS-Submission: pending` and an R4 `OperationOutcome`. The receiver SHOULD include `Retry-After` in seconds. |
-| Asynchronous work was accepted and its polling URL remains available | The original HTTP 202 acceptance with the same `Content-Location` and, for an ITI-x3 task accepted in cancellable mode, `DIS-Cancellation: enabled`. Include `DIS-Submission: replayed`. The sender polls that URL for current status. |
+| Asynchronous work was accepted and its polling URL remains available | The original HTTP 202 acceptance with the same `Content-Location`. Include `DIS-Submission: replayed`. The sender polls that URL for current status. |
 | A definitive rejection or synchronous outcome is retained | The recorded response with `DIS-Submission: replayed`. |
 | The receiver knows the recorded response or polling URL has expired | HTTP 410 with an R4 `OperationOutcome`. |
 | No record is visible to the authorized sender and recovery only was requested | HTTP 404 with an R4 `OperationOutcome`. This response does not establish that the original submission was rejected or that work has stopped. |
@@ -114,26 +114,22 @@ The receiver SHALL document its minimum replay retention period in the applicabl
 
 ## Shared Asynchronous Cancellation Contract
 
-This contract applies to asynchronous jobs under [DIS-ASYNC-JOB](volume-1.html#1pxx24-asynchronous-job-processing-option) and tasks accepted in cancellable mode under [DIS-CANCEL](volume-1.html#asynchronous-cancellation-option). It uses the `DELETE` interaction on the polling URL, following the [FHIR R4 Asynchronous Request Pattern]({{site.data.fhir.path}}async.html). The polling URL identifies the accepted work item.
+This contract applies to asynchronous jobs under [DIS-ASYNC-JOB](volume-1.html#1pxx24-asynchronous-job-processing-option) and asynchronous tasks under [DIS-ASYNC-TASK](volume-1.html#1pxx25-asynchronous-task-processing-option). It uses the `DELETE` interaction on the polling URL, following the [FHIR R4 Asynchronous Request Pattern]({{site.data.fhir.path}}async.html). The polling URL identifies the accepted work item.
 
 ### Capability and submission
 
-An asynchronous job accepted through ITI-x1 supports the ITI-x4 cancellation interaction. The [asynchronous processing support extension](#asynchronous-capability-declaration) on the job submission operation covers both polling and cancellation. ITI-x1 uses `Prefer: respond-async` for asynchronous submission. The receiver SHALL reject `DIS-Cancellation: required` on ITI-x1 with HTTP 400 and an R4 `OperationOutcome`. ITI-x1 acceptance does not return `DIS-Cancellation: enabled`.
-
-A Manager and De-Identifier declaring DIS-CANCEL SHALL include the [DIS Asynchronous Cancellation Support extension](StructureDefinition-dis-cancellation-support.html) with `valueBoolean = true` alongside the asynchronous processing support extension on their respective ITI-x3 operation entries. Before requesting cancellable task mode, the Manager SHALL verify both extensions on the De-Identifier's server entry.
-
-The Manager selects cancellable task mode on ITI-x3 with both `Prefer: respond-async` and `DIS-Cancellation: required`. The De-Identifier SHALL reject the latter without `Prefer: respond-async` with HTTP 400 and an R4 `OperationOutcome`. If it cannot accept the task in cancellable mode, it SHALL return HTTP 422 with an R4 `OperationOutcome` without accepting the assignment. It confirms acceptance in cancellable mode with HTTP 202 and both `Content-Location` and `DIS-Cancellation: enabled`. Missing confirmation can leave the assignment outcome unknown and SHALL NOT be treated as proof that the assignment did not start.
+Every asynchronous job or task accepted through ITI-x1 or ITI-x3 supports cancellation on its polling URL. The [asynchronous processing support extension](#asynchronous-capability-declaration) covers both polling and cancellation. The initiator selects asynchronous processing with `Prefer: respond-async`. A receiver SHALL reject `DIS-Cancellation: required` on either submission operation with HTTP 400 and an R4 `OperationOutcome`. The HTTP 202 acceptance identifies the polling URL in `Content-Location`. See the [submission recovery rules](#submission-retries) if the acceptance response is lost.
 
 ### Cancellation and polling responses
 
-The initiator SHALL send an authorized `DELETE` with an empty body to the exact `Content-Location` returned at submission. The receiver SHALL enforce cancellation authorization independently of polling authorization. It SHALL return HTTP 401 for missing or invalid credentials and HTTP 403 for an authenticated caller without cancellation permission. For an authorized caller of a polling URL whose task was accepted without cancellable mode, it SHALL return HTTP 405 with `Allow: GET`. These responses SHALL include an R4 `OperationOutcome` without changing the work item state or disclosing cancellation details. The following responses apply to authorized cancellation requests and authorized polls of the same URL. Responses for pending, cancelled, or unconfirmed cancellation SHALL contain `Cache-Control: no-store` and SHALL withhold all results for the work item. The receiver SHALL document its maximum pending confirmation interval and minimum terminal cancellation status retention period in the corresponding server operation's CapabilityStatement documentation. The confirmation interval starts when cancellation is accepted. The retention period starts when the receiver first records `cancelled` or `unconfirmed`. The receiver SHALL keep the polling URL available through both intervals.
+The initiator SHALL send an authorized `DELETE` with an empty body to the exact `Content-Location` returned at submission. The receiver SHALL enforce cancellation authorization independently of polling authorization. It SHALL return HTTP 401 for missing or invalid credentials and HTTP 403 for an authenticated caller without cancellation permission. These responses SHALL include an R4 `OperationOutcome` without changing the work item state or disclosing cancellation details. The following responses apply to authorized cancellation requests and authorized polls of the same URL. Responses for pending, cancelled, or unconfirmed cancellation SHALL contain `Cache-Control: no-store` and SHALL withhold all results for the work item. The receiver SHALL document its maximum pending confirmation interval and minimum terminal cancellation status retention period in the corresponding server operation's CapabilityStatement documentation. The confirmation interval starts when cancellation is accepted. The retention period starts when the receiver first records `cancelled` or `unconfirmed`. The receiver SHALL keep the polling URL available through both intervals.
 
 | State or outcome | Response to cancellation request | Response to subsequent poll |
 |---|---|---|
 | Cancellation accepted and still pending | HTTP 202 with `DIS-Cancellation: pending` and an empty body. | HTTP 202 with `DIS-Cancellation: pending` and an empty body. |
 | Cancellation confirmed | HTTP 204 with `DIS-Cancellation: cancelled` and an empty body. | HTTP 410 with `DIS-Cancellation: cancelled` and an R4 `OperationOutcome`. |
 | Cancellation accepted, confirmation interval expired with work still unconfirmed | HTTP 422 with `DIS-Cancellation: unconfirmed` and an R4 `OperationOutcome`. | The same HTTP 422 outcome. |
-| Job cancellation rejected while a non-cancellable assignment is outstanding | HTTP 409 with an R4 `OperationOutcome` describing the conflict without exposing worker details. | Ordinary job polling continues. |
+| Job cancellation rejected while a synchronous assignment is outstanding | HTTP 409 with an R4 `OperationOutcome` describing the conflict without exposing worker details. | Ordinary job polling continues. |
 | Work was already terminal before cancellation took effect | HTTP 409 with an R4 `OperationOutcome` describing the conflict. | The ordinary terminal response for that work item. |
 
 {: .grid}
@@ -395,7 +391,7 @@ The De-ID Manager SHALL set the `reversibility-mode` input in every ITI-x3 submi
 
 When using `lookup-table`, the Manager SHALL dispatch only a protected reference to a document with the entries needed for the assigned task. If the source contains additional entries, the Manager SHALL create a [task-scoped lookup document](volume-3.html#3pxx5-reversible-lookup-table) and track its correlation to the pinned source. The De-Identifier's credentials SHALL NOT grant access to the unrestricted table in that case. The Manager SHALL delete derived task artifacts at termination unless retention is explicitly authorized.
 
-To request asynchronous task processing when both actors support DIS-ASYNC-TASK, the Manager SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern. To select cancellable task mode, the Manager SHALL also follow the [shared cancellation contract](#asynchronous-cancellation).
+To request asynchronous task processing when both actors support DIS-ASYNC-TASK, the Manager SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
 <div markdown="1" class="stu-note">
 **Editorial Note:** The draft [Submit DIS Task OperationDefinition](OperationDefinition-submit-dis-task.html) describes this exchange. Its parameter definitions remain under review alongside the transaction text.
@@ -450,13 +446,13 @@ The De-Identifier returns one of the HTTP status codes described below.
 
 The De-Identifier SHALL return one `payloadResult` matching the dispatched `setId`, binding, and version, with its evidence. For DIS-FHIR-Payload, the result `manifestFormat` SHALL match the assigned input manifest format. The Manager SHALL reject a task result with a different manifest format. This rule also applies to ITI-x7 success.
 
-**202 Accepted — Asynchronous accepted (DIS-ASYNC-TASK).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x7.
+**202 Accepted — Asynchronous accepted (DIS-ASYNC-TASK).** The response body is empty. The `Content-Location` response header contains the URL for ITI-x7 polling and cancellation.
 
 **400 Bad Request.** The response body is an R4 `OperationOutcome` describing the malformed or nonconforming task submission.
 
 **401 Unauthorized / 403 Forbidden.** The response body is an R4 `OperationOutcome` describing the authorization failure.
 
-**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's processing combination or required transformation actions fall outside the De-Identifier's declared capabilities or that the requested asynchronous or cancellable mode is unavailable.
+**422 Unprocessable Entity.** The response body is an HL7 FHIR R4 `OperationOutcome` indicating that the task's processing combination or required transformation actions fall outside the De-Identifier's declared capabilities or that asynchronous processing is unavailable.
 
 **500 Internal Server Error.** The response body is an HL7 FHIR R4 `OperationOutcome` describing the execution failure. No partial output is returned.
 
@@ -586,9 +582,9 @@ On an error response, the Requester SHALL inspect the OperationOutcome and SHALL
 
 The Requester uses the [shared cancellation contract](#asynchronous-cancellation) to request cancellation of an accepted asynchronous job. The Manager SHALL authorize only the original Requester or an explicitly authorized cancellation delegate to cancel the job.
 
-The Manager SHALL coordinate the cancellation decision with dispatch and terminal outcome publication. An assignment counts as outstanding from the point dispatch is committed until a known terminal outcome or a definitive rejection establishes that it did not start. Before accepting cancellation of an active job, the Manager SHALL verify that every outstanding assignment was submitted in cancellable task mode and that no response has established that an assignment was accepted without that mode. An in-flight submission with cancellable mode requested can be accounted for through the recovery rules below. If an outstanding assignment does not meet this check, the Manager SHALL reject cancellation with HTTP 409 and an R4 `OperationOutcome` and SHALL omit the `DIS-Cancellation` response header. Rejection leaves the job status, dispatch and result release rules in effect. For an authorized cancellation request on an active job, the Manager SHALL accept cancellation when no outstanding assignment blocks it. The Requester may retry after the blocking assignments reach known terminal states.
+The Manager SHALL coordinate the cancellation decision with dispatch and terminal outcome publication. An assignment counts as outstanding from the point dispatch is committed until a known terminal outcome or a definitive rejection establishes that it did not start. If any outstanding assignment was submitted for synchronous processing, the Manager SHALL reject cancellation with HTTP 409 and an R4 `OperationOutcome` and SHALL omit the `DIS-Cancellation` response header. Rejection leaves the job status, dispatch and result release rules in effect. For an authorized cancellation request on an active job, the Manager SHALL accept cancellation when no outstanding assignment blocks it. The Requester may retry after the blocking assignments reach known terminal states.
 
-On accepting cancellation, the Manager SHALL stop new dispatch and further local de-identification, block all job result release, and request ITI-x7 cancellation for each outstanding remote assignment for which it has a polling URL and confirmation of cancellable mode. It SHALL also account for submissions already in flight. If the polling URL and confirmation become available while an assignment may still be running, the Manager SHALL request cancellation at that URL. For a lost polling URL, the Manager SHALL use the [recovery-only request](#submission-retries) for the original assignment. It SHALL account for a recorded definitive rejection as an assignment that did not start. A missing record or an expired URL alone does not establish that the assignment is terminal.
+On accepting cancellation, the Manager SHALL stop new dispatch and further local de-identification, block all job result release, and request ITI-x7 cancellation for each outstanding asynchronous assignment for which it has a polling URL. It SHALL also account for submissions already in flight. If the polling URL becomes available while an assignment may still be running, the Manager SHALL request cancellation at that URL. For a lost polling URL, the Manager SHALL use the [recovery-only request](#submission-retries) for the original assignment. It SHALL account for a recorded definitive rejection as an assignment that did not start. A missing record or an expired URL alone does not establish that the assignment is terminal.
 
 The Manager SHALL report confirmed cancellation only after local work has stopped and each dispatched assignment has reached a known terminal state. An assignment that completed or failed before its cancellation was applied counts as terminal. An unconfirmed cancellation response does not establish a terminal task state. The Manager SHALL discard any results from such assignments and SHALL NOT expose their evidence or mappings to the Requester. If the confirmation interval expires with an unresolved assignment, the Manager SHALL report unconfirmed cancellation and continue to withhold all job results. It SHALL continue cancellation of any outstanding assignments it can still address. An Integrated actor applies the same job rules to its local work.
 
@@ -612,7 +608,7 @@ The De-Identification Requester and the De-ID Manager (or Integrated De-ID Manag
 
 ### 2:3.x7.1 Scope
 
-The Retrieve Task Output transaction is used by the De-ID Manager to retrieve the status and output of a previously dispatched asynchronous de-identification task from a De-Identifier. The Manager polls the De-Identifier using the task handle received in the ITI-x3 202 Accepted response. The De-Identifier returns the current task status, and when the task is complete, returns the de-identified output and provenance evidence. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is declared. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
+The Retrieve Task Output transaction is used by the De-ID Manager to retrieve the status and output of a previously dispatched asynchronous de-identification task from a De-Identifier. The Manager polls the De-Identifier using the task handle received in the ITI-x3 202 Accepted response. The De-Identifier returns the current task status, and when the task is complete, returns the de-identified output and provenance evidence. The Manager can also request cancellation of an accepted asynchronous task at the same URL. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is declared. This transaction does not apply to the Integrated De-ID Manager/De-Identifier.
 
 ### 2:3.x7.2 Actors Roles
 
@@ -622,8 +618,8 @@ Table 2:3.x7.2-1 lists the actors and their roles in this transaction.
 
 | Actor | Role |
 |-------|------|
-| [De-ID Manager](volume-1.html#de-id-manager) | Initiates the poll request, presenting the task handle received from ITI-x3 |
-| [De-Identifier](volume-1.html#de-identifier) | Receives the poll request and returns task status, de-identified output, and evidence upon completion |
+| [De-ID Manager](volume-1.html#de-id-manager) | Initiates polling and cancellation requests at the task URL received from ITI-x3 |
+| [De-Identifier](volume-1.html#de-identifier) | Handles polling and cancellation requests and returns task status, de-identified output, and evidence upon successful completion |
 {: .grid}
 
 ### 2:3.x7.3 Referenced Standards
@@ -698,15 +694,15 @@ On an error response, the Manager SHALL inspect the OperationOutcome and any `DI
 
 #### 2:3.x7.4.3 Cancel De-Identification Task
 
-The Manager uses the [shared cancellation contract](#asynchronous-cancellation) to cancel an outstanding task accepted in cancellable mode, including when propagating accepted job cancellation. The De-Identifier SHALL verify that the caller is authorized to cancel the assigned task and that the task was accepted in cancellable mode. On accepting cancellation, the De-Identifier SHALL stop processing, apply the existing cleanup requirements for task-local material, and withhold task output, evidence, and generated mappings. It SHALL report confirmed cancellation only after the assigned work has stopped.
+The Manager uses the [shared cancellation contract](#asynchronous-cancellation) to cancel an accepted asynchronous task, including when propagating accepted job cancellation. The De-Identifier SHALL verify that the caller is authorized to cancel the assigned task. On accepting cancellation, the De-Identifier SHALL stop processing, apply the existing cleanup requirements for task-local material, and withhold task output, evidence, and generated mappings. It SHALL report confirmed cancellation only after the assigned work has stopped.
 
 If the De-Identifier reports that an assignment was already terminal, the Manager SHALL use the ordinary authorized ITI-x7 poll to determine its terminal outcome. The Manager SHALL apply the job cancellation and release rules in [ITI-x4](#job-cancellation).
 
 ### 2:3.x7.5 CapabilityStatement Resource
 
-The De-Identifier declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) declaring support for the ITI-x7 polling interaction as specified in the [shared capability declaration](#asynchronous-capability-declaration).
+The De-Identifier declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource as described in [ITI TF-2: Appendix Z.3](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.3-capabilitystatement-resource) declaring support for ITI-x7 polling and task cancellation as specified in the [shared capability declaration](#asynchronous-capability-declaration).
 
-The De-ID Manager declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource declaring that it can perform the ITI-x7 polling interaction using the same extension on its client entry. Actors supporting cancellation SHALL also declare DIS-CANCEL as specified in the [shared cancellation contract](#asynchronous-cancellation).
+The De-ID Manager declaring DIS-ASYNC-TASK SHALL provide a CapabilityStatement Resource declaring that it can perform ITI-x7 polling and send task cancellation requests using the same extension on its client entry.
 
 ### 2:3.x7.6 Security Considerations
 

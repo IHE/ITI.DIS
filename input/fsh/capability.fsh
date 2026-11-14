@@ -30,17 +30,7 @@ Description: "One compatible payload binding, release, input manifest format, re
 Extension: DISAsyncSupport
 Id: dis-async-support
 Title: "DIS Asynchronous Processing Support"
-Description: "The actor supports asynchronous processing and polling on this submission operation and REST mode. On ITI-x1 this includes the ITI-x4 job cancellation interaction."
-* ^context[0].type = #element
-* ^context[0].expression = "CapabilityStatement.rest.operation"
-* value[x] 1..1
-* value[x] only boolean
-* valueBoolean = true (exactly)
-
-Extension: DISCancellationSupport
-Id: dis-cancellation-support
-Title: "DIS Asynchronous Cancellation Support"
-Description: "The actor supports the DIS-CANCEL task cancellation option on this ITI-x3 submission operation and REST mode."
+Description: "The actor supports asynchronous processing and polling on this submission operation and REST mode. The actor also supports cancellation through ITI-x4 for jobs or ITI-x7 for tasks."
 * ^context[0].type = #element
 * ^context[0].expression = "CapabilityStatement.rest.operation"
 * value[x] 1..1
@@ -70,7 +60,7 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "DIS De-ID Manager"
 * insert DISCapabilityRequirements(DISManager)
-* description = "The Manager receives de-identification jobs in ITI-x1 and submits de-identification tasks in ITI-x3. Both request bodies are FHIR R4 Task resources. With DIS-ASYNC-JOB it handles ITI-x4 polling and job cancellation requests. With DIS-ASYNC-TASK it initiates ITI-x7 polling. With DIS-CANCEL it can request task cancellation through ITI-x7."
+* description = "The Manager receives de-identification jobs in ITI-x1 and submits de-identification tasks in ITI-x3. Both request bodies are FHIR R4 Task resources. With DIS-ASYNC-JOB it handles ITI-x4 polling and job cancellation requests. With DIS-ASYNC-TASK it initiates ITI-x7 polling and can request task cancellation."
 * rest[0].mode = #server
 * rest[0].operation[0].name = "submit-dis-job"
 * rest[0].operation[0].definition = Canonical(submit-dis-job)
@@ -83,7 +73,7 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "DIS De-Identifier"
 * insert DISCapabilityRequirements(DISDeIdentifier)
-* description = "The De-Identifier receives a de-identification task as a FHIR R4 Task in ITI-x3 and publishes its compatible processing capabilities. With DIS-ASYNC-TASK it serves ITI-x7 polling. With DIS-CANCEL it can accept ITI-x7 cancellation requests."
+* description = "The De-Identifier receives a de-identification task as a FHIR R4 Task in ITI-x3 and publishes its compatible processing capabilities. With DIS-ASYNC-TASK it handles ITI-x7 polling and task cancellation requests."
 * rest[0].mode = #server
 * rest[0].operation[0].name = "submit-dis-task"
 * rest[0].operation[0].definition = Canonical(submit-dis-task)

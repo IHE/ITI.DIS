@@ -58,7 +58,7 @@ Considerations include the scope of this supplement, overlap with MHD Document S
 
 #### Asynchronous Job and Task Cancellation
 
-The [DIS-ASYNC-JOB option](volume-1.html#1pxx24-asynchronous-job-processing-option) includes cancellation through [ITI-x4](volume-2.html#job-cancellation). The Manager checks eligibility when the Requester asks to cancel. An outstanding synchronous task or an asynchronous task submitted without cancellable mode blocks job cancellation until its terminal outcome is known. The [optional DIS-CANCEL capability](volume-1.html#asynchronous-cancellation-option) enables task cancellation through [ITI-x7](volume-2.html#task-cancellation).
+The [DIS-ASYNC-JOB option](volume-1.html#1pxx24-asynchronous-job-processing-option) includes cancellation through [ITI-x4](volume-2.html#job-cancellation). The Manager checks eligibility when the Requester asks to cancel. An outstanding synchronous task blocks job cancellation until its terminal outcome is known. The [DIS-ASYNC-TASK option](volume-1.html#1pxx25-asynchronous-task-processing-option) includes cancellation through [ITI-x7](volume-2.html#task-cancellation) for all accepted asynchronous tasks.
 
 **Decisions for committee review.** Review the [draft cancellation wire contract](volume-2.html#asynchronous-cancellation), including the polling outcomes and the declared confirmation and retention intervals. The [submission recovery rules](volume-2.html#submission-retries) define a recovery-only request for a lost task acceptance. Cancellation remains unconfirmed while work is unresolved. If the responder confirms cancellation while the polling URL remains available, the draft reports the confirmed outcome at that URL.
 

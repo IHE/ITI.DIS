@@ -129,7 +129,7 @@ For more details see the detailed [transaction description](volume-2.html#23x4-r
 
 #### 1:PXX.1.2.4 Retrieve Task Output [ITI-x7]
 
-The De-ID Manager polls the De-Identifier for the status of an accepted asynchronous task and retrieves its output and evidence when available. With DIS-CANCEL, the Manager can also request cancellation of a task accepted in cancellable mode. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
+The De-ID Manager polls the De-Identifier for the status of an accepted asynchronous task and retrieves its output and evidence when available. The Manager can also request cancellation of an accepted asynchronous task. This transaction is required when the Asynchronous Task Processing Option (DIS-ASYNC-TASK) is supported. It does not apply to the Integrated De-ID Manager/De-Identifier.
 
 For more details see the detailed [transaction description](volume-2.html#23x7-retrieve-task-output-iti-x7).
 
@@ -146,11 +146,9 @@ Options that may be selected for each actor in this profile are listed in Table 
 | De-Identification Requester | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
 | De-ID Manager | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
 | De-ID Manager | Asynchronous Task Processing (DIS-ASYNC-TASK) | [1:PXX.2.5](#1pxx25-asynchronous-task-processing-option) |
-| De-ID Manager | Asynchronous Task Cancellation (DIS-CANCEL) | [1:PXX.2.7](#asynchronous-cancellation-option) |
 | De-ID Manager | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | De-ID Manager | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
 | De-Identifier | Asynchronous Task Processing (DIS-ASYNC-TASK) | [1:PXX.2.5](#1pxx25-asynchronous-task-processing-option) |
-| De-Identifier | Asynchronous Task Cancellation (DIS-CANCEL) | [1:PXX.2.7](#asynchronous-cancellation-option) |
 | De-Identifier | Irreversible De-Identification (DIS-IRREVERSIBLE) | [1:PXX.2.6](#1pxx26-irreversible-de-identification-option) |
 | De-Identifier | Reversible Pseudonymization (DIS-REVERSIBLE) | [1:PXX.2.2](#1pxx22-reversible-pseudonymization-option) |
 | Integrated De-ID Manager/De-Identifier | Asynchronous Job Processing (DIS-ASYNC-JOB) | [1:PXX.2.4](#1pxx24-asynchronous-job-processing-option) |
@@ -165,8 +163,7 @@ Table 1:PXX.2-2 summarizes the options and their applicability per actor.
 | Option | Requester | Manager | De-Identifier | Integrated Manager/De-Identifier | Dependency / obligation |
 |--------|-----------|---------|---------------|-----------------------------------|-------------------------|
 | DIS-ASYNC-JOB | Optional | Optional | Not applicable | Optional | Asynchronous job processing. Both participating Requester and Manager (or Integrated actor) support ITI-x4 polling and job cancellation. For the Integrated actor, DIS-ASYNC-JOB requires ITI-x1. |
-| DIS-ASYNC-TASK | Not applicable | Optional | Optional | Not applicable | Asynchronous task processing. Both participating Manager and De-Identifier declare support; ITI-x7 required. Not applicable to the Integrated actor. |
-| DIS-CANCEL | Not applicable | Optional | Optional | Not applicable | Adds task cancellation to ITI-x7 and requires DIS-ASYNC-TASK. |
+| DIS-ASYNC-TASK | Not applicable | Optional | Optional | Not applicable | Asynchronous task processing. Both participating Manager and De-Identifier support ITI-x7 polling and task cancellation. |
 | DIS-IRREVERSIBLE | Not applicable | See Note 2 | See Note 2 | See Note 2 | Processing without a DIS-maintained reverse mapping. |
 | DIS-REVERSIBLE | Not applicable | See Note 2 | See Note 2 | See Note 2 | Supports Manager-managed mappings and Requester-supplied lookup tables. |
 {: .grid}
@@ -228,15 +225,15 @@ The Asynchronous Job Processing Option (DIS-ASYNC-JOB) enables the De-Identifica
 
 Both the participating Requester and Manager (or Integrated actor) SHALL declare DIS-ASYNC-JOB and SHALL support ITI-x4 (Retrieve Job Output). The Integrated actor SHALL support ITI-x1 when declaring DIS-ASYNC-JOB. This option is required for multi-patient cohort workflows where processing time exceeds the request timeout. HTTP-level message semantics are specified in the ITI-x1 and ITI-x4 [transaction descriptions](volume-2.html).
 
-Support for DIS-ASYNC-JOB includes the ITI-x4 job cancellation interaction. The Requester SHALL support sending an authorized cancellation request. The Manager and externally invoked Integrated actor SHALL handle authorized cancellation requests. The Manager SHALL reject cancellation of an active job while any dispatched non-cancellable assignment is outstanding, including one awaiting acknowledgement. Once those assignments reach known terminal states, they no longer block cancellation. If the Manager accepts cancellation, it SHALL stop new dispatch and local work, withhold job results, and cancel outstanding cancellable assignments. The Integrated actor handles its local work. See the [job cancellation requirements](volume-2.html#job-cancellation).
+Support for DIS-ASYNC-JOB includes the ITI-x4 job cancellation interaction. The Requester SHALL support sending an authorized cancellation request. The Manager and externally invoked Integrated actor SHALL handle authorized cancellation requests. The Manager SHALL reject cancellation of an active job while any dispatched synchronous assignment is outstanding, including one awaiting acknowledgement. Once those assignments reach known terminal states, they no longer block cancellation. If the Manager accepts cancellation, it SHALL stop new dispatch and local work, withhold job results, and cancel outstanding asynchronous assignments. The Integrated actor handles its local work. See the [job cancellation requirements](volume-2.html#job-cancellation).
 
 ### 1:PXX.2.5 Asynchronous Task Processing Option
 
 The Asynchronous Task Processing Option (DIS-ASYNC-TASK) enables the De-ID Manager and De-Identifier to support asynchronous task-level workflows. For an asynchronous ITI-x3 exchange, the De-ID Manager uses ITI-x7 (Retrieve Task Output) to poll for task status and retrieve output and evidence upon successful completion.
 
-Both the participating De-ID Manager and De-Identifier SHALL declare DIS-ASYNC-TASK and SHALL support ITI-x7. This option does not apply to the Integrated De-ID Manager/De-Identifier.
+Both the participating De-ID Manager and De-Identifier SHALL declare DIS-ASYNC-TASK and SHALL support ITI-x7 polling and cancellation. The Manager SHALL support sending an authorized cancellation request and the De-Identifier SHALL handle it for any accepted asynchronous task. See the [task cancellation requirements](volume-2.html#task-cancellation). This option does not apply to the Integrated De-ID Manager/De-Identifier.
 
-Ordinary async job and task processing can be selected independently. A Manager may support async jobs without async tasks, or async tasks without async jobs.
+Asynchronous job and task processing can be selected independently. A Manager may support asynchronous jobs without asynchronous tasks, or asynchronous tasks without asynchronous jobs.
 
 ### 1:PXX.2.6 Irreversible De-Identification Option
 
@@ -247,14 +244,6 @@ Irreversible mode denotes the absence of a DIS-maintained reverse-mapping capabi
 At least one of DIS-IRREVERSIBLE or DIS-REVERSIBLE SHALL be declared by the De-ID Manager, De-Identifier, and Integrated De-ID Manager/De-Identifier. An actor MAY declare both options to indicate it supports both modes.
 
 Each job SHALL use one reversibility mode for all its payload sets and de-identification tasks. Different payload sets MAY use different approved policies. All policies used in the job SHALL declare the same reversibility mode.
-
-<a name="asynchronous-cancellation-option"> </a>
-
-<a name="1pxx27-asynchronous-cancellation-option"> </a>
-
-### 1:PXX.2.7 Asynchronous Task Cancellation Option
-
-The Asynchronous Task Cancellation Option (DIS-CANCEL) enables the De-ID Manager to cancel a de-identification task accepted in cancellable mode through ITI-x7. Both the Manager and De-Identifier SHALL declare DIS-ASYNC-TASK and DIS-CANCEL before the Manager requests cancellable mode for a task. See the [task cancellation requirements](volume-2.html#task-cancellation).
 
 <a name="required-groupings"> </a>
 

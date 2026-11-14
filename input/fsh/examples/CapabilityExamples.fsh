@@ -29,5 +29,3 @@ Description: "Synthetic deployment supporting asynchronous and cancellable ITI-x
 * rest[0].operation[0].documentation = "Terminal polling outcomes and submission replay records are each retained for at least 24 hours. The maximum pending cancellation interval is 10 minutes. Cancellation outcomes are retained for at least 24 hours."
 * rest[0].operation[0].extension[0].url = Canonical(DISAsyncSupport)
 * rest[0].operation[0].extension[0].valueBoolean = true
-* rest[0].operation[0].extension[1].url = Canonical(DISCancellationSupport)
-* rest[0].operation[0].extension[1].valueBoolean = true
