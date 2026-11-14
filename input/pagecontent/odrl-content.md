@@ -271,20 +271,18 @@ This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Polic
   "@type": "Set",
   "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0",
   "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "syntax",
+  "dis:representationLevel": "semantic",
   "dis:reversibilityMode": "irreversible",
-  "dis:payloadFamily": "fhir",
-  "dis:payloadVersion": "R4",
   "obligation": [
     {
       "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:fhir-elements",
+        "source": "dis:semantic-elements",
         "refinement": {
-          "leftOperand": "dis:fhirPath",
+          "leftOperand": "dis:semanticGroup",
           "operator": "eq",
-          "rightOperand": "Patient.name"
+          "rightOperand": "@subject-names"
         }
       },
       "action": "dis:remove"

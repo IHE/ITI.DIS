@@ -18,7 +18,7 @@ Each payload-set input in the job submission names the versioned policy approved
 
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
-| `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Syntax-Level policy `patient-name-removal` version `1.0` removes `Patient.name` in R4. |
+| `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Semantic-Level policy `patient-name-removal` version `1.0` removes `@subject-names`. The Manager compiles the group to `Patient.name` for R4. |
 | `imaging-report-r5` | A versioned R4 List uses the DIS Target FHIR Release extension to select the [hosted R5 DiagnosticReport](examples/grouped-fhir/grouped-fhir-report-input.json). | Syntax-Level policy `imaging-report-subject-removal` version `1.0` removes `DiagnosticReport.subject` in R5. |
 {: .grid}
 
