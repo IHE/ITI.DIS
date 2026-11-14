@@ -66,4 +66,227 @@ The plan carries `dis:ruleSetId`, `dis:payloadSet`, `dis:payloadBinding` and `di
 
 ## Examples (Informative)
 
-See the [mixed-release exchange](examples-grouped-fhir-job.html#grouped-fhir-submission) for a profiled Agreement, policies and compiled execution plans. The examples use synthetic identifiers.
+These JSON-LD examples show the decoded attachments for the [mixed-release exchange](examples-grouped-fhir-job.html#grouped-fhir-submission). The FHIR resources carry the same JSON-LD as Base64 in their attachment data fields. The policy and plan below follow the R4 clinical set.
+
+<a name="decoded-authorization-example"> </a>
+
+### Data Request Authorization Agreement Example
+
+This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentReference in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). It includes both permissions selected by the [ITI-x1 de-identification job](Task-grouped-fhir-job-request.html).
+
+```json
+{
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@type": "Agreement",
+  "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/1",
+  "profile": "dis:DataRequestAuthorization",
+  "dis:approvedRequest": {
+    "@id": "https://governance.example.org/requests/grouped-fhir-job-request/versions/1"
+  },
+  "permission": [
+    {
+      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/1#patient-r4",
+      "assigner": "https://governance.example.org/organizations/approval-authority",
+      "assignee": "https://coordinator.example.org/organizations/requester",
+      "action": "dis:deIdentify",
+      "target": "https://governance.example.org/scopes/grouped-fhir-permit/patient-r4/versions/1",
+      "constraint": [
+        {
+          "leftOperand": "purpose",
+          "operator": "eq",
+          "rightOperand": {
+            "@id": "https://governance.example.org/purposes/multimodal-research"
+          }
+        },
+        {
+          "leftOperand": "dateTime",
+          "operator": "gteq",
+          "rightOperand": {
+            "@value": "2026-01-01T00:00:00Z",
+            "@type": "xsd:dateTime"
+          }
+        },
+        {
+          "leftOperand": "dateTime",
+          "operator": "lt",
+          "rightOperand": {
+            "@value": "2028-01-01T00:00:00Z",
+            "@type": "xsd:dateTime"
+          }
+        },
+        {
+          "leftOperand": "dis:approvedPolicy",
+          "operator": "eq",
+          "rightOperand": "https://governance.example.org/policies/patient-name-removal|1.0"
+        },
+        {
+          "leftOperand": "dis:payloadBinding",
+          "operator": "eq",
+          "rightOperand": "DIS-FHIR-Payload"
+        },
+        {
+          "leftOperand": "dis:payloadVersion",
+          "operator": "eq",
+          "rightOperand": "R4"
+        },
+        {
+          "leftOperand": "recipient",
+          "operator": "eq",
+          "rightOperand": {
+            "@id": "https://coordinator.example.org/organizations/requester"
+          }
+        }
+      ],
+      "dis:parentAliasRecipient": {
+        "@id": "https://dis.example.org/organizations/example-worker"
+      }
+    },
+    {
+      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/1#imaging-report-r5",
+      "assigner": "https://governance.example.org/organizations/approval-authority",
+      "assignee": "https://coordinator.example.org/organizations/requester",
+      "action": "dis:deIdentify",
+      "target": "https://governance.example.org/scopes/grouped-fhir-permit/imaging-report-r5/versions/1",
+      "constraint": [
+        {
+          "leftOperand": "purpose",
+          "operator": "eq",
+          "rightOperand": {
+            "@id": "https://governance.example.org/purposes/multimodal-research"
+          }
+        },
+        {
+          "leftOperand": "dateTime",
+          "operator": "gteq",
+          "rightOperand": {
+            "@value": "2026-01-01T00:00:00Z",
+            "@type": "xsd:dateTime"
+          }
+        },
+        {
+          "leftOperand": "dateTime",
+          "operator": "lt",
+          "rightOperand": {
+            "@value": "2028-01-01T00:00:00Z",
+            "@type": "xsd:dateTime"
+          }
+        },
+        {
+          "leftOperand": "dis:approvedPolicy",
+          "operator": "eq",
+          "rightOperand": "https://governance.example.org/policies/imaging-report-subject-removal|1.0"
+        },
+        {
+          "leftOperand": "dis:payloadBinding",
+          "operator": "eq",
+          "rightOperand": "DIS-FHIR-Payload"
+        },
+        {
+          "leftOperand": "dis:payloadVersion",
+          "operator": "eq",
+          "rightOperand": "R5"
+        },
+        {
+          "leftOperand": "recipient",
+          "operator": "eq",
+          "rightOperand": {
+            "@id": "https://coordinator.example.org/organizations/requester"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+<a name="decoded-policy-example"> </a>
+
+### De-Identification Policy Set Example
+
+This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Library. The `patient-r4` permission approves version `1.0` of that Library. The policy selects `Patient.name` for removal.
+
+```json
+{
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@type": "Set",
+  "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0",
+  "profile": "dis:DeIdentificationPolicy",
+  "dis:representationLevel": "syntax",
+  "dis:reversibilityMode": "irreversible",
+  "dis:payloadFamily": "fhir",
+  "dis:payloadVersion": "R4",
+  "obligation": [
+    {
+      "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "dis:fhir-elements",
+        "refinement": {
+          "leftOperand": "dis:fhirPath",
+          "operator": "eq",
+          "rightOperand": "Patient.name"
+        }
+      },
+      "action": "dis:remove"
+    }
+  ],
+  "dis:ruleSets": {
+    "@list": [
+      {
+        "dis:ruleSetId": "remove-direct-link",
+        "dis:ruleOrder": {
+          "@list": [
+            {
+              "@id": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+<a name="decoded-plan-example"> </a>
+
+### Execution Plan Set Example
+
+This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Execution Plan Library referenced by the [ITI-x3 de-identification task](Task-grouped-fhir-task-patient-r4.html). It binds the selector to the assigned manifest and links the compiled obligation to the source policy rule.
+
+```json
+{
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@type": "Set",
+  "uid": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0",
+  "profile": "dis:ExecutionPlan",
+  "dis:ruleSetId": "remove-direct-link",
+  "dis:payloadBinding": "DIS-FHIR-Payload",
+  "dis:payloadVersion": "R4",
+  "dis:payloadSet": "patient-r4",
+  "obligation": [
+    {
+      "uid": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0#remove-01",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input/_history/1",
+        "refinement": {
+          "leftOperand": "dis:fhirPath",
+          "operator": "eq",
+          "rightOperand": "Patient.name"
+        }
+      },
+      "action": "dis:remove",
+      "dis:sourceRule": {
+        "@id": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01"
+      }
+    }
+  ],
+  "dis:ruleOrder": {
+    "@list": [
+      {
+        "@id": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0#remove-01"
+      }
+    ]
+  }
+}
+```
