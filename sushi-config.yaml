@@ -68,7 +68,7 @@ resources:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob
   Task/grouped-fhir-task-patient-r4:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
-  Task/grouped-fhir-task-imaging-measurement-r5:
+  Task/grouped-fhir-task-imaging-report-r5:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
   Task/staged-async-job:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob
@@ -97,13 +97,12 @@ groups:
     description: "Informative artifacts for a FHIR-only job."
     resources:
       - Bundle/grouped-fhir-hosted-artifacts
-      - Bundle/grouped-fhir-r5-input
       - Bundle/grouped-fhir-r5-output
       - Task/grouped-fhir-job-request
       - Task/grouped-fhir-task-patient-r4
-      - Task/grouped-fhir-task-imaging-measurement-r5
+      - Task/grouped-fhir-task-imaging-report-r5
       - Parameters/grouped-fhir-task-result-patient-r4
-      - Parameters/grouped-fhir-task-result-imaging-measurement-r5
+      - Parameters/grouped-fhir-task-result-imaging-report-r5
       - Parameters/grouped-fhir-job-result
       - OperationOutcome/grouped-fhir-job-failure
   staged-async-examples:

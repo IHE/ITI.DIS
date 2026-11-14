@@ -894,61 +894,7 @@ The Manager SHALL reject the job if it cannot establish that the identified data
 
 ##### 3:PXX.3.2.2.5 Inline R5 Manifest Package Example
 
-For inline submission, carry the following R4 collection as the serialized `Task.input.valueAttachment.data` on the `payload-set` input with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The inner attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
-
-```json
-{
-  "resourceType": "Bundle",
-  "meta": {
-    "profile": [
-      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ManifestPackage"
-    ]
-  },
-  "type": "collection",
-  "entry": [
-    {
-      "fullUrl": "urn:uuid:64385609-ea68-4315-b178-b70ee276061c",
-      "resource": {
-        "resourceType": "List",
-        "meta": {
-          "profile": [
-            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
-          ]
-        },
-        "status": "current",
-        "mode": "snapshot",
-        "entry": [
-          {
-            "item": {
-              "reference": "urn:uuid:5adb0ea3-d321-496b-8685-63529cbe90e1"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "fullUrl": "urn:uuid:5adb0ea3-d321-496b-8685-63529cbe90e1",
-      "resource": {
-        "resourceType": "DocumentReference",
-        "meta": {
-          "profile": [
-            "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-PayloadWrapper"
-          ]
-        },
-        "status": "current",
-        "content": [
-          {
-            "attachment": {
-              "contentType": "application/fhir+json; fhirVersion=5.0",
-              "data": "eyJyZXNvdXJjZVR5cGUiOiJQYXRpZW50IiwiaWQiOiJleGFtcGxlIn0="
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
-```
+For inline submission, serialize the [R4 manifest package](Bundle-inline-r5-manifest-package.html) as `Task.input.valueAttachment.data` on the `payload-set` input with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The List selects the [R4 payload wrapper](DocumentReference-inline-r5-payload-wrapper.html) by its bundle-local UUID. The wrapper attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
 
 ### 3:PXX.3.3 Proposed DICOM and CDA Bindings (Informative)
 
