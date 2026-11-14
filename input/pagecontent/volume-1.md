@@ -198,7 +198,9 @@ UC-3 and UC-4 illustrate authorized, implementation-defined access to the Manage
 
 The mandatory HL7 FHIR payload binding (`DIS-FHIR-Payload`) defines the content model and baseline execution plan. It specifies FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence, inline submission, authorized retrieval of referenced inputs, and result delivery. It covers independently versioned HL7 FHIR R4 and R5 processing payloads. Actors declare the releases they support. See [Volume 3](volume-3.html#fhir-payload-binding) for the binding requirements.
 
-Future payload bindings could define format-specific content and processing rules for other data formats over the same HL7 FHIR R4 protocol. See [Open Issues](issues.html#additional-payload-binding-conformance).
+<a name="additional-payload-binding-conformance"> </a>
+
+A future DIS supplement that defines another normative payload binding may allow an actor to claim conformance for that binding alone. Actors exchanging a payload set must support the binding declared for that set in their respective roles. A non-FHIR payload binding can use the same HL7 FHIR R4 protocol for external DIS transactions.
 
 #### 1:PXX.2.3.1 Baseline Execution Plan
 

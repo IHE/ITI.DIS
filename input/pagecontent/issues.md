@@ -10,7 +10,6 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 
 ### Open Issues
 
-- [Additional payload binding conformance](#additional-payload-binding-conformance)
 - [FHIR R6 processing payloads](#fhir-r6-processing-payloads)
 - [Key-based reversible pseudonymization](#key-based-reversible-pseudonymization)
 - [Data Recipient actor and push delivery](#data-recipient-and-push-delivery)
@@ -19,12 +18,6 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 - [IUA grouping and authorization denials](#iua-grouping-and-denial-responses)
 - [Future policy management transaction](#future-policy-management-transaction)
 - **Draft contract review:** confirm the payload set transaction contract, capability declarations, stage ordering, and release authorization. Complete detailed conformance procedures and validate them against the agreed baseline.
-
-<a name="additional-payload-binding-conformance"> </a>
-
-#### Additional Payload Binding Conformance
-
-DIS-FHIR-Payload is the mandatory payload binding in this supplement. If DIS adds a binding for another data format, determine whether an actor may claim DIS conformance by supporting that binding alone or must also support DIS-FHIR-Payload. Define what peers must declare and which binding they must share for a job or task exchange.
 
 <a name="fhir-r6-processing-payloads"> </a>
 
