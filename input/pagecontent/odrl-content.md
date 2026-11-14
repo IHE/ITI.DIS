@@ -263,7 +263,7 @@ This Agreement is the decoded attachment in the [UC-2 Data Request Authorization
 
 ### De-Identification Policy Set Example
 
-This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Contract. The `patient-r4` permission approves version `1.0` of that Contract. The policy selects `Patient.name` for removal.
+This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Contract. The `patient-r4` permission approves version `1.0` of that Contract. The policy selects `@subject-names` for removal. The Manager expands the group to `Patient.name` for the R4 clinical set.
 
 ```json
 {

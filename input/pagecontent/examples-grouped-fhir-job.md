@@ -14,7 +14,7 @@ The [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorizati
 
 ### Payload Sets and Approved Policies
 
-Each payload-set input in the job submission names the versioned policy approved for that set. The hosted artifact collection includes both policy Libraries and the plans derived from them. Both policies use irreversible processing. See the [decoded Policy Set for the R4 clinical set](odrl-content.html#decoded-policy-example).
+Each payload-set input in the job submission names the versioned policy approved for that set. The hosted artifact collection includes both Policy Contracts and their Execution Plan Contracts. Both policies use irreversible processing. See the [decoded Policy Set for the R4 clinical set](odrl-content.html#decoded-policy-example).
 
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
