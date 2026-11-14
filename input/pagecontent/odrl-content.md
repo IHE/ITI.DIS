@@ -38,7 +38,7 @@ The Agreement contains an immutable `uid`, a `dis:approvedRequest` identifying t
 | `dateTime` | `gteq` and `lt` | Exactly one of each operator with an `xsd:dateTime` value in UTC. Start is inclusive and end is exclusive. Start SHALL precede end. |
 | `dis:approvedPolicy` | `eq` | One string in `Contract.url\|Contract.version` form. |
 | `dis:payloadBinding`, `dis:payloadVersion` | `eq` | One string for each operand, matching the applicable DIS payload binding and release. |
-| `recipient` | `eq` | One IRI reference identifying the organization entitled to receive results. |
+| `recipient` | `eq` | One IRI reference identifying the organization entitled to receive results. All permissions selected for the same job identify the same organization under the [recipient eligibility rules](volume-3.html#job-result-recipient). |
 | `dis:resultDestination` | `eq` | Optional. One IRI reference identifying an authorized HTTPS service base. Every referenced result endpoint and redirect SHALL remain within that service boundary. |
 {: .grid}
 

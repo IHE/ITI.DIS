@@ -216,6 +216,8 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL apply the [s
 
 The Manager SHALL resolve and validate the exact Contract version and its embedded ODRL Agreement under [Volume 3 §3:PXX.6](volume-3.html#data-request-authorization). It SHALL evaluate the permission identified by each set and compare the requested purpose and policy with the exact values approved by that permission. The Manager SHALL return HTTP 400 for a missing or malformed authorization reference, Contract, Agreement or permission, including an Agreement identifier mismatch or an unsupported expression. It SHALL return HTTP 403 for an authenticated Requester if it cannot retrieve and verify the exact referenced Contract revision or establish that the grant is trusted, currently effective and covers the job. The Manager SHALL return an OperationOutcome and SHALL NOT accept the job, dispatch a task, or return results.
 
+Before accepting an asynchronous job or beginning synchronous processing, the Manager SHALL apply the [result recipient admission checks](volume-3.html#job-result-recipient).
+
 The Manager SHALL obtain the Policy Contract through [inline delivery or Manager resolution](volume-3.html#3pxx14-policy-delivery-and-validation). Before acceptance or synchronous execution, the Manager SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the authorization and policy Contracts.
 
 The Manager SHALL perform three-point policy content validation:
@@ -270,7 +272,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of the
 
 <a name="job-result-release"> </a>
 
-The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them under the [current grant and recipient checks](volume-3.html#data-request-authorization). This requirement applies to the result response and to any manifest or result service the response references. The Manager SHALL apply the [deployment rules for supporting Contract disclosure](volume-3.html#contract-signatures) to the job result. A failed set fails the job without recipient-facing results from any set. For a distributed result set that uses multiple stages, the Manager SHALL include [staged release evidence](volume-3.html#staged-release-evidence) in the set's result package.
+The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available, the Manager SHALL verify that all sets have completed and passed validation and that the actual caller is entitled to receive the complete result under the [current grant and recipient checks](volume-3.html#job-result-recipient). This requirement applies to the result response and to any manifest or result service the response references. The Manager SHALL apply the [deployment rules for supporting Contract disclosure](volume-3.html#contract-signatures) to the job result. A failed set fails the job without recipient-facing results from any set. For a distributed result set that uses multiple stages, the Manager SHALL include [staged release evidence](volume-3.html#staged-release-evidence) in the set's result package.
 
 **202 Accepted — Asynchronous accepted (DIS-ASYNC-JOB).** The response body is empty. The `Content-Location` response header contains the polling URL for use with ITI-x4.
 
@@ -541,7 +543,7 @@ The caller SHALL include credentials authenticating the original Requester or an
 
 Upon receipt of a Retrieve Job Output Request, the De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL return the current status of the referenced job.
 
-For accepted cancellation, the Manager SHALL apply the [shared cancellation responses](#asynchronous-cancellation). The Manager SHALL enforce authorization on retrieval. Only the original De-Identification Requester, or an explicitly authorized delegate, SHALL be permitted to retrieve the status of a given job. Before returning or enabling access to output, the Manager SHALL apply the [current grant and recipient checks](volume-3.html#data-request-authorization). The Manager SHALL reject unauthorized retrieval requests with an appropriate error.
+For accepted cancellation, the Manager SHALL apply the [shared cancellation responses](#asynchronous-cancellation). The Manager SHALL enforce authorization on retrieval. Only the original De-Identification Requester, or an explicitly authorized delegate, SHALL be permitted to retrieve the status of a given job. Before returning or enabling access to output, the Manager SHALL apply the [current grant and recipient checks](volume-3.html#job-result-recipient). If an authenticated caller authorized to poll fails these release checks, the Manager SHALL return HTTP 403 with an R4 `OperationOutcome` and withhold every set, its evidence and download access from that caller.
 
 When the job is still in progress, the Manager SHALL indicate in-progress status and SHOULD include retry-after guidance to help the Requester pace its polling.
 
@@ -565,7 +567,7 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) uses the HTTP poll
 
 **422 Unprocessable Entity — Terminal processing failure.** On an authorized poll, the responder SHALL return an R4 `OperationOutcome` when the accepted work item has failed. It SHALL withhold every result for that work item.
 
-**Other 4xx/5xx — Polling error.** The responder SHALL return an R4 `OperationOutcome` without a result. An invalid or unauthorized poll, an expired polling URL, or an endpoint outage does not report terminal processing failure. Use HTTP 401 for missing or invalid credentials and HTTP 403 for credentials that do not authorize the poll.
+**Other 4xx/5xx — Polling error.** The responder SHALL return an R4 `OperationOutcome` without a result. An invalid or unauthorized poll, an expired polling URL, or an endpoint outage does not report terminal processing failure. Use HTTP 401 for missing or invalid credentials and HTTP 403 when the caller lacks authority to poll or receive the completed result.
 
 ##### 2:3.x4.4.2.3 Expected Actions
 
