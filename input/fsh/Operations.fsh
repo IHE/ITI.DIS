@@ -133,7 +133,7 @@ Usage: #definition
 * parameter[=].min = 0
 * parameter[=].max = "1"
 * parameter[=].type = #DocumentReference
-* parameter[=].documentation = "Inline DocumentReference conforming to DIS-LookupTable, required when a reversible Manager-managed task generates patient identifier pseudonyms. Protected output to the Manager."
+* parameter[=].documentation = "Inline DocumentReference conforming to DIS-LookupTable, returned for reversible Manager-managed patient identifier hashing. Protected output to the Manager."
 
 // ── Output: validationStatus ──
 * parameter[+].name = #validationStatus

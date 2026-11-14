@@ -205,7 +205,7 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 #### 3:PXX.1.2.3 Patient Identifier Pseudonymization
 
-Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. The proposed third method derives the pseudonym through [deterministic encryption](#encryption-based-patient-pseudonymization) and returns the generated mapping for authorized reversal.
+Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. The proposed third method derives the pseudonym through [deterministic encryption](#encryption-based-patient-pseudonymization) and allows the Manager to decrypt the pseudonym when authorized.
 
 **Salted hash derivation.**
 
@@ -233,7 +233,7 @@ The De-Identifier uses the supplied [lookup table](#3pxx5-reversible-lookup-tabl
 
 ##### Encryption-based derivation (Informative Proposal)
 
-The proposed third method under DIS-REVERSIBLE uses policy-selected deterministic encryption to generate patient identifier pseudonyms. Within the same authorized linkage scope, independent De-Identifiers would produce the same pseudonym for the same resolved patient identity using the same configuration and key. The De-Identifier would return authorized mappings through the protected [`generatedLookupTable`](#3pxx5-reversible-lookup-table) for Manager-managed reversal. See the [draft encryption method and FF1 test vector](draft-encryption-based-pseudonymization.html).
+The proposed third method under DIS-REVERSIBLE uses policy-selected deterministic encryption to generate patient identifier pseudonyms. Within the same authorized linkage scope, independent De-Identifiers would produce the same pseudonym for the same resolved patient identity using the same configuration and key. Before dispatch, the deployment would make the scoped key version available to the De-Identifiers for encryption and to the Manager for authorized decryption. The execution plan identifies the configuration, scope, and key version. See the [draft encryption method and FF1 test vector](draft-encryption-based-pseudonymization.html).
 
 <a name="3pxx22-policy-rules-json-structure"> </a>
 
@@ -1057,7 +1057,7 @@ Source identifier pairs SHALL be unique within a table.
 
 **Supplied tables.** A task-scoped subset has its own business identifier and `masterIdentifier`, retains the authorized scope, and links to the pinned source with `relatesTo` code `transforms`. A reference may use a literal, version-specific history URL or an identifier that resolves unambiguously to an exact version. Repository provisioning and table lifecycle remain deployment concerns. ITI-x1 defines admission and pinning, and ITI-x3 defines restricted dispatch and cleanup.
 
-**Generated tables.** When a reversible Manager-managed task generates patient identifier pseudonyms, the De-Identifier SHALL return one `generatedLookupTable` containing the resulting patient mappings and the resolved scope. Disclosure of the generated table to the Manager SHALL be authorized for the assigned task. The Manager SHALL validate the table against the task and retain the mappings before job release. Repeated identical pairs across tasks or retries are idempotent. If a source pair maps to conflicting targets in the same job or a target is assigned to distinct patients, the Manager SHALL fail the job without partial release. A task applying supplied patient mappings or executing an irreversible policy SHALL NOT return a generated patient lookup table.
+**Generated tables.** When a reversible Manager-managed task generates patient identifier pseudonyms through salted hashing, the De-Identifier SHALL return one `generatedLookupTable` containing the resulting patient mappings and the resolved scope. Disclosure of the generated table to the Manager SHALL be authorized for the assigned task. The Manager SHALL validate the table against the task and retain the mappings before job release. Repeated identical pairs across tasks or retries are idempotent. If a source pair maps to conflicting targets in the same job or a target is assigned to distinct patients, the Manager SHALL fail the job without partial release. A task applying supplied patient mappings or executing an irreversible policy SHALL NOT return a generated patient lookup table.
 
 Generated and supplied tables are protected operational material and SHALL be excluded from recipient-facing output, evidence, logs and errors.
 
