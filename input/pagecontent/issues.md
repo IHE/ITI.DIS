@@ -29,7 +29,9 @@ This supplement assesses conformance with published FHIR R4 or R5 processing pay
 
 #### Key-Based Reversible Pseudonymization
 
-Evaluate key-based reversal as an additional arrangement under DIS-REVERSIBLE. Define who holds the key, who is authorized to reverse a pseudonym, and what the Manager and De-Identifier must exchange or declare when implemented by different vendors. Determine whether that behavior requires a shared capability declaration and how to test it.
+The [proposed DIS-REVERSIBLE method](draft-encryption-based-pseudonymization.html) uses deterministic encryption to generate patient pseudonyms. Independent De-Identifiers must produce the same pseudonym for the same resolved identity within the authorized linkage scope. The deployment provisions the matching scope-specific key version before dispatch so the De-Identifiers can encrypt and the Manager can decrypt when authorized. [Issue #50](https://github.com/IHE/ITI.DIS/issues/50) tracks the binding, key provisioning assumptions, and conformance tests.
+
+For the proposed FF1 method, the published NIST SP 800-38G defines the algorithm. The February 2025 second public draft of Revision 1 is an informative reference for policy authors, including its proposed minimum FF1 domain of one million values. [NIST SP 800-38G](https://csrc.nist.gov/pubs/sp/800/38/g/upd1/final) · [NIST SP 800-38G Rev. 1, second public draft](https://csrc.nist.gov/pubs/sp/800/38/g/r1/2pd)
 
 <a name="data-recipient-and-push-delivery"> </a>
 

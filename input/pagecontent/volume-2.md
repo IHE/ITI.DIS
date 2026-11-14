@@ -413,7 +413,7 @@ When the `lookup-table` input is present, the De-Identifier SHALL resolve and va
 
 The De-Identifier SHALL apply the execution plan rules to the processing target in full. Partial execution is not permitted. If any rule cannot be applied, the De-Identifier SHALL reject the task with an OperationOutcome and SHALL NOT produce partial output.
 
-The De-Identifier SHALL produce de-identified output conforming to the declared payload binding and version. When a reversible Manager-managed task generates patient identifier mappings, the De-Identifier SHALL return a protected `generatedLookupTable` under Volume 3 §3:PXX.5. An irreversible task SHALL NOT return a generated lookup table. The Manager SHALL validate and retain generated mappings before job release and exclude them from recipient-facing responses.
+The De-Identifier SHALL produce de-identified output conforming to the declared payload binding and version. When a reversible Manager-managed task generates patient identifier mappings through salted hashing, the De-Identifier SHALL return a protected `generatedLookupTable` under Volume 3 §3:PXX.5. An irreversible task SHALL NOT return a generated lookup table. The Manager SHALL validate and retain generated mappings before job release and exclude them from recipient-facing responses.
 
 The De-Identifier SHALL produce provenance evidence containing at minimum the nine elements in the [de-identification evidence baseline](volume-3.html#evidence-baseline). Evidence SHALL faithfully record the transformation decisions made during task execution.
 
