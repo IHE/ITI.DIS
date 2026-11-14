@@ -979,3 +979,32 @@ Before acceptance or synchronous processing the Manager SHALL establish that the
 For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The Manager SHALL authorize result access only for the named recipient organization through an authenticated caller entitled to retrieve that job under ITI-x1 or ITI-x4, and through any specified result destination. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy. An optional [purpose classification](odrl-content.html#purpose-classification) records the issuer’s ISO/TS 14265:2024 classification. The Manager SHALL evaluate the specific approved purpose IRI in the Agreement.
 
 Before revealing results, the Manager SHALL verify that the time and recipient constraints still apply. It SHALL enforce destination restrictions on both direct and referenced access. When an output service controls retrieval, the Manager SHALL ensure that the service enforces those restrictions and current release authorization for the same result.
+
+<a name="data-request-authorization-contract"> </a>
+
+### 3:PXX.6.1 Data Request Authorization Contract
+
+A publisher MAY provide a [DIS Data Request Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) to help authorized users read and find an issued Agreement. The Contract SHALL carry one `rule.contentReference` pointing to the exact version of the DIS Data Request Authorization DocumentReference containing the full Agreement. The Contract publisher SHALL protect the Contract, its narrative, and its search results under the authorization governing discovery of the referenced Agreement.
+
+The publisher SHALL generate the Contract from the referenced Agreement revision and verify the following mappings before making the Contract available for display or search.
+
+| Contract element | Source and interpretation |
+| --- | --- |
+| `identifier` | Agreement revision `uid`, with `system = urn:ietf:rfc:3986`. |
+| `title` | Display title supplied by the publisher. |
+| `authority` | The common Agreement assigner as an Organization reference. Use the assigner IRI in `Reference.identifier.value` with `system = urn:ietf:rfc:3986`. A literal Organization reference may also be supplied when it identifies the same organization. |
+| `issued` | Issuance timestamp when supplied by the issuing authority. |
+| `term.identifier` | One term per Agreement permission, keyed by the permission `uid` using `system = urn:ietf:rfc:3986`. |
+| [DIS Permission Validity](StructureDefinition-dis-permission-validity.html) on `term` | Exact `inclusiveStart` and `exclusiveEnd` from the permission. The extension preserves the Agreement's exclusive upper bound. FHIR R4 `Period.end` is inclusive. |
+| `term.offer.party` | One Organization reference with role `requester` for the assignee and one with role `result-recipient` for the authorized recipient. Use the same IRI identifier form as for `authority`. |
+| [DIS Approved Purpose](StructureDefinition-dis-approved-purpose.html) on `term` | Exact approved purpose IRI. |
+| [DIS Purpose Classification](StructureDefinition-dis-purpose-classification.html) on `term` | One Coding for each distinct ISO classification code when supplied in the permission. Copy the system, edition, and code. |
+| [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact `Library.url\|Library.version` value approved by the permission. |
+
+The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. It SHALL withhold or remove a Contract from discovery if verification fails. If the issuer revises the Agreement, the publisher SHALL create and verify a representation referencing that exact new revision before advertising the revised terms. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
+
+ITI-x1 uses the referenced DocumentReference and evaluates the full ODRL Agreement and its current status. A Contract is a discovery resource. A search hit, Contract status, or mirrored term confers no authority to submit a de-identification job or retrieve results.
+
+FHIR R4 defines [Contract search parameters]({{site.data.fhir.path}}contract.html#search) including `identifier`, `authority`, and `issued`. If the server indexes the logical Organization identifier for `authority`, declare the supported search behavior. Queries on mirrored permission terms, such as approved purpose or policy revision, require separately defined and advertised search parameters. A query that matches a combination of permission fields would need to correlate those fields within the same term.
+
+See the [UC-2 Contract example](Contract-grouped-fhir-authorization-contract.html), the [readable Agreement](odrl-content.html#decoded-authorization-example), and the [Contract verification checks](testplan.html#authorization-contract-discovery).

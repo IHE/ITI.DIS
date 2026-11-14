@@ -98,6 +98,7 @@ groups:
     description: "Informative artifacts for a FHIR-only job."
     resources:
       - Bundle/grouped-fhir-hosted-artifacts
+      - Contract/grouped-fhir-authorization-contract
       - Bundle/grouped-fhir-r5-output
       - Task/grouped-fhir-job-request
       - Task/grouped-fhir-task-patient-r4

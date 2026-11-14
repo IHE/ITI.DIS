@@ -87,6 +87,12 @@ Apply the [actor grouping table](volume-1.html#required-groupings) and the [shar
 
 Use a profiled Agreement with two permissions selecting distinct sets and exact policy revisions. Confirm that the Manager checks the Agreement before synchronous processing or asynchronous acceptance. Repeat with a malformed or non-versioned authorization reference, a missing permission, an untrusted issuer, a different purpose or policy revision, a substituted input version, and an unrecognized required operand. Expect HTTP 400 for malformed inputs and HTTP 403 for a well-formed grant whose conditions the Manager cannot establish. Verify that none of these failures dispatches a task. Revoke the grant after acceptance or attempt retrieval from an unapproved recipient identity or result destination, and verify that the Manager withholds results, evidence and download access.
 
+<a name="authorization-contract-discovery"> </a>
+
+#### Authorization Contract Discovery
+
+For publishers that provide [Authorization Contracts](volume-3.html#data-request-authorization-contract), inspect the [UC-2 Contract](Contract-grouped-fhir-authorization-contract.html) against its versioned Agreement. Verify a one-to-one match of the permission IDs, purpose, ISO classification, validity bounds, parties, and approved policy versions. Search by Agreement identifier on a server declaring that search. Repeat with a changed policy version, swapped R4 and R5 policies, an omitted permission, or an unversioned rule reference. The publisher withholds an inconsistent Contract from discovery. Verify that a Requester uses the exact DocumentReference in ITI-x1 and that the Manager enforces the Agreement's exclusive upper time bound even when the Contract is available.
+
 #### Purpose Classification
 
 | Stimulus | Pass criteria |
