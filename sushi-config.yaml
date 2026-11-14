@@ -77,7 +77,7 @@ resources:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
   Task/staged-async-advanced-task:
     exampleCanonical: https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationTask
-  Library/staged-patient:
+  Contract/staged-patient:
     description: "Approved syntax policy that gives the Requester the expected stage and ruleSet sequence for the staged R4 Patient example."
   Bundle/staged-r4-patient-result:
     description: "Final R4 Patient with task Provenance and Manager evidence for two validated stages."
@@ -110,12 +110,12 @@ groups:
   staged-async-examples:
     name: "Staged Asynchronous Patient Job Examples"
     resources:
-      - Library/staged-patient
+      - Contract/staged-patient
       - Task/staged-async-job
-      - Library/staged-async-preliminary-plan
+      - Contract/staged-async-preliminary-plan
       - Task/staged-async-preliminary-task
       - Parameters/staged-async-preliminary-result
-      - Library/staged-async-advanced-plan
+      - Contract/staged-async-advanced-plan
       - Task/staged-async-advanced-task
       - Parameters/staged-async-advanced-result
       - Bundle/staged-r4-patient-result
@@ -130,7 +130,7 @@ groups:
     resources:
       - Bundle/standalone-export-input
       - Bundle/standalone-export-output
-      - Library/standalone-export-policy
+      - Contract/standalone-export-policy
       - Provenance/standalone-export-evidence
   draft-native-payload-indexes:
     name: "Draft DICOM and CDA Index Profiles and Examples"

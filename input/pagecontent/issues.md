@@ -97,7 +97,7 @@ The job result delivered through ITI-x1 or ITI-x4 SHALL make available, with the
 - Use two authorization revisions that approve the same reusable policy. Verify that each plan assignment traces to its own authorization, permission and exact source policy. Substitute a manifest or assigned De-Identifier and verify rejection before execution.
 - Verify the authorized recipient can obtain the signed artifacts and check their signatures after synchronous and asynchronous disclosure. Revoke the authorization or remove the recipient's access to a required supporting artifact and verify that the Manager withholds release.
 
-The current transaction artifacts still define the Library carriers. The next specification change is to replace them and add the signature and result package profiles, including the Requester-carried policy representation.
+The transaction artifacts use Contract carriers. Adding the common signature exchange and signed result package entries remains follow-on work. The current Requester-carried policy remains a JWS-signed Contract in a Binary.
 
 <a name="future-policy-management-transaction"> </a>
 

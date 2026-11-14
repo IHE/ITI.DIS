@@ -7,7 +7,7 @@ A clinician uses a local workstation to export a FHIR R4 discharge summary. The 
 | Artifact | What to inspect |
 |----------|-----------------|
 | [Input document Bundle](Bundle-standalone-export-input.html) | The Composition selects a Patient with a synthetic name and references the included author. |
-| [Locally approved policy](Library-standalone-export-policy.html) | The R4 Library carries the irreversible Syntax-Level policy for `Patient.name`. |
+| [Locally approved policy](Contract-standalone-export-policy.html) | The R4 Contract carries the irreversible Syntax-Level policy for `Patient.name`. |
 | [Result document Bundle](Bundle-standalone-export-output.html) | The Patient's name is absent. The output has fresh resource and document identities, and the Composition's subject, author, and section references resolve within the output Bundle. |
 | [Provenance evidence](Provenance-standalone-export-evidence.html) | The evidence identifies the output Bundle, policy, ruleSet, Integrated actor, validation result, and audit correlation. |
 {: .grid}

@@ -2,7 +2,7 @@
 
 ### Decoded ODRL De-Identification Policy Set
 
-This JSON-LD is the decoded Base64 content of `Library.content.data` in this example.
+This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.data` in this example.
 
 ```json
 {

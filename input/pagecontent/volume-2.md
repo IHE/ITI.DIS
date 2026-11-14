@@ -203,7 +203,7 @@ The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification 
 | `payload-set` | 1..* | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | One manifest with the set's binding, version, permission IRI, requested purpose IRI, approved policy and any permitted supplied lookup reference |
 {: .grid}
 
-Each set SHALL have a unique `setId`, a `permission` IRI equal to the applicable Agreement permission's `uid`, a `purpose` IRI, and the approved policy as a versioned canonical (`Library.url|Library.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives the job's reversibility mode from the common mode declared by the approved policies and obtains each set's linkage scope from its policy.
+Each set SHALL have a unique `setId`, a `permission` IRI equal to the applicable Agreement permission's `uid`, a `purpose` IRI, and the approved policy as a versioned canonical (`Contract.url|Contract.version`). The optional `policyContent` extension references a contained JWS-signed policy Binary. The Manager derives the job's reversibility mode from the common mode declared by the approved policies and obtains each set's linkage scope from its policy.
 
 To request asynchronous job processing when both actors support DIS-ASYNC-JOB, the Requester SHALL include the `Prefer: respond-async` request header per the HL7 FHIR R4 Asynchronous Request Pattern.
 
@@ -217,15 +217,15 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) SHALL apply the [s
 
 The Manager SHALL resolve and validate the exact Contract version and its embedded ODRL Agreement under [Volume 3 §3:PXX.6](volume-3.html#data-request-authorization). It SHALL evaluate the permission identified by each set and compare the requested purpose and policy with the exact values approved by that permission. The Manager SHALL return HTTP 400 for a missing or malformed authorization reference, Contract, Agreement or permission, including an Agreement identifier mismatch or an unsupported expression. It SHALL return HTTP 403 for an authenticated Requester if it cannot retrieve and verify the exact referenced Contract revision or establish that the grant is trusted, currently effective and covers the job. The Manager SHALL return an OperationOutcome and SHALL NOT accept the job, dispatch a task, or return results.
 
-The Manager SHALL obtain the policy content. When `policyContent` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared versioned policy canonical. When `policyContent` is absent, the Manager SHALL resolve the policy identified by the declared canonical and version by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
+The Manager SHALL obtain the policy content. When `policyContent` is present, the Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model and SHALL confirm that `Contract.url` and `Contract.version` inside the JWS payload match the declared versioned policy canonical. When `policyContent` is absent, the Manager SHALL resolve the policy identified by the declared canonical and version by implementation-defined means (see [§3:PXX.1.4](volume-3.html#3pxx14-policy-delivery-and-validation)).
 
 The Manager SHALL perform three-point policy content validation:
 
-1. **Structure** — verify the Library and decoded ODRL Set against the applicable DIS profiles.
+1. **Structure** — verify the Contract and decoded ODRL Set against the applicable DIS profiles.
 2. **Currency** — verify that the policy has not expired or been revoked.
 3. **Integrity** — verify that the obtained rules are the exact content bound to the approved version under the [policy validation rules](volume-3.html#3pxx132-policy-validation). Apply the JWS verification above for carried content and the deployment's resolution trust model for Manager-resolved content.
 
-If any point of the four-point validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
+If any point of the three-point policy content validation fails, the Manager SHALL reject the job with an OperationOutcome describing the failure point.
 
 The Manager SHALL verify that all approved policies declare the same reversibility mode before accepting an asynchronous job or beginning synchronous execution. If the modes differ, the Manager SHALL reject the job with an OperationOutcome before dispatching any tasks.
 
@@ -341,7 +341,7 @@ Table 2:3.x3.2-1 lists the actors and their roles in this transaction.
 - [HL7 FHIR R4 Operations]({{site.data.fhir.path}}operations.html) — FHIR operation framework
 - [HL7 FHIR R4 Task]({{site.data.fhir.path}}task.html) — work-order request
 - [HL7 FHIR R4 Parameters]({{site.data.fhir.path}}parameters.html) — successful operation result envelope
-- [HL7 FHIR R4 Library]({{site.data.fhir.path}}library.html) — execution plan carrier
+- [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) — execution plan carrier
 - [HL7 FHIR R4 Provenance]({{site.data.fhir.path}}provenance.html) — de-identification evidence
 - [HL7 FHIR R4 OperationOutcome]({{site.data.fhir.path}}operationoutcome.html) — error reporting
 
@@ -370,7 +370,7 @@ The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification 
 | Input code | Cardinality | Value | Description |
 |------------|-------------|-------|-------------|
 | `payload-set` | 1..1 | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | Manifest for the assigned set or subset |
-| `execution-plan` | 1..1 | `valueReference` | [DIS Execution Plan Library](StructureDefinition-DIS-ExecutionPlan.html) for this ruleSet, including the [source policy identity](volume-3.html#execution-plan-source-policy) |
+| `execution-plan` | 1..1 | `valueReference` | [DIS Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) for this ruleSet, including the [source policy identity](volume-3.html#execution-plan-source-policy) |
 | `rule-set-id` | 1..1 | `valueString` | RuleSet from the source policy that this assignment executes |
 | `stage-id` | 0..1 | `valueString` | Required when the source policy declares staged execution |
 | `lookup-table` | 0..1 | `valueReference` | Protected lookup table restricted to the assignment |
@@ -403,7 +403,7 @@ The De-Identifier SHALL apply the [shared identifier and retry rules](#submissio
 
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
-Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Library, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan. It SHALL verify that the plan's targets all select within the assigned manifest. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
+Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Contract, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL verify that the resolved plan matches the referenced resource revision, that its identifier matches the Set revision `uid`, and that it identifies the authenticated Manager and the assigned De-Identifier. It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan. It SHALL verify that the plan's targets all select within the assigned manifest. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
 
 Before accepting the task, the De-Identifier SHALL verify that the task's processing combination and required actions are within its declared capabilities. For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an unsupported combination or action with HTTP 422 and an R4 OperationOutcome.
 

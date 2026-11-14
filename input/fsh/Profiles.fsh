@@ -55,83 +55,58 @@ Severity: #error
 Expression: "agent.where(type.coding.where(system = 'http://terminology.hl7.org/CodeSystem/provenance-participant-type' and code = 'performer').exists()).count() = 1"
 
 
-// ── DIS-Policy ───────────────────────────────────────────────────────────────
+RuleSet: DISODRLContract
+* id 1..1
+* meta.versionId 1..1
+* url 1..1
+* version 1..1
+* identifier 1..1
+* identifier.system 1..1
+* identifier.system = "urn:ietf:rfc:3986" (exactly)
+* identifier.value 1..1
+* identifier.value obeys dis-absolute-iri
+* name 1..1
+* issued 1..1
+* rule 1..1
+* rule.content[x] only Attachment
+* rule.contentAttachment.contentType 1..1
+* rule.contentAttachment.contentType = #"application/ld+json" (exactly)
+* rule.contentAttachment.data 1..1
+* rule.contentAttachment.url 0..0
 
 Profile: DISPolicy
-Parent: Library
+Parent: Contract
 Id: DIS-Policy
-Title: "DIS Policy"
-Description: """
-DIS de-identification policy artifact. A Library resource carrying a versioned
-ODRL Set governing de-identification transformations. The JSON-LD is
-carried in Library.content as base64-encoded data. A policy may be delivered
-inline as JWS-signed content in a Binary contained in the ITI-x1 job submission
-or resolved by the De-ID Manager from its own trust model. Policies are
-distinguished from execution plans by Library.type coding dis-policy.
-"""
-* ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-Policy"
-* ^status = #active
-* ^experimental = false
-* url 1..1
-* identifier 1..*
-* version 1..1
-* name 1..1
+Title: "DIS De-Identification Policy Contract"
+Description: "Versioned Contract carrying a reusable ODRL Set of de-identification duties."
+* insert DISODRLContract
 * status 1..1
-* type 1..1
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-policy "De-identification policy (Semantic-Level or Syntax-Level rules)"
-* date 1..1
-* publisher 1..1
-* effectivePeriod 1..1
-* content 1..1
-* content.contentType 1..1
-* content.contentType = #"application/ld+json" (exactly)
-* content.data 1..1
-* content.url 0..0
-
-
-// ── DIS-ExecutionPlan ─────────────────────────────────────────────────────────
+* authority 1..1
+* authority only Reference(Organization)
+* applies 1..1
 
 Profile: DISExecutionPlan
-Parent: Library
+Parent: Contract
 Id: DIS-ExecutionPlan
-Title: "DIS Execution Plan"
-Description: """
-DIS execution plan artifact. A Library resource carrying a payload-specific,
-compiled ODRL Set of transformation obligations dispatched by the De-ID Manager to a
-De-Identifier via ITI-x3. Execution plans are derived from a DIS-Policy and
-contain only concrete element paths — semantic group references are expanded
-during compilation. Execution plans are distinguished from policies by
-Library.type coding dis-execution-plan.
-"""
-* ^url = "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ExecutionPlan"
-* ^status = #active
-* ^experimental = false
-* url 1..1
-* version 1..1
-* name 1..1
-* status 1..1
-* type 1..1
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-execution-plan "Execution plan (payload-specific compiled rules)"
-* date 1..1
-* content 1..1
-* content.contentType 1..1
-* content.contentType = #"application/ld+json" (exactly)
-* content.data 1..1
-* content.url 0..0
+Title: "DIS De-Identification Execution Plan Contract"
+Description: "Task-specific Contract carrying a compiled ODRL Set derived from the approved policy."
+* insert DISODRLContract
+* authority 1..1
+* authority only Reference(Organization)
+* subject 1..1
+* subject only Reference(Organization)
+* supportingInfo 1..1
+* supportingInfo only Reference(DISPolicy)
+* supportingInfo.reference 1..1
+* supportingInfo.reference obeys dis-versioned-contract-reference
 
-* relatedArtifact ^slicing.discriminator.type = #value
-* relatedArtifact ^slicing.discriminator.path = "type"
-* relatedArtifact ^slicing.rules = #open
-* relatedArtifact contains sourcePolicy 1..1
-* relatedArtifact[sourcePolicy].type = #derived-from (exactly)
-* relatedArtifact[sourcePolicy].resource 1..1
-* relatedArtifact[sourcePolicy].resource obeys dis-source-policy-version
-* relatedArtifact[sourcePolicy].url 0..0
-* relatedArtifact[sourcePolicy].document 0..0
-* relatedArtifact[sourcePolicy].extension contains DisPolicyEvidenceUri named evidenceUri 1..1
+Invariant: dis-versioned-contract-reference
+Description: "Reference identifies one exact Contract revision on an HTTPS FHIR server."
+Severity: #error
+Expression: "$this.matches('^https://[^?# ]+/Contract/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-source-policy-version
-Description: "The source policy reference includes its canonical URL and Library version."
+Description: "The source policy identifier includes its URL and business version."
 Severity: #error
 Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^|]+[|][^|]+$')"
 

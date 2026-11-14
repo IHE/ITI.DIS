@@ -29,7 +29,7 @@ Usage: #inline
 * target[0].extension[targetFhirVersion].valueCode = #5.0
 * recorded = "2026-11-06T03:00:00Z"
 * activity = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity#dis-task
-* policy = "https://governance.example.org/fhir/Library/hosted-imaging-subject-removal/_history/1"
+* policy = "https://governance.example.org/fhir/Contract/hosted-imaging-subject-removal/_history/1"
 * agent.type = http://terminology.hl7.org/CodeSystem/provenance-participant-type#performer
 * agent.who.identifier.system = "https://dis.example.org/identifiers/worker"
 * agent.who.identifier.value = "example-worker"
