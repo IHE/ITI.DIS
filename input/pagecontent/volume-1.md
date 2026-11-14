@@ -292,7 +292,7 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 A **de-identification job** is the work covered by one approved data request. For distributed processing, the De-ID Manager divides the job into one or more **de-identification tasks** and assigns them to De-Identifiers. A task applies one ruleSet to one payload set or an assigned subset. An Integrated De-ID Manager/De-Identifier performs those assignments locally.
 
-For example, [UC-2](#uc-2) uses one job for R4 clinical and laboratory records and R5 CT measurements. The Manager assigns a task for each set and delivers both validated results together. Volume 2 describes [job submission](volume-2.html#23x1-submit-de-identification-job-iti-x1), [task submission](volume-2.html#23x3-submit-de-identification-task-iti-x3), and [assignment correlation](volume-2.html#assignment-correlation).
+For example, [UC-2](#uc-2) uses one job for R4 clinical and laboratory records and R5 CT diagnostic reports. The Manager assigns a task for each set and delivers both validated results together. Volume 2 describes [job submission](volume-2.html#23x1-submit-de-identification-job-iti-x1), [task submission](volume-2.html#23x3-submit-de-identification-task-iti-x3), and [assignment correlation](volume-2.html#assignment-correlation).
 
 #### 1:PXX.4.1.2 Policy, Payload, and Evidence
 
@@ -319,7 +319,7 @@ For example, [UC-2](#uc-2) uses one job for R4 clinical and laboratory records a
 | Use case | What it demonstrates |
 |----------|----------------------|
 | [UC-1 — Cross-Border Epidemiological Study](#1pxx421-use-case-1-cross-border-epidemiological-study-using-ips) | Two-stage asynchronous Bulk FHIR processing, irreversible pseudonymization, staged release Provenance, and job cancellation. [Worked example](examples-bulk-fhir-cohort.html) |
-| [UC-2 — Multimodal AI/ML Input Preparation](#uc-2) | Separate R4 clinical and lab data and R5 CT measurements in one asynchronous job, with synchronous worker tasks and recovery of a lost acceptance. [Worked example](examples-grouped-fhir-job.html) |
+| [UC-2 — Multimodal AI/ML Input Preparation](#uc-2) | Separate R4 clinical and lab data and R5 CT diagnostic reports in one asynchronous job, with synchronous worker tasks and recovery of a lost acceptance. [Worked example](examples-grouped-fhir-job.html) |
 | [UC-3 — Clinical Pathology Order](#1pxx423-use-case-3-clinical-pathology-order-pseudonymous-care) | Synchronous reversible pseudonymization with a Manager-resolved Semantic-Level policy, preserving the order’s link to the patient. [Worked example](examples-reversible-pathology.html) |
 | [UC-4 — Cloud Decision Support](#1pxx424-use-case-4-ai-assisted-clinical-decision-support-cloud-deployment) | Synchronous reversible pseudonymization with a requester-carried, JWS-signed Syntax-Level policy, versioned input references, and hospital-side mapping custody. [Worked example](examples-cloud-decision-support.html) |
 | [UC-5 — Local Clinical Export](#1pxx425-use-case-5-de-identified-health-data-export-content-conformance) | Standalone de-identification of a FHIR document using a local policy, with Provenance and audit correlation. [Worked example](examples-standalone-export.html) |
@@ -355,17 +355,17 @@ The [UC-1 Bulk FHIR cohort example](examples-bulk-fhir-cohort.html) shows both s
 
 #### 1:PXX.4.2.2 Use Case 2: FHIR Input Preparation for Multimodal AI/ML
 
-An AI/ML consortium prepares a lung cancer cohort for model development or validation. The approved data include clinical records, laboratory results, and structured CT measurements. DIS prepares these FHIR inputs for the cohort release. Native DICOM processing is outside the scope of this supplement. The [illustrative FHIR and DICOM extension](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) shows how a future binding could add a separate native imaging payload set to the same job.
+An AI/ML consortium prepares a lung cancer cohort for model development or validation. The approved data include clinical records, laboratory results, and CT diagnostic reports. DIS prepares these FHIR inputs for the cohort release. Native DICOM processing is outside the scope of this supplement. The [illustrative FHIR and DICOM extension](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) shows how a future binding could add a separate native imaging payload set to the same job.
 
 ##### 1:PXX.4.2.2.1 AI/ML Method Development Use Case Description
 
-The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous de-identification job through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and carries CT-derived measurements as [R5 Observation](https://hl7.org/fhir/R5/observation.html) resources. The DIS requests, responses, and evidence use R4 for both sets.
+The consortium holds a data permit identifying the approved cohort, inputs, purposes, policies, and linkage requirements. Acting as the De-Identification Requester, the DAC submits one asynchronous de-identification job through ITI-x1 with two FHIR payload sets. One set declares R4 and selects clinical records and laboratory results. The other declares R5 and selects a hosted [R5 DiagnosticReport](https://hl7.org/fhir/R5/diagnosticreport.html) with a CT finding. The DIS requests, responses, and evidence use R4 for both sets.
 
-The Manager validates the permit and both approved policies before accepting the job and returning a polling URL. Each set uses one ruleSet. The R4 policy removes `Patient.name` and preserves links from the laboratory results to the output Patient. The R5 policy retains the CT measurements and removes the patient reference because the permit authorizes those measurements for independent analysis. The job selects irreversible processing. A `setId` correlates each set with its task and result within the job.
+The Manager validates the permit and both approved policies before accepting the job and returning a polling URL. Each set uses one ruleSet. The R4 policy removes `Patient.name` and preserves links from the laboratory results to the output Patient. The R5 policy retains the CT finding and removes the patient reference because the permit authorizes independent analysis of the report. The job selects irreversible processing. A `setId` correlates each set with its task and result within the job.
 
 The Manager dispatches a synchronous de-identification task through ITI-x3 for each set and validates both results. The job remains asynchronous at the Requester–Manager interface. If the acceptance response is lost, the DAC can recover the original polling URL using the same submission and the recovery header. After rechecking release authorization, the Manager makes both sets and their evidence available through ITI-x4. The DAC delivers the approved FHIR output to the SPE outside DIS.
 
-The [UC-2 mixed-version FHIR example](examples-grouped-fhir-job.html) shows submission recovery, a task and policy for each payload version, and release of both results.
+The [UC-2 mixed-version FHIR example](examples-grouped-fhir-job.html) shows submission recovery, a task and policy for each payload version, and direct references to the hosted R5 report on input and release.
 
 ##### 1:PXX.4.2.2.2 AI/ML Method Development Process Flow
 
