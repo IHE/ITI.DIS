@@ -586,9 +586,9 @@ The `fhir-bulk-data` format uses the JSON [bulk file manifest](#3pxx3224-bulk-fi
 
 <a name="manifest-package"> </a>
 
-Use an R4 `Bundle` of type `collection` when the manifest and its targets or indexes travel together. It SHALL contain exactly one List declaring the DIS Resource Manifest profile. Each entry in that List SHALL use either an absolute HTTPS FHIR REST reference to an R4 resource or a `urn:uuid` reference matching exactly one `Bundle.entry.fullUrl` in the same package. A standalone List SHALL use absolute HTTPS references. Only the List's selected entries determine the payload set. Other Bundle entries may support resolution under the selected binding.
+Use an R4 `Bundle` of type `collection` when the manifest and its targets or indexes travel together. It SHALL contain exactly one List declaring the DIS Resource Manifest profile. Each entry in that List SHALL use either an absolute HTTPS FHIR REST reference allowed by the selected payload binding or a `urn:uuid` reference matching exactly one `Bundle.entry.fullUrl` in the same package. A standalone List SHALL use absolute HTTPS references. Only the List's selected entries determine the payload set. Other Bundle entries may support resolution under the selected binding.
 
-A bundled R4 resource can be the target itself or a wrapper or index. The package SHALL carry non-R4 bytes inside the attachment of an R4 resource. Each Bundle entry SHALL be an R4 resource.
+A bundled R4 resource can be the target itself or a wrapper or index. Any non-R4 payload bytes included in the package SHALL be carried inside the attachment of an R4 resource. Each Bundle entry SHALL be an R4 resource.
 
 <a name="3pxx32-authorization-and-stable-retrieval"> </a>
 
@@ -785,12 +785,26 @@ Table 3:PXX.3.2.2-2 shows how a List entry identifies the payload.
 | Binding and version | Resource selected by a List entry | Payload selected |
 |---------------------|------------------------------------|------------------|
 | DIS-FHIR-Payload R4 | An R4 resource, or an R4 [DIS Payload Wrapper](StructureDefinition-DIS-PayloadWrapper.html) | The resource itself or, for a wrapper, the R4 content carried or located by its attachment |
-| DIS-FHIR-Payload R5 | R4 DIS Payload Wrapper | The serialized R5 resource carried or located by the wrapper's attachment |
+| DIS-FHIR-Payload R5 | An R4 DIS Payload Wrapper or a [release-qualified HTTPS reference](#direct-hosted-r5-references) | The R5 resource carried or located by the wrapper's attachment, or the R5 resource retrieved directly from the referenced endpoint |
 {: .grid}
 
 **Payload wrapper.** The wrapper is a profiled R4 DocumentReference with one attachment. Its `data` carries the payload bytes inline, or its `url` locates the payload at an authorized HTTPS endpoint. Exactly one SHALL be present. A FHIR wrapper SHALL use `application/fhir+json` or `application/fhir+xml`. The receiving actor SHALL retrieve or decode the payload and validate it against the containing set's binding and version. If the FHIR media-type release parameter is present, it SHALL agree with `payloadVersion`. Any HTTP negotiation for R5 occurs on retrieval of the attachment content. The manifest, package, and wrapper exchanges use R4.
 
 The receiving actor SHALL follow the attachment only when the DocumentReference declares and conforms to the DIS Payload Wrapper profile. A DocumentReference claiming that profile but failing validation SHALL cause a set failure. To deliver a resource that itself declares the wrapper profile as a FHIR payload, serialize it inside a separate wrapper. An inline R5 DocumentReference is therefore carried as R5 bytes in the R4 wrapper, just like any other R5 resource.
+
+<a name="direct-hosted-r5-references"> </a>
+
+**Direct hosted R5 references.** For a FHIR resource-list payload set declared as `R5`, a List item MAY reference a hosted R5 resource directly using an absolute HTTPS FHIR [version-specific read URL](https://hl7.org/fhir/R5/http.html#vread). The item SHALL carry the [DIS Target FHIR Release extension](StructureDefinition-dis-target-fhir-version.html) with `valueCode = 5.0`. Resolve List items without the extension as R4 workflow resources or native R4 payloads, as applicable. For an R5 set, an unqualified item SHALL resolve to a conformant R4 Payload Wrapper. The extension SHALL NOT qualify an R4 wrapper or index, a bundle-local reference, or a reference in a set declared as R4. This rule defines cross-release resolution for DIS, including [evidence targets](#3pxx3214-evidence-representation-across-versions).
+
+The retrieving actor SHALL use the target release to set the [FHIR media-type parameter](https://hl7.org/fhir/R5/versioning.html) on the separate GET, for example `Accept: application/fhir+json; fhirVersion=5.0`. It SHALL confirm the release using the response media-type parameter or verified FHIR server capabilities for that endpoint. If a response media-type parameter is present, it SHALL agree with the requested release. If it is absent, the actor SHALL verify that the resource endpoint serves R5 exclusively, using trusted endpoint configuration and its R5 CapabilityStatement. A multi-release endpoint SHALL identify the returned release in its response media type for this exchange. The actor SHALL verify that the resource type, logical ID, and `meta.versionId` match the URL and validate the returned resource against R5. A successful HTTP status alone does not establish the release. Apply the [authorization and stable retrieval rules](#3pxx32-authorization-and-stable-retrieval). Reject the submission or fail the accepted work if a required input cannot be verified and retrieved. For results, apply the evidence and release checks below.
+
+See the [hosted R5 input List](List-hosted-r5-input.html) and [hosted R5 result package](Bundle-hosted-r5-result.html). These artifacts illustrate the resource-list manifest and evidence for a set with `payloadBinding = DIS-FHIR-Payload` and `payloadVersion = R5`. They use illustrative URLs. The result package pairs an R4 manifest List with R4 Provenance. Both identify the same hosted R5 output revision. A receiver requests that revision as follows.
+
+```http
+GET /fhir/r5/Observation/hosted-imaging-output/_history/1
+Host: results.example.org
+Accept: application/fhir+json; fhirVersion=5.0
+```
 
 **Results.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence follows the rules below.
 
@@ -813,7 +827,7 @@ The [mixed R4 result package](Bundle-mixed-r4-result.html) selects a bundled Pat
 
 ##### 3:PXX.3.2.2.3 Version-Safe Packaging of Inline and Hosted Resources
 
-The DIS transaction envelope and manifest package use HL7 FHIR R4. For R5, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
+The DIS transaction envelope and manifest package use HL7 FHIR R4. For inline R5, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. Hosted R5 resources can use [direct release-qualified references](#direct-hosted-r5-references) or an R4 wrapper with an attachment URL. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
 
 <a name="protocol-resources-remain-hl7-fhir-r4"> </a>
 
@@ -1003,16 +1017,16 @@ The `Provenance.agent` entry for the De-Identifier SHALL use `Provenance.agent.t
 
 ### 3:PXX.4.3 Identifying Results Across FHIR Releases
 
-De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. Evidence does not depend on the payload's HL7 FHIR version because:
+De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. The following rules identify the payload covered by the R4 evidence:
 
-- `Provenance.target` identifies a native R4 result or, for R5, the R4 wrapper carrying or locating the result.
-- For a resource list, each `Provenance.target.reference` SHALL match a selected List item. For a bundled output, the reference SHALL resolve to exactly one entry by `Bundle.entry.fullUrl` in the same result package. For a hosted output, use the HTTPS reference selected by the List.
+- `Provenance.target` identifies a native R4 result, an R4 wrapper carrying or locating the result, or the direct release-qualified HTTPS reference to a hosted R5 result.
+- For a resource list, each `Provenance.target.reference` SHALL match a selected List item. For a bundled output, the reference SHALL resolve to exactly one entry by `Bundle.entry.fullUrl` in the same result package. For a hosted output, use the HTTPS reference selected by the List. If the List item has the DIS Target FHIR Release extension, the evidence target SHALL carry the same extension value. The receiver SHALL compare both the reference and the presence and value of the release extension before accepting a match. Resolve a direct hosted R5 target under the same rules as its List item.
 - For bulk, each `Provenance.target.reference` SHALL identify a selected DIS Bulk Result File descriptor by its Bundle entry `fullUrl`. The evidence targets the R4 descriptor rather than the NDJSON URL directly.
 - Each selected output entry or file SHALL be covered by at least one evidence target. The receiver SHALL reject missing, unresolved, ambiguous, or unselected targets before accepting or releasing the result.
 - Transformation summary entries use version-neutral FHIRPath target paths (e.g., `Patient.name`, `Patient.birthDate`). These paths describe what was transformed, not the version of the resource that was transformed.
 - Policy references, ruleSet identifiers, reversibility state, validation status, and audit correlation identifiers are version-independent metadata.
 
-The `Provenance` resource MAY include the payload HL7 FHIR version in an extension when consumers need to distinguish output versions. This is informational; it does not change the evidence structure.
+The target release extension on a direct hosted R5 reference governs retrieval of that target. The Provenance resource itself remains R4.
 
 <a name="3pxx153-transformation-summary"> </a>
 

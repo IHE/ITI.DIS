@@ -125,7 +125,7 @@ Use the action definitions in [Volume 3](volume-3.html#transformation-actions). 
 
 ### Payload, Evidence and Release
 
-Cover R4 workflow resources with independently versioned R4 and R5 payloads. Verify declared-version validation and confirm that R5 payloads are carried or referenced by R4 wrappers. Verify that a request for a payload release outside the supported binding is rejected before dispatch.
+Cover R4 workflow resources with independently versioned R4 and R5 payloads. Verify declared-version validation and exercise inline R5 in an R4 wrapper and hosted R5 both directly and through a wrapper. Verify that a request for a payload release outside the supported binding is rejected before dispatch.
 
 Submit one inline R4 Patient through a manifest package and verify that the List selects exactly the intended Patient. Verify that ITI-x3 carries the assigned set and that the returned result and evidence preserve its `setId`. Reject a Task with no `payload-set` input, a Task using a `processingTarget` or `resourceManifest` input code, a manifest with an unauthorized entry, and a payload whose release conflicts with the declared `payloadVersion`. Verify stable selection across retries and verify that task and job result manifests resolve to authorized de-identified resources. For bulk input, cover a complete authorized manifest, a dataset outside the approved scope, and missing files or expired access. Verify that a required input failure withholds all job output, including access through result endpoints.
 
@@ -149,15 +149,21 @@ For the substitution cases, repeat after release where the test setup allows the
 
 ### Jobs with Multiple Payload Sets
 
-Submit a job with two payload sets, distinct set identifiers, and an approved policy for each set. Verify dispatch and plan selection per set, including a handoff from bundled to hosted content that preserves the target set. Compare bundled and externally hosted manifest entries for each supported binding. For R5, exercise an R4 wrapper with inline bytes and with an HTTPS attachment URL. Reject direct cross-release List references, unresolved bundle-local references, wrappers with both data and URL, a mismatched payload release, duplicate set identifiers, inputs outside the applicable Task profile, and unauthorized manifest entries. Verify correlation of each result and its evidence to the submitted set. Fail one task after another set succeeds and verify that the Requester receives no output for either set.
+Submit a job with two payload sets, distinct set identifiers, and an approved policy for each set. Verify dispatch and plan selection per set, including a handoff from bundled to hosted content that preserves the target set. Compare bundled and externally hosted manifest entries for each supported binding. For R5, exercise a direct hosted reference and R4 wrappers with inline bytes and with an HTTPS attachment URL. Reject an unqualified R5 reference that does not resolve to a conformant R4 wrapper, unresolved bundle-local references, wrappers with both data and URL, a mismatched payload release, duplicate set identifiers, inputs outside the applicable Task profile, and unauthorized manifest entries. Verify correlation of each result and its evidence to the submitted set. Fail one task after another set succeeds and verify that the Requester receives no output for either set.
 
 ### Result Packages and Evidence Coverage
 
-Exercise fully inline R4 and wrapped R5 results, a List selecting bundled and hosted resources, and a bulk set with two NDJSON files. For each successful response, retrieve or decode its single `resultPackage`, validate the R4 Bundle, and verify that it has one manifest of the declared format and DIS Evidence Provenance. Verify that the outer result has no `manifest` or `evidence` part. Check synchronous task and job responses and the corresponding completed polling responses.
+Exercise fully inline R4 and wrapped R5 results, direct hosted R5 results, a List selecting bundled and hosted resources, and a bulk set with two NDJSON files. For each successful response, retrieve or decode its single `resultPackage`, validate the R4 Bundle, and verify that it has one manifest of the declared format and DIS Evidence Provenance. Verify that the outer result has no `manifest` or `evidence` part. Check synchronous task and job responses and the corresponding completed polling responses.
 
-For a List, verify that evidence covers each selected resource or wrapper. For bulk, match the file descriptors one to one to the JSON manifest, match evidence targets to those descriptors, and pass the extracted manifest to a Bulk Data client. Verify that hosted results remain accessible only to the authorized receiver. Apply the bulk content identity and renewal procedures above.
+For a List, verify that evidence covers each selected resource or wrapper, including the exact revision and release extension for direct hosted R5. For bulk, match the file descriptors one to one to the JSON manifest, match evidence targets to those descriptors, and pass the extracted manifest to a Bulk Data client. Verify that hosted results remain accessible only to the authorized receiver. Apply the bulk content identity and renewal procedures above.
 
 Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a missing or unlisted file descriptor, an unresolved target, a target outside the set, and an outer evidence part. Verify that the receiver rejects each result and that the Manager withholds release.
+
+### Direct Hosted R5 References
+
+Use the [hosted R5 input List](List-hosted-r5-input.html) and [result package](Bundle-hosted-r5-result.html) with a synthetic R5 endpoint. Verify that each retrieving actor requests the pinned revision with `fhirVersion=5.0` on a separate GET, confirms the release, validates the native payload, and checks the exact resource type, ID, and revision. Repeat with a version-specific endpoint that omits the parameter on its response and exposes an R5 CapabilityStatement. The R4 workflow resources remain independently valid.
+
+Repeat with an unqualified R5 URL in the input List, a qualified reference on an R4 set, a missing revision, a conflicting response release, a wrong body revision, and an endpoint or response that cannot establish the requested release. Verify rejection or work-item failure as applicable and no partial job output. Repeat result verification with a Provenance target that drops the extension or identifies another revision. Verify that the receiver rejects each mismatched package. Run the same target comparison for staged release Provenance when applicable.
 
 ### Requester Validation of Staged Release Evidence
 
