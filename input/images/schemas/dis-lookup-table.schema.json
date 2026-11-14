@@ -63,6 +63,24 @@
       "type": "string",
       "pattern": "\\S"
     },
+    "scopeIdentifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "system": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
+        "value": {
+          "$ref": "#/$defs/nonBlankString"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ]
+    },
     "scope": {
       "type": "object",
       "additionalProperties": false,
