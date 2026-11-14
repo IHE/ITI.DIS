@@ -135,26 +135,6 @@ Description: "The source policy reference includes its canonical URL and Library
 Severity: #error
 Expression: "$this.matches('^[A-Za-z][A-Za-z0-9+.-]*:[^|]+[|][^|]+$')"
 
-Profile: DISDataRequestAuthorization
-Parent: DocumentReference
-Id: DIS-DataRequestAuthorization
-Title: "DIS Data Request Authorization"
-Description: "The immutable revision of an organizational approval. The inline attachment carries a DIS ODRL Agreement."
-* id 1..1
-* meta.versionId 1..1
-* masterIdentifier 1..1
-* masterIdentifier.system 1..1
-* masterIdentifier.system = "urn:ietf:rfc:3986" (exactly)
-* masterIdentifier.value 1..1
-* masterIdentifier.value obeys dis-absolute-iri
-* type 1..1
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type#data-request-authorization
-* content 1..1
-* content.attachment.contentType 1..1
-* content.attachment.contentType = #"application/ld+json" (exactly)
-* content.attachment.data 1..1
-* content.attachment.url 0..0
-
 // ── Persistent, referenceable lookup table ──────────────────────────────────
 Profile: DISLookupTable
 Parent: DocumentReference

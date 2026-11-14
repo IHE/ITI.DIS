@@ -56,7 +56,7 @@ The tables describe the R4 work-order inputs and result parameters. Each success
 
 ### ITI-x1 Job Submission
 
-The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42/_history/1`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
+The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/Contract/permit-42/_history/1`. The ODRL Agreement in that Contract covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
 
 | Metadata or manifest of each `payload-set` input | Clinical set | Imaging set |
 |--------------------------------|--------------|-------------|
@@ -179,7 +179,7 @@ Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both p
         ]
       },
       "valueReference": {
-        "reference": "https://governance.example.org/fhir/DocumentReference/permit-42/_history/1"
+        "reference": "https://governance.example.org/fhir/Contract/permit-42/_history/1"
       }
     },
     {
