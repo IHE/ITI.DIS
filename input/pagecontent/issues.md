@@ -29,7 +29,7 @@ This supplement assesses conformance with published FHIR R4 or R5 processing pay
 
 #### Key-Based Reversible Pseudonymization
 
-Evaluate key-based reversal as an additional arrangement under DIS-REVERSIBLE. Define who holds the key, who is authorized to reverse a pseudonym, and what the Manager and De-Identifier must exchange or declare when implemented by different vendors. Determine whether that behavior requires a shared capability declaration and how to test it.
+The proposed DIS-REVERSIBLE method uses deterministic encryption to generate patient pseudonyms. Independent De-Identifiers must produce the same pseudonym for the same resolved identity within the authorized linkage scope. The De-Identifier returns the generated mappings through the protected lookup-table output, and the Manager uses those mappings for authorized resolution. [Issue #50](https://github.com/IHE/ITI.DIS/issues/50) tracks the binding, key provisioning assumptions, and conformance tests.
 
 <a name="data-recipient-and-push-delivery"> </a>
 

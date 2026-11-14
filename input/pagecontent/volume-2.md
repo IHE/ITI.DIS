@@ -440,7 +440,7 @@ The De-Identifier returns one of the HTTP status codes described below.
 | Parameter | Cardinality | Type | Description |
 |-----------|-------------|------|-------------|
 | `payloadResult` | 1..1 | Group | De-identified [payload set](#grouped-payload-parameters) with evidence for that set |
-| `generatedLookupTable` | 0..1 | DocumentReference | Inline DIS-LookupTable with generated patient identifier mappings. Required when reversible Manager-managed hashing generates patient mappings. Protected output to the Manager. |
+| `generatedLookupTable` | 0..1 | DocumentReference | Inline DIS-LookupTable with generated patient identifier mappings. Required when a reversible Manager-managed task generates patient identifier pseudonyms. Protected output to the Manager. |
 | `validationStatus` | 1..1 | code | Per-task validation outcome |
 {: .grid}
 
