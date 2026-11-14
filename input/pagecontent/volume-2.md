@@ -240,7 +240,7 @@ Before accepting a job with a supplied table, the Manager SHALL resolve and vali
 
 An unavailable, ambiguous, unauthorized or invalid table, including changed bytes under the same `masterIdentifier`, SHALL cause rejection before acceptance or terminal job failure if detected afterward. A missing required mapping SHALL have the same result. The Manager SHALL report a failure of an accepted asynchronous job through ITI-x4. It SHALL NOT add missing entries, generate substitutes, disclose source identifiers in error responses, or release partial results. Temporary copies SHALL be deleted at job termination unless Manager retention is explicitly authorized. The Requester's authoritative table remains under the repository's custody.
 
-The Manager SHALL verify that the same data request authorization covers every set and approves the policy named for each set. Before dispatch, the Manager SHALL verify that each set can be processed using the requested binding and version, its approved policy, and a supported manifest format. Each plan applies to one ruleSet and one payload set. For each set, the Manager compiles or validates the assigned policy for that set's binding and version. It uses the [assignment correlation rules](#assignment-correlation) to associate tasks, results, and evidence with the job and its payload sets.
+The Manager SHALL verify that the same data request authorization covers every set and approves the policy named for each set. Before dispatch, the Manager SHALL verify that each set can be processed using the requested binding and version, its approved policy, and a supported manifest format. Each plan applies to one ruleSet and one payload set. For each set, the Manager compiles or validates the assigned policy for that set's binding and version. It uses the [assignment correlation rules](#assignment-correlation) to associate tasks, results, and evidence with the job and its payload sets. Where outputs depend on consistent identifiers across sets, the selected bindings and approved policies SHALL define the linkage and validation contract before the Manager accepts the job.
 
 The Manager SHALL verify that the data request authorization covers the identified processing target set, including the resources or files listed in a manifest. It SHALL check that references are resolvable and use the retrieval authorization and failure rules in [Volume 3](volume-3.html#obtaining-processing-targets).
 
@@ -273,6 +273,8 @@ The De-ID Manager (or Integrated De-ID Manager/De-Identifier) returns one of the
 | `payloadResult` | 1..* | Group | De-identified [payload set](#grouped-payload-parameters) with evidence for that set |
 | `validationStatus` | 1..1 | code | Overall validation outcome for the job |
 {: .grid}
+
+<a name="job-result-release"> </a>
 
 The Manager SHALL return one `payloadResult` per submitted `setId`, with the corresponding binding, version, and result package containing the manifest and evidence. Before making a result available to the Requester, the Manager SHALL verify that all sets have completed and passed validation and that the Requester remains authorized to receive them. This requirement applies to the result response and to any manifest or result service the response references. A failed set fails the job without recipient-facing results from any set. For a distributed result set that uses multiple stages, the Manager SHALL include [staged release evidence](volume-3.html#staged-release-evidence) in the set's result package.
 

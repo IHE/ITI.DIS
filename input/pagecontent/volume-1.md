@@ -286,111 +286,31 @@ This section shows how the transactions of the DIS Profile are combined to addre
 
 ### 1:PXX.4.1 Concepts
 
-DIS introduces the following key concepts that provide necessary background for understanding the profile.
-
 <a name="job-and-execution-task"></a>
 
 #### 1:PXX.4.1.1 De-Identification Job and De-Identification Task
 
-- **De-Identification Job.** The overall de-identification work authorized for one request. It covers all selected payload sets, each with its own approved policy version, and includes coordinating the assignments and validating the results for release. The Requester submits an external job through ITI-x1 with the data request authorization.
-- **De-Identification Task.** An assignment within a job that applies one ruleSet to one payload set or subset using one execution plan. When a policy declares stages, each assigned ruleSet belongs to one stage, which determines its place in the execution order. In distributed processing, the De-ID Manager dispatches the task through ITI-x3. The Integrated actor performs assignments locally.
+A **de-identification job** is the work covered by one approved data request. For distributed processing, the De-ID Manager divides the job into one or more **de-identification tasks** and assigns them to De-Identifiers. A task applies one ruleSet to one payload set or an assigned subset. An Integrated De-ID Manager/De-Identifier performs those assignments locally.
 
-After accepting a de-identification job for distributed processing, the De-ID Manager creates one or more de-identification tasks. In UC-2, one job selects two payload sets, each with one ruleSet. The Manager creates one task for the R4 clinical and laboratory records and another for the R5 CT measurements. The Manager dispatches each task to its assigned De-Identifier and assembles both validated results for the original job. [UC-2 worked example](examples-grouped-fhir-job.html)
-
-The Manager tracks which job, set, ruleSet, and stage each assignment belongs to. It uses that association to validate results, coordinate cancellation, and link audit records. A De-Identifier receives the information needed for its assignment. See the [assignment correlation and disclosure rules](volume-2.html#assignment-correlation).
-
-The ITI-x1 job submission uses a FHIR R4 `Task` resource conforming to the [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.html). The ITI-x3 task submission uses a FHIR R4 `Task` resource conforming to the [De-Identification Task profile](StructureDefinition-DIS-DeIdentificationTask.html). Each payload set declares its processing payload release independently, as described in [Cross-Version Payload Support](#1pxx232-cross-version-payload-support).
+For example, [UC-2](#uc-2) uses one job for R4 clinical and laboratory records and R5 CT measurements. The Manager assigns a task for each set and delivers both validated results together. Volume 2 describes [job submission](volume-2.html#23x1-submit-de-identification-job-iti-x1), [task submission](volume-2.html#23x3-submit-de-identification-task-iti-x3), and [assignment correlation](volume-2.html#assignment-correlation).
 
 #### 1:PXX.4.1.2 Policy, Payload, and Evidence
 
-**Policy-Governed De-Identification.** DIS separates policy approval from policy execution. DIS assumes the De-Identification Requester can read the exact approved policy through an implementation-defined mechanism. The Requester declares the approved policy's canonical URL and version for each payload set. The De-ID Manager checks that both the declaration and the policy rules match the data request authorization. The Requester may carry the JWS-signed policy in `policyContent` or let the Manager resolve the declared version through its trust model.
+**Policy and authorization.** The data request authorization identifies the approved scope and the policy version for each payload set. Policies can be reused across approved requests. The Manager verifies that the policy matches the exact approved version and is authentic, valid, and current before processing. The Requester can supply signed policy content, or the Manager can resolve the approved version. A Semantic-Level policy identifies kinds of information to transform. A Syntax-Level policy identifies concrete data elements. The Manager prepares the execution plan for either form. See [policy delivery, validation, and compilation](volume-3.html#3pxx14-policy-delivery-and-validation).
 
-The De-ID Manager validates all policies:
+**Staged processing.** A policy can group rules into ruleSets and place them in successive stages. The Manager can assign stages to different De-Identifiers to limit what each receives. For example, [UC-1](#1pxx421-use-case-1-cross-border-epidemiological-study-using-ips) pseudonymizes direct identifiers before a later stage reduces birth dates to year precision. The Manager validates the output of each stage before passing it to the next. See [execution plan assembly](volume-3.html#execution-plan-assembly) and [staged release evidence](volume-3.html#staged-release-evidence).
 
-1. **Authorization consistency** -- the declared policy URL and version match the policy approved in the data request authorization
-2. **Integrity** -- when the Requester carries policy content, the JWS signature is cryptographically valid and issued by a trusted authority, and the Library's canonical URL and version match the declared values. When the Manager resolves the policy itself, it uses its resolution trust model. In both cases the Manager verifies that the rules are the exact content bound to the approved policy version.
-3. **Schema conformance** -- the policy content conforms to the expected schema
-4. **Currency** -- the policy is not expired or revoked
+<a id="tPXX.4-2"></a>
 
-A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. The data request authorization is the per-request evidence that a data governance authority approved a specific data request — including identification of the de-identification policy to be applied. The authorization binds each set to its approved policy version. Applying changed rules or a different version requires approval for the data request.
+**Transformation scope.** DIS supports policy-specified record-level actions such as removal, pseudonymization, and reducing the precision of dates or numbers. The same actions can be applied to a cohort. Dataset-level statistical disclosure control, such as suppressing small cells based on cohort statistics, is outside the scope of this supplement. Where such assessment is required, it takes place separately from the DIS workflow. See the [core action catalog and ISO/IEC 20889 classifications](volume-3.html#3pxx131-action-catalog).
 
-Every ITI-x1 request declares the approved policy for each payload set by canonical URL and version. The Requester may also carry the policy content for each set.
+**Reversibility and consistency.** An approved policy may require reversible pseudonyms or processing without a DIS-maintained reverse mapping. For reversible work, the Manager retains the mappings it manages or uses an authoritative Requester-supplied lookup table. The approved policy determines where consistent pseudonyms may be reused, such as within a job or across authorized jobs. See the [reversibility options](#1pxx22-reversible-pseudonymization-option), [custody requirements](#1pxx54-reversibility-material-custody), and [pseudonymization rules](volume-3.html#3pxx123-patient-identifier-pseudonymization).
 
-- **Policy content carried (`policyContent` present)** -- the job submission carries the JWS-signed policy Library in a contained `Binary` resource referenced by the set. The Manager verifies the JWS signature and confirms the Library's canonical URL and version match the declared values. The Requester obtains the signed artifact through its implementation-defined mechanism.
-- **Policy content resolved by Manager (`policyContent` absent)** -- the Manager resolves the declared policy version by implementation-defined means.
+**Payloads and delivery.** A job may cover several payload sets under one authorization, each with its own approved policy and data release. DIS supports FHIR R4 and R5 processing payloads over an R4 workflow. A manifest identifies the resources or prepared Bulk Data files to process. The Manager matches each set to a compatible De-Identifier before dispatch and releases the results together after validation. A failed job releases no partial dataset. See [payload set delivery](volume-3.html#payload-set-delivery), [Bulk Data delivery](volume-3.html#3pxx3224-bulk-file-manifests-and-authorized-retrieval), and [result release](volume-2.html#job-result-release).
 
-A policy may be authored at the Semantic-Level or the Syntax-Level. A Semantic-Level policy uses semantic group references (`@subject-identifiers`, `@dates`, etc.) and is format-neutral -- it can be reused across data formats and use cases. Before execution, the Manager compiles it into a payload-specific execution plan. A Syntax-Level policy uses concrete element paths (FHIRPath, DICOM tags, etc.) for a specific payload family and version -- it is directly executable after validation. Both levels go through the same four-point validation. Both are approved by the joint privacy team.
+**Evidence and conformance.** The De-Identifier produces Provenance evidence of the work performed. The Manager validates the results and their evidence before release. The Requester receives the evidence with the de-identified output. In a standalone deployment, the Integrated actor produces and validates the output and evidence locally and claims content conformance. When it supports external job submission, it also claims transaction conformance for its supported exchanges. In the distributed model, each actor claims conformance for its own transactions, and the Manager is responsible for the combined output. See [de-identification evidence](volume-3.html#evidence-baseline) and the [actor and transaction table](#tPXX.1-1).
 
-**RuleSets and Staged Execution.** DIS organizes de-identification rules into ruleSets -- named groups of rules with shared data-semantic character. A policy contains one or more ruleSets. Optionally, a policy may declare stages that reference ruleSet IDs to define execution ordering and trust isolation boundaries. When stages are declared, a preliminary stage typically handles direct identifiers (hashing, removal), and an advanced stage applies policy-specified record-level rules to quasi-identifiers. For each payload set, the De-ID Manager dispatches one ITI-x3 task per assigned ruleSet and follows the declared stage ordering when stages are present. Each De-Identifier receives its assigned plan and authorized stage inputs. Volume 3 defines how validated results move between stages. For a distributed payload set that uses multiple stages, the Manager records the validated execution in [staged release evidence](volume-3.html#staged-release-evidence) associated with the final result.
-
-**De-Identification Technique Classification.** DIS transformation actions are classified per ISO/IEC 20889:2018 *Privacy enhancing data de-identification terminology and classification of techniques*. Each DIS action code carries an ISO/IEC 20889 `technique` attribute tracing the action to its §9 classification. DIS actions are concrete operational instructions (what the De-Identifier does); ISO techniques are the classification framework. Action design is informed by the RSNA CTP DICOM Anonymizer function patterns. Table 1:PXX.4-2 maps the core actions to their ISO technique classification.
-
-<p id="tPXX.4-2" class="tableTitle"><strong>Table 1:PXX.4-2: Core Transformation Actions — ISO/IEC 20889 Classification</strong></p>
-
-| ISO/IEC 20889 §9 Category | ISO Technique | DIS Action | Function |
-|---|---|---|---|
-| §9.3 Suppression | Local suppression (§9.3.3) | `remove` | `(element) → ∅` |
-| §9.3 Suppression | Local suppression (§9.3.3) | `redact` | `(narrative) → ∅` |
-| §9.3 Suppression / §9.4 Pseudonymization | Masking (§9.3.2) / lookup-table pseudonymization (§9.4.3.2) | `replace` | Fixed replacement or authoritative lookup-backed replacement |
-| §9.4 Pseudonymization | Hashing (§9.4.3.3) | `hash` | `(value, mode, algorithm, scope?) → digest` |
-| §9.6 Generalization | Rounding (§9.6.2) | `truncate-date` | `(date, precision) → truncated` |
-| §9.6 Generalization | Rounding (§9.6.2) | `round` | `(value, step) → binned` |
-| §9.6 Generalization | Generalization (§9.6) | `truncate` | `(value, length) → shortened` |
-| §9.7 Randomization | Noise addition (§9.7.2) | `date-shift` | `(date, scope, maxDays) → shifted` |
-| — | — | `keep` | `(element) → element` |
-{: .grid}
-
-ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic/format-preserving/homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE.
-
-**Transformation Scope.** DIS excludes dataset- or database-level de-identification techniques, including small-cell handling, frequency-based rare-condition suppression, and transformations requiring statistics computed across the cohort (ISO/IEC 20889 §9.1 statistical tools, §9.7.4 microaggregation, §10 formal privacy measurement models). Multi-patient cohort processing remains supported for applying record-level rules with policy-specified parameters. Staged execution does not extend this action scope. Dataset-level statistical disclosure control is outside this supplement; completing a DIS workflow does not establish that any separately required dataset-level disclosure criteria have been met.
-
-**Resource Manifest Input and Output.** A [DIS Resource Manifest](volume-3.html#resource-manifest) uses an R4 List to enumerate targets for one payload set. For FHIR the entries reference the target resources. The draft DICOM and CDA bindings illustrate how entries can reference R4 indexes to the native content. A manifest can identify inputs or de-identified results.
-
-**Bulk Data Input and Output.** DIS supports both input and output for asynchronous cohort jobs using manifests referencing NDJSON files. The Requester supplies a manifest referencing prepared input files; obtaining those files through source-system export is outside DIS. The Manager returns a manifest referencing de-identified output files together with evidence references. Processing remains limited to the action scope described above.
-
-Each processing payload SHALL explicitly identify its HL7 FHIR version (R4 or R5), independently of the HL7 FHIR R4 protocol binding. Participating actors SHALL declare supported input/output formats and payload versions, and the Manager SHALL verify compatibility before dispatch. File retrieval SHALL require authorization. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset; failures SHALL be reported through job status.
-
-Volume 3 specifies [input manifest fields and retrieval authorization](volume-3.html#obtaining-processing-targets). Volume 2 defines the DIS transactions for returning task and job results.
-
-**Reversibility Custody.** When reversible pseudonymization is selected without a supplied lookup table, the De-ID Manager retains the mapping needed for reversal. With a Requester-supplied table, the Manager uses that table without mandatory persistent retention. The De-Identifier is stateless with respect to reversibility. Manager-managed persistent mappings remain within the Manager's trust boundary; task-scoped entries may be shared as specified in §1:PXX.2.2.
-
-**Consistency Scope and Transformation Material.** The approved policy declares the authorized `identity-linkage-scope`. A `job` scope is limited to one job and its tasks and retries. A `source-institution` scope supports authorized reuse across jobs of one source institution. A `cross-community` scope supports authorized reuse across participating communities. Source-institution and cross-community policies identify the scope with an identifier system and value. The Manager validates authorization and resolves a job-level scope to a stable job-specific identifier. The Manager copies the resolved scope into each salted `hash` rule.
-
-The De-Identifier’s deployment generates or provisions distinct confidential salts per scope and salt version. Workers that must agree use the same effective salt and version. The De-Identifier follows the exact encoding in [Volume 3](volume-3.html#3pxx123-patient-identifier-pseudonymization). Matching results depend on the same source identifier system and value, scope, and salt. A change of salt defines a new derivation context.
-
-Cross-community identity resolution, scope authorization, and coordination of the effective salt, version and lifecycle are deployment prerequisites outside DIS. Implementations claiming cross-community consistency SHALL establish those prerequisites. Supplied lookup tables use their authorized mappings under §1:PXX.2.2.
-
-Date-shift reference dates and offsets are protected transformation parameters, not consistency keys. Deterministic derivation from purpose-specific seeds is preferred. Where a De-Identifier generates a parameter that SHALL be reused, an explicit capability contract SHALL define its protected return to the Manager, authorized retention, and reuse in subsequent tasks. Acceptance of precomputed parameters is not mandatory for all De-Identifiers. Protected transformation parameters follow §1:PXX.5.4.
-
-**Evidence Baseline.** Every completed de-identification task produces provenance evidence containing at minimum nine elements: evidence identifier, outcome status, workflow reference, target identifier, policy-decision reference, ruleSet identifier, reversibility state, validation status, and audit correlation identifier.
-
-**Conformance Layers.** DIS defines two conformance layers:
-
-- **Content conformance.** The Integrated actor validates the approved policy, prepares and applies the execution plan, and produces output and provenance evidence that satisfy the applicable FHIR payload and evidence requirements. The Integrated De-ID Manager/De-Identifier is the actor for content conformance claims. It MAY operate standalone without external transactions, producing conformant output through local invocation.
-- **Transaction conformance** -- actors participate in external DIS transactions (ITI-x1, ITI-x3, ITI-x4, ITI-x7). Transaction conformance applies when actors communicate over standardized interfaces. The distributed model (Requester, Manager, De-Identifier) requires transaction conformance. The Integrated actor adds transaction conformance when it supports ITI-x1 (and optionally ITI-x4).
-
-Content conformance is the foundation. An Integrated actor operating standalone claims content conformance only. When the Integrated actor also supports ITI-x1, it claims both content and transaction conformance. In the distributed model, the De-ID Manager and De-Identifier each claim transaction conformance for their respective transactions; the Manager is responsible for ensuring that the combined output achieves content conformance.
-
-**Payload Binding Framework.** DIS separates the mandatory HL7 FHIR R4 protocol binding from the payload binding so that additional data formats can be supported without changing the protocol layer. The protocol binding defines how transactions are initiated, dispatched, and polled -- it is content-neutral and carries or references payloads of any format. Each payload binding defines the format-specific rules for a particular data format family. This supplement defines DIS-FHIR-Payload. Additional payload bindings could follow the same architectural pattern.
-
-**Jobs with multiple payload sets.** A job can include several sets under one data request authorization, for example two FHIR sets with different releases or approved policies. Each set has a job-local identifier and declares its own payload binding, version, manifest, and approved policy. The Manager dispatches tasks for individual sets and returns the validated results together. Where outputs depend on consistent identifiers across sets, the selected bindings and policies must define the linkage and validation contract before the Manager accepts the job.
-
-Each payload set uses the [common manifest contract](volume-3.html#payload-set-delivery) for bundled or hosted content. Each binding defines how manifest entries resolve to native payloads. The payload set encoding applies even when the job contains only one set.
-
-A payload binding defines at minimum:
-
-1. **Content model** -- how data elements within the format are identified and addressed (e.g., FHIRPath for HL7 FHIR resources, DICOM tag paths for DICOM objects, XPath or CDA document model paths for CDA documents)
-2. **Transformation action mapping** -- how the DIS core transformation actions (removal, replacement, hashing, rounding, truncation, etc.) are applied to the format's data structures and element types
-3. **Processing targets and results** -- how actors obtain processing inputs and deliver results, including inline content and authorized retrieval of referenced resources or files
-4. **Evidence mapping** -- how de-identification evidence and provenance are represented for the format, mapping format-specific outcomes to the DIS evidence baseline
-5. **Version identification** -- how the payload's format version is declared, validated, and matched against De-Identifier capabilities
-6. **Packaging rules** -- how a payload in this format is carried within or referenced from the HL7 FHIR R4 transaction envelope without being embedded as a native HL7 FHIR resource
-
-The [draft DICOM and CDA examples](draft-native-payload-bindings.html) are informative and illustrate how this framework can support additional data formats.
-
-An actor declares which payload bindings it supports. The De-ID Manager verifies payload binding compatibility between the Requester's job and the De-Identifier's declared capabilities before dispatching tasks. Each payload set uses one binding and version. The Manager dispatches and validates each set under its declared binding. The framework can accommodate additional data format families as their bindings are defined.
-
-Each future payload binding is developed as a self-contained specification, independent of other payload bindings. A new payload binding does not require changes to the HL7 FHIR R4 protocol binding or to previously defined payload bindings. This independence enables parallel development by different IHE domains or working groups, and allows implementations to adopt additional payload support incrementally.
+**Payload Binding Framework.** The R4 workflow can accommodate other data formats through additional payload bindings. The [draft DICOM and CDA examples](draft-native-payload-bindings.html) illustrate how this could work. Volume 3 describes the [binding requirements](volume-3.html#payload-binding-framework).
 
 ### 1:PXX.4.2 Use Cases
 
