@@ -984,9 +984,9 @@ Before revealing results, the Manager SHALL verify that the time and recipient c
 
 ### 3:PXX.6.1 Data Request Authorization Contract
 
-A publisher MAY provide a [DIS Data Request Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) to help authorized users read and find an issued Agreement. The Contract SHALL carry one `rule.contentReference` pointing to the exact version of the DIS Data Request Authorization DocumentReference containing the full Agreement. The Contract publisher SHALL protect the Contract, its narrative, and its search results under the authorization governing discovery of the referenced Agreement.
+A publisher MAY provide a [DIS Data Request Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) to help authorized users read and find an issued Agreement. The Contract SHALL carry one `rule.contentAttachment` with `contentType` set to `application/ld+json` and the complete issued ODRL Agreement in `data` as Base64-encoded UTF-8 JSON-LD. The attachment SHALL omit `url`. The Contract publisher SHALL protect the Contract, its narrative, and its search results under the authorization governing discovery of the embedded Agreement. See [FHIR R4 Contract.rule]({{site.data.fhir.path}}contract-definitions.html#Contract.rule).
 
-The publisher SHALL generate the Contract from the referenced Agreement revision and verify the following mappings before making the Contract available for display or search.
+The publisher SHALL generate the Contract from the embedded Agreement revision and verify the following mappings before making the Contract available for display or search.
 
 | Contract element | Source and interpretation |
 | --- | --- |
@@ -1001,9 +1001,9 @@ The publisher SHALL generate the Contract from the referenced Agreement revision
 | [DIS Purpose Classification](StructureDefinition-dis-purpose-classification.html) on `term` | One Coding for each distinct ISO classification code when supplied in the permission. Copy the system, edition, and code. |
 | [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact approved policy URL and version joined by a vertical bar. |
 
-The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. It SHALL withhold or remove a Contract from discovery if verification fails. If the issuer revises the Agreement, the publisher SHALL create and verify a representation referencing that exact new revision before advertising the revised terms. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
+The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. It SHALL withhold or remove a Contract from discovery if verification fails. If the issuer revises the Agreement, the publisher SHALL create and verify a Contract carrying that exact new revision before advertising the revised terms. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
 
-ITI-x1 uses the referenced DocumentReference and evaluates the full ODRL Agreement and its current status. A Contract is a discovery resource. A search hit, Contract status, or mirrored term confers no authority to submit a de-identification job or retrieve results.
+In ITI-x1, the Manager uses the version-specific DocumentReference to evaluate the full ODRL Agreement and its current status. When the same Agreement revision is published in both carriers, both SHALL contain the same issued Agreement bytes and `uid`. A Contract is a discovery resource. A search hit, Contract status, or mirrored term confers no authority to submit a de-identification job or retrieve results.
 
 FHIR R4 defines [Contract search parameters]({{site.data.fhir.path}}contract.html#search) including `identifier`, `authority`, and `issued`. If the server indexes the logical Organization identifier for `authority`, declare the supported search behavior. Queries on mirrored permission terms, such as approved purpose or policy revision, require separately defined and advertised search parameters. A query that matches a combination of permission fields would need to correlate those fields within the same term.
 

@@ -84,9 +84,11 @@ Description: "Readable and searchable representation of one exact DIS Data Reque
 * authority.identifier.value 1..1
 * authority.identifier.value obeys dis-absolute-iri
 * rule 1..1
-* rule.content[x] only Reference(DISDataRequestAuthorization)
-* rule.content[x].reference 1..1
-* rule.content[x].reference obeys dis-contract-agreement-reference
+* rule.content[x] only Attachment
+* rule.contentAttachment.contentType 1..1
+* rule.contentAttachment.contentType = #"application/ld+json" (exactly)
+* rule.contentAttachment.data 1..1
+* rule.contentAttachment.url 0..0
 * applies 0..0
 * term 1..*
 * term.identifier 1..1
@@ -117,11 +119,6 @@ Description: "Readable and searchable representation of one exact DIS Data Reque
 * term.offer.party.reference.identifier.value 1..1
 * term.offer.party.reference.identifier.value obeys dis-absolute-iri
 * obeys dis-contract-permission-ids
-
-Invariant: dis-contract-agreement-reference
-Description: "Reference names the exact HTTPS DocumentReference version of the DIS Agreement."
-Severity: #error
-Expression: "$this.matches('^https://[^?# ]+/DocumentReference/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-contract-permission-ids
 Description: "Each mirrored permission has a distinct identifier."

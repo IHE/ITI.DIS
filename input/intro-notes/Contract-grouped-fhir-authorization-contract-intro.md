@@ -1,4 +1,4 @@
-This example mirrors the two permissions in the [UC-2 Agreement](odrl-content.html#decoded-authorization-example). The approved purpose and ISO category are shared. The R4 clinical and R5 imaging permissions retain their own policy versions. The original Agreement is referenced by its exact DocumentReference version.
+The inline rule attachment carries the complete [UC-2 Agreement](odrl-content.html#decoded-authorization-example) as Base64-encoded JSON-LD. This example mirrors its two permissions. The approved purpose and ISO category are shared. The R4 clinical and R5 imaging permissions retain their own policy versions.
 
 | Field | Summary |
 | --- | --- |
