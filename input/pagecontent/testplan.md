@@ -248,6 +248,10 @@ Use synthetic fixtures. Validate available FHIR artifacts and examples, compile 
 
 The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-push-delivery) remains open. The standalone UC-5 case is assessed through content conformance.
 
+### Published UC-2 ODRL Examples
+
+Decode the ODRL attachments for the R4 clinical set in the [UC-2 hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) and compare them with the [readable ODRL examples](odrl-content.html#decoded-authorization-example). Verify that the Agreement, Policy Set, and Execution Plan Set match their readable JSON-LD, including the revision identifiers and rule order. Verify that the permission approves the Policy Contract version carried by the job, and that the R4 plan expands `@subject-names` to `Patient.name` while preserving the action and source rule reference.
+
 ### Published Lookup Table Examples
 
 Validate the [published lookup table examples](volume-3.html#3pxx52-worked-mapping-examples) against their declared FHIR profiles. Decode the Binary and inline attachments and check that they carry the same table. Check that the task-scoped example references the source version and contains only the assigned mappings. Validate the generated table and confirm that its pseudonym matches the salted test vector and the published Patient example.
