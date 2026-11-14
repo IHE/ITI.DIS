@@ -111,6 +111,14 @@ dis:redact
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#redact> ;
     odrl:includedIn odrl:use .
 
+dis:encrypt
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Encrypt"@en ;
+    skos:definition "Pseudonymize a patient business identifier using the optional AES-FF1 method."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#encryption-based-patient-pseudonymization> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:encryptionMethod, dis:configurationVersion, dis:identity-linkage-scope, dis:pseudonymSystem, dis:keyVersion .
+
 # Vocabulary metadata
 
 dis:actionParameter
@@ -174,7 +182,7 @@ dis:algorithm
 dis:pseudonymSystem
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Pseudonym system"@en ;
-    skos:definition "Identifier system for the pseudonyms produced by the selected hash rule."@en ;
+    skos:definition "Identifier system for the pseudonyms produced by the selected hash or encryption rule."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 dis:precision
@@ -205,6 +213,24 @@ dis:length
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Truncation length"@en ;
     skos:definition "Positive number of leading characters retained by the truncate action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:encryptionMethod
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Encryption method"@en ;
+    skos:definition "Method selected by a reversible policy for the encrypt action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:configurationVersion
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Encryption configuration revision"@en ;
+    skos:definition "IRI of the immutable approved encryption configuration."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:keyVersion
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Key version"@en ;
+    skos:definition "Non-secret identifier of the provisioned scoped encryption key version pinned in the plan."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
 
 # DIS properties
@@ -358,7 +384,7 @@ dis:payloadVersion
 dis:identity-linkage-scope
     a owl:DatatypeProperty, odrl:LeftOperand, skos:Concept ;
     rdfs:label "Identity linkage scope"@en ;
-    skos:definition "Authorized scope declared in a policy or resolved for a compiled salted hash rule."@en ;
+    skos:definition "Authorized scope declared in a policy or resolved for a compiled salted hash or encryption rule."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> ;
     rdfs:range rdf:JSON .
 

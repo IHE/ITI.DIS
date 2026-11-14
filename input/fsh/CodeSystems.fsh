@@ -78,7 +78,7 @@ CodeSystem: DisAction
 Id: dis-action
 Title: "DIS Transformation Action"
 Description: """
-Transformation action codes from the DIS core action family.
+Transformation action codes for the DIS core action family and optional AES-FF1.
 Each action is a concrete, deterministic function with
 well-defined parameters and testable output. Actions are classified by
 their ISO/IEC 20889:2018 de-identification technique via the technique
@@ -119,6 +119,7 @@ function patterns.
 * #redact "Remove the narrative content from a resource"
 * #redact ^property[+].code = #technique
 * #redact ^property[=].valueCoding = DisIsoTechnique#local-suppression
+* #encrypt "Pseudonymize a patient business identifier using the optional AES-FF1 method"
 
 
 CodeSystem: DisIsoTechnique
@@ -188,7 +189,7 @@ Description: "Per-element outcome codes for the DIS transformation summary."
 ValueSet: DisActionVS
 Id: dis-action-vs
 Title: "DIS Transformation Action Value Set"
-Description: "Transformation action codes from the DIS core action family."
+Description: "Transformation action codes for the DIS core action family and optional AES-FF1."
 * ^url = "https://profiles.ihe.net/ITI/DIS/ValueSet/dis-action-vs"
 * ^status = #active
 * ^experimental = false

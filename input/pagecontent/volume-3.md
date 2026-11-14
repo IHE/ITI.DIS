@@ -123,7 +123,7 @@ Each DIS action code carries a `technique` property that identifies its ISO/IEC 
 | — | — | `keep` | `(element) → element` |
 {: .grid}
 
-ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic, format-preserving, and homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE. The [encryption proposal](#encryption-based-patient-pseudonymization) is described below for review.
+ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE. The optional [encryption method](#encryption-based-patient-pseudonymization) uses AES-FF1 format-preserving encryption under DIS-REVERSIBLE.
 
 <a name="3pxx132-action-definitions"> </a>
 
@@ -206,7 +206,7 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 #### 3:PXX.1.2.3 Patient Identifier Pseudonymization
 
-Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. The proposed third method derives the pseudonym through [deterministic encryption](#encryption-based-patient-pseudonymization) and allows the Manager to decrypt the pseudonym when authorized.
+Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. Optional [AES-FF1 encryption](#encryption-based-patient-pseudonymization) lets the Manager recover the resolved identifier when authorized.
 
 **Salted hash derivation.**
 
@@ -232,9 +232,9 @@ The De-Identifier uses the supplied [lookup table](#3pxx5-reversible-lookup-tabl
 
 <a name="encryption-based-patient-pseudonymization"> </a>
 
-##### Encryption-based derivation (Informative Proposal)
+##### Encryption-based derivation
 
-The proposed third method under DIS-REVERSIBLE uses policy-selected deterministic encryption to generate patient identifier pseudonyms. Within the same authorized linkage scope, independent De-Identifiers would produce the same pseudonym for the same resolved patient identity using the same configuration and key. Before dispatch, the deployment would make the scoped key version available to the De-Identifiers for encryption and to the Manager for authorized decryption. The execution plan identifies the configuration, scope, and key version. See the [draft encryption method and FF1 test vector](draft-encryption-based-pseudonymization.html).
+A reversible policy MAY use the optional `encrypt` action to pseudonymize a selected `Patient.identifier`. The Manager SHALL apply the [AES-FF1 configuration, compilation, and reversal requirements](draft-encryption-based-pseudonymization.html). The De-Identifier SHALL use the approved FF1 configuration and the scoped key version pinned in the compiled [ODRL action](odrl-content.html#action-parameters). A payload set that uses the encryption action SHALL NOT include a supplied lookup table. DIS does not require an implementation declaring DIS-REVERSIBLE to support the optional action.
 
 <a name="3pxx22-policy-rules-json-structure"> </a>
 
@@ -246,7 +246,7 @@ The proposed third method under DIS-REVERSIBLE uses policy-selected deterministi
 
 The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
 
-A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement, salted hashing, or date shifting without an explicit consistency scope. See the [ODRL action parameters](odrl-content.html#action-parameters). Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
+A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement, encryption, salted hashing, or date shifting without an explicit consistency scope. See the [ODRL action parameters](odrl-content.html#action-parameters). Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
 
 The Manager SHALL dispatch each stage after validating all results from the preceding stage. A later stage SHALL receive the validated outputs from the preceding stage, together with any unchanged resources needed for its authorized input set. It SHALL NOT receive the original versions of transformed resources or the preceding stage's protected mappings unless separately required and authorized for its task. The last stage's validated output, including unchanged resources, is the basis for the released set.
 
@@ -339,7 +339,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 #### 3:PXX.1.5.2 Assemble the Plan and Check Capabilities
 
-**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The Manager assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Library resource with `Library.type` coding `dis-execution-plan`.
+**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Library resource with `Library.type` coding `dis-execution-plan`.
 
 **Capability verification.** The De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
 
@@ -431,7 +431,7 @@ See the [decoded ODRL Execution Plan Set](odrl-content.html#decoded-plan-example
 
 The De-Identifier SHALL ensure that references between retained resources resolve correctly in the de-identified output. In a Bundle, this includes keeping `Bundle.entry.fullUrl` values and internal references consistent with the resource identities in the output. Handle references to removed resources and external references according to the approved policy. The De-Identifier SHALL fail the task without partial output if it cannot produce a valid result under the declared FHIR version and policy.
 
-Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods and the encryption proposal. The output packaging rules govern FHIR resource identities and references.
+Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
 
 <a name="payload-bindings"> </a>
 
@@ -885,7 +885,7 @@ Table 3:PXX.4-3 lists the elements of each transformation summary entry.
 | Element | Cardinality | Type | Description |
 |---------|-------------|------|-------------|
 | `targetPath` | 1..1 | string | FHIRPath expression identifying the transformed element |
-| `action` | 1..1 | code | Action code applied (from the core action family) |
+| `action` | 1..1 | code | Action code applied from the DIS Transformation Action Value Set |
 | `outcome` | 1..1 | code | `applied`, `skipped` (element not present), or `error` |
 | `ruleId` | 0..1 | string | Identifier of the execution plan rule that triggered this action |
 {: .grid}
