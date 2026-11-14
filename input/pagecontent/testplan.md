@@ -200,6 +200,14 @@ Test the [bulk result content identity rules](volume-3.html#bulk-result-content-
 
 For a signed-download deployment, repeat the renewal case with `requiresAccessToken = false`. The manifest lists a stable HTTPS capability URL for the selected file version. A request to that URL redirects to a short-lived signed download URL. Verify that the client follows the redirect without a SMART bearer token. After the signed URL expires, verify that the unchanged file URL listed in the manifest can yield a fresh signed link and that the expired link still fails. Compare the downloaded bytes with the validated version after HTTP decompression. Repeat with the capability removed or revoked and with the original file version unavailable. Neither case grants renewed access or returns a substitute version.
 
+Exercise [bulk job result download authorization](volume-3.html#bulk-result-download-authorization) at the file service, including the final endpoint after a redirect.
+
+| Case | Procedure | Pass criteria |
+|---|---|---|
+| Revocation before an issued link expires | Obtain a signed download URL and confirm it can retrieve the validated file while authorized. Revoke the grant or the recipient's release authority while the same link is still unexpired. Request the file through the manifest locator and directly from the final signed URL. Repeat with a byte-range request. | Both paths deny further output and renewal. The signed URL and any cached response grant no continued access. |
+| Current authorization unavailable | With an unexpired signed URL from the successful run, make current release authorization unavailable to the service and request the file. | The service returns no file bytes. The retrieval denial does not turn the completed job into a processing failure. |
+| Redirect outside the approved service boundary | Configure a permitted HTTPS result destination. First retrieve through a redirect within the boundary. Repeat with a redirect that leaves the approved boundary, including one that does so after an allowed intermediate hop. | The in-boundary path returns the validated file while authorized. The delivering service prevents the out-of-boundary redirect. If the retrieving actor is presented that redirect, it sends no request or credentials to the unapproved destination. |
+
 For the substitution cases, repeat after release where the test setup allows the producer to detect a storage or retrieval fault. Confirm that the affected result set becomes inaccessible after detection and that access renewal does not expose substituted content. An authorization error or expired download does not by itself report a terminal job failure.
 
 ### Jobs with Multiple Payload Sets

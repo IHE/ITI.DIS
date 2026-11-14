@@ -28,7 +28,7 @@ To reproduce the sample output, use the source identifier pairs in the input fil
 | 4 | The Requester polls the job URL through ITI-x4. A pending poll returns `202 Accepted`. The completed poll returns `200 OK` with the [R4 result Parameters](Parameters-bulk-r4-result.html). | The [result package](Bundle-bulk-r4-result.html) contains the [output manifest](examples/bulk-fhir/output-manifest.json), two file descriptors, the final worker's evidence, and the Manager's staged release Provenance. Both evidence records target the two final file descriptors. |
 {: .grid}
 
-The Requester verifies the policy URI and the stage order in the release record against the approved Contract, then retrieves [output file 1](examples/bulk-fhir/output-patients-1.ndjson) and [output file 2](examples/bulk-fhir/output-patients-2.ndjson) using authorized access. The descriptors and manifest identify the exact file versions the Manager validated. The Requester delivers the cohort to the Secure Processing Environment outside DIS.
+The Requester verifies the policy URI and the stage order in the release record against the approved Contract, then retrieves [output file 1](examples/bulk-fhir/output-patients-1.ndjson) and [output file 2](examples/bulk-fhir/output-patients-2.ndjson) using authorized access. The descriptors and manifest identify the exact file versions the Manager validated. The file service checks current release authority on each download. A deployment that uses signed URLs applies the [same check at the final download endpoint](volume-3.html#bulk-result-download-authorization), even when a link is unexpired. The Requester delivers the cohort to the Secure Processing Environment outside DIS.
 
 <a name="failure-and-optional-cancellation"> </a>
 

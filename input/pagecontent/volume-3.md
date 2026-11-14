@@ -707,6 +707,12 @@ The producing actor SHALL withhold the result if it cannot establish or preserve
 
 When a deployment supports renewal, the actor controlling access SHALL verify that the receiver is still authorized and that renewal is within the authorized release window. It MAY issue a new temporary download URL or credentials for the same version. The locators in the released manifest and the bytes of the manifest and files SHALL remain unchanged. The profile does not define a renewal transaction or prescribe how the deployment maintains object versions.
 
+<a name="bulk-result-download-authorization"> </a>
+
+**Bulk job result downloads.** The Manager SHALL ensure that services delivering a hosted result package, manifest or NDJSON file enforce the [current job release authorization](#job-result-recipient) on every new download request, including a range or resume request. This applies to the manifest URL, each stable file locator and every endpoint reached through a redirect. If the grant expires or is revoked, the recipient loses release authority, or current authorization cannot be established, the services SHALL deny further downloads and renewal. The final download service SHALL deny a request using an already-issued signed URL in these cases, even if the URL itself is still valid. The Manager SHALL enable signed downloads only where the complete delivery chain can enforce these rules. A finite URL lifetime is an additional limit on access.
+
+When a selected permission specifies a result destination, the Manager SHALL ensure that each referenced endpoint and redirect for the affected result stays within that approved HTTPS service boundary. The retrieving actor SHALL check the destination before following each redirect and stop if it cannot establish that the destination is authorized. Apply this check before forwarding any credentials. The Manager SHALL ensure that a cache in the delivery chain cannot serve a protected result or a reusable access redirect in place of a current authorization check.
+
 <a name="referenced-input-authorization"> </a>
 
 <a name="3pxx164-authorization-for-referenced-inputs"> </a>
