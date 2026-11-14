@@ -6,9 +6,9 @@ The Data Access Coordinator submits one asynchronous R4 job for an authorized re
 
 ## Approved Policy
 
-The de-identification job references the [synthetic Data Request Authorization](DocumentReference-uc1-cohort-permit.html) and selects the permission that binds its set to the approved policy version.
+The de-identification job references the [synthetic Data Request Authorization](Contract-uc1-cohort-permit.html) and selects the permission that binds its set to the approved policy version.
 
-The job submission declares `https://governance.example.org/policies/uc1-bulk-cohort|1.0`. The Manager resolves this [approved R4 Syntax-Level policy](Library-uc1-bulk-cohort-policy.html) through its trusted policy store and validates it against the authorization.
+The job submission declares `https://governance.example.org/policies/uc1-bulk-cohort|1.0`. The Manager resolves this [approved R4 Syntax-Level policy](Contract-uc1-bulk-cohort-policy.html) through its trusted policy store and validates it against the authorization.
 
 | Stage | Assigned ruleSet | Result |
 |---|---|---|
@@ -16,7 +16,7 @@ The job submission declares `https://governance.example.org/policies/uc1-bulk-co
 | `advanced` | `generalize-birth-date` | Reduce `Patient.birthDate` to year precision. Preserve the pseudonyms. |
 {: .grid}
 
-To reproduce the sample output, use the source identifier pairs in the input files, the scope in the approved Library, and the 16 public test bytes `000102030405060708090a0b0c0d0e0f` in the [patient identifier derivation](volume-3.html#3pxx123-baseline-patient-pseudonym-derivation).
+To reproduce the sample output, use the source identifier pairs in the input files, the scope in the approved Contract, and the 16 public test bytes `000102030405060708090a0b0c0d0e0f` in the [patient identifier derivation](volume-3.html#3pxx123-baseline-patient-pseudonym-derivation).
 
 ## Submit, Dispatch, and Retrieve
 
@@ -28,7 +28,7 @@ To reproduce the sample output, use the source identifier pairs in the input fil
 | 4 | The Requester polls the job URL through ITI-x4. A pending poll returns `202 Accepted`. The completed poll returns `200 OK` with the [R4 result Parameters](Parameters-bulk-r4-result.html). | The [result package](Bundle-bulk-r4-result.html) contains the [output manifest](examples/bulk-fhir/output-manifest.json), two file descriptors, the final worker's evidence, and the Manager's staged release Provenance. Both evidence records target the two final file descriptors. |
 {: .grid}
 
-The Requester verifies the policy URI and the stage order in the release record against the approved Library, then retrieves [output file 1](examples/bulk-fhir/output-patients-1.ndjson) and [output file 2](examples/bulk-fhir/output-patients-2.ndjson) using authorized access. The descriptors and manifest identify the exact file versions the Manager validated. The Requester delivers the cohort to the Secure Processing Environment outside DIS.
+The Requester verifies the policy URI and the stage order in the release record against the approved Contract, then retrieves [output file 1](examples/bulk-fhir/output-patients-1.ndjson) and [output file 2](examples/bulk-fhir/output-patients-2.ndjson) using authorized access. The descriptors and manifest identify the exact file versions the Manager validated. The Requester delivers the cohort to the Secure Processing Environment outside DIS.
 
 <a name="failure-and-optional-cancellation"> </a>
 

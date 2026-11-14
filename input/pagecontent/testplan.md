@@ -87,6 +87,30 @@ Apply the [actor grouping table](volume-1.html#required-groupings) and the [shar
 
 Use a profiled Agreement with two permissions selecting distinct sets and exact policy revisions. Confirm that the Manager checks the Agreement before synchronous processing or asynchronous acceptance. Repeat with a malformed or non-versioned authorization reference, a missing permission, an untrusted issuer, a different purpose or policy revision, a substituted input version, and an unrecognized required operand. Expect HTTP 400 for malformed inputs and HTTP 403 for a well-formed grant whose conditions the Manager cannot establish. Verify that none of these failures dispatches a task. Revoke the grant after acceptance or attempt retrieval from an unapproved recipient identity or result destination, and verify that the Manager withholds results, evidence and download access.
 
+<a name="authorization-contract-validation"> </a>
+
+#### Authorization Contract Validation
+
+| Actor and stimulus | Pass criteria |
+|---|---|
+| Inspect the Requester's [UC-2 job](Task-grouped-fhir-job-request.html) and resolve its version-specific [Contract reference](Contract-grouped-fhir-authorization-contract.html). | The Contract id and version match the reference. The single rule contains inline Base64 data with content type `application/ld+json` and no URL. The decoded Agreement identifies both selected permissions and binds each set to its approved policy version. |
+| Submit a job with an unversioned Contract reference or a DocumentReference as the authorization input. Repeat with an inline rule that contains malformed JSON-LD or a reference in place of the attachment. | The Manager returns HTTP 400 and does not accept the job or dispatch a task. |
+| Submit a job referencing a Contract whose identifier differs from the embedded Agreement's `uid`. | The Manager returns HTTP 400 and does not accept the job or dispatch a task. |
+| Check the publisher's Contract against the embedded Agreement. Repeat with a changed or swapped policy version or an omitted mirrored permission. | The publisher identifies inconsistent mirrored terms and corrects the Contract before making it available. |
+| Return a different resource id or version when the Manager resolves the reference. Repeat with a matching Contract for which the Manager cannot establish current Agreement status. | The Manager returns HTTP 403 and does not accept the job or dispatch a task. |
+| Submit or attempt result retrieval at the Agreement's exclusive upper time bound. | The Manager denies submission or result release, respectively. |
+| On a server that declares support for searching by Agreement identifier, search for the issued Contract using that identifier. | The server returns the authorized Contract revision where the identifier matches. |
+
+#### Purpose Classification
+
+| Stimulus | Pass criteria |
+|---|---|
+| Submit the same authorized purpose in jobs that refer to individually issued Agreements with the [purpose classification](odrl-content.html#purpose-classification) omitted, present with one code, and present with several distinct codes. Exercise a heading code, `D4`, `7.1`, and `7.2`. | Classification is optional. Each valid code is accepted without changing the authorization decision. |
+| Use a different specific purpose IRI that the issuer classifies under the same ISO code as the approved purpose. Repeat with `7.1` and `7.2`. | The Manager returns HTTP 403 and does not accept the job or dispatch a task. |
+| Repeat with a malformed classification in a referenced Agreement. Use an unsupported edition or system, an unknown code, a numeric code, duplicate codes, and an empty array. | The Manager returns HTTP 400 and does not accept the job or dispatch a task. |
+
+#### Policy and Plan Validation
+
 Configure the Requester with access to the approved policy and the Manager with a trusted means of obtaining or verifying the same version. Test both optional JWS-signed Requester-carried content and Manager-resolved content. Verify authorization consistency, integrity, content conformance and currency before acceptance or dispatch.
 
 | Stimulus | Pass criteria |
@@ -96,7 +120,16 @@ Configure the Requester with access to the approved policy and the Manager with 
 | Submit a job with two sets under different approved policies. Give both policies the same reversibility mode, then repeat with one policy declaring the other mode and approval for that policy. | With a common mode, every ITI-x3 task submission carries that mode. With mixed modes, ITI-x1 returns HTTP 422 with an OperationOutcome before acceptance or dispatch and returns no result. |
 | Modify the carried rules while retaining their declared URL and version. Repeat with Manager-resolved content that changes under the same identity. | The Manager returns an integrity error with no acceptance, dispatch or result. |
 
-Exchange a compiled ODRL Set in the R4 Execution Plan Library. Reverse the serialized obligation array while preserving the explicit rule order and verify identical outputs. Change the rule-order list to reference an absent or repeated obligation, substitute the payload-set or stage ID, and repeat with an unresolved semantic group, an unknown action parameter or an unsupported context. Verify that the De-Identifier returns HTTP 400 without accepting the task, performing transformations, or returning a result.
+Exchange a compiled ODRL Set in the R4 Execution Plan Contract. Reverse the serialized obligation array while preserving the explicit rule order and verify identical outputs. Change the rule-order list to reference an absent or repeated obligation, substitute the payload-set or stage ID, and repeat with an unresolved semantic group, an unknown action parameter or an unsupported context. Verify that the De-Identifier returns HTTP 400 without accepting the task, performing transformations, or returning a result.
+
+Check the [ODRL action parameter binding](odrl-content.html#action-parameters) in both policy admission and plan validation.
+
+| Stimulus | Pass criteria |
+|---|---|
+| Submit a policy with one valid refinement per required operand. Repeat with a missing or duplicate operand, an operator other than `eq`, a numeric value encoded as a string, an out-of-range value, and a refinement on `dis:remove`. | The Manager accepts the valid policy and rejects each invalid policy before dispatch. A task with the same invalid parameter syntax receives HTTP 400 before processing. |
+| Compare fixed replacement and lookup-backed replacement. Repeat with both `dis:value` and `dis:source` in one action and with a lookup-backed assignment missing the required table. | The two valid forms use their selected replacement source. The conflicting or incomplete requests yield no successful result. |
+| Compile a salted hash rule under a job-level scope, then compile an unsalted rule for a permitted target. Repeat with an unresolved scope in a salted plan, a scope in an unsalted plan, and missing `dis:pseudonymSystem` for an Identifier target. | The first plan carries its exact resolved scope and the second omits the scope refinement. The De-Identifier rejects each invalid plan before processing. |
+| Compile a date-shift policy without `dis:scope` using its authorized policy linkage scope and a compatible derivation capability. Repeat without an explicit or policy scope. | The first assignment uses the resolved scope and preserves the approved offset bound. The Manager rejects the second policy before dispatch. |
 
 Cover Semantic-Level compilation, Syntax-Level validation and packaging, ordered rules, one execution plan per ruleSet, and optional stage ordering. Full composable execution plans and dataset-level statistical disclosure control are outside the scope of this supplement.
 
@@ -104,7 +137,7 @@ Compile a policy targeting `@dates` against R4 and R5 Encounter payloads. Verify
 
 #### Source Policy Identity in an ITI-x3 Plan
 
-Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) with its versioned execution plan Library in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Verify that the De-Identifier can return the exact evidence URI carried by the plan in `Provenance.policy` with no retrieval of the source policy. Verify that the Manager checks that URI against the dispatched plan before release.
+Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) with its versioned execution plan Contract in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Verify that the De-Identifier can return the exact evidence URI carried by the plan in `Provenance.policy` with no retrieval of the source policy. Verify that the Manager checks that URI against the dispatched plan before release.
 
 Repeat with the `derived-from` entry absent, with an unversioned canonical, with the evidence URI absent, and with two source policy entries. Each task fails before transformation and returns an OperationOutcome without a result. Supply a policy URI for a different version when assembling the plan and verify that the Manager does not dispatch it. Return successful task evidence with a different policy URI and verify that the Manager withholds job output.
 
@@ -171,7 +204,7 @@ Repeat with an unqualified R5 URL in the input List, a qualified reference on an
 
 ### Requester Validation of Staged Release Evidence
 
-Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Library-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For a separate single-stage run, submit only the R4 set from [UC-2](examples-grouped-fhir-job.html#grouped-fhir-submission) under its own approved policy, `patient-name-removal|1.0`, and return the corresponding R4 set from the [UC-2 job result](Parameters-grouped-fhir-job-result.html). For the asynchronous run, adapt the [UC-1 staged cohort exchange](examples-bulk-fhir-cohort.html#submit-dispatch-and-retrieve) or use the compact [staged job submission](Task-staged-async-job.html) and the [preliminary](Task-staged-async-preliminary-task.html) and [advanced](Task-staged-async-advanced-task.html) task fixtures. Exercise both ITI-x7 polls and repeat with [recovery of a lost acceptance](examples-grouped-fhir-job.html#grouped-fhir-submission).
+Test a De-Identification Requester with synchronous ITI-x1 and repeat with a completed ITI-x4 response if the Requester supports DIS-ASYNC-JOB. Give the Requester the [approved staged policy](Contract-staged-patient.html) and its version-specific evidence URI independently of the result package. Derive the expected sequence from `stages` and their ordered `ruleSetRefs`. Run with Requester-carried content and with Manager-resolved content. Use the [staged Patient package](Bundle-staged-r4-patient-result.html) for the positive staged case. For a separate single-stage run, submit only the R4 set from [UC-2](examples-grouped-fhir-job.html#grouped-fhir-submission) under its own approved policy, `patient-name-removal|1.0`, and return the corresponding R4 set from the [UC-2 job result](Parameters-grouped-fhir-job-result.html). For the asynchronous run, adapt the [UC-1 staged cohort exchange](examples-bulk-fhir-cohort.html#submit-dispatch-and-retrieve) or use the compact [staged job submission](Task-staged-async-job.html) and the [preliminary](Task-staged-async-preliminary-task.html) and [advanced](Task-staged-async-advanced-task.html) task fixtures. Exercise both ITI-x7 polls and repeat with [recovery of a lost acceptance](examples-grouped-fhir-job.html#grouped-fhir-submission).
 
 | Stimulus | Pass criteria |
 |---|---|
@@ -182,7 +215,7 @@ Test a De-Identification Requester with synchronous ITI-x1 and repeat with a com
 
 ### Reversible Lookup Mapping
 
-Cover both mandatory DIS-REVERSIBLE arrangements: absent table causes Manager mapping creation/maintenance and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent patient identifier replacement and valid output references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
+Cover both mandatory DIS-REVERSIBLE arrangements: salted hashing without a supplied table causes Manager mapping creation, maintenance, and persistence; supplied table causes authoritative direct-identifier replacement without mandatory Manager persistence. Test complete tables, missing entries before acceptance and after async acceptance, duplicate/ambiguous mappings, incompatible irreversible policy, unauthorized scope, no fallback generation, consistent patient identifier replacement and valid output references, task-scoped disclosure and terminal deletion. Missing entries must reject/fail the complete job and release no partial output. Inspect that source identifiers and mappings are absent from recipient-facing evidence, logs and error diagnostics.
 
 ### Cross-Community Consistency Prerequisites
 
@@ -194,11 +227,16 @@ Exercise the published salted and unsalted test vectors. Verify matching output 
 
 For reversible patient hashing, verify the inline `generatedLookupTable` in synchronous ITI-x3 and asynchronous ITI-x7 completion. Validate the original-to-pseudonym pairs, resolved scope and Manager retention before release. Check that the supplied-table and irreversible patient workflows do not return a generated patient table. Verify that mapping artifacts and confidential salts stay out of recipient output, evidence, logs and errors.
 
-### Encryption-Based Pseudonymization (Informative Proposal)
+### Encryption-Based Pseudonymization
 
-For the [proposed encryption method](draft-encryption-based-pseudonymization.html), run the [synthetic FF1 vector](draft-encryption-based-pseudonymization.html#ff1-interoperability-vector) with two independent De-Identifiers. Check the exact output identifier pair, including leading zeroes, and verify that the Manager's authorized reversal process can recover the original resolved value using the provisioned key and the pinned context. Repeat with another approved identifier format, with a retry using the pinned configuration, and with changes to the scope or key version. Check that equivalent assignments use matching pseudonyms and that the output namespace follows the approved configuration.
+Use the [AES-FF1 vector](draft-encryption-based-pseudonymization.html#ff1-interoperability-vector) with a Manager and two independent De-Identifiers. Provision the vector's public test key to the test actors for the assigned operations and publish matching capability entries.
 
-Repeat the matching and reversal checks for deterministic AES-SIV when a binding is available. Check rejection of tampered AES-SIV ciphertext and mismatched associated data. Verify that the Manager detects a key version unavailable to its reversal process or an assigned De-Identifier, or an unsupported configuration, before dispatch. Exercise a changed configuration on retry and an identifier outside the approved format. Check that an encrypt-only worker and an unauthorized caller cannot decrypt. Inspect synchronous ITI-x3 and successful asynchronous ITI-x7 responses for leakage of key material, local key handles, or generated lookup tables for the encryption method. Check that keys and handles stay out of recipient output, evidence, logs, and errors.
+| Stimulus | Pass criteria |
+| --- | --- |
+| Submit the approved reversible policy with the vector configuration. Dispatch both assignments and retry with the same pinned context. | Both workers produce `0863301760` under the configured namespace with valid references. The Manager's authorized reversal recovers `0000000014`. A worker result carries no generated table for encrypted identifiers. |
+| Repeat with a missing configuration capability, an unavailable or unauthorized key version, and a supplied lookup table for the same payload set. | The Manager rejects each job before dispatch. |
+| Send a task with a substituted configuration, scope, or namespace that conflicts with its authorized context, or an unavailable or unauthorized key. Repeat with an out-of-domain input identifier. | The De-Identifier rejects the inconsistent or unauthorized assignment or fails the out-of-domain input without partial output. |
+| Repeat after a key rotation with a new output namespace. Attempt reversal with an unauthorized caller and with a value lacking trusted provenance. Inspect task results, evidence, and errors. | Authorized reversal uses the exact pinned context for each namespace. Unauthorized or unverified reversal fails. Key bytes and local key handles are absent from exchanged artifacts and diagnostics. |
 
 ### Persistent Lookup Table References
 

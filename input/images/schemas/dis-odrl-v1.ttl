@@ -1,0 +1,403 @@
+@prefix dis: <https://profiles.ihe.net/ITI/DIS/odrl/v1#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.ttl>
+    a owl:Ontology ;
+    dct:title "DIS ODRL Vocabulary, version 1"@en ;
+    owl:versionInfo "1" ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html> .
+
+# Profile identifiers
+
+dis:DataRequestAuthorization
+    a dct:Standard, skos:Concept ;
+    rdfs:label "Data Request Authorization"@en ;
+    skos:definition "Profile for an Agreement that authorizes a specific data request."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
+
+dis:DeIdentificationPolicy
+    a dct:Standard, skos:Concept ;
+    rdfs:label "De-Identification Policy"@en ;
+    skos:definition "Profile for a reusable Set of de-identification obligations."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> .
+
+dis:ExecutionPlan
+    a dct:Standard, skos:Concept ;
+    rdfs:label "De-Identification Execution Plan"@en ;
+    skos:definition "Profile for a Set of compiled obligations bound to a de-identification task."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> .
+
+# Actions
+
+dis:deIdentify
+    a odrl:Action, skos:Concept ;
+    rdfs:label "De-identify"@en ;
+    skos:definition "Request de-identification of the approved data scope under the permission conditions."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> ;
+    odrl:includedIn odrl:use .
+
+dis:remove
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Remove"@en ;
+    skos:definition "Remove the selected element and its children."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#remove> ;
+    odrl:includedIn odrl:use .
+
+dis:replace
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Replace"@en ;
+    skos:definition "Replace the selected content with a fixed value or apply an authoritative reversible lookup mapping."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#replace> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:value, dis:source .
+
+dis:keep
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Keep"@en ;
+    skos:definition "Preserve the selected element in the de-identified output."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#keep> ;
+    odrl:includedIn odrl:use .
+
+dis:hash
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Hash"@en ;
+    skos:definition "Replace the selected value with a digest using the specified salted or unsalted recipe."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#hash> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:mode, dis:algorithm, dis:pseudonymSystem, dis:identity-linkage-scope .
+
+dis:truncate-date
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Truncate date"@en ;
+    skos:definition "Reduce date precision to the specified year or year-month granularity."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#truncate-date> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:precision .
+
+dis:date-shift
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Date shift"@en ;
+    skos:definition "Shift selected dates by a consistent per-patient offset within the specified bound."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#date-shift> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:maxOffsetDays, dis:scope .
+
+dis:round
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Round"@en ;
+    skos:definition "Round the selected numeric value to the nearest multiple of the specified step."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#round> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:step .
+
+dis:truncate
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Truncate"@en ;
+    skos:definition "Retain the specified number of leading characters of the selected string."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#truncate> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:length .
+
+dis:redact
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Redact"@en ;
+    skos:definition "Replace selected FHIR narrative with the fixed redaction placeholder."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#redact> ;
+    odrl:includedIn odrl:use .
+
+dis:encrypt
+    a odrl:Action, skos:Concept ;
+    rdfs:label "Encrypt"@en ;
+    skos:definition "Pseudonymize a patient business identifier using the optional AES-FF1 method."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/volume-3.html#encryption-based-patient-pseudonymization> ;
+    odrl:includedIn odrl:use ;
+    dis:actionParameter dis:encryptionMethod, dis:configurationVersion, dis:identity-linkage-scope, dis:pseudonymSystem, dis:keyVersion .
+
+# Vocabulary metadata
+
+dis:actionParameter
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Action parameter"@en ;
+    skos:definition "Links an action to a left operand permitted in a DIS action refinement under at least one of the policy or execution plan profiles."@en ;
+    rdfs:domain odrl:Action ;
+    rdfs:range odrl:LeftOperand ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+# Constraint and refinement left operands
+
+dis:approvedPolicy
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Approved policy"@en ;
+    skos:definition "Versioned FHIR Library canonical approved for the selected permission."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
+
+dis:resultDestination
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Result destination"@en ;
+    skos:definition "Approved HTTPS service base for access to the job result."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
+
+dis:semanticGroup
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Semantic group"@en ;
+    skos:definition "Semantic group identifier including its @ prefix, resolved using the payload binding."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+
+dis:fhirPath
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "FHIRPath"@en ;
+    skos:definition "FHIRPath selector evaluated against the applicable FHIR payload release."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+
+dis:value
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Replacement value"@en ;
+    skos:definition "Nonempty fixed value used by the replace action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:source
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Replacement source"@en ;
+    skos:definition "Lookup table selected as the source of replacement values."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:mode
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Hash mode"@en ;
+    skos:definition "Salted or unsalted digest recipe for the hash action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:algorithm
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Hash algorithm"@en ;
+    skos:definition "Digest algorithm used by the hash action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:pseudonymSystem
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Pseudonym system"@en ;
+    skos:definition "Identifier system for the pseudonyms produced by the selected hash or encryption rule."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:precision
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Date precision"@en ;
+    skos:definition "Year or year-month precision retained by the truncate-date action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:maxOffsetDays
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Maximum offset in days"@en ;
+    skos:definition "Maximum absolute number of days by which the date-shift action may shift a value."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:scope
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Date shift scope"@en ;
+    skos:definition "Consistency scope for the date-shift action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:step
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Rounding step"@en ;
+    skos:definition "Positive interval between multiples used by the round action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:length
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Truncation length"@en ;
+    skos:definition "Positive number of leading characters retained by the truncate action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:encryptionMethod
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Encryption method"@en ;
+    skos:definition "Method selected by a reversible policy for the encrypt action."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:configurationVersion
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Encryption configuration revision"@en ;
+    skos:definition "IRI of the immutable approved encryption configuration."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+dis:keyVersion
+    a odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Key version"@en ;
+    skos:definition "Non-secret identifier of the provisioned scoped encryption key version pinned in the plan."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> .
+
+# DIS properties
+
+dis:approvedRequest
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Approved request"@en ;
+    skos:definition "Exact approved revision of the data request named in the Agreement."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
+
+dis:sourcePermit
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Source permit"@en ;
+    skos:definition "Approval from which the Agreement was derived."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
+
+dis:parentAliasRecipient
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Parent alias recipient"@en ;
+    skos:definition "Worker organization authorized to receive the parent alias for the associated permission."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> ;
+    rdfs:range odrl:Party .
+
+dis:representationLevel
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Representation level"@en ;
+    skos:definition "Whether the policy uses semantic group identifiers or concrete selectors."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range xsd:string .
+
+dis:reversibilityMode
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Reversibility mode"@en ;
+    skos:definition "Reversibility mode declared by the De-Identification Policy Set."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range xsd:string .
+
+dis:payloadFamily
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Payload family"@en ;
+    skos:definition "Payload family governed by a Syntax-Level policy."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range xsd:string .
+
+dis:payloadSet
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Payload set"@en ;
+    skos:definition "Job-local identifier of the payload set assigned to the de-identification task."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> ;
+    rdfs:range xsd:string .
+
+dis:ruleSets
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Rule sets"@en ;
+    skos:definition "Ordered list of the rule-set definitions in a policy."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range rdf:List .
+
+dis:ruleSetId
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Rule-set ID"@en ;
+    skos:definition "Identifier of a rule set in the policy or of the rule set compiled into a plan."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> ;
+    rdfs:range xsd:string .
+
+dis:ruleOrder
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Rule order"@en ;
+    skos:definition "Ordered list of obligation IRIs defining first-match precedence."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> ;
+    rdfs:range rdf:List .
+
+dis:description
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Description"@en ;
+    skos:definition "Human-readable description of a policy rule set or stage."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range xsd:string .
+
+dis:stages
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Stages"@en ;
+    skos:definition "Ordered list of policy stages in dispatch order."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range rdf:List .
+
+dis:stageId
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Stage ID"@en ;
+    skos:definition "Identifier of a policy stage or the stage for which a plan was compiled."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> ;
+    rdfs:range xsd:string .
+
+dis:ruleSetRefs
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Rule-set references"@en ;
+    skos:definition "Ordered list of rule-set identifier strings for a policy stage."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
+    rdfs:range rdf:List .
+
+dis:sourceRule
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Source rule"@en ;
+    skos:definition "IRI of the policy obligation from which the plan obligation was compiled."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> ;
+    rdfs:range odrl:Duty .
+
+dis:purposeClassification
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Purpose classification"@en ;
+    skos:definition "Optional classification of the specific purpose approved by an Agreement permission."@en ;
+    rdfs:domain odrl:Permission ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+dis:classificationSystem
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Classification system"@en ;
+    skos:definition "IRI identifying the publication that defines the purpose classification codes."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+dis:classificationVersion
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Classification version"@en ;
+    skos:definition "Edition of the identified purpose classification system."@en ;
+    rdfs:range xsd:string ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+dis:classificationCode
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "Classification code"@en ;
+    skos:definition "Case-sensitive string identifying a purpose heading or category in the stated edition."@en ;
+    rdfs:range xsd:string ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#purpose-classification> .
+
+# Terms used as properties and as left operands
+
+dis:payloadBinding
+    a owl:DatatypeProperty, odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Payload binding"@en ;
+    skos:definition "Payload binding approved by a permission or declared by the compiled plan."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> ;
+    rdfs:range xsd:string .
+
+dis:payloadVersion
+    a owl:DatatypeProperty, odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Payload version"@en ;
+    skos:definition "Payload release approved by a permission or declared in a policy or plan."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> ;
+    rdfs:range xsd:string .
+
+dis:identity-linkage-scope
+    a owl:DatatypeProperty, odrl:LeftOperand, skos:Concept ;
+    rdfs:label "Identity linkage scope"@en ;
+    skos:definition "Authorized scope declared in a policy or resolved for a compiled salted hash or encryption rule."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#action-parameters> ;
+    rdfs:range rdf:JSON .
+
+# Selector collection sources
+
+dis:semantic-elements
+    a odrl:Asset, skos:Concept ;
+    rdfs:label "Semantic elements"@en ;
+    skos:definition "Collection source used when a policy selects a semantic group."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
+
+dis:fhir-elements
+    a odrl:Asset, skos:Concept ;
+    rdfs:label "FHIR elements"@en ;
+    skos:definition "Collection source used when a Syntax-Level policy selects concrete FHIR elements."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .

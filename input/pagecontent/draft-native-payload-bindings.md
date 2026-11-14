@@ -56,7 +56,7 @@ The tables describe the R4 work-order inputs and result parameters. Each success
 
 ### ITI-x1 Job Submission
 
-The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/DocumentReference/permit-42/_history/1`. The permit covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
+The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. The FHIR R4 `Task` for the job carries an `authorization` input with a reference to `https://governance.example.org/fhir/Contract/permit-42/_history/1`. The ODRL Agreement in that Contract covers the R5 Patient, the two selected DICOM instances, the policy and version for each set, and release to the Requester.
 
 | Metadata or manifest of each `payload-set` input | Clinical set | Imaging set |
 |--------------------------------|--------------|-------------|
@@ -99,7 +99,7 @@ The Manager sends one `POST /fhir/$submit-dis-task` to the assigned De-Identifie
 |------------|---------------|--------------|
 | `setId` in payload-set metadata | `clinical` | `images` |
 | `valueAttachment` in the payload-set input | Same inline manifest package and original R5 bytes | `url = https://index.example.org/fhir/List/images-42/_history/1`, with authorized access to the versioned study index and Endpoint and to the two assigned instances |
-| `execution-plan` reference | `https://dis.example.org/fhir/Library/plan-clinical-42/_history/1` | `https://dis.example.org/fhir/Library/plan-images-42/_history/1` |
+| `execution-plan` reference | `https://dis.example.org/fhir/Contract/plan-clinical-42/_history/1` | `https://dis.example.org/fhir/Contract/plan-images-42/_history/1` |
 | `rule-set-id` string | `clinical-direct-identifiers` | `imaging-confidentiality` |
 {: .grid}
 
@@ -179,7 +179,7 @@ Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both p
         ]
       },
       "valueReference": {
-        "reference": "https://governance.example.org/fhir/DocumentReference/permit-42/_history/1"
+        "reference": "https://governance.example.org/fhir/Contract/permit-42/_history/1"
       }
     },
     {

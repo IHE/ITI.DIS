@@ -36,7 +36,7 @@ Description: """
 The Submit De-Identification Job operation is invoked by the De-Identification
 Requester to submit a de-identification job to the De-ID Manager (or Integrated
 De-ID Manager/De-Identifier). The Requester supplies a version-specific Data Request
-Authorization reference and selects a permission for each payload set. The Requester declares the approved policy by
+Authorization Contract reference and selects a permission for each payload set. The Requester declares the approved policy by
 canonical URL and version, presents data request authorization evidence, and
 includes references to the processing targets.
 """

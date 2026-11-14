@@ -16,7 +16,7 @@ Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3.html#3p
 
 #### ODRL and JSON Schema Artifacts
 
-The [DIS ODRL binding](odrl-content.html) defines the Agreement, De-Identification Policy, and Execution Plan. Download the [version 1 JSON-LD context](schemas/dis-odrl-v1.jsonld).
+The [DIS ODRL binding](odrl-content.html) defines the Agreement, De-Identification Policy, and Execution Plan. Download the [version 1 RDF vocabulary](schemas/dis-odrl-v1.ttl) and [version 1 JSON-LD context](schemas/dis-odrl-v1.jsonld).
 
 These schemas describe the structure of the decoded JSON payloads used by DIS. Volume 3 defines the additional content and semantic requirements for each payload.
 

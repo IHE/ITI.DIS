@@ -23,16 +23,16 @@ Description: "Synthetic authorization, policies, plans and hosted R4 resources u
 * entry[=].resource = grouped-fhir-r4-output
 * entry[+].fullUrl = "https://results.example.org/fhir/r4/Patient/grouped-fhir-patient-output"
 * entry[=].resource = grouped-fhir-patient-output
-* entry[+].fullUrl = "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4"
+* entry[+].fullUrl = "https://governance.example.org/fhir/Contract/grouped-fhir-policy-patient-r4"
 * entry[=].resource = grouped-fhir-policy-patient-r4
-* entry[+].fullUrl = "https://dis.example.org/fhir/Library/grouped-fhir-plan-patient-r4"
+* entry[+].fullUrl = "https://dis.example.org/fhir/Contract/grouped-fhir-plan-patient-r4"
 * entry[=].resource = grouped-fhir-plan-patient-r4
-* entry[+].fullUrl = "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-report-r5"
+* entry[+].fullUrl = "https://governance.example.org/fhir/Contract/grouped-fhir-policy-imaging-report-r5"
 * entry[=].resource = grouped-fhir-policy-imaging-report-r5
-* entry[+].fullUrl = "https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-report-r5"
+* entry[+].fullUrl = "https://dis.example.org/fhir/Contract/grouped-fhir-plan-imaging-report-r5"
 * entry[=].resource = grouped-fhir-plan-imaging-report-r5
-* entry[+].fullUrl = "https://governance.example.org/fhir/DocumentReference/grouped-fhir-permit"
-* entry[=].resource = grouped-fhir-permit
+* entry[+].fullUrl = "https://governance.example.org/fhir/Contract/grouped-fhir-authorization-contract"
+* entry[=].resource = grouped-fhir-authorization-contract
 * entry[+].fullUrl = "https://source.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-input"
 * entry[=].resource = grouped-fhir-hemoglobin-input
 * entry[+].fullUrl = "https://results.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-output"
@@ -55,11 +55,11 @@ Description: "UC-2 job submission with one R4 clinical set and one R5 diagnostic
 * status = #requested
 * intent = #order
 * code = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type#de-identification-job
-* input[authorization].valueReference = Reference(https://governance.example.org/fhir/DocumentReference/grouped-fhir-permit/_history/1)
+* input[authorization].valueReference = Reference(https://governance.example.org/fhir/Contract/grouped-fhir-authorization-contract/_history/2)
 * input[payloadSet][0].valueAttachment.contentType = #application/fhir+json
 * input[payloadSet][0].valueAttachment.url = "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input/_history/1"
 * input[payloadSet][0].extension[payloadSet].extension[setId].valueString = "patient-r4"
-* input[payloadSet][0].extension[payloadSet].extension[permission].valueUri = "https://governance.example.org/permits/grouped-fhir-permit/versions/1#patient-r4"
+* input[payloadSet][0].extension[payloadSet].extension[permission].valueUri = "https://governance.example.org/permits/grouped-fhir-permit/versions/2#patient-r4"
 * input[payloadSet][0].extension[payloadSet].extension[purpose].valueUri = "https://governance.example.org/purposes/multimodal-research"
 * input[payloadSet][0].extension[payloadSet].extension[payloadBinding].valueCode = #DIS-FHIR-Payload
 * input[payloadSet][0].extension[payloadSet].extension[payloadVersion].valueCode = #R4
@@ -68,7 +68,7 @@ Description: "UC-2 job submission with one R4 clinical set and one R5 diagnostic
 * input[payloadSet][1].valueAttachment.contentType = #application/fhir+json
 * input[payloadSet][1].valueAttachment.url = "https://source.example.org/fhir/r4/List/grouped-fhir-r5-input-list/_history/1"
 * input[payloadSet][1].extension[payloadSet].extension[setId].valueString = "imaging-report-r5"
-* input[payloadSet][1].extension[payloadSet].extension[permission].valueUri = "https://governance.example.org/permits/grouped-fhir-permit/versions/1#imaging-report-r5"
+* input[payloadSet][1].extension[payloadSet].extension[permission].valueUri = "https://governance.example.org/permits/grouped-fhir-permit/versions/2#imaging-report-r5"
 * input[payloadSet][1].extension[payloadSet].extension[purpose].valueUri = "https://governance.example.org/purposes/multimodal-research"
 * input[payloadSet][1].extension[payloadSet].extension[payloadBinding].valueCode = #DIS-FHIR-Payload
 * input[payloadSet][1].extension[payloadSet].extension[payloadVersion].valueCode = #R5
@@ -140,7 +140,7 @@ Description: "UC-2 task submission for the R5 diagnostic report set."
 * input[payloadSet].extension[payloadSet].extension[payloadBinding].valueCode = #DIS-FHIR-Payload
 * input[payloadSet].extension[payloadSet].extension[payloadVersion].valueCode = #R5
 * input[payloadSet].extension[payloadSet].extension[manifestFormat].valueCode = #dis-resource-list
-* input[executionPlan].valueReference = Reference(https://dis.example.org/fhir/Library/grouped-fhir-plan-imaging-report-r5/_history/1)
+* input[executionPlan].valueReference = Reference(https://dis.example.org/fhir/Contract/grouped-fhir-plan-imaging-report-r5/_history/1)
 * input[ruleSetId].valueString = "remove-direct-link"
 * input[reversibilityMode].valueCode = #irreversible
 
@@ -161,7 +161,7 @@ Description: "UC-2 task submission for the R4 Patient and hemoglobin Observation
 * input[payloadSet].extension[payloadSet].extension[payloadBinding].valueCode = #DIS-FHIR-Payload
 * input[payloadSet].extension[payloadSet].extension[payloadVersion].valueCode = #R4
 * input[payloadSet].extension[payloadSet].extension[manifestFormat].valueCode = #dis-resource-list
-* input[executionPlan].valueReference = Reference(https://dis.example.org/fhir/Library/grouped-fhir-plan-patient-r4/_history/1)
+* input[executionPlan].valueReference = Reference(https://dis.example.org/fhir/Contract/grouped-fhir-plan-patient-r4/_history/1)
 * input[ruleSetId].valueString = "remove-direct-link"
 * input[reversibilityMode].valueCode = #irreversible
 
@@ -211,7 +211,7 @@ Usage: #inline
 * target[0].extension[targetFhirVersion].valueCode = #5.0
 * recorded = "2026-11-06T03:00:00Z"
 * activity = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity#dis-task
-* policy = "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-report-r5/_history/1"
+* policy = "https://governance.example.org/fhir/Contract/grouped-fhir-policy-imaging-report-r5/_history/1"
 * agent.type = http://terminology.hl7.org/CodeSystem/provenance-participant-type#performer
 * agent.who.identifier.system = "https://dis.example.org/identifiers/worker"
 * agent.who.identifier.value = "example-worker"
@@ -230,7 +230,7 @@ Usage: #inline
 * target[+] = Reference(https://results.example.org/fhir/r4/Observation/grouped-fhir-hemoglobin-output/_history/1)
 * recorded = "2026-11-06T03:00:00Z"
 * activity = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-activity#dis-task
-* policy = "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+* policy = "https://governance.example.org/fhir/Contract/grouped-fhir-policy-patient-r4/_history/1"
 * agent.type = http://terminology.hl7.org/CodeSystem/provenance-participant-type#performer
 * agent.who.identifier.system = "https://dis.example.org/identifiers/worker"
 * agent.who.identifier.value = "example-worker"
@@ -286,18 +286,6 @@ Usage: #inline
 * meta.versionId = "1"
 * active = true
 
-Instance: grouped-fhir-permit
-InstanceOf: DISDataRequestAuthorization
-Usage: #inline
-Description: "Synthetic organizational data request authorization for the associated de-identification job."
-* id = "grouped-fhir-permit"
-* meta.versionId = "1"
-* status = #current
-* masterIdentifier.system = "urn:ietf:rfc:3986"
-* masterIdentifier.value = "https://governance.example.org/permits/grouped-fhir-permit/versions/1"
-* content.attachment.contentType = #application/ld+json
-* content.attachment.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJBZ3JlZW1lbnQiLCJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcGVybWl0cy9ncm91cGVkLWZoaXItcGVybWl0L3ZlcnNpb25zLzEiLCJwcm9maWxlIjoiZGlzOkRhdGFSZXF1ZXN0QXV0aG9yaXphdGlvbiIsImRpczphcHByb3ZlZFJlcXVlc3QiOnsiQGlkIjoiaHR0cHM6Ly9nb3Zlcm5hbmNlLmV4YW1wbGUub3JnL3JlcXVlc3RzL2dyb3VwZWQtZmhpci1qb2ItcmVxdWVzdC92ZXJzaW9ucy8xIn0sInBlcm1pc3Npb24iOlt7InVpZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wZXJtaXRzL2dyb3VwZWQtZmhpci1wZXJtaXQvdmVyc2lvbnMvMSNwYXRpZW50LXI0IiwiYXNzaWduZXIiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvb3JnYW5pemF0aW9ucy9hcHByb3ZhbC1hdXRob3JpdHkiLCJhc3NpZ25lZSI6Imh0dHBzOi8vY29vcmRpbmF0b3IuZXhhbXBsZS5vcmcvb3JnYW5pemF0aW9ucy9yZXF1ZXN0ZXIiLCJhY3Rpb24iOiJkaXM6ZGVJZGVudGlmeSIsInRhcmdldCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9zY29wZXMvZ3JvdXBlZC1maGlyLXBlcm1pdC9wYXRpZW50LXI0L3ZlcnNpb25zLzEiLCJjb25zdHJhaW50IjpbeyJsZWZ0T3BlcmFuZCI6InB1cnBvc2UiLCJvcGVyYXRvciI6ImVxIiwicmlnaHRPcGVyYW5kIjp7IkBpZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wdXJwb3Nlcy9tdWx0aW1vZGFsLXJlc2VhcmNoIn19LHsibGVmdE9wZXJhbmQiOiJkYXRlVGltZSIsIm9wZXJhdG9yIjoiZ3RlcSIsInJpZ2h0T3BlcmFuZCI6eyJAdmFsdWUiOiIyMDI2LTAxLTAxVDAwOjAwOjAwWiIsIkB0eXBlIjoieHNkOmRhdGVUaW1lIn19LHsibGVmdE9wZXJhbmQiOiJkYXRlVGltZSIsIm9wZXJhdG9yIjoibHQiLCJyaWdodE9wZXJhbmQiOnsiQHZhbHVlIjoiMjAyOC0wMS0wMVQwMDowMDowMFoiLCJAdHlwZSI6InhzZDpkYXRlVGltZSJ9fSx7ImxlZnRPcGVyYW5kIjoiZGlzOmFwcHJvdmVkUG9saWN5Iiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9wYXRpZW50LW5hbWUtcmVtb3ZhbHwxLjAifSx7ImxlZnRPcGVyYW5kIjoiZGlzOnBheWxvYWRCaW5kaW5nIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6IkRJUy1GSElSLVBheWxvYWQifSx7ImxlZnRPcGVyYW5kIjoiZGlzOnBheWxvYWRWZXJzaW9uIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6IlI0In0seyJsZWZ0T3BlcmFuZCI6InJlY2lwaWVudCIsIm9wZXJhdG9yIjoiZXEiLCJyaWdodE9wZXJhbmQiOnsiQGlkIjoiaHR0cHM6Ly9jb29yZGluYXRvci5leGFtcGxlLm9yZy9vcmdhbml6YXRpb25zL3JlcXVlc3RlciJ9fV0sImRpczpwYXJlbnRBbGlhc1JlY2lwaWVudCI6eyJAaWQiOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9vcmdhbml6YXRpb25zL2V4YW1wbGUtd29ya2VyIn19LHsidWlkIjoiaHR0cHM6Ly9nb3Zlcm5hbmNlLmV4YW1wbGUub3JnL3Blcm1pdHMvZ3JvdXBlZC1maGlyLXBlcm1pdC92ZXJzaW9ucy8xI2ltYWdpbmctcmVwb3J0LXI1IiwiYXNzaWduZXIiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvb3JnYW5pemF0aW9ucy9hcHByb3ZhbC1hdXRob3JpdHkiLCJhc3NpZ25lZSI6Imh0dHBzOi8vY29vcmRpbmF0b3IuZXhhbXBsZS5vcmcvb3JnYW5pemF0aW9ucy9yZXF1ZXN0ZXIiLCJhY3Rpb24iOiJkaXM6ZGVJZGVudGlmeSIsInRhcmdldCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9zY29wZXMvZ3JvdXBlZC1maGlyLXBlcm1pdC9pbWFnaW5nLXJlcG9ydC1yNS92ZXJzaW9ucy8xIiwiY29uc3RyYWludCI6W3sibGVmdE9wZXJhbmQiOiJwdXJwb3NlIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6eyJAaWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcHVycG9zZXMvbXVsdGltb2RhbC1yZXNlYXJjaCJ9fSx7ImxlZnRPcGVyYW5kIjoiZGF0ZVRpbWUiLCJvcGVyYXRvciI6Imd0ZXEiLCJyaWdodE9wZXJhbmQiOnsiQHZhbHVlIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJAdHlwZSI6InhzZDpkYXRlVGltZSJ9fSx7ImxlZnRPcGVyYW5kIjoiZGF0ZVRpbWUiLCJvcGVyYXRvciI6Imx0IiwicmlnaHRPcGVyYW5kIjp7IkB2YWx1ZSI6IjIwMjgtMDEtMDFUMDA6MDA6MDBaIiwiQHR5cGUiOiJ4c2Q6ZGF0ZVRpbWUifX0seyJsZWZ0T3BlcmFuZCI6ImRpczphcHByb3ZlZFBvbGljeSIsIm9wZXJhdG9yIjoiZXEiLCJyaWdodE9wZXJhbmQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsfDEuMCJ9LHsibGVmdE9wZXJhbmQiOiJkaXM6cGF5bG9hZEJpbmRpbmciLCJvcGVyYXRvciI6ImVxIiwicmlnaHRPcGVyYW5kIjoiRElTLUZISVItUGF5bG9hZCJ9LHsibGVmdE9wZXJhbmQiOiJkaXM6cGF5bG9hZFZlcnNpb24iLCJvcGVyYXRvciI6ImVxIiwicmlnaHRPcGVyYW5kIjoiUjUifSx7ImxlZnRPcGVyYW5kIjoicmVjaXBpZW50Iiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6eyJAaWQiOiJodHRwczovL2Nvb3JkaW5hdG9yLmV4YW1wbGUub3JnL29yZ2FuaXphdGlvbnMvcmVxdWVzdGVyIn19XX1dfQ=="
-
 Instance: grouped-fhir-plan-imaging-report-r5
 InstanceOf: DISExecutionPlan
 Usage: #inline
@@ -306,13 +294,16 @@ Usage: #inline
 * url = "https://dis.example.org/fhir/plans/imaging-report-r5"
 * version = "1.0"
 * name = "GroupedFHIRPlanR5"
-* status = #active
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-execution-plan "Execution plan (payload-specific compiled rules)"
-* date = "2026-11-06T03:00:00Z"
-* content.contentType = #application/ld+json
-* content.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9maGlyL3BsYW5zL2ltYWdpbmctcmVwb3J0LXI1L3ZlcnNpb25zLzEuMCIsInByb2ZpbGUiOiJkaXM6RXhlY3V0aW9uUGxhbiIsImRpczpydWxlU2V0SWQiOiJyZW1vdmUtZGlyZWN0LWxpbmsiLCJkaXM6cGF5bG9hZEJpbmRpbmciOiJESVMtRkhJUi1QYXlsb2FkIiwiZGlzOnBheWxvYWRWZXJzaW9uIjoiUjUiLCJkaXM6cGF5bG9hZFNldCI6ImltYWdpbmctcmVwb3J0LXI1Iiwib2JsaWdhdGlvbiI6W3sidWlkIjoiaHR0cHM6Ly9kaXMuZXhhbXBsZS5vcmcvZmhpci9wbGFucy9pbWFnaW5nLXJlcG9ydC1yNS92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIiwidGFyZ2V0Ijp7IkB0eXBlIjoiQXNzZXRDb2xsZWN0aW9uIiwic291cmNlIjoiaHR0cHM6Ly9zb3VyY2UuZXhhbXBsZS5vcmcvZmhpci9yNC9MaXN0L2dyb3VwZWQtZmhpci1yNS1pbnB1dC1saXN0L19oaXN0b3J5LzEiLCJyZWZpbmVtZW50Ijp7ImxlZnRPcGVyYW5kIjoiZGlzOmZoaXJQYXRoIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6IkRpYWdub3N0aWNSZXBvcnQuc3ViamVjdCJ9fSwiYWN0aW9uIjoiZGlzOnJlbW92ZSIsImRpczpzb3VyY2VSdWxlIjp7IkBpZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9pbWFnaW5nLXJlcG9ydC1zdWJqZWN0LXJlbW92YWwvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9fV0sImRpczpydWxlT3JkZXIiOnsiQGxpc3QiOlt7IkBpZCI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2ZoaXIvcGxhbnMvaW1hZ2luZy1yZXBvcnQtcjUvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9XX19"
-* relatedArtifact[sourcePolicy].resource = "https://governance.example.org/policies/imaging-report-subject-removal|1.0"
-* relatedArtifact[sourcePolicy].extension[evidenceUri].valueUri = "https://governance.example.org/fhir/Library/grouped-fhir-policy-imaging-report-r5/_history/1"
+* status = #executable
+* issued = "2026-11-06T03:00:00Z"
+* identifier.value = "https://dis.example.org/fhir/plans/imaging-report-r5/versions/1.0"
+* authority.identifier.system = "urn:ietf:rfc:3986"
+* authority.identifier.value = "https://dis.example.org/organizations/manager"
+* subject.identifier.system = "urn:ietf:rfc:3986"
+* subject.identifier.value = "https://worker.example.org/organizations/de-identifier"
+* rule.contentAttachment.contentType = #application/ld+json
+* rule.contentAttachment.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9maGlyL3BsYW5zL2ltYWdpbmctcmVwb3J0LXI1L3ZlcnNpb25zLzEuMCIsInByb2ZpbGUiOiJkaXM6RXhlY3V0aW9uUGxhbiIsImRpczpydWxlU2V0SWQiOiJyZW1vdmUtZGlyZWN0LWxpbmsiLCJkaXM6cGF5bG9hZEJpbmRpbmciOiJESVMtRkhJUi1QYXlsb2FkIiwiZGlzOnBheWxvYWRWZXJzaW9uIjoiUjUiLCJkaXM6cGF5bG9hZFNldCI6ImltYWdpbmctcmVwb3J0LXI1Iiwib2JsaWdhdGlvbiI6W3sidWlkIjoiaHR0cHM6Ly9kaXMuZXhhbXBsZS5vcmcvZmhpci9wbGFucy9pbWFnaW5nLXJlcG9ydC1yNS92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIiwidGFyZ2V0Ijp7IkB0eXBlIjoiQXNzZXRDb2xsZWN0aW9uIiwic291cmNlIjoiaHR0cHM6Ly9zb3VyY2UuZXhhbXBsZS5vcmcvZmhpci9yNC9MaXN0L2dyb3VwZWQtZmhpci1yNS1pbnB1dC1saXN0L19oaXN0b3J5LzEiLCJyZWZpbmVtZW50Ijp7ImxlZnRPcGVyYW5kIjoiZGlzOmZoaXJQYXRoIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6IkRpYWdub3N0aWNSZXBvcnQuc3ViamVjdCJ9fSwiYWN0aW9uIjoiZGlzOnJlbW92ZSIsImRpczpzb3VyY2VSdWxlIjp7IkBpZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9pbWFnaW5nLXJlcG9ydC1zdWJqZWN0LXJlbW92YWwvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9fV0sImRpczpydWxlT3JkZXIiOnsiQGxpc3QiOlt7IkBpZCI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2ZoaXIvcGxhbnMvaW1hZ2luZy1yZXBvcnQtcjUvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9XX19"
+* supportingInfo = Reference(https://governance.example.org/fhir/Contract/grouped-fhir-policy-imaging-report-r5/_history/1)
 
 Instance: grouped-fhir-plan-patient-r4
 InstanceOf: DISExecutionPlan
@@ -322,13 +313,16 @@ Usage: #inline
 * url = "https://dis.example.org/fhir/plans/patient-r4"
 * version = "1.0"
 * name = "GroupedFHIRPlanR4"
-* status = #active
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-execution-plan "Execution plan (payload-specific compiled rules)"
-* date = "2026-11-06T03:00:00Z"
-* content.contentType = #application/ld+json
-* content.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9maGlyL3BsYW5zL3BhdGllbnQtcjQvdmVyc2lvbnMvMS4wIiwicHJvZmlsZSI6ImRpczpFeGVjdXRpb25QbGFuIiwiZGlzOnJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsImRpczpwYXlsb2FkQmluZGluZyI6IkRJUy1GSElSLVBheWxvYWQiLCJkaXM6cGF5bG9hZFZlcnNpb24iOiJSNCIsImRpczpwYXlsb2FkU2V0IjoicGF0aWVudC1yNCIsIm9ibGlnYXRpb24iOlt7InVpZCI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2ZoaXIvcGxhbnMvcGF0aWVudC1yNC92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIiwidGFyZ2V0Ijp7IkB0eXBlIjoiQXNzZXRDb2xsZWN0aW9uIiwic291cmNlIjoiaHR0cHM6Ly9zb3VyY2UuZXhhbXBsZS5vcmcvZmhpci9yNC9MaXN0L2dyb3VwZWQtZmhpci1yNC1pbnB1dC9faGlzdG9yeS8xIiwicmVmaW5lbWVudCI6eyJsZWZ0T3BlcmFuZCI6ImRpczpmaGlyUGF0aCIsIm9wZXJhdG9yIjoiZXEiLCJyaWdodE9wZXJhbmQiOiJQYXRpZW50Lm5hbWUifX0sImFjdGlvbiI6ImRpczpyZW1vdmUiLCJkaXM6c291cmNlUnVsZSI6eyJAaWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9fV0sImRpczpydWxlT3JkZXIiOnsiQGxpc3QiOlt7IkBpZCI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2ZoaXIvcGxhbnMvcGF0aWVudC1yNC92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIn1dfX0="
-* relatedArtifact[sourcePolicy].resource = "https://governance.example.org/policies/patient-name-removal|1.0"
-* relatedArtifact[sourcePolicy].extension[evidenceUri].valueUri = "https://governance.example.org/fhir/Library/grouped-fhir-policy-patient-r4/_history/1"
+* status = #executable
+* issued = "2026-11-06T03:00:00Z"
+* identifier.value = "https://dis.example.org/fhir/plans/patient-r4/versions/1.0"
+* authority.identifier.system = "urn:ietf:rfc:3986"
+* authority.identifier.value = "https://dis.example.org/organizations/manager"
+* subject.identifier.system = "urn:ietf:rfc:3986"
+* subject.identifier.value = "https://worker.example.org/organizations/de-identifier"
+* rule.contentAttachment.contentType = #application/ld+json
+* rule.contentAttachment.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2Rpcy5leGFtcGxlLm9yZy9maGlyL3BsYW5zL3BhdGllbnQtcjQvdmVyc2lvbnMvMS4wIiwicHJvZmlsZSI6ImRpczpFeGVjdXRpb25QbGFuIiwiZGlzOnJ1bGVTZXRJZCI6InJlbW92ZS1kaXJlY3QtbGluayIsImRpczpwYXlsb2FkQmluZGluZyI6IkRJUy1GSElSLVBheWxvYWQiLCJkaXM6cGF5bG9hZFZlcnNpb24iOiJSNCIsImRpczpwYXlsb2FkU2V0IjoicGF0aWVudC1yNCIsIm9ibGlnYXRpb24iOlt7InVpZCI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2ZoaXIvcGxhbnMvcGF0aWVudC1yNC92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIiwidGFyZ2V0Ijp7IkB0eXBlIjoiQXNzZXRDb2xsZWN0aW9uIiwic291cmNlIjoiaHR0cHM6Ly9zb3VyY2UuZXhhbXBsZS5vcmcvZmhpci9yNC9MaXN0L2dyb3VwZWQtZmhpci1yNC1pbnB1dC9faGlzdG9yeS8xIiwicmVmaW5lbWVudCI6eyJsZWZ0T3BlcmFuZCI6ImRpczpmaGlyUGF0aCIsIm9wZXJhdG9yIjoiZXEiLCJyaWdodE9wZXJhbmQiOiJQYXRpZW50Lm5hbWUifX0sImFjdGlvbiI6ImRpczpyZW1vdmUiLCJkaXM6c291cmNlUnVsZSI6eyJAaWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9fV0sImRpczpydWxlT3JkZXIiOnsiQGxpc3QiOlt7IkBpZCI6Imh0dHBzOi8vZGlzLmV4YW1wbGUub3JnL2ZoaXIvcGxhbnMvcGF0aWVudC1yNC92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIn1dfX0="
+* supportingInfo = Reference(https://governance.example.org/fhir/Contract/grouped-fhir-policy-patient-r4/_history/1)
 
 Instance: grouped-fhir-policy-imaging-report-r5
 InstanceOf: DISPolicy
@@ -338,16 +332,15 @@ Usage: #inline
 * url = "https://governance.example.org/policies/imaging-report-subject-removal"
 * version = "1.0"
 * name = "GroupedFHIRPolicyR5"
-* status = #active
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-policy "De-identification policy (Semantic-Level or Syntax-Level rules)"
-* date = "2026-11-06T03:00:00Z"
-* content.contentType = #application/ld+json
-* content.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsL3ZlcnNpb25zLzEuMCIsInByb2ZpbGUiOiJkaXM6RGVJZGVudGlmaWNhdGlvblBvbGljeSIsImRpczpyZXByZXNlbnRhdGlvbkxldmVsIjoic3ludGF4IiwiZGlzOnJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwiZGlzOnBheWxvYWRGYW1pbHkiOiJmaGlyIiwiZGlzOnBheWxvYWRWZXJzaW9uIjoiUjUiLCJvYmxpZ2F0aW9uIjpbeyJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsL3ZlcnNpb25zLzEuMCNyZW1vdmUtMDEiLCJ0YXJnZXQiOnsiQHR5cGUiOiJBc3NldENvbGxlY3Rpb24iLCJzb3VyY2UiOiJkaXM6Zmhpci1lbGVtZW50cyIsInJlZmluZW1lbnQiOnsibGVmdE9wZXJhbmQiOiJkaXM6ZmhpclBhdGgiLCJvcGVyYXRvciI6ImVxIiwicmlnaHRPcGVyYW5kIjoiRGlhZ25vc3RpY1JlcG9ydC5zdWJqZWN0In19LCJhY3Rpb24iOiJkaXM6cmVtb3ZlIn1dLCJkaXM6cnVsZVNldHMiOnsiQGxpc3QiOlt7ImRpczpydWxlU2V0SWQiOiJyZW1vdmUtZGlyZWN0LWxpbmsiLCJkaXM6cnVsZU9yZGVyIjp7IkBsaXN0IjpbeyJAaWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsL3ZlcnNpb25zLzEuMCNyZW1vdmUtMDEifV19fV19fQ=="
-* identifier.system = "https://governance.example.org/identifiers/policy"
-* identifier.value = "grouped-fhir-policy-imaging-report-r5"
-* publisher = "Example governance authority"
-* effectivePeriod.start = "2026-01-01"
-* effectivePeriod.end = "2026-12-31"
+* status = #policy
+* issued = "2026-11-06T03:00:00Z"
+* identifier.value = "https://governance.example.org/policies/imaging-report-subject-removal/versions/1.0"
+* rule.contentAttachment.contentType = #application/ld+json
+* rule.contentAttachment.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsL3ZlcnNpb25zLzEuMCIsInByb2ZpbGUiOiJkaXM6RGVJZGVudGlmaWNhdGlvblBvbGljeSIsImRpczpyZXByZXNlbnRhdGlvbkxldmVsIjoic3ludGF4IiwiZGlzOnJldmVyc2liaWxpdHlNb2RlIjoiaXJyZXZlcnNpYmxlIiwiZGlzOnBheWxvYWRGYW1pbHkiOiJmaGlyIiwiZGlzOnBheWxvYWRWZXJzaW9uIjoiUjUiLCJvYmxpZ2F0aW9uIjpbeyJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsL3ZlcnNpb25zLzEuMCNyZW1vdmUtMDEiLCJ0YXJnZXQiOnsiQHR5cGUiOiJBc3NldENvbGxlY3Rpb24iLCJzb3VyY2UiOiJkaXM6Zmhpci1lbGVtZW50cyIsInJlZmluZW1lbnQiOnsibGVmdE9wZXJhbmQiOiJkaXM6ZmhpclBhdGgiLCJvcGVyYXRvciI6ImVxIiwicmlnaHRPcGVyYW5kIjoiRGlhZ25vc3RpY1JlcG9ydC5zdWJqZWN0In19LCJhY3Rpb24iOiJkaXM6cmVtb3ZlIn1dLCJkaXM6cnVsZVNldHMiOnsiQGxpc3QiOlt7ImRpczpydWxlU2V0SWQiOiJyZW1vdmUtZGlyZWN0LWxpbmsiLCJkaXM6cnVsZU9yZGVyIjp7IkBsaXN0IjpbeyJAaWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvaW1hZ2luZy1yZXBvcnQtc3ViamVjdC1yZW1vdmFsL3ZlcnNpb25zLzEuMCNyZW1vdmUtMDEifV19fV19fQ=="
+* authority.identifier.system = "urn:ietf:rfc:3986"
+* authority.identifier.value = "https://governance.example.org/organizations/approval-authority"
+* applies.start = "2026-01-01"
+* applies.end = "2026-12-31"
 
 Instance: grouped-fhir-policy-patient-r4
 InstanceOf: DISPolicy
@@ -357,16 +350,15 @@ Usage: #inline
 * url = "https://governance.example.org/policies/patient-name-removal"
 * version = "1.0"
 * name = "GroupedFHIRPolicyR4"
-* status = #active
-* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type#dis-policy "De-identification policy (Semantic-Level or Syntax-Level rules)"
-* date = "2026-11-06T03:00:00Z"
-* content.contentType = #application/ld+json
-* content.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwvdmVyc2lvbnMvMS4wIiwicHJvZmlsZSI6ImRpczpEZUlkZW50aWZpY2F0aW9uUG9saWN5IiwiZGlzOnJlcHJlc2VudGF0aW9uTGV2ZWwiOiJzZW1hbnRpYyIsImRpczpyZXZlcnNpYmlsaXR5TW9kZSI6ImlycmV2ZXJzaWJsZSIsIm9ibGlnYXRpb24iOlt7InVpZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9wYXRpZW50LW5hbWUtcmVtb3ZhbC92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIiwidGFyZ2V0Ijp7IkB0eXBlIjoiQXNzZXRDb2xsZWN0aW9uIiwic291cmNlIjoiZGlzOnNlbWFudGljLWVsZW1lbnRzIiwicmVmaW5lbWVudCI6eyJsZWZ0T3BlcmFuZCI6ImRpczpzZW1hbnRpY0dyb3VwIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6IkBzdWJqZWN0LW5hbWVzIn19LCJhY3Rpb24iOiJkaXM6cmVtb3ZlIn1dLCJkaXM6cnVsZVNldHMiOnsiQGxpc3QiOlt7ImRpczpydWxlU2V0SWQiOiJyZW1vdmUtZGlyZWN0LWxpbmsiLCJkaXM6cnVsZU9yZGVyIjp7IkBsaXN0IjpbeyJAaWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwvdmVyc2lvbnMvMS4wI3JlbW92ZS0wMSJ9XX19XX19"
-* identifier.system = "https://governance.example.org/identifiers/policy"
-* identifier.value = "grouped-fhir-policy-patient-r4"
-* publisher = "Example governance authority"
-* effectivePeriod.start = "2026-01-01"
-* effectivePeriod.end = "2026-12-31"
+* status = #policy
+* issued = "2026-11-06T03:00:00Z"
+* identifier.value = "https://governance.example.org/policies/patient-name-removal/versions/1.0"
+* rule.contentAttachment.contentType = #application/ld+json
+* rule.contentAttachment.data = "eyJAY29udGV4dCI6Imh0dHBzOi8vcHJvZmlsZXMuaWhlLm5ldC9JVEkvRElTL3NjaGVtYXMvZGlzLW9kcmwtdjEuanNvbmxkIiwiQHR5cGUiOiJTZXQiLCJ1aWQiOiJodHRwczovL2dvdmVybmFuY2UuZXhhbXBsZS5vcmcvcG9saWNpZXMvcGF0aWVudC1uYW1lLXJlbW92YWwvdmVyc2lvbnMvMS4wIiwicHJvZmlsZSI6ImRpczpEZUlkZW50aWZpY2F0aW9uUG9saWN5IiwiZGlzOnJlcHJlc2VudGF0aW9uTGV2ZWwiOiJzeW50YXgiLCJkaXM6cmV2ZXJzaWJpbGl0eU1vZGUiOiJpcnJldmVyc2libGUiLCJkaXM6cGF5bG9hZEZhbWlseSI6ImZoaXIiLCJkaXM6cGF5bG9hZFZlcnNpb24iOiJSNCIsIm9ibGlnYXRpb24iOlt7InVpZCI6Imh0dHBzOi8vZ292ZXJuYW5jZS5leGFtcGxlLm9yZy9wb2xpY2llcy9wYXRpZW50LW5hbWUtcmVtb3ZhbC92ZXJzaW9ucy8xLjAjcmVtb3ZlLTAxIiwidGFyZ2V0Ijp7IkB0eXBlIjoiQXNzZXRDb2xsZWN0aW9uIiwic291cmNlIjoiZGlzOmZoaXItZWxlbWVudHMiLCJyZWZpbmVtZW50Ijp7ImxlZnRPcGVyYW5kIjoiZGlzOmZoaXJQYXRoIiwib3BlcmF0b3IiOiJlcSIsInJpZ2h0T3BlcmFuZCI6IlBhdGllbnQubmFtZSJ9fSwiYWN0aW9uIjoiZGlzOnJlbW92ZSJ9XSwiZGlzOnJ1bGVTZXRzIjp7IkBsaXN0IjpbeyJkaXM6cnVsZVNldElkIjoicmVtb3ZlLWRpcmVjdC1saW5rIiwiZGlzOnJ1bGVPcmRlciI6eyJAbGlzdCI6W3siQGlkIjoiaHR0cHM6Ly9nb3Zlcm5hbmNlLmV4YW1wbGUub3JnL3BvbGljaWVzL3BhdGllbnQtbmFtZS1yZW1vdmFsL3ZlcnNpb25zLzEuMCNyZW1vdmUtMDEifV19fV19fQ=="
+* authority.identifier.system = "urn:ietf:rfc:3986"
+* authority.identifier.value = "https://governance.example.org/organizations/approval-authority"
+* applies.start = "2026-01-01"
+* applies.end = "2026-12-31"
 
 Instance: grouped-fhir-r4-input
 InstanceOf: DISResourceManifest

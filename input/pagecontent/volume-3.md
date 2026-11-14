@@ -21,57 +21,30 @@ Volume 3 defines the content used by the DIS workflow. [Volume 1](volume-1.html)
 
 ## 3:PXX.1 De-Identification Policy
 
-This section defines the structure, delivery, validation, and compilation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Library carrier, delivery modes, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more payload-specific execution plans (see [§3:PXX.2.1](#3pxx21-execution-plan-format)) before dispatching tasks.
+This section defines the structure, delivery, validation, and compilation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Contract carrier, delivery modes, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more payload-specific execution plans (see [§3:PXX.2.1](#3pxx21-execution-plan-format)) before dispatching tasks.
 
-The policy artifact is an HL7 FHIR R4 Library resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
+The policy artifact is an HL7 FHIR R4 Contract resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
 
-**Referenced standards and artifacts.** The [HL7 FHIR R4 Library]({{site.data.fhir.path}}library.html) carries the policy. The draft [DIS Policy profile](StructureDefinition-DIS-Policy.html) and [DIS Library Type CodeSystem](CodeSystem-dis-library-type.html) define its FHIR constraints. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines the policy submission and admission behavior.
+The [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) carries the policy. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines its FHIR constraints. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines the policy submission and admission behavior.
 
 <a name="3pxx21-policy-library-resource-structure"> </a>
 
-### 3:PXX.1.1 Policy Library Resource Structure
+<a name="3pxx11-policy-library-resource-structure"> </a>
 
-A DIS policy is carried as an HL7 FHIR R4 `Library` resource. The Library resource provides versioned metadata about the policy; the policy rules are carried as an [ODRL Set](odrl-content.html#de-identification-policy-set) within `Library.content`. Policies and execution plans both use Library but are distinguished by `Library.type` coding.
+### 3:PXX.1.1 Policy Contract Resource Structure
 
-Table 3:PXX.1.1-1 lists the required Library resource elements for a DIS policy.
+A DIS policy is carried in a profiled FHIR R4 `Contract`. An authorization permission incorporates the approved policy revision by its exact `Contract.url|Contract.version`. The Manager verifies that the Set revision `uid` matches `Contract.identifier.value`. The full [ODRL Policy Set](odrl-content.html#de-identification-policy-set) is carried inline. The same policy revision can be approved by multiple Agreements.
 
-<p id="tPXX.1.1-1" class="tableTitle"><strong>Table 3:PXX.1.1-1: DIS-Policy Library Resource Elements</strong></p>
-
-| Element | Cardinality | Description |
-|---------|-------------|-------------|
-| `Library.url` | 1..1 | Canonical URL identifying this policy |
-| `Library.identifier` | 1..* | Business identifier(s) for the policy |
-| `Library.version` | 1..1 | Version of the policy |
-| `Library.name` | 1..1 | Machine-readable name |
-| `Library.title` | 0..1 | Human-readable title |
-| `Library.status` | 1..1 | `draft`, `active`, or `retired` |
-| `Library.type` | 1..1 | SHALL use coding `https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type\|dis-policy` |
-| `Library.date` | 1..1 | Date the policy was authored or last revised |
-| `Library.publisher` | 1..1 | Policy authority that authored and signed the policy |
-| `Library.description` | 0..1 | Human-readable description of the policy's purpose |
-| `Library.purpose` | 0..1 | Stated purpose (e.g., research de-identification, clinical pseudonymization) |
-| `Library.useContext` | 0..* | Context of use: purpose codes, applicable jurisdictions, applicable data categories |
-| `Library.jurisdiction` | 0..* | Geographic jurisdictions where the policy is applicable |
-| `Library.effectivePeriod` | 1..1 | Period during which the policy is valid; used for currency validation |
-| `Library.relatedArtifact` | 0..* | References to related artifacts (e.g., related policies, derived execution plans) |
-| `Library.content` | 1..1 | Attachment containing the policy ODRL Set |
-| `Library.content.contentType` | 1..1 | SHALL be `application/ld+json` |
-| `Library.content.data` | 1..1 | Base64-encoded policy Set in JSON-LD |
+| Contract element | Cardinality | Description |
+|---|---|---|
+| `id`, `meta.versionId` | 1..1 each | Identify the exact resource revision in a version-specific FHIR reference. |
+| `url`, `version` | 1..1 each | Policy URL and business version. |
+| `identifier` | 1..1 | Set revision `uid`, with system `urn:ietf:rfc:3986`. |
+| `name`, `issued` | 1..1 each | Machine-readable name and issuance timestamp. |
+| `authority` | 1..1 | Organization responsible for issuing the policy. |
+| `status`, `applies` | 1..1 each | Policy lifecycle state and validity period. |
+| `rule.contentAttachment` | 1..1 | Base64-encoded UTF-8 JSON-LD with content type `application/ld+json`. |
 {: .grid}
-
-Table 3:PXX.1.1-2 lists the `Library.type` codings used to distinguish DIS Library artifacts.
-
-<p id="tPXX.1.1-2" class="tableTitle"><strong>Table 3:PXX.1.1-2: DIS Library Type Codings</strong></p>
-
-| Coding | Artifact |
-|--------|----------|
-| `dis-policy` | De-identification policy (Semantic-Level or Syntax-Level rules) |
-| `dis-execution-plan` | Execution plan (payload-specific compiled rules, see [§3:PXX.2.1](#3pxx21-execution-plan-format)) |
-{: .grid}
-
-<div markdown="1" class="stu-note">
-The draft [DIS Policy](StructureDefinition-DIS-Policy.html) and [DIS Execution Plan](StructureDefinition-DIS-ExecutionPlan.html) profiles use the [DIS Library Type CodeSystem](CodeSystem-dis-library-type.html).
-</div>
 
 <a name="transformation-actions"> </a>
 
@@ -123,7 +96,7 @@ Each DIS action code carries a `technique` property that identifies its ISO/IEC 
 | — | — | `keep` | `(element) → element` |
 {: .grid}
 
-ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), cryptographic tools (§9.2 — deterministic, format-preserving, and homomorphic encryption), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE. The [encryption proposal](#encryption-based-patient-pseudonymization) is described below for review.
+ISO/IEC 20889 categories outside the scope of this supplement include statistical tools (§9.1 — sampling, aggregation), anatomization (§9.5), randomization techniques beyond noise addition (§9.7.3 — permutation, §9.7.4 — microaggregation), synthetic data (§9.8), and the formal privacy measurement models (§10 — k-anonymity, l-diversity, t-closeness, differential privacy). Lookup-table-based pseudonymization (ISO §9.4.3.2 — pseudonyms independent of identifying attributes) is supported through lookup-backed `replace` under DIS-REVERSIBLE. The optional [encryption method](#encryption-based-patient-pseudonymization) uses AES-FF1 format-preserving encryption under DIS-REVERSIBLE.
 
 <a name="3pxx132-action-definitions"> </a>
 
@@ -137,7 +110,7 @@ The `remove` action removes the targeted element and all its children from the r
 
 ##### replace
 
-With `parameters.source` set to `lookupTable`, `replace` replaces patient business identifiers in `Patient.identifier` using the [lookup-backed assignment rules](#lookup-backed-assignment). This mode is mutually exclusive with a fixed `value`. It SHALL preserve identifier/reference consistency and SHALL NOT fall back to fixed replacement or hashing when an entry is absent. The following fixed-value behavior applies only when lookup mode is not selected.
+With the `dis:source` action refinement set to `lookupTable`, `replace` replaces patient business identifiers in `Patient.identifier` using the [lookup-backed assignment rules](#lookup-backed-assignment). This mode is mutually exclusive with a fixed `value`. It SHALL preserve identifier/reference consistency and SHALL NOT fall back to fixed replacement or hashing when an entry is absent. The following fixed-value behavior applies only when lookup mode is not selected.
 
 The `replace` action replaces the targeted element's displayable content with the nonempty string specified by the `value` parameter.
 
@@ -206,7 +179,7 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 #### 3:PXX.1.2.3 Patient Identifier Pseudonymization
 
-Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. The proposed third method derives the pseudonym through [deterministic encryption](#encryption-based-patient-pseudonymization) and allows the Manager to decrypt the pseudonym when authorized.
+Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. Optional [AES-FF1 encryption](#encryption-based-patient-pseudonymization) lets the Manager recover the resolved identifier when authorized.
 
 **Salted hash derivation.**
 
@@ -232,9 +205,9 @@ The De-Identifier uses the supplied [lookup table](#3pxx5-reversible-lookup-tabl
 
 <a name="encryption-based-patient-pseudonymization"> </a>
 
-##### Encryption-based derivation (Informative Proposal)
+##### Encryption-based derivation
 
-The proposed third method under DIS-REVERSIBLE uses policy-selected deterministic encryption to generate patient identifier pseudonyms. Within the same authorized linkage scope, independent De-Identifiers would produce the same pseudonym for the same resolved patient identity using the same configuration and key. Before dispatch, the deployment would make the scoped key version available to the De-Identifiers for encryption and to the Manager for authorized decryption. The execution plan identifies the configuration, scope, and key version. See the [draft encryption method and FF1 test vector](draft-encryption-based-pseudonymization.html).
+A reversible policy MAY use the optional `encrypt` action to pseudonymize a selected `Patient.identifier`. The Manager SHALL apply the [AES-FF1 configuration, compilation, and reversal requirements](draft-encryption-based-pseudonymization.html). The De-Identifier SHALL use the approved FF1 configuration and the scoped key version pinned in the compiled [ODRL action](odrl-content.html#action-parameters). A payload set that uses the encryption action SHALL NOT include a supplied lookup table. DIS does not require an implementation declaring DIS-REVERSIBLE to support the optional action.
 
 <a name="3pxx22-policy-rules-json-structure"> </a>
 
@@ -246,7 +219,7 @@ The proposed third method under DIS-REVERSIBLE uses policy-selected deterministi
 
 The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
 
-A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement or salted hashing. Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
+A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement, encryption, salted hashing, or date shifting without an explicit consistency scope. See the [ODRL action parameters](odrl-content.html#action-parameters). Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
 
 The Manager SHALL dispatch each stage after validating all results from the preceding stage. A later stage SHALL receive the validated outputs from the preceding stage, together with any unchanged resources needed for its authorized input set. It SHALL NOT receive the original versions of transformed resources or the preceding stage's protected mappings unless separately required and authorized for its task. The last stage's validated output, including unchanged resources, is the basis for the released set.
 
@@ -278,18 +251,18 @@ A de-identification policy is a reusable knowledge artifact. The same policy may
 
 <a name="approved-policy-access"> </a>
 
-DIS assumes that the De-Identification Requester can read the exact approved policy Library and its rules. The Requester obtains access by implementation-defined means and SHALL declare the canonical URL and version approved for each set. The De-ID Manager SHALL verify that the approved canonical URL and version identify one immutable rules payload, including the linkage scope, rule parameters and stage order. A change to the approved rules requires a new Library version and approval for the data request.
+DIS assumes that the De-Identification Requester can read the exact approved policy Contract and its rules. The Requester obtains access by implementation-defined means and SHALL declare the canonical URL and version approved for each set. The De-ID Manager SHALL verify that the approved canonical URL and version identify one immutable rules payload, including the linkage scope, rule parameters and stage order. A change to the approved rules requires a new Contract version and approval for the data request.
 
-The optional `policyContent` subextension determines how the De-ID Manager obtains the policy Library:
+The optional `policyContent` subextension determines how the De-ID Manager obtains the policy Contract:
 
-**When `policyContent` is present (inline delivery):** The Requester carries the JWS-signed policy Library in a contained [DIS Signed Policy Binary](StructureDefinition-DIS-SignedPolicy.html) with `Binary.contentType = application/jose`. The `policyContent` subextension SHALL reference this Binary by its local fragment identifier. The Manager SHALL reject a reference that does not resolve to a DIS Signed Policy Binary contained in the submitted FHIR R4 `Task`. The JWS lets the Manager detect changes to the policy content carried by the Requester. The De-ID Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model. The JWS payload is the JSON serialization of the Library resource. The JWS header SHALL include:
+**When `policyContent` is present (inline delivery):** The Requester carries the JWS-signed policy Contract in a contained [DIS Signed Policy Binary](StructureDefinition-DIS-SignedPolicy.html) with `Binary.contentType = application/jose`. The `policyContent` subextension SHALL reference this Binary by its local fragment identifier. The Manager SHALL reject a reference that does not resolve to a DIS Signed Policy Binary contained in the submitted FHIR R4 `Task`. The JWS lets the Manager detect changes to the policy content carried by the Requester. The De-ID Manager SHALL verify the JWS signature using a signing key trusted under its configured trust model. The JWS payload is the JSON serialization of the Contract resource. The JWS header SHALL include:
 
 - `alg` — the signing algorithm (e.g., `RS256`, `ES256`)
 - `x5c` or `jwk` — the signing key or certificate chain used by the De-ID Manager to verify the signature under its configured trust model
 
-The De-ID Manager SHALL confirm that `Library.url` and `Library.version` inside the JWS payload match the declared versioned policy canonical. A mismatch indicates the Requester declared one policy but couriered different content; the Manager SHALL reject the job.
+The De-ID Manager SHALL confirm that `Contract.url` and `Contract.version` inside the JWS payload match the declared versioned policy canonical. A mismatch indicates the Requester declared one policy but couriered different content; the Manager SHALL reject the job.
 
-**When `policyContent` is absent (Manager-resolved):** The job submission declares the policy canonical and version. The De-ID Manager SHALL resolve the exact declared policy version by implementation-defined means and verify that the resolved Library URL and version match the declaration. For example:
+**When `policyContent` is absent (Manager-resolved):** The job submission declares the policy canonical and version. The De-ID Manager SHALL resolve the exact declared policy version by implementation-defined means and verify that the resolved Contract URL and version match the declaration. For example:
 
 - When the URL matches a policy managed locally by the De-ID Manager (e.g., provisioned by administrative configuration), the Manager resolves it from its own store.
 - When the URL identifies an externally hosted policy, the Manager retrieves the policy through its implementation-defined trust model (e.g., TLS-protected fetch, mutual TLS, or externally stored JWS artifacts).
@@ -302,12 +275,12 @@ Locally managed policies are trusted by virtue of their administrative provision
 
 #### 3:PXX.1.4.2 Policy Validation
 
-The De-ID Manager SHALL perform the following validation on the resolved policy Library.
+The De-ID Manager SHALL perform the following validation on the resolved policy Contract.
 
 1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy bound by the selected permission in the [Data Request Authorization Agreement](#data-request-authorization).
-2. **Integrity** — confirm that the obtained Library's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
-3. **Schema** — verify the Library conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
-4. **Currency** — verify the current date falls within `Library.effectivePeriod` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
+2. **Integrity** — confirm that the obtained Contract's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Verify the JWS for carried content. For Manager-resolved content, use the deployment's resolution trust model. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
+3. **Schema** — verify the Contract conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
+4. **Currency** — verify the current date falls within `Contract.applies` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
 <a name="3pxx24-policy-compilation"> </a>
 
@@ -315,7 +288,7 @@ The De-ID Manager SHALL perform the following validation on the resolved policy 
 
 ### 3:PXX.1.5 Policy Compilation
 
-Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against the payload binding and assembles the execution plan from the validated policy Library.
+Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against the payload binding and assembles the execution plan from the validated policy Contract.
 
 <a name="3pxx241-semantic-level-compilation"> </a>
 
@@ -339,11 +312,11 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 #### 3:PXX.1.5.2 Assemble the Plan and Check Capabilities
 
-**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted rules. The Manager assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Library resource with `Library.type` coding `dis-execution-plan`.
+**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Contract resource with `Contract.type` coding `dis-execution-plan`.
 
 **Capability verification.** The De-ID Manager verifies that the target De-Identifier's declared capabilities support all action codes and the payload binding and version required by the execution plan. The Manager SHALL NOT dispatch a task with an incompatible execution plan.
 
-For each applicable payload set, each ruleSet produces one execution plan Library, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. Before dispatch, the Manager SHALL populate the execution plan Library's [source policy identity](#execution-plan-source-policy) from the exact approved policy it validated.
+For each applicable payload set, each ruleSet produces one execution plan Contract, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. Before dispatch, the Manager SHALL identify the exact source policy as specified in [Execution Plan Contract Structure](#execution-plan-source-policy).
 
 <a name="3pxx25-policy-lifecycle"> </a>
 
@@ -353,13 +326,7 @@ For each applicable payload set, each ruleSet produces one execution plan Librar
 
 DIS does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 
-The following lifecycle states are supported through `Library.status`:
-
-- `draft` — the policy is under development and SHALL NOT be accepted by the De-ID Manager for job execution
-- `active` — the policy is approved and valid for use within its `effectivePeriod`
-- `retired` — the policy is no longer valid and SHALL NOT be accepted for new jobs
-
-The De-ID Manager SHALL reject a policy with `Library.status` other than `active`. The De-ID Manager SHALL reject a policy whose `Library.effectivePeriod` does not include the current date.
+The De-ID Manager SHALL admit an issued policy with `Contract.status = policy` only while `Contract.applies` covers the current time and the Manager can establish that the policy revision has not been revoked. An authorized, immutable policy version can be reused across jobs.
 
 <a name="execution-plan-content"> </a>
 
@@ -373,39 +340,15 @@ The execution plan is the task-specific artifact produced from a validated polic
 
 ### 3:PXX.2.1 Execution Plan Format
 
-This section defines the structure of DIS-FHIR-Payload execution plans carried within HL7 FHIR R4 Library resources.
+An execution plan is a task-specific FHIR R4 [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html). It carries a compiled [ODRL Set](odrl-content.html#execution-plan-set), uses the Set revision `uid` as its identifier, and carries the Manager in `authority` and the assigned De-Identifier in `subject`, both as Organization references. It supplies `id`, `meta.versionId`, `url`, `version`, `name`, and `issued`. The Set is carried in one inline `rule.contentAttachment` as Base64-encoded UTF-8 JSON-LD with content type `application/ld+json`.
 
 <a name="3pxx141-library-resource-structure"> </a>
 
-#### 3:PXX.2.1.1 Library Resource Structure
-
-A DIS-FHIR-Payload execution plan is carried as a content attachment in an HL7 FHIR R4 `Library` resource. The Library resource provides metadata about the plan; the plan content is a compiled [ODRL Set](odrl-content.html#execution-plan-set).
-
-Table 3:PXX.2.1-1 lists the required Library resource elements.
-
-<p id="tPXX.2.1-1" class="tableTitle"><strong>Table 3:PXX.2.1-1: Execution Plan Library Resource Elements</strong></p>
-
-| Element | Cardinality | Description |
-|---------|-------------|-------------|
-| `Library.url` | 1..1 | Canonical URL identifying this execution plan |
-| `Library.identifier` | 0..* | Business identifiers for the plan |
-| `Library.version` | 1..1 | Version of the execution plan |
-| `Library.name` | 1..1 | Machine-readable name |
-| `Library.title` | 0..1 | Human-readable title |
-| `Library.status` | 1..1 | `draft`, `active`, or `retired` |
-| `Library.type` | 1..1 | SHALL use coding `https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-library-type\|dis-execution-plan` |
-| `Library.date` | 1..1 | Date the plan was compiled |
-| `Library.description` | 0..1 | Human-readable description |
-| `Library.content` | 1..1 | Attachment containing the compiled ODRL Set |
-| `Library.content.contentType` | 1..1 | SHALL be `application/ld+json` |
-| `Library.content.data` | 1..1 | Base64-encoded plan Set in JSON-LD |
-{: .grid}
+#### 3:PXX.2.1.1 Execution Plan Contract Structure
 
 <a name="execution-plan-source-policy"> </a>
 
-**Source policy identity for ITI-x3.** A dispatched DIS Execution Plan Library SHALL include exactly one `Library.relatedArtifact` of type `derived-from` identifying the policy Library that produced the plan. Its `resource` SHALL be the approved policy's canonical URL and nonempty Library version in `canonical|version` form. The same related artifact SHALL carry one [DIS Policy Evidence URI](StructureDefinition-dis-policy-evidence-uri.html) extension. Its `valueUri` SHALL be an absolute, version-specific URI identifying the same approved policy. A version-specific FHIR Library REST URL is one example. The Manager SHALL verify that both values identify the same validated policy version before dispatch.
-
-The De-Identifier SHALL reject a plan before execution if the source policy entry, canonical version, or evidence URI is missing, malformed, or ambiguous. It SHALL copy the supplied evidence URI into `Provenance.policy` for the task. It does not need to retrieve the source policy to produce evidence. The Manager SHALL verify that the returned task evidence names the version-specific URI supplied with the plan before accepting or releasing the result. The evidence URI SHALL NOT contain credentials or temporary access tokens. The Integrated actor may use its local validated policy identity when no ITI-x3 dispatch occurs.
+The plan SHALL identify its source policy with exactly one `Contract.supportingInfo` reference to the Policy Contract, using an absolute HTTPS URL ending in `/Contract/{id}/_history/{vid}`. Before dispatch, the Manager SHALL verify that this reference identifies the exact Policy Contract approved by the selected permission. The Manager SHALL retain the exact authorization Contract revision and permission `uid` with the assignment. The De-Identifier SHALL confirm that the assignment parties match the plan and copy the source policy reference URL into the task's `Provenance.policy`. The De-Identifier can use the reference for evidence without retrieving the policy. The Manager SHALL verify that returned evidence names the same policy version before accepting or releasing the result. The reference SHALL exclude credentials and temporary access tokens.
 
 <a name="3pxx142-execution-plan-json-structure"> </a>
 
@@ -431,7 +374,7 @@ See the [decoded ODRL Execution Plan Set](odrl-content.html#decoded-plan-example
 
 The De-Identifier SHALL ensure that references between retained resources resolve correctly in the de-identified output. In a Bundle, this includes keeping `Bundle.entry.fullUrl` values and internal references consistent with the resource identities in the output. Handle references to removed resources and external references according to the approved policy. The De-Identifier SHALL fail the task without partial output if it cannot produce a valid result under the declared FHIR version and policy.
 
-Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods and the encryption proposal. The output packaging rules govern FHIR resource identities and references.
+Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
 
 <a name="payload-bindings"> </a>
 
@@ -459,7 +402,7 @@ The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.
 | `payloadBinding` | code | Required | Required, matches the assigned job set |
 | `payloadVersion` | code | Required | Required, matches the assigned job set |
 | `manifestFormat` | code | Required | Required for the assigned manifest |
-| `policy` | canonical | Required, use `Library.url\|Library.version` | The execution plan carries the policy identity |
+| `policy` | canonical | Required, use `Contract.url\|Contract.version` | The execution plan carries the policy identity |
 | `policyContent` | Reference | Optional local reference to a contained signed policy Binary | ITI-x1 only |
 | `lookupTable` | Reference | Optional supplied lookup table for this set | Use the separate `lookup-table` input for an assigned lookup |
 {: .grid}
@@ -742,7 +685,7 @@ Table 3:PXX.3.2.2-3 lists the resources that are part of the HL7 FHIR R4 protoco
 | `Provenance` | De-identification evidence |
 | `OperationOutcome` | Error and validation reporting |
 | `Bundle` | Workflow packaging (message, result collection) |
-| `Library` | Policy artifact ([§3:PXX.1.1](#3pxx11-policy-library-resource-structure)) and execution plan carrier ([§3:PXX.2.1](#3pxx21-execution-plan-format)) |
+| `Contract` | Policy artifact ([§3:PXX.1.1](#3pxx11-policy-contract-resource-structure)) and execution plan carrier ([§3:PXX.2.1](#3pxx21-execution-plan-format)) |
 | `CapabilityStatement` | Actor capability declaration |
 {: .grid}
 
@@ -822,7 +765,7 @@ Every completed de-identification task produces an HL7 FHIR R4 Provenance resour
 | 2 | Outcome status | `Provenance.extension[dis-outcome-status]` | Overall task outcome: `complete` or `error` |
 | 3 | Workflow reference | `Provenance.activity` | DIS activity coding; use the audit correlation identifier to associate the specific job or task |
 | 4 | Target identifier | `Provenance.target` | Reference(s) to the de-identified output resource(s) |
-| 5 | Policy-decision reference | `Provenance.policy` | URI identifying the exact validated policy version governing this task. For ITI-x3 tasks, copy the [source policy evidence URI](#execution-plan-source-policy) from the execution plan Library. |
+| 5 | Policy-decision reference | `Provenance.policy` | URI identifying the exact validated policy version governing this task. For ITI-x3 tasks, copy the [source policy evidence URI](#execution-plan-source-policy) from the execution plan Contract. |
 | 6 | RuleSet identifier | `Provenance.extension[dis-ruleset]` | Identifier of the ruleSet that produced this evidence |
 | 7 | Reversibility state | `Provenance.extension[dis-reversibility]` | `irreversible` or `reversible` |
 | 8 | Validation status | `Provenance.extension[dis-validation-status]` | Output validation result: `valid` or `invalid` |
@@ -885,7 +828,7 @@ Table 3:PXX.4-3 lists the elements of each transformation summary entry.
 | Element | Cardinality | Type | Description |
 |---------|-------------|------|-------------|
 | `targetPath` | 1..1 | string | FHIRPath expression identifying the transformed element |
-| `action` | 1..1 | code | Action code applied (from the core action family) |
+| `action` | 1..1 | code | Action code applied from the DIS Transformation Action Value Set |
 | `outcome` | 1..1 | code | `applied`, `skipped` (element not present), or `error` |
 | `ruleId` | 0..1 | string | Identifier of the execution plan rule that triggered this action |
 {: .grid}
@@ -920,7 +863,7 @@ The Requester SHALL use the [exact approved policy](#approved-policy-access) to 
 
 For each set expected to use multiple stages, the Requester SHALL verify that the package contains one staged release record authored by the responding Manager, that its policy identifies the approved version, and that its sequence matches the expected stage and ruleSet IDs in policy order. It SHALL verify that the staged release record covers all and only the selected final outputs. It SHALL also validate the accompanying DIS Evidence and its coverage. The Requester SHALL reject the job result if any required check fails. The evidence checks apply independently of the number of Bundle entries.
 
-The [staged R4 Patient example](Bundle-staged-r4-patient-result.html) shows the final worker's DIS Evidence alongside the Manager's release record. The [approved example policy](Library-staged-patient.html) supplies the expected stage and ruleSet order. In this example, the version-specific evidence URI for the approved policy is `https://governance.example.org/fhir/Library/staged-patient/_history/1`.
+The [staged R4 Patient example](Bundle-staged-r4-patient-result.html) shows the final worker's DIS Evidence alongside the Manager's release record. The [approved example policy](Contract-staged-patient.html) supplies the expected stage and ruleSet order. In this example, the version-specific evidence URI for the approved policy is `https://governance.example.org/fhir/Contract/staged-patient/_history/1`.
 
 <a name="3pxx17-reversible-lookup-table"> </a>
 
@@ -972,10 +915,39 @@ These synthetic, informative FHIR R4 examples accompany the [lookup table bindin
 
 ## 3:PXX.6 Data Request Authorization
 
-The [DIS Data Request Authorization profile](StructureDefinition-DIS-DataRequestAuthorization.html) carries the organizational grant used by ITI-x1. It SHALL contain exactly one inline [DIS ODRL Agreement](#odrl-authorization) in `DocumentReference.content.attachment.data`, encoded as Base64 with `contentType = application/ld+json`. Set `masterIdentifier.system` to `urn:ietf:rfc:3986` and `masterIdentifier.value` to the Agreement's version-specific `uid`. The Requester SHALL send an absolute HTTPS FHIR version-specific reference ending in `/DocumentReference/{id}/_history/{vid}`. The Manager SHALL verify that the resolved resource and version match the reference and that a trusted authority issued the Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued content. See the [decoded ODRL Agreement example](odrl-content.html#decoded-authorization-example).
+The [DIS Data Request Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) carries the organizational grant used by ITI-x1. The Requester SHALL supply an absolute HTTPS FHIR version-specific reference ending in `/Contract/{id}/_history/{vid}`. The Manager SHALL verify that the resolved Contract's `id` and `meta.versionId` match the reference, and that a trusted authority issued the embedded Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued Agreement bytes. See the [decoded ODRL Agreement example](odrl-content.html#decoded-authorization-example).
 
-Before acceptance or synchronous processing the Manager SHALL establish that the grant is currently effective. The Manager SHALL use a trusted status source for the exact Agreement revision. The method for obtaining status is deployment-defined. A historical DocumentReference with `status = current` is insufficient on its own. If status cannot be established, or if the grant is expired, revoked or superseded, the Manager SHALL deny the job. The Manager SHALL check current authorization again before releasing the result, evidence or download access, including on retries and asynchronous retrieval.
+Before acceptance or synchronous processing the Manager SHALL establish that the grant is currently effective. The Manager SHALL use a trusted status source for the exact Agreement revision. The method for obtaining status is deployment-defined. The Manager SHALL establish current effectiveness independently of the historical Contract and its `status`. If status cannot be established, or if the grant is expired, revoked or superseded, the Manager SHALL deny the job. The Manager SHALL check current authorization again before releasing the result, evidence or download access, including on retries and asynchronous retrieval.
 
-For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The Manager SHALL authorize result access only for the named recipient organization through an authenticated caller entitled to retrieve that job under ITI-x1 or ITI-x4, and through any specified result destination. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy.
+For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The Manager SHALL authorize result access only for the named recipient organization through an authenticated caller entitled to retrieve that job under ITI-x1 or ITI-x4, and through any specified result destination. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy. An optional [purpose classification](odrl-content.html#purpose-classification) records the issuer’s ISO/TS 14265:2024 classification. The Manager SHALL evaluate the specific approved purpose IRI in the Agreement.
 
 Before revealing results, the Manager SHALL verify that the time and recipient constraints still apply. It SHALL enforce destination restrictions on both direct and referenced access. When an output service controls retrieval, the Manager SHALL ensure that the service enforces those restrictions and current release authorization for the same result.
+
+<a name="data-request-authorization-contract"> </a>
+
+### 3:PXX.6.1 Data Request Authorization Contract
+
+The Contract SHALL carry one `rule.contentAttachment` with `contentType` set to `application/ld+json` and the complete issued [DIS ODRL Agreement](odrl-content.html#odrl-authorization) in `data` as Base64-encoded UTF-8 JSON-LD. The attachment SHALL omit `url`. The Contract publisher SHALL protect the Contract, its narrative, and its search results under the authorization governing discovery of the embedded Agreement. See [FHIR R4 Contract.rule]({{site.data.fhir.path}}contract-definitions.html#Contract.rule).
+
+The publisher SHALL derive the mirrored fields from the embedded Agreement revision and verify the following mappings before making the Contract available for submission, display or search.
+
+| Contract element | Source and interpretation |
+| --- | --- |
+| `identifier` | Agreement revision `uid`, with `system = urn:ietf:rfc:3986`. |
+| `title` | Display title supplied by the publisher. |
+| `authority` | The common Agreement assigner as an Organization reference. Use the assigner IRI in `Reference.identifier.value` with `system = urn:ietf:rfc:3986`. A literal Organization reference may also be supplied when it identifies the same organization. |
+| `issued` | Issuance timestamp when supplied by the issuing authority. |
+| `term.identifier` | One term per Agreement permission, keyed by the permission `uid` using `system = urn:ietf:rfc:3986`. |
+| [DIS Permission Validity](StructureDefinition-dis-permission-validity.html) on `term` | Exact `inclusiveStart` and `exclusiveEnd` from the permission. The extension preserves the Agreement's exclusive upper bound. FHIR R4 `Period.end` is inclusive. |
+| `term.offer.party` | One Organization reference with role `requester` for the assignee and one with role `result-recipient` for the authorized recipient. Use the same IRI identifier form as for `authority`. |
+| [DIS Approved Purpose](StructureDefinition-dis-approved-purpose.html) on `term` | Exact approved purpose IRI. |
+| [DIS Purpose Classification](StructureDefinition-dis-purpose-classification.html) on `term` | One Coding for each distinct ISO classification code when supplied in the permission. Copy the system, edition, and code. |
+| [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact approved policy URL and version joined by a vertical bar. |
+
+The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. The publisher SHALL correct a Contract that fails verification before making it available for use. The Manager SHALL verify that `Contract.identifier.value` matches the embedded Agreement's `uid`. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
+
+The Manager SHALL use the embedded Agreement to evaluate the job's authorization. The Contract fields that mirror the Agreement support display and search.
+
+FHIR R4 defines [Contract search parameters]({{site.data.fhir.path}}contract.html#search) including `identifier`, `authority`, and `issued`. If the server indexes the logical Organization identifier for `authority`, declare the supported search behavior. Queries on mirrored permission terms, such as approved purpose or policy revision, require separately defined and advertised search parameters. A query that matches a combination of permission fields would need to correlate those fields within the same term.
+
+See the [UC-2 Contract example](Contract-grouped-fhir-authorization-contract.html), the [readable Agreement](odrl-content.html#decoded-authorization-example), and the [Contract verification checks](testplan.html#authorization-contract-validation).

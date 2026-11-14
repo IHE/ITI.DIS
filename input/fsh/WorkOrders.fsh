@@ -69,7 +69,7 @@ Profile: DISSignedPolicy
 Parent: Binary
 Id: DIS-SignedPolicy
 Title: "DIS Signed Policy"
-Description: "Contained JWS-signed policy Library carried in a job submission."
+Description: "Contained JWS-signed policy Contract carried in a job submission."
 * id 1..1
 * contentType = #"application/jose" (exactly)
 * data 1..1
@@ -104,7 +104,7 @@ Description: "FHIR R4 representation of the de-identification job submitted thro
 * input contains authorization 1..1 and payloadSet 1..*
 * input[authorization].type = $DISTaskInput#authorization
 * input[authorization].value[x] 1..1
-* input[authorization].value[x] only Reference(DISDataRequestAuthorization)
+* input[authorization].value[x] only Reference(DISDataRequestAuthorizationContract)
 * input[authorization].value[x].reference 1..1
 * input[authorization] obeys dis-work-order-authorization
 * insert DISWorkOrderPayloadSet
@@ -145,6 +145,8 @@ Description: "FHIR R4 representation of a de-identification task submitted throu
 * input[payloadSet].extension[payloadSet].extension[lookupTable] 0..0
 * input[executionPlan].type = $DISTaskInput#execution-plan
 * input[executionPlan].value[x] only Reference(DISExecutionPlan)
+* input[executionPlan].value[x].reference 1..1
+* input[executionPlan].value[x].reference obeys dis-versioned-contract-reference
 * input[ruleSetId].type = $DISTaskInput#rule-set-id
 * input[ruleSetId].value[x] only string
 * input[stageId].type = $DISTaskInput#stage-id
@@ -171,9 +173,9 @@ Severity: #error
 Expression: "reference.matches('^#[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-work-order-authorization
-Description: "Authorization references the exact version of a DocumentReference using an absolute HTTPS URL."
+Description: "Authorization references the exact version of a DIS Data Request Authorization Contract using an absolute HTTPS URL."
 Severity: #error
-Expression: "value.ofType(Reference).reference.matches('^https://[^?# ]+/DocumentReference/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
+Expression: "value.ofType(Reference).reference.matches('^https://[^?# ]+/Contract/[A-Za-z0-9.-]{1,64}/_history/[A-Za-z0-9.-]{1,64}$')"
 
 Invariant: dis-absolute-iri
 Description: "The identifier is an absolute IRI."

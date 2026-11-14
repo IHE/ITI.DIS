@@ -14,10 +14,15 @@
   <h2 id="root">{{modelType}}: {{profileTitle}} - Examples</h2>
 {% include fragment-simpletable.html %}
 
-   <!-- insert intro if present -->
-    {% include fragment-intro.html type='{{[type]}}' id='{{[id]}}' %}
-
 {% assign basepath = page.path | replace: '-examples.html', '.html' %}
+{% assign profileIntro = site.data.pages[basepath].intro %}
+{% if profileIntro and site.data.pages[basepath].intro-type == 'md' %}
+  {% capture profileIntroContent %}{% include {{profileIntro}} type='{{[type]}}' id='{{[id]}}' %}{% endcapture %}
+  {{ profileIntroContent | markdownify }}
+{% else %}
+  {% include fragment-intro.html type='{{[type]}}' id='{{[id]}}' %}
+{% endif %}
+
 {% if site.data.pages[basepath].examples.size > 0 %}
   <p>Examples for the {{profileTitle}} profile.</p>
   <table style="grid">

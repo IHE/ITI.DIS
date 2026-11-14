@@ -13,7 +13,8 @@ Description: "One compatible payload binding, release, input manifest format, re
     inputFormat 1..1 and
     resultFormat 1..1 and
     reversibilityMode 1..1 and
-    action 1..*
+    action 1..* and
+    encryptionConfiguration 0..*
 * extension[binding].value[x] 1..1
 * extension[binding].value[x] only code
 * extension[release].value[x] 1..1
@@ -26,6 +27,21 @@ Description: "One compatible payload binding, release, input manifest format, re
 * extension[reversibilityMode].value[x] only code
 * extension[action].value[x] 1..1
 * extension[action].value[x] only code
+* extension[encryptionConfiguration].value[x] 1..1
+* extension[encryptionConfiguration].value[x] only uri
+* extension[encryptionConfiguration].value[x] obeys dis-ff1-configuration-uri
+* obeys dis-ff1-capability
+
+Invariant: dis-ff1-capability
+Description: "The encrypt action requires reversible mode and at least one supported configuration revision. Other combinations omit encryption configurations."
+Severity: #error
+Expression: "(extension.where(url = 'action').value.where($this = 'encrypt').exists() = extension.where(url = 'encryptionConfiguration').exists()) and (extension.where(url = 'encryptionConfiguration').empty() or extension.where(url = 'reversibilityMode').value = 'reversible') and extension.where(url = 'encryptionConfiguration').value.isDistinct()"
+
+Invariant: dis-ff1-configuration-uri
+Description: "An AES-FF1 configuration revision uses an absolute HTTPS IRI."
+Severity: #error
+Expression: "$this.matches('^https://[^?# ]+(/[^?# ]+)+$')"
+
 
 Extension: DISAsyncSupport
 Id: dis-async-support
