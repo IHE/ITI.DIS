@@ -203,7 +203,7 @@ This Agreement is the decoded attachment in the `grouped-fhir-permit` DocumentRe
 
 ### De-Identification Policy Set Example
 
-This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Library. The `patient-r4` permission approves version `1.0` of that Library. The policy selects `Patient.name` for removal.
+This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Library. The `patient-r4` permission approves version `1.0` of that Library. The policy requires removing the `@subject-names` semantic group. It can be reused wherever an approved binding defines that group.
 
 ```json
 {
@@ -211,20 +211,18 @@ This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Polic
   "@type": "Set",
   "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0",
   "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "syntax",
+  "dis:representationLevel": "semantic",
   "dis:reversibilityMode": "irreversible",
-  "dis:payloadFamily": "fhir",
-  "dis:payloadVersion": "R4",
   "obligation": [
     {
       "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:fhir-elements",
+        "source": "dis:semantic-elements",
         "refinement": {
-          "leftOperand": "dis:fhirPath",
+          "leftOperand": "dis:semanticGroup",
           "operator": "eq",
-          "rightOperand": "Patient.name"
+          "rightOperand": "@subject-names"
         }
       },
       "action": "dis:remove"
@@ -251,7 +249,7 @@ This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Polic
 
 ### Execution Plan Set Example
 
-This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Execution Plan Library referenced by the [ITI-x3 de-identification task](Task-grouped-fhir-task-patient-r4.html). It binds the selector to the assigned manifest and links the compiled obligation to the source policy rule.
+This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Execution Plan Library referenced by the [ITI-x3 de-identification task](Task-grouped-fhir-task-patient-r4.html). The Manager resolves `@subject-names` to `Patient.name` using the [R4 semantic group binding](volume-3.html#3pxx3213-semantic-group-bindings). The plan binds that concrete FHIRPath selector to the assigned manifest and links the compiled obligation to the source policy rule.
 
 ```json
 {

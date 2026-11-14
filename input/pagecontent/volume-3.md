@@ -258,7 +258,7 @@ Within a stage, the Manager SHALL process ruleSets in the listed order for any i
 
 <a name="3pxx131-policy-rules-examples"> </a>
 
-See the [decoded ODRL Policy Set](odrl-content.html#decoded-policy-example) for a Syntax-Level policy used in UC-2. See also the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-policy), [UC-3 reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy), and [UC-4 signed Syntax-Level policy](examples-cloud-decision-support.html#approved-policy-and-delivery) in their respective use-case examples.
+See the [decoded ODRL Policy Set](odrl-content.html#decoded-policy-example) for the Semantic-Level policy used in UC-2. It selects `@subject-names`, which the Manager resolves to `Patient.name` in the R4 execution plan. See also the [UC-1 staged Bulk FHIR policy](examples-bulk-fhir-cohort.html#approved-policy), [UC-3 reversible Semantic-Level policy](examples-reversible-pathology.html#approved-reversible-policy), and [UC-4 signed Syntax-Level policy](examples-cloud-decision-support.html#approved-policy-and-delivery) in their respective use-case examples.
 
 <a name="3pxx23-policy-delivery-and-validation"> </a>
 
