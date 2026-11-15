@@ -2,6 +2,8 @@ Volume 3 defines the DIS content artifacts, their carriers, and their validation
 
 The approved data request identifies the policy and covered inputs. The De-ID Manager compiles the policy for the declared payload binding and release. The De-Identifier applies the plan to the assigned content and returns validated output and evidence. The Integrated actor performs those functions locally when it claims standalone conformance.
 
+<a name="markdown-toc"> </a>
+
 | Content specification | Bindings and related content | Worked example |
 |---|---|---|
 | [Data Request Authorization](volume-3-authorization.html#data-request-authorization) | [Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) and [ODRL Agreement](odrl-content.html#odrl-authorization) | [UC-2 decoded Agreement](examples-odrl.html#decoded-authorization-example) |
