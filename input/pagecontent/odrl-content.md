@@ -1,4 +1,4 @@
-This page is the normative Volume 3 binding for the decoded DIS Agreement, Policy Set, and Execution Plan Set. The [Volume 3 overview](volume-3.html) links to the FHIR Contracts that carry them and to the applicable validation rules. Worked examples appear in the informative section below.
+This page is the normative Volume 3 binding for the decoded DIS Agreement, Policy Set, and Execution Plan Set. The [Volume 3 overview](volume-3.html) links to the FHIR Contracts that carry them and to the applicable validation rules. See the [informative ODRL worked examples](examples-odrl.html).
 
 ## Common JSON-LD requirements
 
@@ -26,10 +26,10 @@ The [DIS ODRL vocabulary, version 1 (RDF Turtle)](schemas/dis-odrl-v1.ttl) decla
 | Data Request Authorization | `dis:deIdentify` in a permission | Use the Agreement properties and constraint operands defined in [Agreement for organizational data request authorization](#odrl-authorization). |
 | Semantic-Level or Syntax-Level Policy | `dis:remove`, `dis:replace`, `dis:keep`, `dis:hash`, `dis:truncate-date`, `dis:date-shift`, `dis:round`, `dis:truncate`, and `dis:redact` in obligations. A reversible policy may use `dis:encrypt` when the AES-FF1 capability applies. | Use policy representation, rule sets, and optional stages. Use `dis:semanticGroup` for Semantic-Level selectors or the binding's concrete selector for Syntax-Level selectors. |
 | Execution Plan for a Semantic-Level or Syntax-Level Policy | The same nine core actions and optional `dis:encrypt` in obligations | Use concrete selectors, the assigned payload set, the explicit compiled rule order, and `dis:sourceRule`. A compiled salted hash rule uses the resolved linkage scope. |
-| DPV–ODRL Policy and Execution Plan | The nine core actions in obligations | Use the [DPV–ODRL policy profile](draft-dpv-odrl-policy.html) for the policy targets and mapping revision rules. The plan uses concrete selectors. |
+| DPV–ODRL Policy and Execution Plan | The nine core actions in obligations | Use the [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) for the policy targets and mapping revision rules. The plan uses concrete selectors. |
 {: .grid}
 
-The action and procedure definitions in [Volume 3](volume-3.html#transformation-actions) apply to both Sets. Vocabulary declarations describe terms and their relationships. Receivers use the exact action IRIs allowed by the declared DIS profile when validating an exchange.
+The action and procedure definitions in [Volume 3](volume-3-policy.html#transformation-actions) apply to both Sets. Vocabulary declarations describe terms and their relationships. Receivers use the exact action IRIs allowed by the declared DIS profile when validating an exchange.
 
 <a name="odrl-authorization"> </a>
 
@@ -43,11 +43,11 @@ The Agreement contains an immutable `uid`, a `dis:approvedRequest` identifying t
 | `dateTime` | `gteq` and `lt` | Exactly one of each operator with an `xsd:dateTime` value in UTC. Start is inclusive and end is exclusive. Start SHALL precede end. |
 | `dis:approvedPolicy` | `eq` | One string in `Contract.url\|Contract.version` form. |
 | `dis:payloadBinding`, `dis:payloadVersion` | `eq` | One string for each operand, matching the applicable DIS payload binding and release. |
-| `recipient` | `eq` | One IRI reference identifying the organization entitled to receive results. All permissions selected for the same job identify the same organization under the [recipient eligibility rules](volume-3.html#job-result-recipient). |
-| `dis:resultDestination` | `eq` | Optional. One IRI reference identifying an authorized HTTPS service base. Every referenced result endpoint and redirect SHALL remain within that service boundary. See [bulk job result downloads](volume-3.html#bulk-result-download-authorization) for enforcement on the download path. |
+| `recipient` | `eq` | One IRI reference identifying the organization entitled to receive results. All permissions selected for the same job identify the same organization under the [recipient eligibility rules](volume-3-authorization.html#job-result-recipient). |
+| `dis:resultDestination` | `eq` | Optional. One IRI reference identifying an authorized HTTPS service base. Every referenced result endpoint and redirect SHALL remain within that service boundary. See [bulk job result downloads](volume-3-fhir-delivery.html#bulk-result-download-authorization) for enforcement on the download path. |
 {: .grid}
 
-A permission SHALL carry the conditions above in a `constraint` array and all conditions SHALL hold. An IRI reference in a right operand uses the explicit `{"@id": "..."}` form. The scope identified by the target defines eligible data sources and selection criteria or identifies exact eligible resources or files and versions. The scope can precede extraction. The Manager SHALL verify the scope and its binding to the grant under the [admission and release rules](volume-3.html#data-request-authorization). An optional `dis:parentAliasRecipient` IRI reference on a permission identifies a worker organization authorized to receive the alias for that set. Absence of the property grants no such disclosure.
+A permission SHALL carry the conditions above in a `constraint` array and all conditions SHALL hold. An IRI reference in a right operand uses the explicit `{"@id": "..."}` form. The scope identified by the target defines eligible data sources and selection criteria or identifies exact eligible resources or files and versions. The scope can precede extraction. The Manager SHALL verify the scope and its binding to the grant under the [admission and release rules](volume-3-authorization.html#data-request-authorization). An optional `dis:parentAliasRecipient` IRI reference on a permission identifies a worker organization authorized to receive the alias for that set. Absence of the property grants no such disclosure.
 
 ### Purpose classification
 
@@ -77,13 +77,13 @@ The De-ID Manager SHALL validate the object when present. The object SHALL conta
 
 Both Sets carry `obligation` as a nonempty array of ODRL Duty rules. Each obligation has a unique absolute IRI `uid`, exactly one `target` and one `action`. An obligation SHALL NOT carry its own assigner or assignee. The eligible role performs each obligation. The Manager compiles the Policy obligations, and the De-Identifier or Integrated actor applies the compiled Plan obligations to its assigned inputs.
 
-The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI. A DPV–ODRL Policy SHALL use the three refinements defined in its [Policy rules](draft-dpv-odrl-policy.html#policy-rules). Other policies and all plans use one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the [concrete FHIRPath selector](volume-3.html#fhirpath-element-addressing) as a string. For a plan, use the same concrete selector operand for the binding. Every obligation in the plan SHALL use the same manifest source IRI. Use the URI derived from the exact inline bytes or the assigned manifest URL, as specified under [assigned input verification](volume-3.html#assigned-input-verification). The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
+The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI. A DPV–ODRL Policy SHALL use the three refinements defined in its [Policy rules](volume-3-policy.html#policy-rules). Other policies and all plans use one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the [concrete FHIRPath selector](volume-3-fhir-addressing.html#fhirpath-element-addressing) as a string. For a plan, use the same concrete selector operand for the binding. Every obligation in the plan SHALL use the same manifest source IRI. Use the URI derived from the exact inline bytes or the assigned manifest URL, as specified under [assigned input verification](volume-3-payload-bindings.html#assigned-input-verification). The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
 
 ### Action parameters
 
 In the RDF vocabulary, `dis:actionParameter` links each action to its available refinement operands. The links identify parameters allowed in the policy, the execution plan, or both. This property is vocabulary metadata only. In JSON-LD action expressions, send parameter values using `refinement` and apply the profile-specific requirements below.
 
-The action SHALL be one of the [DIS transformation action IRIs](volume-3.html#transformation-actions). For `remove`, `keep`, or `redact`, encode `action` as the action IRI string. For the other actions, `action` SHALL be an object with one `rdf:value` IRI reference such as `{"@id":"dis:truncate-date"}` and a nonempty `refinement` array. Use one refinement per supplied parameter. Each refinement SHALL contain exactly one `leftOperand` from the table, the operator `eq`, and the listed `rightOperand` value form. The order of action refinements has no significance. Receivers SHALL reject duplicate operands, missing required parameters, extraneous parameters, and invalid operators, types, or values.
+The action SHALL be one of the [DIS transformation action IRIs](volume-3-policy.html#transformation-actions). For `remove`, `keep`, or `redact`, encode `action` as the action IRI string. For the other actions, `action` SHALL be an object with one `rdf:value` IRI reference such as `{"@id":"dis:truncate-date"}` and a nonempty `refinement` array. Use one refinement per supplied parameter. Each refinement SHALL contain exactly one `leftOperand` from the table, the operator `eq`, and the listed `rightOperand` value form. The order of action refinements has no significance. Receivers SHALL reject duplicate operands, missing required parameters, extraneous parameters, and invalid operators, types, or values.
 
 | Action | Policy rule parameters | Compiled plan rule parameters |
 | --- | --- | --- |
@@ -91,300 +91,36 @@ The action SHALL be one of the [DIS transformation action IRIs](volume-3.html#tr
 | `replace` | Exactly one of `dis:value` (nonempty string) or `dis:source` (the string `lookupTable`). The lookup mode requires a reversible policy and its authorized linkage scope. | Same selection. In lookup mode, ITI-x3 carries the assigned lookup table reference in the `lookup-table` input. |
 | `hash` | `dis:mode` (string `salted` or `unsalted`) and `dis:algorithm` (string `SHA-256`). Supply `dis:pseudonymSystem` as an IRI reference for `Identifier` targets. Patient business identifiers require `salted`. Salted hashing requires a policy-level linkage scope. | Preserve the approved parameters. For `salted`, include the compiled `dis:identity-linkage-scope` refinement. For `unsalted`, omit that refinement. |
 | `truncate-date` | `dis:precision` (string `year` or `year-month`). | Same parameter. |
-| `date-shift` | `dis:maxOffsetDays` (nonnegative JSON integer) and optional `dis:scope` (nonblank consistency scope string). A policy-level linkage scope is required if the rule omits `dis:scope`. | Preserve `dis:maxOffsetDays` and any explicit `dis:scope`. If the rule omits `dis:scope`, the Manager SHALL ensure the applicable date-shift capability binds the assignment to the resolved policy linkage scope. Apply the [date-shift capability rules](volume-3.html#date-shift). |
+| `date-shift` | `dis:maxOffsetDays` (nonnegative JSON integer) and optional `dis:scope` (nonblank consistency scope string). A policy-level linkage scope is required if the rule omits `dis:scope`. | Preserve `dis:maxOffsetDays` and any explicit `dis:scope`. If the rule omits `dis:scope`, the Manager SHALL ensure the applicable date-shift capability binds the assignment to the resolved policy linkage scope. Apply the [date-shift capability rules](volume-3-policy.html#date-shift). |
 | `round` | `dis:step` (positive JSON number). | Same parameter. |
 | `truncate` | `dis:length` (positive JSON integer). | Same parameter. |
 | `encrypt` | Reversible mode only. Require `dis:encryptionMethod` (string `AES-FF1`) and `dis:configurationVersion` (IRI reference to the immutable approved configuration). The Set SHALL declare the authorized linkage scope. | Preserve the two policy parameters and require `dis:identity-linkage-scope` (resolved scope), `dis:pseudonymSystem` (IRI reference equal to the configured output system), and `dis:keyVersion` (nonblank string identifying the provisioned key version). See the [AES-FF1 binding](draft-encryption-based-pseudonymization.html). |
 {: .grid}
 
-For a `dis:pseudonymSystem` value use `{"@id":"..."}` with an absolute IRI. For linkage scope use a JSON-LD JSON literal of the form `{"@type":"@json","@value":{"type":"...","identifier":{"system":"...","value":"..."}}}`. Use one of the [DIS linkage scope codes](volume-3.html#3pxx13-policy-rules-json-structure), an absolute IRI for `system`, and a nonblank string for `value`. A policy scope with type `job` SHALL omit `identifier`. A policy scope with another type and every compiled salted hash or encryption scope SHALL include it. Keep salts, encryption keys, local key handles, date-shift seeds, and actual offsets in the protected mechanisms defined by the applicable capability.
+For a `dis:pseudonymSystem` value use `{"@id":"..."}` with an absolute IRI. For linkage scope use a JSON-LD JSON literal of the form `{"@type":"@json","@value":{"type":"...","identifier":{"system":"...","value":"..."}}}`. Use one of the [DIS linkage scope codes](volume-3-policy.html#3pxx13-policy-rules-json-structure), an absolute IRI for `system`, and a nonblank string for `value`. A policy scope with type `job` SHALL omit `identifier`. A policy scope with another type and every compiled salted hash or encryption scope SHALL include it. Keep salts, encryption keys, local key handles, date-shift seeds, and actual offsets in the protected mechanisms defined by the applicable capability.
 
 ### De-Identification Policy Set
 
-Both policy profiles carry `dis:reversibilityMode` (`irreversible` or `reversible`) and the `obligation` array. A `dis:DeIdentificationPolicy` also carries `dis:representationLevel` (`semantic` or `syntax`). A `disdpv:Policy` uses the fields and target rules in the [DPV–ODRL binding](draft-dpv-odrl-policy.html#policy-rules). Syntax-Level content SHALL also declare `dis:payloadFamily` (`fhir` for DIS-FHIR-Payload) and `dis:payloadVersion` (`R4` or `R5` for FHIR). Semantic-Level content SHALL omit those two fields. `dis:identity-linkage-scope` carries the policy linkage scope when required by the selected actions.
+Both policy profiles carry `dis:reversibilityMode` (`irreversible` or `reversible`) and the `obligation` array. A `dis:DeIdentificationPolicy` also carries `dis:representationLevel` (`semantic` or `syntax`). A `disdpv:Policy` uses the fields and target rules in the [DPV–ODRL binding](volume-3-policy.html#policy-rules). Syntax-Level content SHALL also declare `dis:payloadFamily` (`fhir` for DIS-FHIR-Payload) and `dis:payloadVersion` (`R4` or `R5` for FHIR). Semantic-Level content SHALL omit those two fields. `dis:identity-linkage-scope` carries the policy linkage scope when required by the selected actions.
 
 `dis:ruleSets` is an explicit `{"@list":[...]}` with one entry per rule set in processing order. Each entry carries a unique `dis:ruleSetId` string, optional `dis:description` string and a nonempty `dis:ruleOrder` list of `{"@id":"..."}` references to the Set's obligations in first-match order. Every obligation SHALL occur in exactly one list, exactly once. No processing order is inferred from the `obligation` array.
 
-Optional `dis:stages` is an explicit nonempty `@list` in dispatch order. Each entry has a unique `dis:stageId` string, optional `dis:description` string, and a nonempty `dis:ruleSetRefs` list of rule-set ID strings. Each defined rule set SHALL be referenced exactly once across the stages. When stages are present, the stage lists determine the effective rule-set execution order. Apply [Volume 3 compilation](volume-3.html#policy-compilation) and stage processing requirements.
+Optional `dis:stages` is an explicit nonempty `@list` in dispatch order. Each entry has a unique `dis:stageId` string, optional `dis:description` string, and a nonempty `dis:ruleSetRefs` list of rule-set ID strings. Each defined rule set SHALL be referenced exactly once across the stages. When stages are present, the stage lists determine the effective rule-set execution order. Apply [Volume 3 compilation](volume-3-execution-plan.html#policy-compilation) and stage processing requirements.
 
 ### Execution Plan Set
 
-The Manager SHALL use `disdpv:ExecutionPlan` when compiling a `disdpv:Policy`. That plan SHALL contain the mapping revision specified by the [DPV–ODRL compilation rules](draft-dpv-odrl-policy.html#compilation-and-evidence). Use `dis:ExecutionPlan` when compiling a `dis:DeIdentificationPolicy`.
+The Manager SHALL use `disdpv:ExecutionPlan` when compiling a `disdpv:Policy`. That plan SHALL contain the mapping revision specified by the [DPV–ODRL compilation rules](volume-3-execution-plan.html#compilation-and-evidence). Use `dis:ExecutionPlan` when compiling a `dis:DeIdentificationPolicy`.
 
-The plan carries `dis:ruleSetId`, `dis:payloadSet`, `dis:payloadBinding` and `dis:payloadVersion` as strings equal to the corresponding task inputs. It also carries `dis:stageId` as a string exactly when the task has a stage ID. The root `dis:ruleOrder` is a nonempty explicit `@list` of IRI references to the compiled obligations. Each obligation SHALL be listed exactly once and SHALL carry a `dis:sourceRule` IRI reference to the original policy obligation. A source obligation can produce several compiled obligations when a DPV target or semantic group expands to several paths. The Manager SHALL preserve original order and the binding's expansion order. The De-Identifier SHALL validate the Set, and apply the [execution rules in Volume 3](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation).
+The plan carries `dis:ruleSetId`, `dis:payloadSet`, `dis:payloadBinding` and `dis:payloadVersion` as strings equal to the corresponding task inputs. It also carries `dis:stageId` as a string exactly when the task has a stage ID. The root `dis:ruleOrder` is a nonempty explicit `@list` of IRI references to the compiled obligations. Each obligation SHALL be listed exactly once and SHALL carry a `dis:sourceRule` IRI reference to the original policy obligation. A source obligation can produce several compiled obligations when a DPV target or semantic group expands to several paths. The Manager SHALL preserve original order and the binding's expansion order. The De-Identifier SHALL validate the Set, and apply the [execution rules in Volume 3](volume-3-execution-plan.html#3pxx212-execution-plan-json-structure-and-rule-evaluation).
 
-When any externally retrieved input relies on digest verification, the Set SHALL include a nonempty `dis:inputDigests` array. Each item has exactly one `dis:inputUrl` as an `{"@id":"..."}` reference to the original assigned HTTPS URL and one `dis:sha256` as a 64-character lowercase hexadecimal string. A URL SHALL occur at most once. Include only URLs required for this assignment and omit the array when there are no externally retrieved inputs with digests. The array has no processing order. Apply the [input verification rules](volume-3.html#assigned-input-verification) to the manifest and to all required external objects reached through it.
+When any externally retrieved input relies on digest verification, the Set SHALL include a nonempty `dis:inputDigests` array. Each item has exactly one `dis:inputUrl` as an `{"@id":"..."}` reference to the original assigned HTTPS URL and one `dis:sha256` as a 64-character lowercase hexadecimal string. A URL SHALL occur at most once. Include only URLs required for this assignment and omit the array when there are no externally retrieved inputs with digests. The array has no processing order. Apply the [input verification rules](volume-3-payload-bindings.html#assigned-input-verification) to the manifest and to all required external objects reached through it.
 
-## Examples (Informative)
+## Worked examples
 
-These JSON-LD examples show the decoded attachments for the [mixed-release exchange](examples-grouped-fhir-job.html#grouped-fhir-submission). The FHIR resources carry the same JSON-LD as Base64 in their attachment data fields. The policy and plan below follow the R4 clinical set.
-
-<a name="decoded-authorization-example"> </a>
-
-### Data Request Authorization Agreement Example
-
-This Agreement is the decoded attachment in the [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorization-contract.html). It includes both permissions selected by the [ITI-x1 de-identification job](Task-grouped-fhir-job-request.html). Both permissions classify the approved project to develop a healthcare algorithm under code `4.2` (health technology innovation).
-
-```json
-{
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
-  "@type": "Agreement",
-  "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/2",
-  "profile": "dis:DataRequestAuthorization",
-  "dis:approvedRequest": {
-    "@id": "https://governance.example.org/requests/grouped-fhir-job-request/versions/1"
-  },
-  "permission": [
-    {
-      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/2#patient-r4",
-      "assigner": "https://governance.example.org/organizations/approval-authority",
-      "assignee": "https://coordinator.example.org/organizations/requester",
-      "action": "dis:deIdentify",
-      "target": "https://governance.example.org/scopes/grouped-fhir-permit/patient-r4/versions/1",
-      "constraint": [
-        {
-          "leftOperand": "purpose",
-          "operator": "eq",
-          "rightOperand": {
-            "@id": "https://governance.example.org/purposes/multimodal-research"
-          }
-        },
-        {
-          "leftOperand": "dateTime",
-          "operator": "gteq",
-          "rightOperand": {
-            "@value": "2026-01-01T00:00:00Z",
-            "@type": "xsd:dateTime"
-          }
-        },
-        {
-          "leftOperand": "dateTime",
-          "operator": "lt",
-          "rightOperand": {
-            "@value": "2028-01-01T00:00:00Z",
-            "@type": "xsd:dateTime"
-          }
-        },
-        {
-          "leftOperand": "dis:approvedPolicy",
-          "operator": "eq",
-          "rightOperand": "https://governance.example.org/policies/patient-name-removal|1.0"
-        },
-        {
-          "leftOperand": "dis:payloadBinding",
-          "operator": "eq",
-          "rightOperand": "DIS-FHIR-Payload"
-        },
-        {
-          "leftOperand": "dis:payloadVersion",
-          "operator": "eq",
-          "rightOperand": "R4"
-        },
-        {
-          "leftOperand": "recipient",
-          "operator": "eq",
-          "rightOperand": {
-            "@id": "https://coordinator.example.org/organizations/requester"
-          }
-        }
-      ],
-      "dis:parentAliasRecipient": {
-        "@id": "https://dis.example.org/organizations/example-worker"
-      },
-      "dis:purposeClassification": {
-        "dis:classificationSystem": {
-          "@id": "https://www.iso.org/standard/83447.html"
-        },
-        "dis:classificationVersion": "2024",
-        "dis:classificationCode": [
-          "4.2"
-        ]
-      }
-    },
-    {
-      "uid": "https://governance.example.org/permits/grouped-fhir-permit/versions/2#imaging-report-r5",
-      "assigner": "https://governance.example.org/organizations/approval-authority",
-      "assignee": "https://coordinator.example.org/organizations/requester",
-      "action": "dis:deIdentify",
-      "target": "https://governance.example.org/scopes/grouped-fhir-permit/imaging-report-r5/versions/1",
-      "constraint": [
-        {
-          "leftOperand": "purpose",
-          "operator": "eq",
-          "rightOperand": {
-            "@id": "https://governance.example.org/purposes/multimodal-research"
-          }
-        },
-        {
-          "leftOperand": "dateTime",
-          "operator": "gteq",
-          "rightOperand": {
-            "@value": "2026-01-01T00:00:00Z",
-            "@type": "xsd:dateTime"
-          }
-        },
-        {
-          "leftOperand": "dateTime",
-          "operator": "lt",
-          "rightOperand": {
-            "@value": "2028-01-01T00:00:00Z",
-            "@type": "xsd:dateTime"
-          }
-        },
-        {
-          "leftOperand": "dis:approvedPolicy",
-          "operator": "eq",
-          "rightOperand": "https://governance.example.org/policies/imaging-report-subject-removal|1.0"
-        },
-        {
-          "leftOperand": "dis:payloadBinding",
-          "operator": "eq",
-          "rightOperand": "DIS-FHIR-Payload"
-        },
-        {
-          "leftOperand": "dis:payloadVersion",
-          "operator": "eq",
-          "rightOperand": "R5"
-        },
-        {
-          "leftOperand": "recipient",
-          "operator": "eq",
-          "rightOperand": {
-            "@id": "https://coordinator.example.org/organizations/requester"
-          }
-        }
-      ],
-      "dis:purposeClassification": {
-        "dis:classificationSystem": {
-          "@id": "https://www.iso.org/standard/83447.html"
-        },
-        "dis:classificationVersion": "2024",
-        "dis:classificationCode": [
-          "4.2"
-        ]
-      }
-    }
-  ]
-}
-```
-
-<a name="decoded-policy-example"> </a>
-
-### De-Identification Policy Set Example
-
-This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Contract. The `patient-r4` permission approves version `1.0` of that Contract. The policy selects `@subject-names` for removal. The Manager expands the group to `Patient.name` for the R4 clinical set.
-
-```json
-{
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
-  "@type": "Set",
-  "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0",
-  "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "semantic",
-  "dis:reversibilityMode": "irreversible",
-  "obligation": [
-    {
-      "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01",
-      "target": {
-        "@type": "AssetCollection",
-        "source": "dis:semantic-elements",
-        "refinement": {
-          "leftOperand": "dis:semanticGroup",
-          "operator": "eq",
-          "rightOperand": "@subject-names"
-        }
-      },
-      "action": "dis:remove"
-    }
-  ],
-  "dis:ruleSets": {
-    "@list": [
-      {
-        "dis:ruleSetId": "remove-direct-link",
-        "dis:ruleOrder": {
-          "@list": [
-            {
-              "@id": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01"
-            }
-          ]
-        }
-      }
-    ]
-  }
-}
-```
-
-<a name="decoded-plan-example"> </a>
-
-### Execution Plan Set Example
-
-This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Execution Plan Contract referenced by the [ITI-x3 de-identification task](Task-grouped-fhir-task-patient-r4.html). It binds the selector to the assigned manifest and links the compiled obligation to the source policy rule.
-
-```json
-{
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
-  "@type": "Set",
-  "uid": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0",
-  "profile": "dis:ExecutionPlan",
-  "dis:ruleSetId": "remove-direct-link",
-  "dis:payloadBinding": "DIS-FHIR-Payload",
-  "dis:payloadVersion": "R4",
-  "dis:payloadSet": "patient-r4",
-  "obligation": [
-    {
-      "uid": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0#remove-01",
-      "target": {
-        "@type": "AssetCollection",
-        "source": "https://source.example.org/fhir/r4/List/grouped-fhir-r4-input/_history/1",
-        "refinement": {
-          "leftOperand": "dis:fhirPath",
-          "operator": "eq",
-          "rightOperand": "Patient.name"
-        }
-      },
-      "action": "dis:remove",
-      "dis:sourceRule": {
-        "@id": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01"
-      }
-    }
-  ],
-  "dis:ruleOrder": {
-    "@list": [
-      {
-        "@id": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0#remove-01"
-      }
-    ]
-  }
-}
-```
-
-<a name="hosted-input-digest-example"> </a>
-
-### Hosted Input Digests Example
-
-This Execution Plan Set fragment binds the manifest and two files in the [synthetic bulk input example](examples-bulk-fhir-cohort.html). Its obligation targets use the manifest URL as `source`.
-
-```json
-{
-  "dis:inputDigests": [
-    {
-      "dis:inputUrl": {
-        "@id": "https://source.example.org/bulk/input-manifest.json"
-      },
-      "dis:sha256": "28173d50a4cf5c753ed8be98700054824dd03c55ce1426a2baaffe99cf7ec315"
-    },
-    {
-      "dis:inputUrl": {
-        "@id": "https://source.example.org/bulk/input-patients-1.ndjson"
-      },
-      "dis:sha256": "1ee32345f27e8e7008ffdedcb7f7e802ecb2069ebe2cd6ff68fdbb2e70603df6"
-    },
-    {
-      "dis:inputUrl": {
-        "@id": "https://source.example.org/bulk/input-patients-2.ndjson"
-      },
-      "dis:sha256": "6d8de3efa2474b4e81609cad605556c5325f0869b2567cba9c49ff7a368c0fbf"
-    }
-  ]
-}
-```
+<ul>
+<li><a name="examples-informative"> </a><a name="markdown-toc-examples-informative"> </a><a href="examples-odrl.html#uc-2-mixed-release-examples">Examples (Informative)</a></li>
+<li><a name="decoded-authorization-example"> </a><a name="data-request-authorization-agreement-example"> </a><a href="examples-odrl.html#data-request-authorization-agreement-example">Data Request Authorization Agreement Example</a></li>
+<li><a name="decoded-policy-example"> </a><a name="de-identification-policy-set-example"> </a><a href="examples-odrl.html#de-identification-policy-set-example">De-Identification Policy Set Example</a></li>
+<li><a name="decoded-plan-example"> </a><a name="execution-plan-set-example"> </a><a href="examples-odrl.html#execution-plan-set-example">Execution Plan Set Example</a></li>
+<li><a name="hosted-input-digest-example"> </a><a name="hosted-input-digests-example"> </a><a href="examples-odrl.html#hosted-input-digests-example">Hosted Input Digests Example</a></li>
+</ul>

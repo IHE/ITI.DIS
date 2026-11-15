@@ -9,7 +9,7 @@ The [IHE ITI.DIS repository](https://github.com/IHE/ITI.DIS) contains the source
 
 #### FHIR Semantic Group Binding
 
-Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3.html#3pxx3213-semantic-group-bindings). The following informative resources support policy authoring.
+Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3-fhir-addressing.html#3pxx3213-semantic-group-bindings). The following informative resources support policy authoring.
 
 - [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv)
 - [FHIR PII classification and semantic group guide](fhir-semantic-group-guide.html)
@@ -22,7 +22,7 @@ These schemas describe the structure of the decoded JSON payloads used by DIS. V
 
 | JSON Schema | Purpose | Volume 3 binding |
 |---|---|---|
-| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3.html#protected-lookup-tables) |
+| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3-lookup-tables.html#protected-lookup-tables) |
 {: .grid}
 
 #### Cross Version Analysis

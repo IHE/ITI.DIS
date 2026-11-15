@@ -68,7 +68,7 @@ The [Contract signature and disclosure rules](volume-3.html#contract-signatures)
 
 #### Future Policy Management Transaction
 
-A future revision could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. DIS uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3.html#3pxx16-policy-lifecycle).
+A future revision could standardize policy discovery, retrieval, and lifecycle management through a transaction such as ITI-x8. DIS uses implementation-defined mechanisms under the [policy lifecycle rules](volume-3-policy.html#3pxx16-policy-lifecycle).
 
 ### Closed Issues
 

@@ -16,7 +16,7 @@ The job submission declares `https://governance.example.org/policies/uc1-bulk-co
 | `advanced` | `generalize-birth-date` | Reduce `Patient.birthDate` to year precision. Preserve the pseudonyms. |
 {: .grid}
 
-To reproduce the sample output, use the source identifier pairs in the input files, the scope in the approved Contract, and the 16 public test bytes `000102030405060708090a0b0c0d0e0f` in the [patient identifier derivation](volume-3.html#3pxx123-baseline-patient-pseudonym-derivation).
+To reproduce the sample output, use the source identifier pairs in the input files, the scope in the approved Contract, and the 16 public test bytes `000102030405060708090a0b0c0d0e0f` in the [patient identifier derivation](volume-3-policy.html#3pxx123-baseline-patient-pseudonym-derivation).
 
 ## Submit, Dispatch, and Retrieve
 
@@ -28,7 +28,7 @@ To reproduce the sample output, use the source identifier pairs in the input fil
 | 4 | The Requester polls the job URL through ITI-x4. A pending poll returns `202 Accepted`. The completed poll returns `200 OK` with the [R4 result Parameters](Parameters-bulk-r4-result.html). | The [result package](Bundle-bulk-r4-result.html) contains the [output manifest](examples/bulk-fhir/output-manifest.json), two file descriptors, the final worker's evidence, and the Manager's staged release Provenance. Both evidence records target the two final file descriptors. |
 {: .grid}
 
-The Requester verifies the policy URI and the stage order in the release record against the approved Contract, then retrieves [output file 1](examples/bulk-fhir/output-patients-1.ndjson) and [output file 2](examples/bulk-fhir/output-patients-2.ndjson) using authorized access. The descriptors and manifest identify the exact file versions the Manager validated. The file service checks current release authority on each download. A deployment that uses signed URLs applies the [same check at the final download endpoint](volume-3.html#bulk-result-download-authorization), even when a link is unexpired. The Requester delivers the cohort to the Secure Processing Environment outside DIS.
+The Requester verifies the policy URI and the stage order in the release record against the approved Contract, then retrieves [output file 1](examples/bulk-fhir/output-patients-1.ndjson) and [output file 2](examples/bulk-fhir/output-patients-2.ndjson) using authorized access. The descriptors and manifest identify the exact file versions the Manager validated. The file service checks current release authority on each download. A deployment that uses signed URLs applies the [same check at the final download endpoint](volume-3-fhir-delivery.html#bulk-result-download-authorization), even when a link is unexpired. The Requester delivers the cohort to the Secure Processing Environment outside DIS.
 
 <a name="failure-and-optional-cancellation"> </a>
 

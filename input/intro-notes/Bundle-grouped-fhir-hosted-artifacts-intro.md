@@ -1,6 +1,6 @@
 ### Readable JSON-LD attachments
 
-This Bundle carries an [ODRL Agreement](odrl-content.html#decoded-authorization-example) for both sets. The guide shows the decoded [R4 policy](odrl-content.html#decoded-policy-example) and [R4 execution plan](odrl-content.html#decoded-plan-example). The R5 attachments are shown below.
+This Bundle carries an [ODRL Agreement](examples-odrl.html#decoded-authorization-example) for both sets. The guide shows the decoded [R4 policy](examples-odrl.html#decoded-policy-example) and [R4 execution plan](examples-odrl.html#decoded-plan-example). The R5 attachments are shown below.
 
 <a name="decoded-r5-policy"> </a>
 
