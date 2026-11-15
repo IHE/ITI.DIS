@@ -118,7 +118,7 @@ When any externally retrieved input relies on digest verification, the Set SHALL
 ## Worked examples
 
 <ul>
-<li><a name="examples-informative"> </a><a href="examples-odrl.html#uc-2-mixed-release-examples">Examples (Informative)</a></li>
+<li><a name="examples-informative"> </a><a name="markdown-toc-examples-informative"> </a><a href="examples-odrl.html#uc-2-mixed-release-examples">Examples (Informative)</a></li>
 <li><a name="decoded-authorization-example"> </a><a name="data-request-authorization-agreement-example"> </a><a href="examples-odrl.html#data-request-authorization-agreement-example">Data Request Authorization Agreement Example</a></li>
 <li><a name="decoded-policy-example"> </a><a name="de-identification-policy-set-example"> </a><a href="examples-odrl.html#de-identification-policy-set-example">De-Identification Policy Set Example</a></li>
 <li><a name="decoded-plan-example"> </a><a name="execution-plan-set-example"> </a><a href="examples-odrl.html#execution-plan-set-example">Execution Plan Set Example</a></li>
