@@ -178,9 +178,14 @@ Run successful synchronous and asynchronous cases with supporting Contract discl
 
 #### Source Policy Identity in an ITI-x3 Plan
 
-Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) with its versioned execution plan Contract in the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Verify that the De-Identifier can return the exact evidence URI carried by the plan in `Provenance.policy` with no retrieval of the source policy. Verify that the Manager checks that URI against the dispatched plan before release.
+Use the [source policy identity rules](volume-3.html#execution-plan-source-policy). Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) using the execution plan and approved Policy Contract from the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Keep the source Policy Contract inaccessible to the De-Identifier.
 
-Repeat with the `derived-from` entry absent, with an unversioned canonical, with the evidence URI absent, and with two source policy entries. Each task fails before transformation and returns an OperationOutcome without a result. Supply a policy URI for a different version when assembling the plan and verify that the Manager does not dispatch it. Return successful task evidence with a different policy URI and verify that the Manager withholds job output.
+| Actor | Stimulus | Pass criteria |
+|---|---|---|
+| De-Identifier | Execute the original task. Decode the result's `payloadResult.resultPackage` and inspect its DIS Evidence Provenance. | `Provenance.policy` equals the single `Contract.supportingInfo.reference` to the Policy Contract's `/_history/1` revision. The De-Identifier completes without retrieving the source Policy Contract. |
+| De-Identifier | In separate submissions, omit the source policy reference, omit the literal reference value, use an unversioned `Contract` URL, use a versioned `Library` URL, or supply two source policy references. | The De-Identifier returns HTTP 400 and an R4 `OperationOutcome` before transformation. It returns no result. |
+| Manager | During plan assembly, substitute a syntactically valid Policy Contract reference for a different revision from the one approved for the set. | The Manager detects the mismatch and does not dispatch the plan. |
+{: .grid}
 
 ### Shared Policy Across Payload Sets
 
@@ -205,11 +210,22 @@ Submit an ITI-x1 job containing an R4 Encounter set and an R5 Encounter set with
 
 ### Transformation Actions
 
-For each core action, specify valid and invalid parameters, applicable data types, expected transformed values and failure outcomes:
+Use the [Volume 3 action definitions](volume-3.html#transformation-actions) and [ODRL action parameters](odrl-content.html#action-parameters). Use approved rules with otherwise valid synthetic resources for the declared payload release. Use one rule per run unless the case specifies multiple rules. For a successful case, inspect the selected elements in the returned payload and validate the output in that release. For a negative case, use a separate submission. The De-Identifier rejects or fails the task with an R4 `OperationOutcome` and returns no partial output. The Integrated actor uses its local success or failure indication and produces the same valid output or withholds export on failure.
 
-`remove`, `redact`, `replace`, `hash`, `truncate-date`, `round`, `truncate`, `date-shift`, and `keep`.
+| Action | Input and applied rule | Expected output | Negative case |
+|---|---|---|---|
+| `remove` | Target `Patient.name` on a Patient with a name. | `Patient.name` and all its children are absent. | Target required `Observation.status`. |
+| `redact` | Target `Patient.text` containing a narrative with text and a link. | `text.status` is `empty`. The entire `text.div` is `<div xmlns="http://www.w3.org/1999/xhtml">Narrative redacted</div>`. | Target `Patient.name`, which is a `HumanName`. |
+| `replace` | Target `Patient.name` with `value = Withheld` on a name with `family = Example`, `given = [Alex]`, and `use = official`. | `family = Withheld` and `given = [Withheld]`. `use` stays `official`. | Send an empty `value`. Exercise lookup-backed replacement separately under [Reversible Lookup Mapping](#reversible-lookup-mapping). |
+| `hash` | Target a `Patient.name.family` value of `example` with `mode = unsalted` and `algorithm = SHA-256`. | The value is `7a5d5b43b1725c76debaedcb17ccfb99d6bd99299593c8b18eab0b4d0e4643b9`. | Apply `mode = unsalted` to `Patient.identifier` containing a patient business identifier. Exercise salted patient hashing against the [patient identifier vector](volume-3.html#3pxx123-patient-identifier-pseudonymization). |
+| `truncate-date` | Target `Patient.birthDate = 1985-03-15` with `precision = year`. Repeat with `precision = year-month`. | The resulting values are `1985` and `1985-03`, respectively. | Send `precision = day`. |
+| `date-shift` | In one task, apply one rule to `Patient.birthDate = 1985-03-15` and a second to an Encounter for that Patient using `Encounter.period` in R4 or `Encounter.actualPeriod` in R5, with start `2026-01-10` and end `2026-01-12`. Use the same authorized scope and set `maxOffsetDays = 0`. In a separate run, use a deployment test vector that derives `+2` days with `maxOffsetDays = 3`. | With a zero limit all three dates stay unchanged. With the `+2` test vector the dates are `1985-03-17`, `2026-01-12`, and `2026-01-14`. The interval remains two days. | Repeat with `Patient.birthDate = 1985-03`, which has insufficient precision for date shifting. |
+| `round` | Target `Observation.value.ofType(Quantity)` in three Observations with values `57`, `15`, and `-15`, a common UCUM unit, and `step = 10`. | The values are `60`, `20`, and `-20`, respectively. The unit stays unchanged. | Send `step = 0`. |
+| `truncate` | Target `Patient.address.postalCode = 02139` with `length = 3`. | The postal code is the string `021`, including its leading zero. | Send `length = 0`. |
+| `keep` | Target the full approved `Patient.identifier` instance in the [repeated-element case](#fhirpath-selectors-and-rule-overlap). | Every field of that identifier remains unchanged. The other occurrence is removed by the later rule. | Add a `dis:value` parameter to `keep`. |
+{: .grid}
 
-Use the action definitions in [Volume 3](volume-3.html#transformation-actions). Cover scope and salt compatibility, date-shift consistency, derivation versions, rotation, collision handling and capability matching. Test protected parameter return/reuse only when an explicit capability contract permits it.
+Use [Processing Capability Declarations](#processing-capability-declarations) and [Pseudonym Derivation and Policy Compatibility](#pseudonym-derivation-and-policy-compatibility) for scope and salt compatibility, derivation versions, rotation and collision handling. Test protected parameter return or reuse only when an explicit capability contract permits it. The nonzero date-shift vector uses the deployment’s supported derivation and does not require support for incoming offsets.
 
 ### FHIRPath Selectors and Rule Overlap
 
@@ -279,6 +295,16 @@ For a List, verify that evidence covers each selected resource or wrapper, inclu
 
 Repeat with missing evidence, the wrong manifest type, duplicate entry URLs, a missing or unlisted file descriptor, an unresolved target, a target outside the set, and an outer evidence part. Verify that the receiver rejects each result and that the Manager withholds release.
 
+Inspect the actual attachments decoded or retrieved from the response. For a successful response, compare the returned `payloadResult.setId` values with the expected IDs from the original work order. An ITI-x3 or ITI-x7 result has exactly the assigned set. An ITI-x1 or ITI-x4 result has exactly one result per submitted set. Confirm the outer `validationStatus` parameter is `valid` and the DIS Evidence status codes are `complete` and `valid`. The Manager compares each task evidence `dis-ruleset` with the assigned ruleSet and each `Provenance.policy` with the policy reference in the dispatched plan.
+
+| Receiver | Mutate one otherwise valid result per run | Pass criteria |
+|---|---|---|
+| Manager and Requester | Replace an expected `setId` with an unknown one. For a job response, also add an extra result and duplicate a known `setId` in separate runs. | The Manager withholds job output when a task result disagrees with the assignment. The Requester rejects a job result with any unknown, extra or repeated set. |
+| Manager and Requester | Keep HTTP 200 and the original payload. Change outer `validationStatus` parameter to `invalid`. In separate runs change embedded DIS Evidence validation to `invalid` or its outcome to `error`. | The receiver rejects the inconsistent success result. The Manager withholds release when checking a task result. |
+| Manager | Preserve the manifest and evidence targets in `resultPackage`. Change `Provenance.policy` in that package to a `Library` URI, then to a different Policy Contract revision. In a separate run keep the correct policy and substitute a different `dis-ruleset`. | Each change causes rejection of the task result and withholding of all job output, even though the Provenance still covers precisely the selected output graph. |
+| Requester | In the actual embedded job result, replace the policy URI with a `Library` URI or a different Policy Contract revision while keeping all resource references valid. For a staged result, also run with a different ruleSet in the release record. | The Requester rejects each result and does not use the clinical output. |
+{: .grid}
+
 ### Direct Hosted R5 References
 
 Use the [hosted R5 input List](List-hosted-r5-input.html) and [result package](Bundle-hosted-r5-result.html) with a synthetic R5 endpoint. Verify that each retrieving actor requests the pinned revision with `fhirVersion=5.0` on a separate GET, confirms the release, validates the native payload, and checks the exact resource type, ID, and revision. Repeat with a version-specific endpoint that omits the parameter on its response and exposes an R5 CapabilityStatement. The R4 workflow resources remain independently valid.
@@ -295,6 +321,20 @@ Test a De-Identification Requester with synchronous ITI-x1 and repeat with a com
 | Remove or duplicate the staged release record. Repeat with a missing ruleSet, duplicate sequence, altered order, wrong policy version or wrong Manager identity. | The Requester rejects the job result and does not use the clinical output. |
 | Change the release record to reference an unresolved target or a bundled intermediate Patient that the List does not select. Repeat with missing or invalid DIS Evidence. | The Requester rejects the job result. The release record does not substitute for task evidence. |
 | Complete both stages and revoke release authorization before the Manager responds. Repeat with a failure in one stage. | The Manager withholds the entire result, including the release record. |
+
+<a name="standalone-local-clinical-export"> </a>
+
+### Standalone Integrated Clinical Export
+
+Use [UC-5](examples-standalone-export.html) with the [input document](Bundle-standalone-export-input.html) and [approved policy](Contract-standalone-export-policy.html). Configure a local user with the authorized role and export purpose. Invoke processing and export through the Integrated actor’s local interface. Inspect the [example result document](Bundle-standalone-export-output.html) and [DIS Evidence Provenance](Provenance-standalone-export-evidence.html) as reference outputs. Run the procedure without external DIS transactions.
+
+| Step | Pass criteria |
+|---|---|
+| Resolve and execute the local policy. | The exact approved policy revision executes the irreversible `local-name-removal` ruleSet. The Patient selected by the Composition has no `name` and retains `active = true`. |
+| Validate the exported document and its reference graph. | The result validates as a FHIR R4 document Bundle with the Composition first and fresh document and resource identities as in the example. The Composition subject and section entry each resolve to the same exported Patient and the author resolves to the exported Organization. The references resolve within the output Bundle. |
+| Inspect the exported evidence and local ATNA audit trail. | The Provenance conforms to DIS Evidence and identifies the exported Bundle, the exact Policy Contract revision, `local-name-removal`, and the Integrated performer. It reports outcome `complete`, validation `valid` and mode `irreversible`. Its audit correlation identifier links to the local audit event for the same policy, ruleSet and outcome. |
+| Repeat with the local role or purpose denied, an unapproved policy revision substituted, and an unresolved reference in the proposed output. | Each run produces a local denial or failure and no export. The actor produces no evidence claiming successful export for the failed attempt. |
+{: .grid}
 
 ### Reversible Lookup Mapping
 
@@ -329,7 +369,7 @@ Check the DIS-LookupTable DocumentReference and DIS-LookupTableContent Binary pr
 
 Use synthetic fixtures. Validate available FHIR artifacts and examples, compile FSH, check links and diagrams, and build the guide. Record actor, declared options, preconditions, inputs, observable expected behavior and pass/fail criteria for each procedure. Standalone Integrated actor review includes pipeline behavior as well as output/evidence inspection. Artifact validity alone does not demonstrate operational interoperability or de-identification adequacy.
 
-The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-push-delivery) remains open. The standalone UC-5 case is assessed through content conformance.
+The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-push-delivery) remains open. Assess standalone content conformance with the [local clinical export procedure](#standalone-local-clinical-export).
 
 ### Published UC-2 ODRL Examples
 
