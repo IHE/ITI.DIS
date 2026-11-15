@@ -3,7 +3,7 @@ The De-Identification Services (DIS) Profile defines a standardized, policy-gove
 
 DIS is a **Workflow** profile. It defines four actors, four transactions, a data request authorization format, a policy execution model, an execution plan format, and a minimum evidence baseline. DIS begins after a data request has been approved — including approval of the de-identification policy to be applied — and the data request authorization has been issued. It does not standardize how a data request is submitted, reviewed, approved, issued, discovered, amended, revoked, or retired.
 
-DIS separates the mandatory HL7 FHIR R4 **protocol binding** from the processing **payload binding**. These are DIS-defined terms: the protocol binding is the HL7 FHIR version used for transaction APIs and workflow resources; the payload binding is the format-specific content model for the data being de-identified. The protocol binding uses HL7 FHIR R4 APIs and resources exclusively for job submission, task dispatch, and status reporting; it is content-neutral and can orchestrate any payload type for which a corresponding payload binding is declared. DIS-FHIR-Payload is the HL7 FHIR payload binding, supporting independently versioned HL7 FHIR R4 and R5 processing payloads over the same R4 protocol binding. Additional payload bindings (e.g., DIS-DICOM1, DIS-CDA1) may be defined independently to support non-FHIR data formats within the same HL7 FHIR R4 protocol layer.
+DIS uses HL7 FHIR R4 APIs and workflow resources for job submission, task dispatch, and status reporting. The `payloadBinding` code identifies the format of the source and result data. `DIS-FHIR-Payload` supports independently versioned FHIR R4 and R5 datasets over the R4 protocol. A future specification can define another payload format for the same R4 protocol.
 
 Each processing payload explicitly identifies its format and version. De-Identifiers declare supported payload bindings and versions, and the Manager verifies compatibility before dispatch. Payloads whose version differs from the HL7 FHIR R4 protocol binding are carried or referenced using the payload binding's packaging rules rather than embedded as native resources in the HL7 FHIR R4 transaction envelope. Detailed version identification, packaging rules, and normative requirements are specified in the applicable actor, option, and transaction sections.
 
@@ -55,10 +55,10 @@ Table 1:PXX.1-2 summarizes each actor's required content responsibilities. All a
 
 | Actor | Required content responsibilities | Volume 3 specifications |
 |-------|-----------------------------------|-------------------------|
-| De-Identification Requester | Reads the approved policy and identifies it by canonical URL and version. May carry the approved policy content as permitted by ITI-x1. Supplies or identifies the FHIR processing targets and receives output and evidence. | [Policy](volume-3-policy.html#de-identification-policy), [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
-| De-ID Manager | Resolves and validates the approved policy, prepares the execution plan, assigns the FHIR processing targets, and assembles and releases the validated output and evidence. | [Policy](volume-3-policy.html#de-identification-policy), [execution plan](volume-3-execution-plan.html#execution-plan-content), [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
-| De-Identifier | Receives and applies the compiled execution plan to the assigned FHIR targets. Produces de-identified output and evidence. | [Execution plan](volume-3-execution-plan.html#execution-plan-content), [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
-| Integrated De-ID Manager/De-Identifier | Validates the approved policy, prepares and applies the execution plan, and produces validated FHIR output and evidence. The same content requirements apply to standalone operation. | [Policy](volume-3-policy.html#de-identification-policy), [execution plan](volume-3-execution-plan.html#execution-plan-content), [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
+| De-Identification Requester | Reads the approved policy and identifies it by canonical URL and version. May carry the approved policy content as permitted by ITI-x1. Supplies or identifies the FHIR processing targets and receives output and evidence. | [Policy](volume-3-policy.html#de-identification-policy), [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
+| De-ID Manager | Resolves and validates the approved policy, prepares the execution plan, assigns the FHIR processing targets, and assembles and releases the validated output and evidence. | [Policy](volume-3-policy.html#de-identification-policy), [execution plan](volume-3-execution-plan.html#execution-plan-content), [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
+| De-Identifier | Receives and applies the compiled execution plan to the assigned FHIR targets. Produces de-identified output and evidence. | [Execution plan](volume-3-execution-plan.html#execution-plan-content), [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
+| Integrated De-ID Manager/De-Identifier | Validates the approved policy, prepares and applies the execution plan, and produces validated FHIR output and evidence. The same content requirements apply to standalone operation. | [Policy](volume-3-policy.html#de-identification-policy), [execution plan](volume-3-execution-plan.html#execution-plan-content), [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding), [evidence](volume-3-evidence.html#evidence-baseline) |
 {: .grid}
 
 The [reversible lookup table specification](volume-3-lookup-tables.html#protected-lookup-tables) applies where the selected reversible pseudonymization arrangement requires a table. The FHIR payload binding supports independently versioned R4 and R5 payloads.
@@ -172,7 +172,7 @@ Note 2: *The De-ID Manager, De-Identifier, and Integrated De-ID Manager/De-Ident
 
 ### 1:PXX.2.1 Mandatory Baseline
 
-All DIS actors SHALL support the [HL7 FHIR payload binding](#1pxx23-hl7-fhir-payload-binding) (`DIS-FHIR-Payload`) for their respective roles.
+All DIS actors SHALL support the [HL7 FHIR payload support](#1pxx23-hl7-fhir-payload-binding) (`DIS-FHIR-Payload`) for their respective roles.
 
 External DIS transactions SHALL use the HL7 FHIR R4 protocol binding. Synchronous job processing via ITI-x1 applies to the De-Identification Requester, De-ID Manager, and externally invoked Integrated De-ID Manager/De-Identifier. Synchronous task dispatch via ITI-x3 applies to the De-ID Manager and De-Identifier. The associated workflow resources use R4 (`Task` for submissions, `Parameters` for result responses, `Bundle` for result packages, `Provenance` for evidence, and `OperationOutcome` for errors). The Integrated actor may operate standalone under [content conformance](#1pxx41-concepts) through local invocation.
 
@@ -194,9 +194,11 @@ UC-3 and UC-4 illustrate authorized, implementation-defined access to the Manage
 
 <a name="1pxx23-hl7-fhir-payload-option"> </a>
 
-### 1:PXX.2.3 HL7 FHIR Payload Binding
+<a name="1pxx23-hl7-fhir-payload-binding"> </a>
 
-The mandatory HL7 FHIR payload binding (`DIS-FHIR-Payload`) defines the content model and baseline execution plan. It specifies FHIRPath addressing, resource traversal, narrative handling, Provenance-based evidence, inline submission, authorized retrieval of referenced inputs, and result delivery. It covers independently versioned HL7 FHIR R4 and R5 processing payloads. Actors declare the releases they support. See [Volume 3](volume-3-payload-bindings.html#fhir-payload-binding) for the binding requirements.
+### 1:PXX.2.3 HL7 FHIR Payload Support
+
+The mandatory FHIR format (`DIS-FHIR-Payload`) covers independently versioned FHIR R4 and R5 payloads. Actors declare the releases they support. Volume 3 specifies [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding), [FHIR addressing and processing](volume-3-fhir-addressing.html), and [de-identification evidence](volume-3-evidence.html#evidence-baseline).
 
 <a name="additional-payload-binding-conformance"> </a>
 
@@ -215,8 +217,8 @@ The execution plan model is payload-specific. Each payload binding defines its o
 DIS-FHIR-Payload supports processing payloads whose HL7 FHIR version differs from the HL7 FHIR R4 protocol binding. Through the same R4 transactions, actors can submit HL7 FHIR R5 processing payloads. This cross-version support rests on four design properties:
 
 - **Version identification** -- each processing payload SHALL explicitly identify its HL7 FHIR version. De-Identifiers SHALL declare which payload versions they support, and the Manager SHALL verify compatibility before dispatch. HL7 FHIR payloads SHALL be validated against their declared version.
-- **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the HL7 FHIR R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the HL7 FHIR R4 transaction envelope. Packaging patterns are specified in the [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding).
-- **Version-neutral policy targets** -- The Manager resolves [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) targets and Semantic-Level group codes using the mapping for the declared payload release. Volume 3 defines the [FHIR R4 DPV mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping) and the [Semantic Group Binding for FHIR R4 and R5](volume-3-fhir-addressing.html#3pxx3213-semantic-group-bindings).
+- **Version-safe packaging** -- an HL7 FHIR payload whose version differs from the HL7 FHIR R4 protocol binding is carried or referenced using the payload binding's packaging rules. It SHALL NOT be embedded as a native resource of the payload version in the HL7 FHIR R4 transaction envelope. Packaging patterns are specified in the [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding).
+- **Version-neutral policy targets** -- The Manager resolves [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) targets and Semantic-Level group codes using the mapping for the declared payload release. Volume 3 defines the [FHIR R4 DPV mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping) and the [Semantic Group Binding for FHIR R4 and R5](volume-3-fhir-addressing.html#3pxx3213-semantic-group-bindings).
 - **Evidence across versions** -- de-identification evidence is represented as HL7 FHIR R4 Provenance (protocol layer, not payload). The evidence model does not depend on the payload's HL7 FHIR version.
 
 HL7 FHIR R4 protocol resources (`Task`, `Parameters`, `Provenance`, `OperationOutcome`, `Bundle` used for workflow packaging) remain HL7 FHIR R4 regardless of the payload version.
@@ -304,7 +306,7 @@ For example, [UC-2](#uc-2) uses one job for R4 clinical and laboratory records a
 
 **Evidence and conformance.** The De-Identifier produces Provenance evidence of the work performed. The Manager validates the results and their evidence before release. The Requester receives the evidence with the de-identified output. In a standalone deployment, the Integrated actor produces and validates the output and evidence locally and claims content conformance. When it supports external job submission, it also claims transaction conformance for its supported exchanges. In the distributed model, each actor claims conformance for its own transactions, and the Manager is responsible for the combined output. See [de-identification evidence](volume-3-evidence.html#evidence-baseline) and the [actor and transaction table](#tPXX.1-1).
 
-**Payload Binding Framework.** The R4 workflow can accommodate other data formats through additional payload bindings. The [draft DICOM and CDA examples](draft-native-payload-bindings.html) illustrate how this could work. Volume 3 describes the [binding requirements](volume-3-payload-bindings.html#payload-binding-framework).
+**Payload delivery across formats.** The R4 workflow can carry or reference data in different formats. Volume 3 defines the [payload delivery requirements](volume-3-payload-bindings.html#payload-delivery), and the [draft DICOM and CDA examples](draft-native-payload-bindings.html) illustrate delivery for additional formats.
 
 ### 1:PXX.4.2 Use Cases
 

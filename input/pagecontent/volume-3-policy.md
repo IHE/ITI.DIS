@@ -8,13 +8,47 @@
 
 <a name="3pxx2-de-identification-policy"> </a>
 
-This section defines the structure, delivery, and validation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. Policies can use DPV categories, Semantic-Level group references, or Syntax-Level element selectors. All policies use the same Contract carrier, delivery modes, and validation procedures. The De-ID Manager validates the policy, and when required, compiles it into one or more [payload-specific execution plans](volume-3-execution-plan.html#policy-compilation) before dispatching tasks.
+A de-identification policy specifies which personal data to transform and which actions to apply. Policies may target data through the DPV–ODRL profile, Semantic-Level group references, or Syntax-Level element selectors. The De-ID Manager validates the policy and prepares [payload-specific execution plans](volume-3-execution-plan.html#policy-compilation) before dispatching tasks.
 
-The policy artifact is an HL7 FHIR R4 Contract resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
+<a name="personal-data"> </a>
 
-The [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) carries the policy. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines its FHIR constraints. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines the policy submission and admission behavior.
+## 3:PXX.2.1 Personal Data
 
-The [normative DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) defines reusable targets by personal data category, the person's role, and the location of the information. During compilation, the Manager applies the versioned mapping for the assigned payload binding and release. The [normative FHIR R4 mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping) supplies the corresponding selectors for FHIR R4.
+Personal data targeted by a DIS policy can be described by its category, the role of the person it relates to, and where it appears in the payload. The applicable payload binding determines which occurrences it can locate.
+
+<a name="dpv-odrl-policy-profile"> </a>
+<a name="dpvodrl-policy-profile"> </a>
+<a name="common-personal-information-model"> </a>
+
+### Targeting Personal Data with DPV–ODRL
+
+The DPV–ODRL policy profile provides a way to select personal data independently of the payload format. The target selects the data, and the [policy rule](#policy-rules) specifies the action to apply. During compilation, the Manager resolves the target using a versioned payload mapping, such as the [FHIR R4 mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping).
+
+A DPV–ODRL target describes a class of personal data occurrences using exactly one value from each dimension.
+
+| Dimension | ODRL constraint operand | Values |
+| --- | --- | --- |
+| Personal data category | `disdpv:category` | A concept IRI from DPV Personal Data Categories v2.3. The versioned payload mapping declares the supported category, role, and location combinations. |
+| Role in the record | `disdpv:personRole` | `disdpv:patient`, `disdpv:patient-contact`, `disdpv:care-provider`, or `disdpv:all-person-roles`. The FHIR R4 mapping defines additional role use. |
+| Location | `disdpv:location` | `disdpv:structured` for structured elements, `disdpv:narrative` for names or other information within free text, and `disdpv:pixel` for information in image pixels. The FHIR R4 mapping supports only `disdpv:structured`. |
+{: .grid}
+
+Category matching uses the exact IRI defined in [DPV Personal Data Categories v2.3](https://w3c-cg.github.io/dpv/2.3/pd/). A binding declares the categories it can evaluate. The Manager SHALL reject an unsupported category and SHALL use no implicit expansion to related, broader, or narrower categories. For example, selecting `pd:BirthDate` does not select a recorded age. The [DPV Health Sector Concepts v2.3 draft](https://w3c-cg.github.io/dpv/2.3/sector/health/) provides context for interpreting health sector roles. The DIS role codes below have their own matching rules.
+
+- **Patient** applies to information about a person in the role of receiving care represented by the assigned record.
+- **Patient contact** applies to information about a person represented as a patient's contact.
+- **Care provider** applies to information about a person represented as participating in the patient's care in the assigned record. A person can have another role elsewhere in the same payload. A name in a patient record remains in the patient role even if the same person is also named as a care provider.
+- **All person roles** matches every occurrence with the selected category and location within the supported assignment scope. It also matches occurrences where the person's precise role is unnecessary to determine the action.
+
+Other FHIR R4 roles include a related person, the person described by a `Person` record, a family member, a named contact, a subscriber, a research participant, and a practitioner represented by a `PractitionerRole`. Their occurrence-level bindings are defined in the [FHIR R4 mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping).
+
+Location values are exact. To cover several locations, author a rule for each location. Where an action requires complete coverage of a location, a binding SHALL establish that coverage for the governed assignment. For example, a mapping for a person's structured name does not cover the same name in a narrative or image. The policy's coverage statement applies to the selected locations and the input scope admitted under the Agreement.
+
+<a name="dpv-odrl-target-rules"> </a>
+
+Each obligation SHALL have a unique `uid`, an `action`, and one `target`. The target is an ODRL `AssetCollection` with `source` equal to `disdpv:personal-information`. Its `refinement` is an array of three constraints, one for each dimension. Each constraint uses `eq` and an explicit `{"@id":"…"}` right operand. All three constraints SHALL match. Reject unknown or duplicate operands, unsupported values, and additional target properties. See the [ODRL Information Model, §2.5.5](https://www.w3.org/TR/odrl-model/).
+
+The DPV–ODRL Policy and Execution Plan use the DIS FHIR R4 Contract carriers and signature rules. The [ODRL Agreement binding](odrl-content.html#odrl-authorization) governs authorization for the approved scope and recipient.
 
 <a name="3pxx21-policy-library-resource-structure"> </a>
 
@@ -24,9 +58,13 @@ The [normative DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-p
 
 <a name="policy-contract-structure"> </a>
 
-## 3:PXX.2.1 Policy Contract Resource Structure
+<a name="3pxx21-policy-contract-resource-structure"> </a>
 
-A DIS policy is carried in a profiled FHIR R4 `Contract`. An authorization permission incorporates the approved policy revision by its exact `Contract.url|Contract.version`. The Manager verifies that the Set revision `uid` matches `Contract.identifier.value`. The full [ODRL Policy Set](odrl-content.html#de-identification-policy-set) is carried inline. The same policy revision can be approved by multiple Agreements.
+<a name="markdown-toc-3pxx21-policy-contract-resource-structure"> </a>
+
+## 3:PXX.2.2 Policy Contract Resource Structure
+
+A DIS policy is carried in a [profiled FHIR R4 Contract](StructureDefinition-DIS-Policy.html) for every payload version. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines policy submission and admission. An authorization permission incorporates the approved policy revision by its exact `Contract.url|Contract.version`. The Manager verifies that the Set revision `uid` matches `Contract.identifier.value`. The full [ODRL Policy Set](odrl-content.html#de-identification-policy-set) is carried inline. The same policy revision can be approved by multiple Agreements.
 
 | Contract element | Cardinality | Description |
 |---|---|---|
@@ -47,7 +85,9 @@ A DIS policy is carried in a profiled FHIR R4 `Contract`. An authorization permi
 
 <a name="3pxx12-transformation-actions"> </a>
 
-## 3:PXX.2.2 Transformation Actions
+<a name="markdown-toc-3pxx22-transformation-actions"> </a>
+
+## 3:PXX.2.3 Transformation Actions
 
 Policy rules select transformation actions. The compiled execution plan applies the same action definitions to concrete targets. This section defines the core action family (`core`) for DIS-FHIR-Payload. The [processing capability requirements](volume-3-fhir-addressing.html#fhir-processing-capabilities) define how a De-Identifier or Integrated actor supports and declares the core actions.
 
@@ -57,11 +97,11 @@ Policy rules select transformation actions. The compiled execution plan applies 
 
 <a name="3pxx121-action-catalog"> </a>
 
-### 3:PXX.2.2.1 Action Catalog
+### 3:PXX.2.3.1 Action Catalog
 
-Table 3:PXX.2.2-1 lists the core transformation actions.
+Table 3:PXX.2.3-1 lists the core transformation actions.
 
-<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.2.2-1: Core Transformation Actions</strong></p>
+<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.2.3-1: Core Transformation Actions</strong></p>
 
 | Action Code | Description | Applicable HL7 FHIR Datatypes | Deterministic | Parameters |
 |-------------|-------------|-------------------------------|---------------|------------|
@@ -78,7 +118,7 @@ Table 3:PXX.2.2-1 lists the core transformation actions.
 
 Each DIS action code carries a `technique` property that identifies its ISO/IEC 20889:2018 classification. The classifications describe the techniques behind the executable DIS actions. The action design draws on RSNA CTP DICOM Anonymizer function patterns.
 
-<p id="tPXX.1.2-2" class="tableTitle"><strong>Table 3:PXX.2.2-2: Core Transformation Actions — ISO/IEC 20889 Classification</strong></p>
+<p id="tPXX.1.2-2" class="tableTitle"><strong>Table 3:PXX.2.3-2: Core Transformation Actions — ISO/IEC 20889 Classification</strong></p>
 
 | ISO/IEC 20889 §9 Category | ISO Technique | DIS Action | Function |
 |---|---|---|---|
@@ -101,7 +141,7 @@ ISO/IEC 20889 categories outside the scope of this supplement include statistica
 
 <a name="3pxx122-action-definitions"> </a>
 
-### 3:PXX.2.2.2 Action Definitions
+### 3:PXX.2.3.2 Action Definitions
 
 #### remove
 
@@ -178,7 +218,9 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 <a name="3pxx123-patient-identifier-pseudonymization"> </a>
 
-### 3:PXX.2.2.3 Patient Identifier Pseudonymization
+<a name="3pxx223-patient-identifier-pseudonymization"> </a>
+
+### 3:PXX.2.3.3 Patient Identifier Pseudonymization
 
 Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. Optional [AES-FF1 encryption](#encryption-based-patient-pseudonymization) lets the Manager recover the resolved identifier when authorized.
 
@@ -218,43 +260,19 @@ A reversible policy MAY use the optional `encrypt` action to pseudonymize a sele
 
 <a name="3pxx13-policy-rules-and-ordering"> </a>
 
-## 3:PXX.2.3 Policy Rules and Ordering
+<a name="3pxx23-policy-rules-and-ordering"> </a>
 
-The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). DPV–ODRL policies SHALL use the [DPV–ODRL target rules](volume-3-policy.html#policy-rules). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
+<a name="markdown-toc-3pxx23-policy-rules-and-ordering"> </a>
+
+## 3:PXX.2.4 Policy Rules and Ordering
+
+The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). DPV–ODRL policies SHALL use the [DPV–ODRL personal data targeting rules](#dpv-odrl-target-rules). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
 
 A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement, encryption, salted hashing, or date shifting without an explicit consistency scope. See the [ODRL action parameters](odrl-content.html#action-parameters). Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
 
 The ODRL Policy Set declares ruleSet order and any stage sequence. The Manager applies this order under the [staged job execution rules](volume-2.html#staged-job-execution).
 
-<a name="dpv-odrl-policy-profile"> </a>
-
-### DPV–ODRL policy profile
-
-DPV–ODRL defines format-independent policy targets and a corresponding compiled Execution Plan. The Policy and Execution Plan use the DIS FHIR R4 Contract carriers and signature rules. The [ODRL Agreement binding](odrl-content.html#odrl-authorization) governs authorization for the approved scope and recipient.
-
-#### Common personal information model
-
-Each ODRL target describes a class of occurrences using exactly one value from each dimension.
-
-| Dimension | ODRL constraint operand | Values |
-| --- | --- | --- |
-| Personal data category | `disdpv:category` | The DPV v2.3 concept IRI. The FHIR R4 mapping covers `pd:Name`, `pd:Identifier`, and `pd:BirthDate`. |
-| Role in the record | `disdpv:personRole` | `disdpv:patient`, `disdpv:patient-contact`, `disdpv:care-provider`, or `disdpv:all-person-roles`. The FHIR R4 mapping defines additional role use. |
-| Location | `disdpv:location` | `disdpv:structured` for structured elements, `disdpv:narrative` for names or other information within free text, and `disdpv:pixel` for information in image pixels. The FHIR R4 mapping supports only `disdpv:structured`. |
-{: .grid}
-
-Category matching uses the exact IRI defined in [DPV Personal Data Categories v2.3](https://w3c-cg.github.io/dpv/2.3/pd/). A binding declares the categories it can evaluate. The Manager SHALL reject an unsupported category and SHALL use no implicit expansion to related, broader, or narrower categories. For example, selecting `pd:BirthDate` does not select a recorded age. The [DPV Health Sector Concepts v2.3 draft](https://w3c-cg.github.io/dpv/2.3/sector/health/) provides context for interpreting health sector roles. The DIS role codes below have their own matching rules.
-
-- **Patient** applies to information about a person in the role of receiving care represented by the assigned record.
-- **Patient contact** applies to information about a person represented as a patient's contact.
-- **Care provider** applies to information about a person represented as participating in the patient's care in the assigned record. A person can have another role elsewhere in the same payload. A name in a patient record remains in the patient role even if the same person is also named as a care provider.
-- **All person roles** matches every occurrence with the selected category and location within the supported assignment scope. It also matches occurrences where the person's precise role is unnecessary to determine the action.
-
-Other FHIR R4 roles include a related person, the person described by a `Person` record, a family member, a named contact, a subscriber, and a research participant. Their occurrence-level bindings are defined in the [FHIR R4 mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping).
-
-Location values are exact. To cover several locations, author a rule for each location. Where an action requires complete coverage of a location, a binding SHALL establish that coverage for the governed assignment. For example, a mapping for a person's structured name does not cover the same name in a narrative or image. The policy's coverage statement applies to the selected locations and the input scope admitted under the Agreement.
-
-#### ODRL representation
+### ODRL representation
 
 Use the [DPV–ODRL JSON-LD context](schemas/dis-dpv-odrl-draft-1.jsonld) as the sole context for the Policy and Execution Plan. The [DPV–ODRL vocabulary (RDF Turtle)](schemas/dis-dpv-odrl-draft-1.ttl) identifies the profiles and terms. The `dis:` prefix identifies the [DIS actions and shared terms](odrl-content.html#dis-odrl-vocabulary). Apply the [common JSON-LD requirements](odrl-content.html#common-json-ld-requirements). The context URL and `disdpv:` term IRIs retain their published identifiers for policies, plans, and FHIR R4 mapping revision 1.
 
@@ -264,11 +282,9 @@ Use the [DPV–ODRL JSON-LD context](schemas/dis-dpv-odrl-draft-1.jsonld) as the
 | Execution Plan | `Set` | `disdpv:ExecutionPlan` |
 {: .grid}
 
-##### Policy rules
+#### Policy rules
 
-Use the `uid`, `obligation`, `dis:reversibilityMode`, `dis:ruleSets`, and optional staging and linkage scope fields of the [DIS Policy Set](odrl-content.html#de-identification-policy-set). The Policy Set SHALL omit `dis:representationLevel`, `dis:payloadFamily`, and `dis:payloadVersion`.
-
-Each obligation SHALL have a unique `uid`, an `action`, and one `target`. The target is an ODRL `AssetCollection` with `source` equal to `disdpv:personal-information`. Its `refinement` is an array of three constraints, one for each dimension. Each constraint uses `eq` and an explicit `{"@id":"…"}` right operand. All three constraints SHALL match. Reject unknown or duplicate operands, unsupported values, and additional target properties. See the [ODRL Information Model, §2.5.5](https://www.w3.org/TR/odrl-model/).
+Use the `uid`, `obligation`, `dis:reversibilityMode`, `dis:ruleSets`, and optional staging and linkage scope fields of the [DIS Policy Set](odrl-content.html#de-identification-policy-set). The Policy Set SHALL omit `dis:representationLevel`, `dis:payloadFamily`, and `dis:payloadVersion`. Apply the [DPV–ODRL personal data targeting rules](#dpv-odrl-target-rules) to each obligation.
 
 Use the nine DIS actions and their [existing definitions and parameters](#transformation-actions), including the [ODRL action encoding](odrl-content.html#action-parameters). The allowed actions are `remove`, `replace`, `keep`, `hash`, `truncate-date`, `date-shift`, `round`, `truncate`, and `redact`. Reversibility is declared independently of action support. The applicable option, assignment capabilities, and action-specific requirements still govern each selected action.
 
@@ -288,7 +304,11 @@ See the [DPV–ODRL worked policies](examples-odrl.html#dpv-odrl-worked-examples
 
 <a name="3pxx14-policy-delivery-and-validation"> </a>
 
-## 3:PXX.2.4 Policy Delivery and Validation
+<a name="3pxx24-policy-delivery-and-validation"> </a>
+
+<a name="markdown-toc-3pxx24-policy-delivery-and-validation"> </a>
+
+## 3:PXX.2.5 Policy Delivery and Validation
 
 A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. Each payload-set input in the ITI-x1 request declares the approved policy as a versioned canonical in the `policy` subextension. The `authorization` input provides evidence that the data governance authority approved the data request and that specific policy. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
 
@@ -298,7 +318,9 @@ A de-identification policy is a reusable knowledge artifact. The same policy may
 
 <a name="3pxx141-policy-content-resolution"> </a>
 
-### 3:PXX.2.4.1 Policy Content Resolution
+<a name="3pxx241-policy-content-resolution"> </a>
+
+### 3:PXX.2.5.1 Policy Content Resolution
 
 <a name="approved-policy-access"> </a>
 
@@ -316,7 +338,9 @@ The optional `policyContent` subextension determines how the De-ID Manager obtai
 
 <a name="3pxx142-policy-validation"> </a>
 
-### 3:PXX.2.4.2 Policy Validation
+<a name="3pxx242-policy-validation"> </a>
+
+### 3:PXX.2.5.2 Policy Validation
 
 The De-ID Manager SHALL perform the following validation on the resolved policy Contract.
 
@@ -331,7 +355,9 @@ The De-ID Manager SHALL perform the following validation on the resolved policy 
 
 <a name="3pxx16-policy-lifecycle"> </a>
 
-## 3:PXX.2.5 Policy Lifecycle
+<a name="markdown-toc-3pxx25-policy-lifecycle"> </a>
+
+## 3:PXX.2.6 Policy Lifecycle
 
 DIS does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
 

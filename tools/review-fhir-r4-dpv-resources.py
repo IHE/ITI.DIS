@@ -1,14 +1,13 @@
 """Generate the FHIR R4 resource coverage inventory from HL7's 4.0.1 package."""
 
 import argparse
+from collections import defaultdict
 import csv
 import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "input/images/bindings"
-MAPPING = ROOT / "dis-fhir-r4-dpv-mapping-1.jsonld"
-REVIEW = ROOT / "dis-fhir-r4-dpv-resource-review-1.csv"
 
 
 def resource_definitions(package):
@@ -82,13 +81,88 @@ def generate_rows(resources, mapping):
         raise SystemExit(f"Unmatched resource selectors: {sorted(mapped_paths - matched)}")
 
 
+def paths_without_filters(path):
+    """Remove where filters while preserving the declared path and choice constraints."""
+    start = path.find(".where(")
+    while start >= 0:
+        depth, end, quoted = 1, start + len(".where("), False
+        while end < len(path) and depth:
+            char = path[end]
+            if char == "'":
+                quoted = not quoted
+            if not quoted and char == "(":
+                depth += 1
+            if not quoted and char == ")":
+                depth -= 1
+            end += 1
+        if depth or quoted:
+            raise SystemExit(f"Unbalanced selector filter: {path}")
+        path = path[:start] + path[end:]
+        start = path.find(".where(")
+    return path
+
+
+def revision_two_rows(resources, mapping):
+    selectors_by_resource = defaultdict(list)
+    for entry in mapping["entries"]:
+        selector = entry["targetPath"]
+        resource = selector.split(".", 1)[0]
+        if resource == "ContactDetail":
+            continue
+        if resource not in resources:
+            raise SystemExit(f"Unknown selector resource type: {selector}")
+        if "subjectPath" in entry:
+            path = entry["subjectPath"]
+            declared = {e["path"]: e for e in declared_elements(resources[resource])}
+            field = declared.get(path)
+            if field is None or "Reference" not in type_codes(field):
+                raise SystemExit(f"Subject path is not a reference on {resource}: {path}")
+            profiles = {
+                profile.split("/")[-1] for type_ in field["type"]
+                for profile in type_.get("targetProfile", [])
+            }
+            if profiles and not {entry["subjectResourceType"], "Resource"} & profiles:
+                raise SystemExit(f"Subject type is not allowed by {path}")
+        selectors_by_resource[resource].append(selector)
+
+    candidate_types = {"HumanName", "Identifier", "ContactPoint", "Address", "Age", "Attachment",
+                       "Money", "Dosage", "CodeableConcept", "Quantity", "Period"}
+    for resource, info in sorted(resources.items()):
+        elements = declared_elements(info)
+        selectors = selectors_by_resource[resource]
+        expanded = [paths_without_filters(selector) for selector in selectors]
+        other = []
+        contact_sites = 0
+        for element in elements:
+            path = element["path"]
+            if type_codes(element) == {"ContactDetail"}:
+                contact_sites += 1
+                continue
+            variants = {path}
+            if path.endswith("[x]"):
+                variants.update(path[:-3] + f".ofType({t})" for t in type_codes(element))
+            mapped = any(selector == variant or selector.startswith(variant + ".")
+                         for selector in expanded for variant in variants)
+            if not mapped and (candidate(element) or type_codes(element) & candidate_types):
+                other.append(path)
+        yield [
+            mapping["@id"], info["url"], info["version"], resource,
+            "abstract" if info.get("abstract") else "concrete",
+            len(elements), " | ".join(selectors), contact_sites, " | ".join(other),
+        ]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("package", type=Path, help="package directory for hl7.fhir.r4.core#4.0.1")
+    parser.add_argument("--revision", type=int, choices=[1, 2], default=1, help="mapping revision to review")
     args = parser.parse_args()
-    mapping = json.loads(MAPPING.read_text(encoding="utf-8"))
-    rows = list(generate_rows(resource_definitions(args.package), mapping))
-    with REVIEW.open("w", encoding="utf-8", newline="") as output:
+    mapping_path = ROOT / f"dis-fhir-r4-dpv-mapping-{args.revision}.jsonld"
+    review_path = ROOT / f"dis-fhir-r4-dpv-resource-review-{args.revision}.csv"
+    mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
+    review = generate_rows if args.revision == 1 else revision_two_rows
+    rows = list(review(resource_definitions(args.package), mapping))
+    with review_path.open("w", encoding="utf-8", newline="") as output:
         writer = csv.writer(output, lineterminator="\n")
         writer.writerow([
             "Mapping revision", "StructureDefinition", "FHIR version", "Resource type", "Kind",

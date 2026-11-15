@@ -4,7 +4,7 @@
 
 <a name="3pxx3-de-identification-execution-plan"> </a>
 
-The execution plan is the task-specific artifact produced from a validated policy. The [policy compilation rules](#policy-compilation) define how policy rules become concrete payload selectors. The plan uses the [transformation actions](volume-3-policy.html#transformation-actions) defined by the policy section. [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3) defines how the Manager dispatches the plan.
+The execution plan is the task-specific artifact produced from a validated policy. The [policy compilation rules](#policy-compilation) define how policy rules become concrete payload selectors. The plan uses the [transformation actions](volume-3-policy.html#transformation-actions) defined by the policy section. [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3) defines how the Manager dispatches the plan. [FHIR Addressing and Processing](volume-3-fhir-addressing.html) defines selector syntax, resource traversal, processing capabilities, and output validation for FHIR.
 
 <a name="execution-plan-format"> </a>
 
@@ -64,7 +64,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 #### DPV–ODRL compilation and evidence
 
-Use the immutable mapping for the assigned payload binding and release. For FHIR R4, use the [FHIR R4 DPV category mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping).
+Use the immutable mapping for the assigned payload binding and release. Select one supported [FHIR R4 DPV mapping revision](#fhir-r4-dpv-mapping) per FHIR R4 assignment. The Manager SHALL fail compilation if the selected revision does not cover the required targets.
 
 1. The Manager admits the job under [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1), including verification of the exact authorized Policy Contract revision and input scope. It chooses an immutable mapping revision for the assigned binding and release, checks the assignment against the mapping's declared scope, and verifies support for each category, role, location and applicable action.
 2. The Manager resolves roles from verified assignment inputs. If role uncertainty could change the winning rule or its action for a selected element, the Manager SHALL fail compilation. It SHALL fail before dispatch when requested coverage is unsupported. A supported optional element that is absent contributes zero matches. The Manager retains the selector for an optional mapped element where the binding permits that selector to be evaluated independently of the element's presence.
@@ -82,6 +82,63 @@ Use the immutable mapping for the assigned payload binding and release. For FHIR
 **Capability verification.** The De-ID Manager SHALL verify that the complete assignment is supported by the target De-Identifier's [declared processing capabilities](volume-3-fhir-addressing.html#fhir-processing-capabilities) before dispatch. The Integrated actor applies the same check before local execution.
 
 For each applicable payload set, each ruleSet produces one execution plan Contract, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. Before dispatch, the Manager SHALL identify the exact source policy as specified in [Execution Plan Contract Structure](#execution-plan-source-policy).
+
+<a name="fhir-r4-dpv-mapping"> </a>
+
+<a name="3pxx4217-fhir-r4-dpv-category-mapping"> </a>
+
+### 3:PXX.3.2.3 FHIR R4 DPV Category Mapping
+
+<a name="fhir-r4-dpv-mapping-revision-2"> </a>
+
+#### Revision 2
+
+Use [FHIR R4 mapping revision 2 (JSON-LD)](bindings/dis-fhir-r4-dpv-mapping-2.jsonld) to compile assignments needing its broader coverage. The [full CSV](bindings/dis-fhir-r4-dpv-mapping-2.csv) and the sample below are generated from the JSON-LD. The [resource review inventory (CSV)](bindings/dis-fhir-r4-dpv-resource-review-2.csv) distinguishes mapped declarations and other screened paths in the R4 core package.
+
+Revision 2 uses the DPV Personal Data Categories v2.3 edition. It covers structured identifiers, demographics, contact and address information, family information, clinical information, prescriptions, insurance, and financial information, among other categories. The mapping's entries define the exact scope of each category. A category IRI with no entry for the requested role and location is unsupported for that assignment.
+
+<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE 2 -->
+
+| Order | DPV category | Person role | FHIR R4 target |
+| --- | --- | --- | --- |
+| 1 | `pd:Name` | `disdpv:patient` | `Patient.name` |
+| 39 | `pd:PostalCode` | `disdpv:patient` | `Patient.address.postalCode` |
+| 104 | `pd:EmailAddress` | `disdpv:patient` | `Patient.telecom.where(system = 'email')` |
+| 202 | `pd:MedicalHealth` | `disdpv:patient` | `Condition.code` |
+| 333 | `pd:Insurance` | `disdpv:patient` | `Coverage.type` |
+{: .grid}
+
+<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE 2 -->
+
+The JSON-LD uses the same entry structure as revision 1. An entry with `subjectPath` also carries `subjectResourceType` and `subjectRule`. These properties bind a contextual occurrence to a person represented by an assigned resource. For example, an entry for `Condition.code` uses `Condition.subject` and the resource type `Patient`. The verifier must establish the patient association before selecting the condition, including for an all-person-roles target. Static person roles and the care-team exception continue to use their versioned role rules.
+
+Some entries limit the selector to a particular FHIR type, code, or extension URL. Examples include HL7 R4 [Vital Signs](https://hl7.org/fhir/R4/observation-vitalsigns.html) observations for height and weight, [LOINC ABO and Rh group](https://loinc.org/882-1/) for blood type, and the FHIR R4 [Patient Birth Place extension](https://hl7.org/fhir/R4/extension-patient-birthplace.html) for birthplace. A contact point with email system and home use matches personal email. A contact point with email system and work use matches work email. Selecting `pd:EmailAddress` uses the entry for the general email system.
+
+Apply the [revision 2 coverage rule](volume-3.html#fhir-r4-dpv-coverage-2), the [verified subject rule](volume-3.html#fhir-r4-dpv-verified-subject-2), and the entry's expansion rule. The Manager SHALL record the exact revision used in `disdpv:mappingRevision`. For example, a plan compiled with revision 1 carries its revision 1 IRI even when revision 2 is available.
+
+<a name="fhir-r4-dpv-mapping-revision-1"> </a>
+
+#### Revision 1
+
+For an assignment using the [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) with mapping revision 1, use the [normative FHIR R4 mapping revision 1 (JSON-LD)](bindings/dis-fhir-r4-dpv-mapping-1.jsonld). The [full CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv) and the sample below are generated from that artifact and identify the same revision. The [resource review inventory (CSV)](bindings/dis-fhir-r4-dpv-resource-review-1.csv) records the 146 concrete R4 resources and the two abstract base definitions examined for this mapping.
+
+<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE 1 -->
+
+| Order | DPV category | Person role | FHIR R4 target |
+| --- | --- | --- | --- |
+| 1 | `pd:Name` | `disdpv:patient` | `Patient.name` |
+| 3 | `pd:Name` | `disdpv:care-provider` | `Practitioner.name` |
+| 5 | `pd:BirthDate` | `disdpv:patient` | `Patient.birthDate` |
+| 18 | `pd:Name` | `disdpv:contact-person` | `ContactDetail.name` |
+{: .grid}
+
+<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE 1 -->
+
+The JSON-LD document's absolute `@id` is the mapping revision used in the compiled plan. Its context is embedded. The document identifies the payload binding, FHIR release, exact FHIR package, manifest format, DPV edition, and coverage rule. Each entry supplies a category IRI, role IRI, location IRI, unique positive integer expansion order, target path, selector language, role rule IRI, and expansion rule IRI. The Manager SHALL recognize the pinned mapping revision and implement its referenced rules before compilation. Changes to the mapping or its referenced rule semantics require a new revision.
+
+Read the entries by increasing `order`. Match `category` and `location` by exact IRI equality. A request for a specific role selects entries for that role and applies the entry's `roleRule`. A request for `disdpv:all-person-roles` selects every entry for the category and location and includes each instance irrespective of role. In particular, it uses `Practitioner.name` for both care-team members and other Practitioners in scope. A tuple that has no mapping is unsupported. Apply the mapping entry's `expansionRule` to produce resource-local FHIRPath selectors for the verified assignment. Preserve the policy's source rule order and the mapping's expansion order within each rule. Deduplicate identical selectors produced for the same source obligation while preserving first occurrence.
+
+{% include fhir-r4-dpv-mapping-rules.md %}
 
 <a name="3pxx142-execution-plan-json-structure"> </a>
 
@@ -107,4 +164,4 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 ## 3:PXX.3.4 Execution Plan Examples
 
-See the [decoded ODRL Execution Plan Set](examples-odrl.html#decoded-plan-example) for the R4 clinical assignment and the [UC-2 walkthrough](examples-grouped-fhir-job.html#grouped-fhir-dispatch) for the two FHIR processing releases and the [UC-3 clinical pathology workflow](examples-reversible-pathology.html) for an example involving a supplied lookup table.
+See the [DPV–ODRL worked examples](examples-odrl.html#dpv-odrl-worked-examples) for compiled FHIR selectors and the recorded mapping revision. See the [decoded ODRL Execution Plan Set](examples-odrl.html#decoded-plan-example) for the R4 clinical assignment and the [UC-2 walkthrough](examples-grouped-fhir-job.html#grouped-fhir-dispatch) for the two FHIR processing releases and the [UC-3 clinical pathology workflow](examples-reversible-pathology.html) for an example involving a supplied lookup table.

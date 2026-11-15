@@ -164,12 +164,12 @@ pages:
     volume-3-execution-plan.md:
       title: "3:PXX.3 De-Identification Execution Plan"
       generation: markdown
-    volume-3-payload-bindings.md:
-      title: "3:PXX.4 Payload Bindings"
-      generation: markdown
       volume-3-fhir-addressing.md:
-        title: "3:PXX.4.2.1 FHIR Addressing and Processing"
+        title: "3:PXX.3.5 FHIR Addressing and Processing"
         generation: markdown
+    volume-3-payload-bindings.md:
+      title: "3:PXX.4 Payload Delivery"
+      generation: markdown
       volume-3-fhir-delivery.md:
         title: "3:PXX.4.2.2 FHIR Input and Result Delivery"
         generation: markdown
@@ -249,7 +249,7 @@ menu:
     Data Request Authorization: volume-3-authorization.html
     De-Identification Policy: volume-3-policy.html
     Execution Plan: volume-3-execution-plan.html
-    Payload Bindings: volume-3-payload-bindings.html
+    Payload Delivery: volume-3-payload-bindings.html
     De-Identification Evidence: volume-3-evidence.html
   Examples:
     "UC-1 – Bulk FHIR Cohort Job": examples-bulk-fhir-cohort.html

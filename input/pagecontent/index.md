@@ -34,7 +34,7 @@ This guide is organized into the following sections:
   - [Data Request Authorization](volume-3-authorization.html#data-request-authorization)
   - [De-Identification Policy](volume-3-policy.html#de-identification-policy)
   - [Execution Plan](volume-3-execution-plan.html#execution-plan-content)
-  - [Payload Bindings](volume-3-payload-bindings.html#payload-bindings)
+  - [Payload Delivery](volume-3-payload-bindings.html#payload-delivery)
   - [De-Identification Evidence](volume-3-evidence.html#evidence-baseline)
 - Examples
   - [UC-1 – Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
