@@ -62,7 +62,7 @@ The [DIS-ASYNC-JOB option](volume-1.html#1pxx24-asynchronous-job-processing-opti
 
 #### Contract signatures and disclosure
 
-The [Contract signature and disclosure rules](volume-3.html#contract-signatures) use `Contract.signer.signature` for DIS digital signatures. Deployments choose signature requirements for authorization, policy, and execution plans, and configure disclosure of supporting Contracts. The [UC-4 worked example](examples-cloud-decision-support.html#signature-verification) demonstrates verification when a deployment requires the policy signature.
+The [Contract signature and disclosure rules](volume-3-contract-rules.html#contract-signatures) use `Contract.signer.signature` for DIS digital signatures. Deployments choose signature requirements for authorization, policy, and execution plans, and configure disclosure of supporting Contracts. The [UC-4 worked example](examples-cloud-decision-support.html#signature-verification) demonstrates verification when a deployment requires the policy signature.
 
 <a name="future-policy-management-transaction"> </a>
 

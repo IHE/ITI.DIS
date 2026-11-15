@@ -14,7 +14,7 @@ The execution plan is the task-specific artifact produced from a validated polic
 
 ## 3:PXX.3.1 Execution Plan Format
 
-An execution plan is a task-specific FHIR R4 [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html). It carries a compiled [ODRL Set](odrl-content.html#execution-plan-set), uses the Set revision `uid` as its identifier, and carries the Manager in `authority` and the assigned De-Identifier in `subject`, both as Organization references. It supplies `id`, `meta.versionId`, `url`, `version`, `name`, and `issued`. The Set is carried in one inline `rule.contentAttachment` as Base64-encoded UTF-8 JSON-LD with content type `application/ld+json`. Apply the [shared Contract signature rules](volume-3.html#contract-signatures).
+An execution plan is a task-specific FHIR R4 [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html). It carries a compiled [ODRL Set](odrl-content.html#execution-plan-set), uses the Set revision `uid` as its identifier, and carries the Manager in `authority` and the assigned De-Identifier in `subject`, both as Organization references. It supplies `id`, `meta.versionId`, `url`, `version`, `name`, and `issued`. The Set is carried in one inline `rule.contentAttachment` as Base64-encoded UTF-8 JSON-LD with content type `application/ld+json`. Apply the [shared Contract signature rules](volume-3-contract-rules.html#contract-signatures).
 
 <a name="3pxx141-library-resource-structure"> </a>
 
@@ -64,7 +64,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 #### DPV–ODRL compilation and evidence
 
-Use the immutable mapping for the assigned payload binding and release. For FHIR R4, use the [FHIR R4 DPV category mapping](volume-3.html#fhir-r4-dpv-mapping).
+Use the immutable mapping for the assigned payload binding and release. For FHIR R4, use the [FHIR R4 DPV category mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping).
 
 1. The Manager admits the job under [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1), including verification of the exact authorized Policy Contract revision and input scope. It chooses an immutable mapping revision for the assigned binding and release, checks the assignment against the mapping's declared scope, and verifies support for each category, role, location and applicable action.
 2. The Manager resolves roles from verified assignment inputs. If role uncertainty could change the winning rule or its action for a selected element, the Manager SHALL fail compilation. It SHALL fail before dispatch when requested coverage is unsupported. A supported optional element that is absent contributes zero matches. The Manager retains the selector for an optional mapped element where the binding permits that selector to be evaluated independently of the element's presence.

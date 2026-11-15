@@ -161,4 +161,26 @@ The De-Identifier SHALL ensure that references between retained resources resolv
 
 Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](volume-3-policy.html#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
 
-See [§3:PXX.4.2.1.7 FHIR R4 DPV Category Mapping](volume-3.html#fhir-r4-dpv-mapping) for the versioned mapping and rule definitions.
+<a name="fhir-r4-dpv-mapping"> </a>
+
+## 3:PXX.4.2.1.7 FHIR R4 DPV Category Mapping
+
+For the [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile), an implementation claiming FHIR R4 mapping support SHALL use the [normative FHIR R4 mapping revision 1 (JSON-LD)](bindings/dis-fhir-r4-dpv-mapping-1.jsonld). The [full CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv) and the sample below are generated from that artifact and identify the same revision. The [resource review inventory (CSV)](bindings/dis-fhir-r4-dpv-resource-review-1.csv) records the 146 concrete R4 resources and the two abstract base definitions examined for this mapping.
+
+<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE -->
+
+| Order | DPV category | Person role | FHIR R4 target |
+| --- | --- | --- | --- |
+| 1 | `pd:Name` | `disdpv:patient` | `Patient.name` |
+| 3 | `pd:Name` | `disdpv:care-provider` | `Practitioner.name` |
+| 5 | `pd:BirthDate` | `disdpv:patient` | `Patient.birthDate` |
+| 18 | `pd:Name` | `disdpv:contact-person` | `ContactDetail.name` |
+{: .grid}
+
+<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE -->
+
+The JSON-LD document's absolute `@id` is the mapping revision used in the compiled plan. Its context is embedded. The document identifies the payload binding, FHIR release, exact FHIR package, manifest format, DPV edition, and coverage rule. Each entry supplies a category IRI, role IRI, location IRI, unique positive integer expansion order, target path, selector language, role rule IRI, and expansion rule IRI. The Manager SHALL recognize the pinned mapping revision and implement its referenced rules before compilation. Changes to the mapping or its referenced rule semantics require a new revision.
+
+Read the entries by increasing `order`. Match `category` and `location` by exact IRI equality. A request for a specific role selects entries for that role and applies the entry's `roleRule`. A request for `disdpv:all-person-roles` selects every entry for the category and location and includes each instance irrespective of role. In particular, it uses `Practitioner.name` for both care-team members and other Practitioners in scope. A tuple that has no mapping is unsupported. Apply the mapping entry's `expansionRule` to produce resource-local FHIRPath selectors for the verified assignment. Preserve the policy's source rule order and the mapping's expansion order within each rule. Deduplicate identical selectors produced for the same source obligation while preserving first occurrence.
+
+{% include fhir-r4-dpv-mapping-rules.md %}

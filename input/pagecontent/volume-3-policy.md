@@ -14,7 +14,7 @@ The policy artifact is an HL7 FHIR R4 Contract resource, part of the protocol la
 
 The [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) carries the policy. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines its FHIR constraints. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines the policy submission and admission behavior.
 
-The [normative DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) defines reusable targets by personal data category, the person's role, and the location of the information. During compilation, the Manager applies the versioned mapping for the assigned payload binding and release. The [normative FHIR R4 mapping](volume-3.html#fhir-r4-dpv-mapping) supplies the corresponding selectors for FHIR R4.
+The [normative DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile) defines reusable targets by personal data category, the person's role, and the location of the information. During compilation, the Manager applies the versioned mapping for the assigned payload binding and release. The [normative FHIR R4 mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping) supplies the corresponding selectors for FHIR R4.
 
 <a name="3pxx21-policy-library-resource-structure"> </a>
 
@@ -250,7 +250,7 @@ Category matching uses the exact IRI defined in [DPV Personal Data Categories v2
 - **Care provider** applies to information about a person represented as participating in the patient's care in the assigned record. A person can have another role elsewhere in the same payload. A name in a patient record remains in the patient role even if the same person is also named as a care provider.
 - **All person roles** matches every occurrence with the selected category and location within the supported assignment scope. It also matches occurrences where the person's precise role is unnecessary to determine the action.
 
-Other FHIR R4 roles include a related person, the person described by a `Person` record, a family member, a named contact, a subscriber, and a research participant. Their occurrence-level bindings are defined in the [FHIR R4 mapping](volume-3.html#fhir-r4-dpv-mapping).
+Other FHIR R4 roles include a related person, the person described by a `Person` record, a family member, a named contact, a subscriber, and a research participant. Their occurrence-level bindings are defined in the [FHIR R4 mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping).
 
 Location values are exact. To cover several locations, author a rule for each location. Where an action requires complete coverage of a location, a binding SHALL establish that coverage for the governed assignment. For example, a mapping for a person's structured name does not cover the same name in a narrative or image. The policy's coverage statement applies to the selected locations and the input scope admitted under the Agreement.
 
@@ -308,7 +308,7 @@ The optional `policyContent` subextension determines how the De-ID Manager obtai
 
 **When `policyContent` is present (inline delivery):** The subextension SHALL reference a contained [DIS Policy Content Binary](StructureDefinition-DIS-PolicyContent.html) by its local fragment identifier. `Binary.data` SHALL carry the UTF-8 JSON serialization of the complete FHIR R4 Policy Contract with `Binary.contentType = application/fhir+json`. The Manager SHALL reject an unresolved reference or invalid carrier and SHALL verify the decoded Contract's canonical URL and version against the declaration.
 
-**When `policyContent` is absent (Manager-resolved):** The Manager SHALL resolve the exact declared Policy Contract by implementation-defined trusted means and verify its canonical URL and version. Both delivery modes use the [shared Contract signature requirements](volume-3.html#contract-signatures).
+**When `policyContent` is absent (Manager-resolved):** The Manager SHALL resolve the exact declared Policy Contract by implementation-defined trusted means and verify its canonical URL and version. Both delivery modes use the [shared Contract signature requirements](volume-3-contract-rules.html#contract-signatures).
 
 <a name="3pxx232-policy-validation"> </a>
 
@@ -321,7 +321,7 @@ The optional `policyContent` subextension determines how the De-ID Manager obtai
 The De-ID Manager SHALL perform the following validation on the resolved policy Contract.
 
 1. **Authorization consistency** — verify that the canonical and version declared for each set in the job submission identify the policy bound by the selected permission in the [Data Request Authorization Agreement](volume-3-authorization.html#data-request-authorization).
-2. **Integrity** — confirm that the obtained Contract's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Apply the [deployment signature requirements](volume-3.html#contract-signatures) and establish trust in the exact policy revision. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
+2. **Integrity** — confirm that the obtained Contract's canonical URL and version match the declaration and that its rules are the exact content bound to the approved version. Apply the [deployment signature requirements](volume-3-contract-rules.html#contract-signatures) and establish trust in the exact policy revision. Both modes require an unambiguous binding to the approved content, for example through an authoritative immutable version or an integrity value bound to the approval. Reject altered or ambiguous content even if its canonical URL and version match the declaration.
 3. **Schema** — verify the Contract conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Contract.applies` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 

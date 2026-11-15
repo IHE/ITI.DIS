@@ -7,73 +7,28 @@ The approved data request identifies the policy and covered inputs. The De-ID Ma
 | [Data Request Authorization](volume-3-authorization.html#data-request-authorization) | [Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) and [ODRL Agreement](odrl-content.html#odrl-authorization) | [UC-2 decoded Agreement](examples-odrl.html#decoded-authorization-example) |
 | [De-Identification Policy](volume-3-policy.html#de-identification-policy) | [Policy Contract](StructureDefinition-DIS-Policy.html) and [ODRL Policy Set](odrl-content.html#de-identification-policy-set)<br />[Normative DPV–ODRL profile](volume-3-policy.html#dpv-odrl-policy-profile) and [transformation actions](volume-3-policy.html#transformation-actions) | [UC-2 decoded Policy Set](examples-odrl.html#decoded-policy-example) |
 | [De-Identification Execution Plan](volume-3-execution-plan.html#execution-plan-content) | [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) and [ODRL Execution Plan Set](odrl-content.html#execution-plan-set) | [UC-2 decoded Execution Plan](examples-odrl.html#decoded-plan-example) |
-| [Payload Bindings](volume-3-payload-bindings.html#payload-bindings) | [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding), [input manifest](StructureDefinition-DIS-ResourceManifest.html), and [result package](StructureDefinition-DIS-ResultPackage.html)<br />[FHIR R4 DPV mapping](#fhir-r4-dpv-mapping) ([JSON-LD](bindings/dis-fhir-r4-dpv-mapping-1.jsonld), [CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv))<br />[Proposed DICOM and CDA bindings (informative)](volume-3-payload-bindings.html#3pxx33-proposed-dicom-and-cda-bindings-informative) | [UC-2 mixed-release submission](examples-grouped-fhir-job.html#grouped-fhir-submission) |
+| [Payload Bindings](volume-3-payload-bindings.html#payload-bindings) | [FHIR payload binding](volume-3-payload-bindings.html#fhir-payload-binding), [input manifest](StructureDefinition-DIS-ResourceManifest.html), and [result package](StructureDefinition-DIS-ResultPackage.html)<br />[FHIR R4 DPV mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping) ([JSON-LD](bindings/dis-fhir-r4-dpv-mapping-1.jsonld), [CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv))<br />[Proposed DICOM and CDA bindings (informative)](volume-3-payload-bindings.html#3pxx33-proposed-dicom-and-cda-bindings-informative) | [UC-2 mixed-release submission](examples-grouped-fhir-job.html#grouped-fhir-submission) |
 | [De-Identification Evidence](volume-3-evidence.html#evidence-baseline) | [DIS Evidence Provenance](StructureDefinition-DIS-Evidence.html) and [Staged Release Evidence](StructureDefinition-DIS-StagedReleaseEvidence.html) | [UC-3 pseudonymization evidence](Provenance-dis-evidence-uc3-001.html) |
 | [Protected Lookup Tables](volume-3-lookup-tables.html#protected-lookup-tables) | [Lookup Table DocumentReference](StructureDefinition-DIS-LookupTable.html) and [JSON Schema](schemas/dis-lookup-table.schema.json) | [Worked mapping examples](volume-3-lookup-tables.html#lookup-table-examples) |
-| [Shared Contract Rules](#shared-contract-rules) | [Signatures and disclosure](#contract-signatures) | [UC-4 signature verification](examples-cloud-decision-support.html#signature-verification) |
+| [Shared Contract Rules](volume-3-contract-rules.html#shared-contract-rules) | [Signatures and disclosure](volume-3-contract-rules.html#contract-signatures) | [UC-4 signature verification](examples-cloud-decision-support.html#signature-verification) |
 {: .grid}
 
 The [normative DIS ODRL content binding](odrl-content.html) defines the decoded Agreement and Sets.
 
-## Shared Contract Rules
+<a name="earlier-volume-3-section-links"> </a>
+<a name="markdown-toc-earlier-volume-3-section-links"> </a>
 
-<a name="contract-signatures"> </a>
+<details markdown="1">
+<summary>Earlier section links and published mapping rule references</summary>
 
-### Contract Signatures and Disclosure
+<ul>
+<li><a name="shared-contract-rules"> </a><a name="markdown-toc-shared-contract-rules"> </a><a href="volume-3-contract-rules.html#shared-contract-rules">Shared Contract Rules</a></li>
+<li><a name="contract-signatures"> </a><a name="contract-signatures-and-disclosure"> </a><a href="volume-3-contract-rules.html#contract-signatures">Contract Signatures and Disclosure</a></li>
+<li><a name="fhir-r4-dpv-mapping"> </a><a name="3pxx4217-fhir-r4-dpv-category-mapping"> </a><a name="markdown-toc-3pxx4217-fhir-r4-dpv-category-mapping"> </a><a href="volume-3-fhir-addressing.html#fhir-r4-dpv-mapping">FHIR R4 DPV Category Mapping</a></li>
+</ul>
 
-A DIS digital signature on a Contract SHALL be carried in [`Contract.signer.signature`]({{site.data.fhir.path}}contract-definitions.html#Contract.signer.signature). A deployment determines which signatures it requires on Data Request Authorization and Policy Contracts at ITI-x1 and on Execution Plan Contracts at ITI-x3. It configures the accepted signature format, signed bytes, trusted keys and signer authority. When a signature is required, the receiving actor SHALL reject an absent or unverifiable signature and verify that the signer is authorized to sign for `Contract.signer.party`. Apply the same rules to Requester-carried and Manager-resolved policies. The [UC-4 example](examples-cloud-decision-support.html#signature-verification) illustrates one configuration.
-
-A deployment also determines whether to make signed authorization or policy Contracts available with a job result and how to handle unavailable or restricted supporting Contracts. The Manager SHALL apply the deployment's disclosure rules together with the [current grant and recipient checks](volume-3-authorization.html#data-request-authorization) before releasing the result or any supporting Contract. When supplied as part of a result package, supporting Contracts remain outside the clinical output manifest. Transformation Provenance records processing and release evidence.
-
-<a name="fhir-r4-dpv-mapping"> </a>
-
-## 3:PXX.4.2.1.7 FHIR R4 DPV Category Mapping
-
-See [FHIR Addressing and Processing](volume-3-fhir-addressing.html) for the rest of §3:PXX.4.2.1.
-
-For the [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile), an implementation claiming FHIR R4 mapping support SHALL use the [normative FHIR R4 mapping revision 1 (JSON-LD)](bindings/dis-fhir-r4-dpv-mapping-1.jsonld). The [full CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv) and the sample below are generated from that artifact and identify the same revision. The [resource review inventory (CSV)](bindings/dis-fhir-r4-dpv-resource-review-1.csv) records the 146 concrete R4 resources and the two abstract base definitions examined for this mapping.
-
-<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE -->
-
-| Order | DPV category | Person role | FHIR R4 target |
-| --- | --- | --- | --- |
-| 1 | `pd:Name` | `disdpv:patient` | `Patient.name` |
-| 3 | `pd:Name` | `disdpv:care-provider` | `Practitioner.name` |
-| 5 | `pd:BirthDate` | `disdpv:patient` | `Patient.birthDate` |
-| 18 | `pd:Name` | `disdpv:contact-person` | `ContactDetail.name` |
-{: .grid}
-
-<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE -->
-
-The JSON-LD document's absolute `@id` is the mapping revision used in the compiled plan. Its context is embedded. The document identifies the payload binding, FHIR release, exact FHIR package, manifest format, DPV edition, and coverage rule. Each entry supplies a category IRI, role IRI, location IRI, unique positive integer expansion order, target path, selector language, role rule IRI, and expansion rule IRI. The Manager SHALL recognize the pinned mapping revision and implement its referenced rules before compilation. Changes to the mapping or its referenced rule semantics require a new revision.
-
-Read the entries by increasing `order`. Match `category` and `location` by exact IRI equality. A request for a specific role selects entries for that role and applies the entry's `roleRule`. A request for `disdpv:all-person-roles` selects every entry for the category and location and includes each instance irrespective of role. In particular, it uses `Practitioner.name` for both care-team members and other Practitioners in scope. A tuple that has no mapping is unsupported. Apply the mapping entry's `expansionRule` to produce resource-local FHIRPath selectors for the verified assignment. Preserve the policy's source rule order and the mapping's expansion order within each rule. Deduplicate identical selectors produced for the same source obligation while preserving first occurrence.
-
-<a name="fhir-r4-dpv-coverage-1"> </a>
-
-**Coverage rule, revision 1.** This mapping covers the declared structured occurrences of `pd:Name`, `pd:Identifier`, and `pd:BirthDate` in a versioned R4 `dis-resource-list` assignment. Verify the resource type, release, and version for each selected resource. Logical IDs SHALL be unique within each resource type in the assignment. The review uses the base definitions in `hl7.fhir.r4.core#4.0.1` and evaluates inherited declarations at their defining type. Reusable datatype entries appear once in the mapping. A generated execution plan still names concrete use sites as required by the assignment.
-
-The mapping covers whole `HumanName` and `Identifier` occurrences where those types are selected. It covers a declared date of birth on `FamilyMemberHistory.born[x]` through `ofType(date)`. A birth period or textual estimate, references and their displays or logical identifiers, narrative, arbitrary string values, generic choice values, contained or embedded resources, and extensions require separate coverage when in scope. Business identifiers for encounters, studies, plans, and other records are distinct from identifiers assigned to people. `Resource.id` is a logical record key. The review inventory counts each declaration at its defining resource and lists other name, identifier, and birth-date candidates separately from the mapped paths. A candidate may describe a non-person entity or need context that the base definition does not provide. The Manager SHALL fail compilation if the authorization scope requires coverage outside the mapping. An absent optional mapped element contributes zero matches.
-
-<a name="fhir-r4-dpv-declared-role-1"> </a>
-
-**Declared role rule, revision 1.** The path definition establishes the role. For example, `Coverage.subscriberId` identifies the subscriber, and `FamilyMemberHistory.name` names the relative. A `Person` record describes the person in that record. It does not supply the patient or care-provider role for other resources linked to the same person.
-
-<a name="fhir-r4-dpv-care-team-role-1"> </a>
-
-**Care-team role rule, revision 1.** For a role-specific care-provider rule, verify that the approved scope identifies the active CareTeam records that collectively provide the complete in-scope care roster. Each applicable record links its `subject` to an assigned Patient and its clinician `participant.member` directly to an assigned Practitioner. Resolve both links against the verified immutable manifest entries. Membership in any of these care teams qualifies the Practitioner's mapped occurrences in the care-provider role. An incomplete roster, ambiguous identity, or unresolved relevant reference SHALL fail compilation when it could change the winning rule or action for a selected occurrence. A name on a Patient resource remains in the patient role even when a Practitioner resource describes the same person.
-
-<a name="fhir-r4-dpv-local-path-1"> </a>
-
-**Resource-local expansion rule, revision 1.** Emit the entry's FHIRPath when its root resource type is assigned. If the care-team role rule applies, qualify the resource root by each matching Practitioner ID in manifest order, as in `Practitioner.where(id = 'provider-example').name`. A complete roster with no qualifying Practitioner yields zero matches. If a supported policy rule generates no selector for an assignment, it contributes no compiled obligation. If this leaves the entire rule set empty, compile the first applicable resource-rooted entry in mapping order with `where(false)` on its resource root. For a rule set with only the reusable datatype entry, use `ActivityDefinition.where(false).contact.name` as the zero-match selector. This preserves the nonempty plan structure and makes no change to the assigned content.
-
-<a name="fhir-r4-dpv-contact-detail-1"> </a>
-
-**ContactDetail expansion rule, revision 1.** For each assigned resource type, read its effective R4 element definitions and find the local paths whose only declared type is `ContactDetail`. Include the paths inherited by that resource once. Use the resource's concrete type as the root, append `.name`, and emit the resulting FHIRPath selectors in lexicographic order. For example, `Organization.contact.name` comes from its own declared entry, while `ActivityDefinition.contact.name` expands from the shared `ContactDetail.name` entry. Generic choice elements and locations within embedded resources remain outside this rule.
-
-## Earlier Volume 3 section links
-
-### Earlier links for Data Request Authorization
+<a name="earlier-links-for-data-request-authorization"> </a>
+<p><strong>Earlier links for Data Request Authorization</strong></p>
 
 <ul>
 <li><a name="data-request-authorization"> </a><a name="3pxx6-data-request-authorization"> </a><a name="3pxx1-data-request-authorization"> </a><a name="markdown-toc-3pxx1-data-request-authorization"> </a><a href="volume-3-authorization.html#3pxx1-data-request-authorization">3:PXX.1 Data Request Authorization</a></li>
@@ -82,7 +37,8 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="job-result-recipient"> </a><a name="result-recipient-eligibility"> </a><a name="3pxx13-result-recipient-eligibility-and-release"> </a><a href="volume-3-authorization.html#3pxx13-result-recipient-eligibility-and-release">3:PXX.1.3 Result Recipient Eligibility and Release</a></li>
 </ul>
 
-### Earlier links for De-Identification Policy
+<a name="earlier-links-for-de-identification-policy"> </a>
+<p><strong>Earlier links for De-Identification Policy</strong></p>
 
 <ul>
 <li><a name="de-identification-policy"> </a><a name="policy-content-module"> </a><a name="3pxx2-dis-policy-content-module"> </a><a name="3pxx1-de-identification-policy"> </a><a name="3pxx2-de-identification-policy"> </a><a name="markdown-toc-3pxx2-de-identification-policy"> </a><a href="volume-3-policy.html#3pxx2-de-identification-policy">3:PXX.2 De-Identification Policy</a></li>
@@ -113,7 +69,8 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="3pxx25-policy-lifecycle"> </a><a name="3pxx15-policy-lifecycle"> </a><a name="3pxx16-policy-lifecycle"> </a><a href="volume-3-policy.html#3pxx25-policy-lifecycle">3:PXX.2.5 Policy Lifecycle</a></li>
 </ul>
 
-### Earlier links for De-Identification Execution Plan
+<a name="earlier-links-for-de-identification-execution-plan"> </a>
+<p><strong>Earlier links for De-Identification Execution Plan</strong></p>
 
 <ul>
 <li><a name="execution-plan-content"> </a><a name="3pxx2-de-identification-execution-plan"> </a><a name="3pxx3-de-identification-execution-plan"> </a><a name="markdown-toc-3pxx3-de-identification-execution-plan"> </a><a href="volume-3-execution-plan.html#3pxx3-de-identification-execution-plan">3:PXX.3 De-Identification Execution Plan</a></li>
@@ -127,7 +84,8 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="3pxx143-execution-plan-example"> </a><a name="3pxx213-execution-plan-example"> </a><a name="3pxx34-execution-plan-examples"> </a><a href="volume-3-execution-plan.html#3pxx34-execution-plan-examples">3:PXX.3.4 Execution Plan Examples</a></li>
 </ul>
 
-### Earlier links for Payload Bindings
+<a name="earlier-links-for-payload-bindings"> </a>
+<p><strong>Earlier links for Payload Bindings</strong></p>
 
 <ul>
 <li><a name="payload-bindings"> </a><a name="3pxx3-payload-bindings"> </a><a name="3pxx4-payload-bindings"> </a><a name="markdown-toc-3pxx4-payload-bindings"> </a><a href="volume-3-payload-bindings.html#3pxx4-payload-bindings">3:PXX.4 Payload Bindings</a></li>
@@ -142,7 +100,8 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="mixed-payload-walkthrough"> </a><a href="volume-3-payload-bindings.html#mixed-payload-walkthrough">3:PXX.4.3 Proposed DICOM and CDA Bindings (Informative)</a></li>
 </ul>
 
-### Earlier links for FHIR Addressing and Processing
+<a name="earlier-links-for-fhir-addressing-and-processing"> </a>
+<p><strong>Earlier links for FHIR Addressing and Processing</strong></p>
 
 <ul>
 <li><a name="3pxx11-cross-version-payload-support"> </a><a name="cross-version-payload"> </a><a name="content-model"> </a><a name="3pxx12-content-model"> </a><a name="3pxx322-content-model"> </a><a name="3pxx321-cross-version-payload-support"> </a><a name="3pxx321-addressing-and-processing"> </a><a name="3pxx421-addressing-and-processing"> </a><a href="volume-3-fhir-addressing.html#3pxx421-addressing-and-processing">3:PXX.4.2.1 Addressing and Processing</a></li>
@@ -157,7 +116,8 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="3pxx22-fhir-reference-integrity"> </a><a name="fhir-reference-integrity"> </a><a href="volume-3-fhir-addressing.html#3pxx22-fhir-reference-integrity">FHIR reference integrity</a></li>
 </ul>
 
-### Earlier links for FHIR Input and Result Delivery
+<a name="earlier-links-for-fhir-input-and-result-delivery"> </a>
+<p><strong>Earlier links for FHIR Input and Result Delivery</strong></p>
 
 <ul>
 <li><a name="data-plane-access"> </a><a name="obtaining-processing-targets"> </a><a name="3pxx16-obtaining-processing-targets"> </a><a name="3pxx323-obtaining-processing-targets"> </a><a name="3pxx322-input-and-result-delivery"> </a><a name="3pxx422-input-and-result-delivery"> </a><a href="volume-3-fhir-delivery.html#3pxx422-input-and-result-delivery">3:PXX.4.2.2 Input and Result Delivery</a></li>
@@ -179,7 +139,8 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="bulk-result-download-authorization"> </a><a href="volume-3-fhir-delivery.html#bulk-result-download-authorization">Bulk job result downloads</a></li>
 </ul>
 
-### Earlier links for De-Identification Evidence
+<a name="earlier-links-for-de-identification-evidence"> </a>
+<p><strong>Earlier links for De-Identification Evidence</strong></p>
 
 <ul>
 <li><a name="evidence-baseline"> </a><a name="3pxx15-evidence-baseline"> </a><a name="3pxx4-de-identification-evidence"> </a><a name="3pxx5-de-identification-evidence"> </a><a name="markdown-toc-3pxx5-de-identification-evidence"> </a><a href="volume-3-evidence.html#3pxx5-de-identification-evidence">3:PXX.5 De-Identification Evidence</a></li>
@@ -194,10 +155,17 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 <li><a name="staged-release-evidence"> </a><a name="3pxx46-staged-release-evidence"> </a><a name="3pxx56-staged-release-evidence"> </a><a href="volume-3-evidence.html#3pxx56-staged-release-evidence">3:PXX.5.6 Staged Release Evidence</a></li>
 </ul>
 
-### Earlier links for Protected Lookup Tables
+<a name="earlier-links-for-protected-lookup-tables"> </a>
+<p><strong>Earlier links for Protected Lookup Tables</strong></p>
 
 <ul>
 <li><a name="3pxx17-reversible-lookup-table"> </a><a name="3pxx5-reversible-lookup-table"> </a><a name="protected-lookup-tables"> </a><a name="3pxx6-protected-lookup-tables"> </a><a name="markdown-toc-3pxx6-protected-lookup-tables"> </a><a href="volume-3-lookup-tables.html#3pxx6-protected-lookup-tables">3:PXX.6 Protected Lookup Tables</a></li>
 <li><a name="3pxx51-lookup-table-structure-and-handling"> </a><a name="3pxx61-lookup-table-structure-and-handling"> </a><a href="volume-3-lookup-tables.html#3pxx61-lookup-table-structure-and-handling">3:PXX.6.1 Lookup Table Structure and Handling</a></li>
 <li><a name="3pxx18-worked-mapping-examples"> </a><a name="3pxx51-worked-mapping-examples"> </a><a name="3pxx52-worked-mapping-examples"> </a><a name="lookup-table-examples"> </a><a name="3pxx62-worked-mapping-examples"> </a><a href="volume-3-lookup-tables.html#3pxx62-worked-mapping-examples">3:PXX.6.2 Worked Mapping Examples</a></li>
 </ul>
+
+**FHIR R4 DPV mapping revision 1 rule definitions**
+
+{% include fhir-r4-dpv-mapping-rules.md %}
+
+</details>
