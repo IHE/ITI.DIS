@@ -1,17 +1,82 @@
-Volume 3 defines the content used by the DIS workflow. [Volume 1](volume-1.html) describes the actors and their obligations. [Volume 2](volume-2.html) specifies the transactions that carry the content.
+Volume 3 defines the DIS content artifacts, their carriers, and their validation rules. [Volume 1](volume-1.html) describes the actors and options. [Volume 2](volume-2.html) defines the exchanges that carry these artifacts, including admission, dispatch, and result retrieval.
 
-- The De-ID Manager turns an approved policy into an execution plan by resolving semantic groups or validating concrete selectors against the selected payload binding and release.
-- DIS actors use that binding to package or locate source and de-identified data for exchange through the FHIR R4 protocol.
+The approved data request identifies the policy and covered inputs. The De-ID Manager compiles the policy for the declared payload binding and release. The De-Identifier applies the plan to the assigned content and returns validated output and evidence. The Integrated actor performs those functions locally when it claims standalone conformance.
 
-| Topic | Content defined here |
-|---|---|
-| [Data Request Authorization](#data-request-authorization) | Organizational grant checked at admission and result release |
-| [De-Identification Policy](#de-identification-policy) | Approved policy artifact, transformation actions, rule sets, validation, and compilation |
-| [De-Identification Execution Plan](#execution-plan-content) | Resolved task rules and FHIR integrity constraints |
-| [Payload Bindings](#payload-bindings) | Common manifest contract, FHIR payload releases, and links to proposed native-format bindings |
-| [De-Identification Evidence](#evidence-baseline) | Minimum evidence and its FHIR R4 Provenance representation |
-| [Reversible Lookup Table](#3pxx5-reversible-lookup-table) | Protected patient identifier mappings and examples |
+| Content specification | Carrier or normative binding | Worked example |
+|---|---|---|
+| [Data Request Authorization](#data-request-authorization) | [Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) and [ODRL Agreement](odrl-content.html#odrl-authorization) | [UC-2 decoded Agreement](odrl-content.html#decoded-authorization-example) |
+| [De-Identification Policy](#de-identification-policy) | [Policy Contract](StructureDefinition-DIS-Policy.html) and [ODRL Policy Set](odrl-content.html#de-identification-policy-set) | [UC-2 decoded Policy Set](odrl-content.html#decoded-policy-example) |
+| [De-Identification Execution Plan](#execution-plan-content) | [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) and [ODRL Execution Plan Set](odrl-content.html#execution-plan-set) | [UC-2 decoded Execution Plan](odrl-content.html#decoded-plan-example) |
+| [Payload Bindings](#payload-bindings) | [FHIR payload binding](#fhir-payload-binding), [input manifest](StructureDefinition-DIS-ResourceManifest.html), and [result package](StructureDefinition-DIS-ResultPackage.html) | [UC-2 mixed-release submission](examples-grouped-fhir-job.html#grouped-fhir-submission) |
+| [De-Identification Evidence](#evidence-baseline) | [DIS Evidence Provenance](StructureDefinition-DIS-Evidence.html) and [Staged Release Evidence](StructureDefinition-DIS-StagedReleaseEvidence.html) | [UC-3 pseudonymization evidence](Provenance-dis-evidence-uc3-001.html) |
+| [Protected Lookup Tables](#protected-lookup-tables) | [Lookup Table DocumentReference](StructureDefinition-DIS-LookupTable.html) and [JSON Schema](schemas/dis-lookup-table.schema.json) | [Worked mapping examples](#lookup-table-examples) |
 {: .grid}
+
+The [normative DIS ODRL content binding](odrl-content.html) defines the decoded Agreement and Sets. The [shared Contract rules](#contract-signatures) cover deployment-configured signatures and disclosure.
+
+<a name="data-request-authorization"> </a>
+
+<a name="3pxx6-data-request-authorization"> </a>
+
+## 3:PXX.1 Data Request Authorization
+
+This section defines the organizational grant, how the De-ID Manager establishes coverage for a job, and who may receive the result. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) specifies admission and [ITI-x4](volume-2.html#23x4-retrieve-job-output-iti-x4) specifies asynchronous retrieval.
+
+<a name="data-request-authorization-contract"> </a>
+
+<a name="3pxx61-data-request-authorization-contract"> </a>
+
+### 3:PXX.1.1 Data Request Authorization Contract
+
+The [DIS Data Request Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) carries the organizational grant used by ITI-x1. The Requester SHALL supply an absolute HTTPS FHIR version-specific reference ending in `/Contract/{id}/_history/{vid}`. The Manager SHALL verify that the resolved Contract's `id` and `meta.versionId` match the reference, and that a trusted authority issued the embedded Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued Agreement bytes. See the [decoded ODRL Agreement example](odrl-content.html#decoded-authorization-example). Apply the [shared Contract signature rules](#contract-signatures).
+
+The Contract SHALL carry one `rule.contentAttachment` with `contentType` set to `application/ld+json` and the complete issued [DIS ODRL Agreement](odrl-content.html#odrl-authorization) in `data` as Base64-encoded UTF-8 JSON-LD. The attachment SHALL omit `url`. The Contract publisher SHALL protect the Contract, its narrative, and its search results under the authorization governing discovery of the embedded Agreement. See [FHIR R4 Contract.rule]({{site.data.fhir.path}}contract-definitions.html#Contract.rule).
+
+The publisher SHALL derive the mirrored fields from the embedded Agreement revision and verify the following mappings before making the Contract available for submission, display or search.
+
+| Contract element | Source and interpretation |
+| --- | --- |
+| `identifier` | Agreement revision `uid`, with `system = urn:ietf:rfc:3986`. |
+| `title` | Display title supplied by the publisher. |
+| `authority` | The common Agreement assigner as an Organization reference. Use the assigner IRI in `Reference.identifier.value` with `system = urn:ietf:rfc:3986`. A literal Organization reference may also be supplied when it identifies the same organization. |
+| `issued` | Issuance timestamp when supplied by the issuing authority. |
+| `term.identifier` | One term per Agreement permission, keyed by the permission `uid` using `system = urn:ietf:rfc:3986`. |
+| [DIS Permission Validity](StructureDefinition-dis-permission-validity.html) on `term` | Exact `inclusiveStart` and `exclusiveEnd` from the permission. The extension preserves the Agreement's exclusive upper bound. FHIR R4 `Period.end` is inclusive. |
+| `term.offer.party` | One Organization reference with role `requester` for the assignee and one with role `result-recipient` for the authorized recipient. Use the same IRI identifier form as for `authority`. |
+| [DIS Approved Purpose](StructureDefinition-dis-approved-purpose.html) on `term` | Exact approved purpose IRI. |
+| [DIS Purpose Classification](StructureDefinition-dis-purpose-classification.html) on `term` | One Coding for each distinct ISO classification code when supplied in the permission. Copy the system, edition, and code. |
+| [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact approved policy URL and version joined by a vertical bar. |
+
+The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. The publisher SHALL correct a Contract that fails verification before making it available for use. The Manager SHALL verify that `Contract.identifier.value` matches the embedded Agreement's `uid`. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
+
+The Manager SHALL use the embedded Agreement to evaluate the job's authorization. The Contract fields that mirror the Agreement support display and search.
+
+FHIR R4 defines [Contract search parameters]({{site.data.fhir.path}}contract.html#search) including `identifier`, `authority`, and `issued`. If the server indexes the logical Organization identifier for `authority`, declare the supported search behavior. Queries on mirrored permission terms, such as approved purpose or policy revision, require separately defined and advertised search parameters. A query that matches a combination of permission fields would need to correlate those fields within the same term.
+
+See the [UC-2 Contract example](Contract-grouped-fhir-authorization-contract.html), the [readable Agreement](odrl-content.html#decoded-authorization-example), and the [Contract verification checks](testplan.html#authorization-contract-validation).
+
+<a name="grant-validation-and-scope"> </a>
+
+### 3:PXX.1.2 Grant Validation and Approved Scope
+
+Before acceptance or synchronous processing the Manager SHALL establish that the grant is currently effective. The Manager SHALL use a trusted status source for the exact Agreement revision. The method for obtaining status is deployment-defined. The Manager SHALL establish current effectiveness independently of the historical Contract and its `status`. If status cannot be established, or if the grant is expired, revoked or superseded, the Manager SHALL deny the job. The Manager SHALL check current authorization again before releasing the result, evidence or download access, including on retries and asynchronous retrieval.
+
+For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy. An optional [purpose classification](odrl-content.html#purpose-classification) records the issuer’s ISO/TS 14265:2024 classification. The Manager SHALL evaluate the specific approved purpose IRI in the Agreement.
+
+<a name="job-result-recipient"> </a>
+
+<a name="result-recipient-eligibility"> </a>
+
+### 3:PXX.1.3 Result Recipient Eligibility and Release
+
+Before accepting an asynchronous job or beginning synchronous processing, the Manager SHALL establish that all selected permissions use the same recipient organization IRI and that the chosen processing mode provides an eligible caller for the complete result.
+
+- **Synchronous job.** The authenticated submitting caller SHALL be authorized to receive the complete result on behalf of the recipient organization.
+- **Asynchronous job.** The Manager SHALL establish that the original Requester or an explicitly authorized retrieval delegate is authorized to receive the complete result on behalf of the recipient organization. The Manager uses deployment-defined trusted information to establish the caller's authority and any delegation. Agreement recipient status alone grants no access to the job.
+
+If either admission check fails, the Manager SHALL return HTTP 403 with an R4 `OperationOutcome` before accepting the job or dispatching work. Each admitted job has one release audience across all of its sets.
+
+Before returning or enabling access to a result, the Manager SHALL verify that the grant is still effective and that the actual caller remains entitled to receive every set on behalf of that recipient organization. Apply this check to synchronous responses, recovery and replay of synchronous results, and asynchronous retrieval. The Manager SHALL enforce all applicable destination restrictions on direct and referenced access. When a result service controls retrieval, the Manager SHALL ensure that the service enforces those restrictions and current release authorization. If the caller fails a release check, withhold every set, its evidence and download access from that caller.
 
 <a name="de-identification-policy"> </a>
 
@@ -19,9 +84,11 @@ Volume 3 defines the content used by the DIS workflow. [Volume 1](volume-1.html)
 
 <a name="3pxx2-dis-policy-content-module"> </a>
 
-## 3:PXX.1 De-Identification Policy
+<a name="3pxx1-de-identification-policy"> </a>
 
-This section defines the structure, delivery, validation, and compilation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Contract carrier, delivery modes, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more payload-specific execution plans (see [§3:PXX.2.1](#3pxx21-execution-plan-format)) before dispatching tasks.
+## 3:PXX.2 De-Identification Policy
+
+This section defines the structure, delivery, and validation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Contract carrier, delivery modes, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more [payload-specific execution plans](#policy-compilation) before dispatching tasks.
 
 The policy artifact is an HL7 FHIR R4 Contract resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
 
@@ -31,7 +98,11 @@ The [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) carries the pol
 
 <a name="3pxx11-policy-library-resource-structure"> </a>
 
-### 3:PXX.1.1 Policy Contract Resource Structure
+<a name="3pxx11-policy-contract-resource-structure"> </a>
+
+<a name="policy-contract-structure"> </a>
+
+### 3:PXX.2.1 Policy Contract Resource Structure
 
 A DIS policy is carried in a profiled FHIR R4 `Contract`. An authorization permission incorporates the approved policy revision by its exact `Contract.url|Contract.version`. The Manager verifies that the Set revision `uid` matches `Contract.identifier.value`. The full [ODRL Policy Set](odrl-content.html#de-identification-policy-set) is carried inline. The same policy revision can be approved by multiple Agreements.
 
@@ -52,7 +123,9 @@ A DIS policy is carried in a profiled FHIR R4 `Contract`. An authorization permi
 
 <a name="3pxx22-transformation-actions"> </a>
 
-### 3:PXX.1.2 Transformation Actions
+<a name="3pxx12-transformation-actions"> </a>
+
+### 3:PXX.2.2 Transformation Actions
 
 Policy rules select transformation actions. The compiled execution plan applies the same action definitions to concrete targets. This section defines the core action family (`core`) for DIS-FHIR-Payload. The [processing capability requirements](#fhir-processing-capabilities) define how a De-Identifier or Integrated actor supports and declares the core actions.
 
@@ -60,11 +133,13 @@ Policy rules select transformation actions. The compiled execution plan applies 
 
 <a name="3pxx221-action-catalog"> </a>
 
-#### 3:PXX.1.2.1 Action Catalog
+<a name="3pxx121-action-catalog"> </a>
 
-Table 3:PXX.1.2-1 lists the core transformation actions.
+#### 3:PXX.2.2.1 Action Catalog
 
-<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.1.2-1: Core Transformation Actions</strong></p>
+Table 3:PXX.2.2-1 lists the core transformation actions.
+
+<p id="tPXX.1.2-1" class="tableTitle"><strong>Table 3:PXX.2.2-1: Core Transformation Actions</strong></p>
 
 | Action Code | Description | Applicable HL7 FHIR Datatypes | Deterministic | Parameters |
 |-------------|-------------|-------------------------------|---------------|------------|
@@ -81,7 +156,7 @@ Table 3:PXX.1.2-1 lists the core transformation actions.
 
 Each DIS action code carries a `technique` property that identifies its ISO/IEC 20889:2018 classification. The classifications describe the techniques behind the executable DIS actions. The action design draws on RSNA CTP DICOM Anonymizer function patterns.
 
-<p id="tPXX.1.2-2" class="tableTitle"><strong>Table 3:PXX.1.2-2: Core Transformation Actions — ISO/IEC 20889 Classification</strong></p>
+<p id="tPXX.1.2-2" class="tableTitle"><strong>Table 3:PXX.2.2-2: Core Transformation Actions — ISO/IEC 20889 Classification</strong></p>
 
 | ISO/IEC 20889 §9 Category | ISO Technique | DIS Action | Function |
 |---|---|---|---|
@@ -102,7 +177,9 @@ ISO/IEC 20889 categories outside the scope of this supplement include statistica
 
 <a name="3pxx222-action-definitions"> </a>
 
-#### 3:PXX.1.2.2 Action Definitions
+<a name="3pxx122-action-definitions"> </a>
+
+#### 3:PXX.2.2.2 Action Definitions
 
 ##### remove
 
@@ -129,7 +206,7 @@ R02: target Patient.identifier         action remove
 
 The `hash` action computes a SHA-256 digest. The `algorithm` parameter uses the `SHA-256` code from HL7's [IntegrityCheckAlgorithm CodeSystem](https://terminology.hl7.org/CodeSystem-v3-IntegrityCheckAlgorithm.html). The `mode` parameter selects `salted` or `unsalted`.
 
-For patient business identifiers, the rule SHALL use `salted` and declare `pseudonymSystem`. Apply the patient identifier recipe in [§3:PXX.1.2.3](#3pxx123-patient-identifier-pseudonymization). Generic value rules hash the exact original string, including a selected displayable string sub-element where applicable. The unsalted message is the UTF-8 serialization of `["DIS-value-digest-v1", value]`. The salted message is the UTF-8 serialization of `["DIS-value-digest-v1", scope.type, scope.identifier.system, scope.identifier.value, value]` followed by the raw scope salt. Both modes use the serialization and output rules in §3:PXX.1.2.3. An unsalted rule is unsuitable for patient business identifiers because an observer can test guesses against the digest.
+For patient business identifiers, the rule SHALL use `salted` and declare `pseudonymSystem`. Apply the patient identifier recipe in [patient identifier pseudonymization](#3pxx123-patient-identifier-pseudonymization). Generic value rules hash the exact original string, including a selected displayable string sub-element where applicable. The unsalted message is the UTF-8 serialization of `["DIS-value-digest-v1", value]`. The salted message is the UTF-8 serialization of `["DIS-value-digest-v1", scope.type, scope.identifier.system, scope.identifier.value, value]` followed by the raw scope salt. Both modes use the serialization and output rules in §3:PXX.1.2.3. An unsalted rule is unsuitable for patient business identifiers because an observer can test guesses against the digest.
 
 For `HumanName`, hash `family`, `given`, `prefix`, `suffix` and `text` individually. Preserve `use` and remove `period`. For an `Identifier` governed by a generic hash rule, replace `value` with the digest and set `system` to the rule's required `pseudonymSystem`. Preserve `type`, `use` and `period`, and remove `assigner`.
 
@@ -177,7 +254,9 @@ The `redact` action removes the narrative content (`DomainResource.text`) from a
 
 <a name="3pxx123-baseline-patient-pseudonym-derivation"> </a>
 
-#### 3:PXX.1.2.3 Patient Identifier Pseudonymization
+<a name="3pxx123-patient-identifier-pseudonymization"> </a>
+
+#### 3:PXX.2.2.3 Patient Identifier Pseudonymization
 
 Salted `hash` derives a pseudonym from the source identifier and linkage scope. In Manager-managed reversible processing, the Manager retains the generated mapping for authorized reversal. Lookup-backed `replace` assigns a pseudonym from a Requester-supplied mapping. Optional [AES-FF1 encryption](#encryption-based-patient-pseudonymization) lets the Manager recover the resolved identifier when authorized.
 
@@ -201,7 +280,7 @@ Salted test vector. The exact UTF-8 message is `["DIS-patient-identifier-v1","so
 
 **Lookup-backed assignment.**
 
-The De-Identifier uses the supplied [lookup table](#3pxx5-reversible-lookup-table) to replace `Patient.identifier`. `sourceSystem` and `sourceValue` are the original `Identifier.system` and `Identifier.value`. `targetSystem` and `targetValue` are the pseudonym identifier pair. The De-Identifier SHALL match both source fields exactly, without implicit normalization, and replace both target fields. A supplied table may map multiple approved source identifiers to one assigned pseudonym for the same patient. The table authority and Manager SHALL ensure that a shared target pair is authorized for the same patient. A missing or conflicting source mapping SHALL fail the job without partial output.
+The De-Identifier uses the supplied [lookup table](#protected-lookup-tables) to replace `Patient.identifier`. `sourceSystem` and `sourceValue` are the original `Identifier.system` and `Identifier.value`. `targetSystem` and `targetValue` are the pseudonym identifier pair. The De-Identifier SHALL match both source fields exactly, without implicit normalization, and replace both target fields. A supplied table may map multiple approved source identifiers to one assigned pseudonym for the same patient. The table authority and Manager SHALL ensure that a shared target pair is authorized for the same patient. A missing or conflicting source mapping SHALL fail the job without partial output.
 
 <a name="encryption-based-patient-pseudonymization"> </a>
 
@@ -215,15 +294,15 @@ A reversible policy MAY use the optional `encrypt` action to pseudonymize a sele
 
 <a name="3pxx13-policy-rules-json-structure"> </a>
 
-### 3:PXX.1.3 Policy Rules and Ordering
+<a name="3pxx13-policy-rules-and-ordering"> </a>
+
+### 3:PXX.2.3 Policy Rules and Ordering
 
 The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
 
 A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement, encryption, salted hashing, or date shifting without an explicit consistency scope. See the [ODRL action parameters](odrl-content.html#action-parameters). Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
 
-The Manager SHALL dispatch each stage after validating all results from the preceding stage. A later stage SHALL receive the validated outputs from the preceding stage, together with any unchanged resources needed for its authorized input set. It SHALL NOT receive the original versions of transformed resources or the preceding stage's protected mappings unless separately required and authorized for its task. The last stage's validated output, including unchanged resources, is the basis for the released set.
-
-Within a stage, the Manager SHALL process ruleSets in the listed order for any input resource governed by more than one ruleSet. Each subsequent ruleSet receives the latest validated version of that resource. The Manager MAY run tasks concurrently on disjoint inputs when their transformations cannot affect each other's references or results. If it cannot determine an unambiguous input or final result, it SHALL reject the plan before dispatch. When `stages` is absent, apply the same rules in one stage using the order of `ruleSets`.
+The ODRL Policy Set declares ruleSet order and any stage sequence. The Manager applies this order under the [staged job execution rules](volume-2.html#staged-job-execution).
 
 <a name="3pxx221-policy-rules-examples"> </a>
 
@@ -239,7 +318,7 @@ See the [decoded ODRL Policy Set](odrl-content.html#decoded-policy-example) for 
 
 <a name="3pxx14-policy-delivery-and-validation"> </a>
 
-### 3:PXX.1.4 Policy Delivery and Validation
+### 3:PXX.2.4 Policy Delivery and Validation
 
 A de-identification policy is a reusable knowledge artifact. The same policy may be approved for multiple independent data requests. Each payload-set input in the ITI-x1 request declares the approved policy as a versioned canonical in the `policy` subextension. The `authorization` input provides evidence that the data governance authority approved the data request and that specific policy. The De-ID Manager validates that the declared policy matches the policy approved in the authorization.
 
@@ -247,7 +326,9 @@ A de-identification policy is a reusable knowledge artifact. The same policy may
 
 <a name="3pxx131-policy-content-resolution"> </a>
 
-#### 3:PXX.1.4.1 Policy Content Resolution
+<a name="3pxx141-policy-content-resolution"> </a>
+
+#### 3:PXX.2.4.1 Policy Content Resolution
 
 <a name="approved-policy-access"> </a>
 
@@ -257,21 +338,15 @@ The optional `policyContent` subextension determines how the De-ID Manager obtai
 
 **When `policyContent` is present (inline delivery):** The subextension SHALL reference a contained [DIS Policy Content Binary](StructureDefinition-DIS-PolicyContent.html) by its local fragment identifier. `Binary.data` SHALL carry the UTF-8 JSON serialization of the complete FHIR R4 Policy Contract with `Binary.contentType = application/fhir+json`. The Manager SHALL reject an unresolved reference or invalid carrier and SHALL verify the decoded Contract's canonical URL and version against the declaration.
 
-**When `policyContent` is absent (Manager-resolved):** The Manager SHALL resolve the exact declared Policy Contract by implementation-defined trusted means and verify its canonical URL and version. Both delivery modes use the same applicable deployment signature requirements.
-
-<a name="contract-signatures"> </a>
-
-#### Contract signatures and disclosure
-
-A DIS digital signature on a Contract SHALL be carried in [`Contract.signer.signature`]({{site.data.fhir.path}}contract-definitions.html#Contract.signer.signature). A deployment determines which signatures it requires on Data Request Authorization and Policy Contracts at ITI-x1 and on Execution Plan Contracts at ITI-x3. It configures the accepted signature format, signed bytes, trusted keys and signer authority. When a signature is required, the receiving actor SHALL reject an absent or unverifiable signature and verify that the signer is authorized to sign for `Contract.signer.party`. Apply the same rules to Requester-carried and Manager-resolved policies. The [UC-4 example](examples-cloud-decision-support.html#signature-verification) illustrates one configuration.
-
-A deployment also determines whether to make signed authorization or policy Contracts available with a job result and how to handle unavailable or restricted supporting Contracts. The Manager SHALL apply the deployment's disclosure rules together with the [current grant and recipient checks](#data-request-authorization) before releasing the result or any supporting Contract. When supplied as part of a result package, supporting Contracts remain outside the clinical output manifest. Transformation Provenance records processing and release evidence.
+**When `policyContent` is absent (Manager-resolved):** The Manager SHALL resolve the exact declared Policy Contract by implementation-defined trusted means and verify its canonical URL and version. Both delivery modes use the [shared Contract signature requirements](#contract-signatures).
 
 <a name="3pxx232-policy-validation"> </a>
 
 <a name="3pxx132-policy-validation"> </a>
 
-#### 3:PXX.1.4.2 Policy Validation
+<a name="3pxx142-policy-validation"> </a>
+
+#### 3:PXX.2.4.2 Policy Validation
 
 The De-ID Manager SHALL perform the following validation on the resolved policy Contract.
 
@@ -280,11 +355,55 @@ The De-ID Manager SHALL perform the following validation on the resolved policy 
 3. **Schema** — verify the Contract conforms to the [DIS Policy profile](StructureDefinition-DIS-Policy.html) and the decoded policy rules conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Also verify unique ruleSet, rule, and stage IDs in their applicable scopes, resolve all stage references, and check that each ruleSet appears exactly once when stages are declared. Validate target paths or semantic groups, action applicability, and parameter values that depend on the target, approved scope, or declared capabilities.
 4. **Currency** — verify the current date falls within `Contract.applies` and that the policy has not been revoked. Revocation checking uses the deployment's implementation-defined policy trust and lifecycle mechanisms.
 
+<a name="3pxx25-policy-lifecycle"> </a>
+
+<a name="3pxx15-policy-lifecycle"> </a>
+
+<a name="3pxx16-policy-lifecycle"> </a>
+
+### 3:PXX.2.5 Policy Lifecycle
+
+DIS does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
+
+The De-ID Manager SHALL admit an issued policy with `Contract.status = policy` only while `Contract.applies` covers the current time and the Manager can establish that the policy revision has not been revoked. An authorized, immutable policy version can be reused across jobs.
+
+<a name="execution-plan-content"> </a>
+
+<a name="3pxx2-de-identification-execution-plan"> </a>
+
+## 3:PXX.3 De-Identification Execution Plan
+
+The execution plan is the task-specific artifact produced from a validated policy. The [policy compilation rules](#policy-compilation) define how policy rules become concrete payload selectors. The plan uses the [transformation actions](#transformation-actions) defined by the policy section. [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3) defines how the Manager dispatches the plan.
+
+<a name="execution-plan-format"> </a>
+
+<a name="3pxx14-execution-plan-format"> </a>
+
+<a name="3pxx21-execution-plan-format"> </a>
+
+### 3:PXX.3.1 Execution Plan Format
+
+An execution plan is a task-specific FHIR R4 [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html). It carries a compiled [ODRL Set](odrl-content.html#execution-plan-set), uses the Set revision `uid` as its identifier, and carries the Manager in `authority` and the assigned De-Identifier in `subject`, both as Organization references. It supplies `id`, `meta.versionId`, `url`, `version`, `name`, and `issued`. The Set is carried in one inline `rule.contentAttachment` as Base64-encoded UTF-8 JSON-LD with content type `application/ld+json`. Apply the [shared Contract signature rules](#contract-signatures).
+
+<a name="3pxx141-library-resource-structure"> </a>
+
+<a name="3pxx211-execution-plan-contract-structure"> </a>
+
+#### 3:PXX.3.1.1 Execution Plan Contract Structure
+
+<a name="execution-plan-source-policy"> </a>
+
+The plan SHALL identify its source policy with exactly one `Contract.supportingInfo` reference to the Policy Contract, using an absolute HTTPS URL ending in `/Contract/{id}/_history/{vid}`. Before dispatch, the Manager SHALL verify that this reference identifies the exact Policy Contract approved by the selected permission. The Manager SHALL retain the exact authorization Contract revision and permission `uid` with the assignment. The De-Identifier SHALL confirm that the assignment parties match the plan and copy the source policy reference URL into the task's `Provenance.policy`. The De-Identifier can use the reference for evidence without retrieving the policy. The Manager SHALL verify that returned evidence names the same policy version before accepting or releasing the result. The reference SHALL exclude credentials and temporary access tokens.
+
+<a name="policy-compilation"> </a>
+
 <a name="3pxx24-policy-compilation"> </a>
 
 <a name="3pxx14-policy-compilation"> </a>
 
-### 3:PXX.1.5 Policy Compilation
+<a name="3pxx15-policy-compilation"> </a>
+
+### 3:PXX.3.2 Policy Compilation
 
 Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against the payload binding and assembles the execution plan from the validated policy Contract.
 
@@ -300,7 +419,9 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 <a name="3pxx151-semantic-level-compilation"> </a>
 
-#### 3:PXX.1.5.1 Resolve Semantic Groups or Validate Concrete Selectors
+<a name="3pxx151-resolve-semantic-groups-or-validate-concrete-selectors"> </a>
+
+#### 3:PXX.3.2.1 Resolve Semantic Groups or Validate Concrete Selectors
 
 **Semantic-Level policies.** The De-ID Manager SHALL resolve each `@` group reference using the [Semantic Group Binding](#3pxx3213-semantic-group-bindings) for the declared payload family and release. If a referenced group has no binding for that release, the Manager SHALL fail compilation before dispatch.
 
@@ -308,45 +429,15 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 <a name="execution-plan-assembly"> </a>
 
-#### 3:PXX.1.5.2 Assemble the Plan and Check Capabilities
+<a name="3pxx152-assemble-the-plan-and-check-capabilities"> </a>
 
-**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager binds the rules to the [verified assignment inputs](#assigned-input-verification) and assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Contract resource with `Contract.type` coding `dis-execution-plan` from the [DIS Document Type CodeSystem](CodeSystem-dis-document-type.html).
+#### 3:PXX.3.2.2 Assemble the Plan and Check Capabilities
+
+**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager binds the rules to the [verified assignment inputs](#assigned-input-verification) and assembles the resolved or validated rules into a compiled [ODRL Execution Plan Set](odrl-content.html#execution-plan-set) and packages the plan in a Contract resource with `Contract.type` coding `dis-execution-plan` from the [DIS Document Type CodeSystem](CodeSystem-dis-document-type.html).
 
 **Capability verification.** The De-ID Manager SHALL verify that the complete assignment is supported by the target De-Identifier's [declared processing capabilities](#fhir-processing-capabilities) before dispatch. The Integrated actor applies the same check before local execution.
 
 For each applicable payload set, each ruleSet produces one execution plan Contract, dispatched as one ITI-x3 task for that set. When stages are declared, the Manager dispatches in stage order. Before dispatch, the Manager SHALL identify the exact source policy as specified in [Execution Plan Contract Structure](#execution-plan-source-policy).
-
-<a name="3pxx25-policy-lifecycle"> </a>
-
-<a name="3pxx15-policy-lifecycle"> </a>
-
-### 3:PXX.1.6 Policy Lifecycle
-
-DIS does not standardize policy lifecycle management (authoring, approval, distribution, revocation, versioning workflows). Implementations obtain policies through implementation-defined mechanisms, including local configuration, administrative provisioning, bilateral agreement, or integration with an external policy management system.
-
-The De-ID Manager SHALL admit an issued policy with `Contract.status = policy` only while `Contract.applies` covers the current time and the Manager can establish that the policy revision has not been revoked. An authorized, immutable policy version can be reused across jobs.
-
-<a name="execution-plan-content"> </a>
-
-## 3:PXX.2 De-Identification Execution Plan
-
-The execution plan is the task-specific artifact produced from a validated policy. The [policy compilation rules](#3pxx15-policy-compilation) define how policy rules become concrete payload selectors. The plan uses the [transformation actions](#transformation-actions) defined by the policy section. [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3) defines how the Manager dispatches the plan.
-
-<a name="execution-plan-format"> </a>
-
-<a name="3pxx14-execution-plan-format"> </a>
-
-### 3:PXX.2.1 Execution Plan Format
-
-An execution plan is a task-specific FHIR R4 [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html). It carries a compiled [ODRL Set](odrl-content.html#execution-plan-set), uses the Set revision `uid` as its identifier, and carries the Manager in `authority` and the assigned De-Identifier in `subject`, both as Organization references. It supplies `id`, `meta.versionId`, `url`, `version`, `name`, and `issued`. The Set is carried in one inline `rule.contentAttachment` as Base64-encoded UTF-8 JSON-LD with content type `application/ld+json`.
-
-<a name="3pxx141-library-resource-structure"> </a>
-
-#### 3:PXX.2.1.1 Execution Plan Contract Structure
-
-<a name="execution-plan-source-policy"> </a>
-
-The plan SHALL identify its source policy with exactly one `Contract.supportingInfo` reference to the Policy Contract, using an absolute HTTPS URL ending in `/Contract/{id}/_history/{vid}`. Before dispatch, the Manager SHALL verify that this reference identifies the exact Policy Contract approved by the selected permission. The Manager SHALL retain the exact authorization Contract revision and permission `uid` with the assignment. The De-Identifier SHALL confirm that the assignment parties match the plan and copy the source policy reference URL into the task's `Provenance.policy`. The De-Identifier can use the reference for evidence without retrieving the policy. The Manager SHALL verify that returned evidence names the same policy version before accepting or releasing the result. The reference SHALL exclude credentials and temporary access tokens.
 
 <a name="3pxx142-execution-plan-json-structure"> </a>
 
@@ -354,7 +445,9 @@ The plan SHALL identify its source policy with exactly one `Contract.supportingI
 
 <a name="3pxx212-execution-plan-json-structure-and-rule-evaluation"> </a>
 
-#### 3:PXX.2.1.2 Execution Plan Structure and Rule Evaluation
+<a name="3pxx212-execution-plan-structure-and-rule-evaluation"> </a>
+
+### 3:PXX.3.3 Execution Plan Structure and Rule Evaluation
 
 The decoded plan attachment SHALL conform to the [DIS ODRL Execution Plan Set](odrl-content.html#execution-plan-set). Each compiled obligation SHALL identify its source policy obligation, a concrete selector and its resolved action parameters. The De-Identifier SHALL check the plan's set, rule-set, stage, binding and release declarations against the task before processing. It SHALL reject a plan that cannot be validated, including unrecognized selectors, actions or parameters.
 
@@ -366,25 +459,25 @@ Execution plans dispatched via ITI-x3 SHALL contain only concrete element paths.
 
 <a name="3pxx143-execution-plan-example"> </a>
 
-#### 3:PXX.2.1.3 Execution Plan Example
+<a name="3pxx213-execution-plan-example"> </a>
+
+### 3:PXX.3.4 Execution Plan Examples
 
 See the [decoded ODRL Execution Plan Set](odrl-content.html#decoded-plan-example) for the R4 clinical assignment and the [UC-2 walkthrough](examples-grouped-fhir-job.html#grouped-fhir-dispatch) for the two FHIR processing releases and the [UC-3 clinical pathology workflow](examples-reversible-pathology.html) for an example involving a supplied lookup table.
 
-### 3:PXX.2.2 FHIR Reference Integrity
-
-The De-Identifier SHALL ensure that references between retained resources resolve correctly in the de-identified output. In a Bundle, this includes keeping `Bundle.entry.fullUrl` values and internal references consistent with the resource identities in the output. Handle references to removed resources and external references according to the approved policy. The De-Identifier SHALL fail the task without partial output if it cannot produce a valid result under the declared FHIR version and policy.
-
-Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
-
 <a name="payload-bindings"> </a>
 
-## 3:PXX.3 Payload Bindings
+<a name="3pxx3-payload-bindings"> </a>
+
+## 3:PXX.4 Payload Bindings
 
 DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines the native format and version and how content is carried or resolved through the protocol. The common delivery contract applies to every payload set. The FHIR binding specifies the supported payload content.
 
 <a name="payload-binding-framework"> </a>
 
-### Payload Binding Requirements
+<a name="payload-binding-requirements"> </a>
+
+**Payload binding requirements.**
 
 A payload binding defines how DIS applies to a particular format. It specifies the content model and element addressing, the mapping of DIS actions to that format, how to obtain inputs and deliver results, how to represent evidence, how to identify and validate versions and match capabilities, and how to carry or reference the data in the FHIR R4 workflow envelope. Each additional binding defines these requirements independently. The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) illustrate this structure.
 
@@ -392,7 +485,9 @@ A payload binding defines how DIS applies to a particular format. It specifies t
 
 <a name="3pxx3-common-payload-set-delivery"> </a>
 
-### 3:PXX.3.1 Common Payload Set Delivery
+<a name="3pxx31-common-payload-set-delivery"> </a>
+
+### 3:PXX.4.1 Common Payload Set Delivery
 
 The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.html) and [De-Identification Task profile](StructureDefinition-DIS-DeIdentificationTask.html) define the FHIR R4 `Task` request bodies for ITI-x1 and ITI-x3. They use the [DIS Work Order Input codes](CodeSystem-dis-task-input.html) for `Task.input.type`. Each `payload-set` input has one manifest attachment as `Task.input.valueAttachment` and one [DIS Payload Set Metadata extension](StructureDefinition-dis-payload-set.html) on that input.
 
@@ -419,7 +514,9 @@ The [shared payload set parameters](volume-2.html#grouped-payload-parameters) de
 
 <a name="3pxx311-manifest-formats"> </a>
 
-#### 3:PXX.3.1.1 Manifest Formats and Packages
+<a name="3pxx311-manifest-formats-and-packages"> </a>
+
+#### 3:PXX.4.1.1 Manifest Formats and Packages
 
 The `dis-resource-list` format carries an R4 DIS Resource Manifest as a standalone List or in an R4 [DIS Manifest Package](StructureDefinition-DIS-ManifestPackage.html). Serialize either as FHIR JSON or XML and declare the corresponding FHIR media type in the `manifest` attachment. These forms apply to inputs. Results carry the List inside the result package.
 
@@ -433,7 +530,9 @@ A bundled R4 resource can be the target itself or a wrapper or index. Any non-R4
 
 <a name="3pxx32-authorization-and-stable-retrieval"> </a>
 
-#### 3:PXX.3.1.2 Authorization and Stable Retrieval
+<a name="3pxx312-authorization-and-stable-retrieval"> </a>
+
+#### 3:PXX.4.1.2 Authorization and Stable Retrieval
 
 The Manager SHALL verify that the job authorization covers every set, including the indexes, native objects, or files reached through its references or manifests. The retrieving actor SHALL use HTTPS and obtain credentials accepted by each endpoint. For automated FHIR REST retrieval of manifests, indexes, or payloads, apply the [FHIR retrieval authorization rules](#referenced-input-authorization). Other bindings define the access mechanism for their endpoints. The job authorization and credentials for reading the source serve separate purposes.
 
@@ -441,7 +540,9 @@ The Manager SHALL establish the authorized target set before dispatch, including
 
 <a name="assigned-input-verification"> </a>
 
-#### 3:PXX.3.1.3 Assigned Input Verification
+<a name="3pxx313-assigned-input-verification"> </a>
+
+#### 3:PXX.4.1.3 Assigned Input Verification
 
 The De-ID Manager SHALL establish the exact versions of the manifest and the resources, wrappers, indexes and files needed to resolve and process the assigned set. It SHALL authorize the selected content and bind those versions to the execution plan before dispatch. For a later stage, bind the authorized input to that stage's plan, including any verified output from an earlier stage that supplies its input.
 
@@ -463,7 +564,9 @@ The De-Identifier SHALL use the verified bytes or resource instance for subseque
 
 <a name="3pxx1-dis-fhir-payload-content-module"> </a>
 
-### 3:PXX.3.2 FHIR Payload Binding
+<a name="3pxx32-fhir-payload-binding"> </a>
+
+### 3:PXX.4.2 FHIR Payload Binding
 
 The FHIR payload binding (`DIS-FHIR-Payload`) defines how actors identify, carry, retrieve, address, and validate FHIR processing payloads. The [execution plan](#execution-plan-content) and [evidence](#evidence-baseline) sections define the associated task and result artifacts.
 
@@ -483,7 +586,9 @@ The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing l
 
 <a name="3pxx321-cross-version-payload-support"> </a>
 
-#### 3:PXX.3.2.1 Addressing and Processing
+<a name="3pxx321-addressing-and-processing"> </a>
+
+#### 3:PXX.4.2.1 Addressing and Processing
 
 The declared payload release determines the element selectors, traversal of the target resources, and validation of the result.
 
@@ -491,13 +596,15 @@ The declared payload release determines the element selectors, traversal of the 
 
 <a name="3pxx3211-version-identification"> </a>
 
-##### 3:PXX.3.2.1.1 FHIR Release and Capability Matching
+<a name="3pxx3211-fhir-release-and-capability-matching"> </a>
+
+##### 3:PXX.4.2.1.1 FHIR Release Identification
 
 For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request if the declaration is absent or specifies a release other than `R4` or `R5`. The Manager SHALL use the same declaration in ITI-x3. A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
 
 <a name="fhir-processing-capabilities"> </a>
 
-##### FHIR processing capabilities
+##### 3:PXX.4.2.1.2 FHIR Processing Capabilities
 
 A De-Identifier or Integrated actor SHALL support and declare all nine [core actions](#transformation-actions) for DIS-FHIR-Payload. This requirement applies to the actor's processing capabilities as a whole. An individual entry may advertise a subset of actions for its release and manifest formats.
 
@@ -519,14 +626,16 @@ For each combination that includes `date-shift`, the processing actor SHALL docu
 
 <a name="fhirpath-element-addressing"> </a>
 
-##### 3:PXX.3.2.1.2 FHIRPath Element Addressing
+<a name="3pxx3212-fhirpath-element-addressing"> </a>
+
+##### 3:PXX.4.2.1.3 FHIRPath Element Addressing
 
 DIS-FHIR-Payload uses FHIRPath expressions as the element addressing language. Execution plan rules and semantic group definitions reference HL7 FHIR elements using FHIRPath-compatible path expressions rooted at the resource type.
 
 An element path SHALL be one of the following forms:
 
 - **Resource-rooted path** -- a FHIRPath expression starting with a resource type (e.g., `Patient.name`, `Observation.value`). The path identifies one or more elements within a single resource instance.
-- **Semantic group reference** -- a reference to a named semantic group (e.g., `@subject-identifiers`). The `@` prefix distinguishes a semantic group reference from a FHIRPath expression. The group expands to its member paths at policy compilation time (see [§3:PXX.1.5](#3pxx15-policy-compilation)).
+- **Semantic group reference** -- a reference to a named semantic group (e.g., `@subject-identifiers`). The `@` prefix distinguishes a semantic group reference from a FHIRPath expression. The group expands to its member paths at policy compilation time (see [policy compilation](#policy-compilation)).
 
 A concrete selector SHALL identify locations of existing FHIR elements within the input resource, including individual occurrences of repeating elements. A filter such as `where()` may narrow the selection. Standalone calculated results such as `Patient.identifier.count()` are invalid transformation targets. A selector SHALL NOT follow a reference to select a target in another resource. The action definition determines which parts of a selected element it changes. If rules also select descendants, apply the [plan evaluation rules](#3pxx212-execution-plan-json-structure-and-rule-evaluation).
 
@@ -538,11 +647,13 @@ Semantic-Level policies use the same group codes across releases. The [Semantic 
 
 <a name="3pxx3222-semantic-groups"> </a>
 
-##### 3:PXX.3.2.1.3 Semantic Group Bindings
+<a name="3pxx3213-semantic-group-bindings"> </a>
 
-Semantic groups categorize HL7 FHIR elements by privacy sensitivity. Semantic-Level policies reference semantic groups instead of individual element paths. The De-ID Manager expands semantic group references to individual element paths during policy compilation (see [§3:PXX.1.5](#3pxx15-policy-compilation)).
+##### 3:PXX.4.2.1.4 Semantic Group Bindings
 
-The [DIS Semantic Group CodeSystem](CodeSystem-dis-semantic-group.html) defines the group codes and their meanings. Table 3:PXX.3.2.1-1 is the authoritative FHIR Semantic Group Binding for selector membership and order by payload release. The table defines binding version 0.2.0 independently of the FHIR payload version.
+Semantic groups categorize HL7 FHIR elements by privacy sensitivity. Semantic-Level policies reference semantic groups instead of individual element paths. The De-ID Manager expands semantic group references to individual element paths during policy compilation (see [policy compilation](#policy-compilation)).
+
+The [DIS Semantic Group CodeSystem](CodeSystem-dis-semantic-group.html) defines the group codes and their meanings. Table 3:PXX.4.2.1-1 is the authoritative FHIR Semantic Group Binding for selector membership and order by payload release. The table defines binding version 0.2.0 independently of the FHIR payload version.
 
 The [R4/R5 PII path catalog](bindings/dis-fhir-pii-path-catalog-0.2.0.csv) and [classification and semantic group guide](fhir-semantic-group-guide.html) are informative. They help policy authors identify candidate FHIRPath selectors for syntax-level policies. Catalog groups and paths do not extend the selector membership defined in the table.
 
@@ -552,7 +663,7 @@ Policies may use the applicable date actions or remove the birth date. If the po
 
 <a name="tPXX.3.2.2-1"> </a>
 
-<p id="tPXX.3.2.1-1" class="tableTitle"><strong>Table 3:PXX.3.2.1-1: DIS FHIR Semantic Group Binding</strong></p>
+<p id="tPXX.3.2.1-1" class="tableTitle"><strong>Table 3:PXX.4.2.1-1: DIS FHIR Semantic Group Binding</strong></p>
 
 | Semantic group | FHIR R4 (4.0.1) | FHIR R5 (5.0.0) |
 | --- | --- | --- |
@@ -569,19 +680,21 @@ Policies may use the applicable date actions or remove the birth date. If the po
 | `device-identifiers` | `Device.identifier`, `Device.serialNumber`, `Device.deviceName`, `Device.udiCarrier` | `Device.identifier`, `Device.serialNumber`, `Device.name`, `Device.udiCarrier` |
 {: .grid}
 
-For the declared FHIR payload release, the Manager SHALL expand each semantic group using the selectors in the corresponding release column of Table 3:PXX.3.2.1-1. The Manager SHALL preserve the listed selector order and the order of source policy rules. A selector with a concrete resource root applies to resources of that type. `DomainResource.text` applies to the narrative element on each governed resource derived from `DomainResource`.
+For the declared FHIR payload release, the Manager SHALL expand each semantic group using the selectors in the corresponding release column of Table 3:PXX.4.2.1-1. The Manager SHALL preserve the listed selector order and the order of source policy rules. A selector with a concrete resource root applies to resources of that type. `DomainResource.text` applies to the narrative element on each governed resource derived from `DomainResource`.
 
 The FHIR payload binding defines group membership. A policy selects groups and actions. It cannot change the group's selectors. The `subject-identifiers` group intentionally shares its two selectors with `subject-business-identifiers` and `subject-names`. Use the narrower groups when applying different actions to identifiers and names. A group containing a composite element selects the element as a whole. The separate action applicability rules still apply to every expanded target.
 
 The `dates` group covers the listed structured temporal values. Its choice selectors constrain the selected FHIR types using `ofType()`. Free-text dates, ages, ranges, and schedules expressed as `Timing` are outside this binding. Other paths, including extensions and other references, require separate policy coverage as applicable. The binding does not establish that a policy covers all identifying content in a payload.
 
-Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.3.2.1-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the groups in Table 3:PXX.3.2.1-1.
+Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.4.2.1-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the groups in Table 3:PXX.4.2.1-1.
 
 <a name="3pxx123-resource-traversal"> </a>
 
 <a name="3pxx3223-resource-traversal"> </a>
 
-##### 3:PXX.3.2.1.4 Resource Traversal
+<a name="3pxx3214-resource-traversal"> </a>
+
+##### 3:PXX.4.2.1.5 Resource Traversal
 
 An execution plan applies to a set of processing target resources. The De-Identifier SHALL traverse the processing target according to the following rules.
 
@@ -595,7 +708,9 @@ An execution plan applies to a set of processing target resources. The De-Identi
 
 <a name="3pxx3215-validation-across-versions"> </a>
 
-##### 3:PXX.3.2.1.5 Output Validation in the Declared Release
+<a name="3pxx3215-output-validation-in-the-declared-release"> </a>
+
+##### 3:PXX.4.2.1.6 Output Validation in the Declared Release
 
 De-identified output SHALL be validated against the processing payload's declared HL7 FHIR version, not against the HL7 FHIR R4 protocol binding version.
 
@@ -608,9 +723,19 @@ The following minimum validation checks apply to all payload versions:
 5. Internal references remain resolvable within the output graph or Bundle.
 6. Remapped identifiers and references are consistent within the declared scope.
 7. Narrative XHTML remains valid and contains no detected PHI for governed narrative targets.
-8. Provenance evidence maps all required DIS evidence baseline elements (see [§3:PXX.4](#3pxx4-de-identification-evidence)).
+8. Provenance evidence maps all required DIS evidence baseline elements (see [De-Identification Evidence](#evidence-baseline)).
 
 A De-Identifier SHALL use an HL7 FHIR validation library or equivalent mechanism compatible with the declared payload version. Validation against the wrong HL7 FHIR version (e.g., validating HL7 FHIR R5 output against HL7 FHIR R4 definitions) is a conformance failure.
+
+<a name="3pxx22-fhir-reference-integrity"> </a>
+
+<a name="fhir-reference-integrity"> </a>
+
+**FHIR reference integrity.**
+
+The De-Identifier SHALL ensure that references between retained resources resolve correctly in the de-identified output. In a Bundle, this includes keeping `Bundle.entry.fullUrl` values and internal references consistent with the resource identities in the output. Handle references to removed resources and external references according to the approved policy. The De-Identifier SHALL fail the task without partial output if it cannot produce a valid result under the declared FHIR version and policy.
+
+Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
 
 <a name="data-plane-access"> </a>
 <a name="obtaining-processing-targets"> </a>
@@ -619,7 +744,9 @@ A De-Identifier SHALL use an HL7 FHIR validation library or equivalent mechanism
 
 <a name="3pxx323-obtaining-processing-targets"> </a>
 
-#### 3:PXX.3.2.2 Input and Result Delivery
+<a name="3pxx322-input-and-result-delivery"> </a>
+
+#### 3:PXX.4.2.2 Input and Result Delivery
 
 The job request identifies the proposed processing targets. The task request identifies the data assigned to the De-Identifier. The De-Identifier returns task results in ITI-x3 or ITI-x7. The Manager returns job results in ITI-x1 or ITI-x4. Result resources retain the declared input release.
 
@@ -627,11 +754,13 @@ The job request identifies the proposed processing targets. The task request ide
 
 <a name="3pxx324-fhir-payload-delivery-summary"> </a>
 
-##### 3:PXX.3.2.2.1 Payload Set Delivery
+<a name="3pxx3221-payload-set-delivery"> </a>
 
-[Volume 2](volume-2.html#grouped-payload-parameters) defines the transaction parameters. Table 3:PXX.3.2.2-1 summarizes the delivery forms for a FHIR payload set.
+##### 3:PXX.4.2.2.1 Payload Set Delivery
 
-<p id="fhir-input-result-delivery-table" class="tableTitle"><strong>Table 3:PXX.3.2.2-1: FHIR Input and Result Delivery</strong></p>
+[Volume 2](volume-2.html#grouped-payload-parameters) defines the transaction parameters. Table 3:PXX.4.2.2-1 summarizes the delivery forms for a FHIR payload set.
+
+<p id="fhir-input-result-delivery-table" class="tableTitle"><strong>Table 3:PXX.4.2.2-1: FHIR Input and Result Delivery</strong></p>
 
 | Exchange | Delivery attachment |
 |---|---|
@@ -641,21 +770,62 @@ The job request identifies the proposed processing targets. The task request ide
 
 For both exchanges, use `dis-resource-list` for bundled or hosted FHIR resources, or `fhir-bulk-data` for bulk files. A single inline R4 input uses an R4 manifest package containing the List and that resource. Its result uses a DIS Result Package. The FHIR task result uses the same manifest format as the assigned input, as specified in [ITI-x3](volume-2.html#23x3422-message-semantics). The Manager MAY repackage inline or hosted inputs at dispatch while preserving the authorized content and set identity.
 
+<a name="3pxx112-version-safe-packaging"> </a>
+
+<a name="3pxx3212-version-safe-packaging"> </a>
+
+<a name="3pxx3223-version-safe-packaging-of-inline-and-hosted-resources"> </a>
+
+##### 3:PXX.4.2.2.2 Version-Safe Packaging of Inline and Hosted Resources
+
+The DIS transaction envelope and manifest package use HL7 FHIR R4. For inline R5, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. Hosted R5 resources can use [direct release-qualified references](#direct-hosted-r5-references) or an R4 wrapper with an attachment URL. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
+
+<a name="protocol-resources-remain-hl7-fhir-r4"> </a>
+
+**Protocol Resources Remain HL7 FHIR R4**
+
+Table 3:PXX.4.2.2-2 lists the resources that are part of the HL7 FHIR R4 protocol layer and remain HL7 FHIR R4 regardless of the payload version.
+
+<a name="tPXX.3.2.1-2"> </a>
+
+<p id="tPXX.3.2.2-3" class="tableTitle"><strong>Table 3:PXX.4.2.2-2: HL7 FHIR R4 Protocol Resources</strong></p>
+
+| HL7 FHIR R4 Protocol Resource | Role |
+|-------------------------------|------|
+| `Task` | Request bodies for the ITI-x1 job submission and ITI-x3 task submission |
+| `Parameters` | ITI-x1, ITI-x3, ITI-x4 and ITI-x7 success responses carrying results |
+| `Provenance` | De-identification evidence |
+| `OperationOutcome` | Error and validation reporting |
+| `Bundle` | Workflow packaging (message, result collection) |
+| `Contract` | Carries the [Data Request Authorization](#data-request-authorization-contract), [Policy Set](#policy-contract-structure), and [Execution Plan Set](#execution-plan-format) |
+| `CapabilityStatement` | Actor capability declaration |
+{: .grid}
+
+<a name="3pxx163-bulk-file-manifests"> </a>
+
+<a name="3pxx3233-bulk-file-manifests"> </a>
+
 <a name="resource-manifest"> </a>
 
 <a name="resource-manifest-resolution"> </a>
 
 <a name="fhir-resource-manifest-resolution"> </a>
 
-##### 3:PXX.3.2.2.2 FHIR Resource Manifest and Wrapper Resolution
+<a name="3pxx3222-fhir-resource-manifest-and-wrapper-resolution"> </a>
+
+<a name="fhir-input-manifests-and-retrieval"> </a>
+
+##### 3:PXX.4.2.2.3 Input Manifests and Retrieval
+
+**Resource-list manifests and wrappers.**
 
 A [DIS Resource Manifest](StructureDefinition-DIS-ResourceManifest.html) is a profiled FHIR R4 [List](https://hl7.org/fhir/R4/list.html). A standalone List uses absolute HTTPS FHIR REST references. Within a package the List may also use bundle-local references under the [manifest package rules](#manifest-package). The manifest belongs to one payload set. The selected binding and version determine whether an entry identifies a payload resource, an R4 payload wrapper, or an R4 index.
 
 The Manager SHALL establish the manifest's entry set before dispatch and verify that authorization covers every entry and the corresponding native content. It SHALL ensure the job and its retries resolve to the same target set. The Manager can use version-specific references or a protected snapshot of the manifest and any index resources used to resolve the targets. The Manager SHALL give the De-Identifier access only to the manifest, indexes, and payloads authorized for its task. The Integrated De-ID Manager/De-Identifier applies the same rules when processing directly.
 
-Table 3:PXX.3.2.2-2 shows how a List entry identifies the payload.
+Table 3:PXX.4.2.2-3 shows how a List entry identifies the payload.
 
-<p id="tPXX.3.2.2-2" class="tableTitle"><strong>Table 3:PXX.3.2.2-2: FHIR Resource Manifest Resolution</strong></p>
+<p id="tPXX.3.2.2-2" class="tableTitle"><strong>Table 3:PXX.4.2.2-3: FHIR Resource Manifest Resolution</strong></p>
 
 | Binding and version | Resource selected by a List entry | Payload selected |
 |---------------------|------------------------------------|------------------|
@@ -671,7 +841,7 @@ The receiving actor SHALL follow the attachment only when the DocumentReference 
 
 **Direct hosted R5 references.** For a FHIR resource-list payload set declared as `R5`, a List item MAY reference a hosted R5 resource directly using an absolute HTTPS FHIR [version-specific read URL](https://hl7.org/fhir/R5/http.html#vread). The item SHALL carry the [DIS Target FHIR Release extension](StructureDefinition-dis-target-fhir-version.html) with `valueCode = 5.0`. Resolve List items without the extension as R4 workflow resources or native R4 payloads, as applicable. For an R5 set, an unqualified item SHALL resolve to a conformant R4 Payload Wrapper. The extension SHALL NOT qualify an R4 wrapper or index, a bundle-local reference, or a reference in a set declared as R4. This rule defines cross-release resolution for DIS, including [evidence targets](#3pxx3214-evidence-representation-across-versions).
 
-The retrieving actor SHALL use the target release to set the [FHIR media-type parameter](https://hl7.org/fhir/R5/versioning.html) on the separate GET, for example `Accept: application/fhir+json; fhirVersion=5.0`. It SHALL confirm the release using the response media-type parameter or verified FHIR server capabilities for that endpoint. If a response media-type parameter is present, it SHALL agree with the requested release. If it is absent, the actor SHALL verify that the resource endpoint serves R5 exclusively, using trusted endpoint configuration and its R5 CapabilityStatement. A multi-release endpoint SHALL identify the returned release in its response media type for this exchange. The actor SHALL verify that the resource type, logical ID, and `meta.versionId` match the URL and validate the returned resource against R5. A successful HTTP status alone does not establish the release. Apply the [authorization and stable retrieval rules](#3pxx32-authorization-and-stable-retrieval). Reject the submission or fail the accepted work if a required input cannot be verified and retrieved. For results, apply the evidence and release checks below.
+The retrieving actor SHALL use the target release to set the [FHIR media-type parameter](https://hl7.org/fhir/R5/versioning.html) on the separate GET, for example `Accept: application/fhir+json; fhirVersion=5.0`. It SHALL confirm the release using the response media-type parameter or verified FHIR server capabilities for that endpoint. If a response media-type parameter is present, it SHALL agree with the requested release. If it is absent, the actor SHALL verify that the resource endpoint serves R5 exclusively, using trusted endpoint configuration and its R5 CapabilityStatement. A multi-release endpoint SHALL identify the returned release in its response media type for this exchange. The actor SHALL verify that the resource type, logical ID, and `meta.versionId` match the URL and validate the returned resource against R5. A successful HTTP status alone does not establish the release. Apply the [authorization and stable retrieval rules](#3pxx32-authorization-and-stable-retrieval). Reject the submission or fail the accepted work if a required input cannot be verified and retrieved. For results, apply the [result packaging checks](#fhir-result-packages-and-delivery) and [evidence target rules](#3pxx3214-evidence-representation-across-versions).
 
 See the [hosted R5 input List](List-hosted-r5-input.html) and [hosted R5 result package](Bundle-hosted-r5-result.html). These artifacts illustrate the resource-list manifest and evidence for a set with `payloadBinding = DIS-FHIR-Payload` and `payloadVersion = R5`. They use illustrative URLs. The result package pairs an R4 manifest List with R4 Provenance. Both identify the same hosted R5 output revision. A receiver requests that revision as follows.
 
@@ -681,75 +851,13 @@ Host: results.example.org
 Accept: application/fhir+json; fhirVersion=5.0
 ```
 
-**Results.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence follows the rules below.
+<a name="3pxx3224-bulk-file-manifests-and-authorized-retrieval"> </a>
 
-<a name="result-evidence-placement"> </a>
-
-**Result package and evidence placement.** Each successful job or task result SHALL carry one [DIS Result Package](StructureDefinition-DIS-ResultPackage.html) in `payloadResult.resultPackage`. This FHIR R4 collection Bundle SHALL contain the manifest and at least one DIS Evidence Provenance entry. The attachment's `data` contains the serialized Bundle, or its HTTPS `url` identifies that Bundle at an authorized endpoint. Use `application/fhir+json` or `application/fhir+xml`. The same packaging applies when the result is returned immediately or by polling. Each distributed job result set that uses multiple stages also carries [staged release evidence](#staged-release-evidence). The receiver SHALL identify the manifest and evidence by profile and validate their references.
-
-| `manifestFormat` | Required package contents in addition to Provenance |
-|---|---|
-| `dis-resource-list` | Exactly one DIS Resource Manifest List. Its selected entries may be bundled resources or authorized HTTPS references. Apply the payload binding's wrapper or index rules. |
-| `fhir-bulk-data` | Exactly one [DIS Bulk Result Manifest](StructureDefinition-DIS-BulkResultManifest.html) DocumentReference and one [DIS Bulk Result File](StructureDefinition-DIS-BulkResultFile.html) DocumentReference per listed file. The manifest carrier holds or links to the JSON file listing. File descriptors link to the listed NDJSON files. |
-
-The List or bulk JSON manifest determines the selected output. Provenance and manifest carriers SHALL NOT be selected as clinical payload. The receiver SHALL verify that the package contents agree with the enclosing `manifestFormat`, binding and payload version, and validate evidence coverage before accepting or releasing the set. If the Manager changes how results are made available, it SHALL preserve the selected output and update the manifest and evidence targets to describe the same released set.
-
-The [mixed R4 result package](Bundle-mixed-r4-result.html) selects a bundled Patient and a hosted Observation in the same List. The [result response](Parameters-mixed-r4-result.html) carries the package inline.
-
-<a name="3pxx112-version-safe-packaging"> </a>
-
-<a name="3pxx3212-version-safe-packaging"> </a>
-
-##### 3:PXX.3.2.2.3 Version-Safe Packaging of Inline and Hosted Resources
-
-The DIS transaction envelope and manifest package use HL7 FHIR R4. For inline R5, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. Hosted R5 resources can use [direct release-qualified references](#direct-hosted-r5-references) or an R4 wrapper with an attachment URL. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
-
-<a name="protocol-resources-remain-hl7-fhir-r4"> </a>
-
-**Protocol Resources Remain HL7 FHIR R4**
-
-Table 3:PXX.3.2.2-3 lists the resources that are part of the HL7 FHIR R4 protocol layer and remain HL7 FHIR R4 regardless of the payload version.
-
-<a name="tPXX.3.2.1-2"> </a>
-
-<p id="tPXX.3.2.2-3" class="tableTitle"><strong>Table 3:PXX.3.2.2-3: HL7 FHIR R4 Protocol Resources</strong></p>
-
-| HL7 FHIR R4 Protocol Resource | Role |
-|-------------------------------|------|
-| `Task` | Request bodies for the ITI-x1 job submission and ITI-x3 task submission |
-| `Parameters` | ITI-x1, ITI-x3, ITI-x4 and ITI-x7 success responses carrying results |
-| `Provenance` | De-identification evidence |
-| `OperationOutcome` | Error and validation reporting |
-| `Bundle` | Workflow packaging (message, result collection) |
-| `Contract` | Policy artifact ([§3:PXX.1.1](#3pxx11-policy-contract-resource-structure)) and execution plan carrier ([§3:PXX.2.1](#3pxx21-execution-plan-format)) |
-| `CapabilityStatement` | Actor capability declaration |
-{: .grid}
-
-<a name="3pxx163-bulk-file-manifests"> </a>
-
-<a name="3pxx3233-bulk-file-manifests"> </a>
-
-##### 3:PXX.3.2.2.4 Bulk File Manifests and Authorized Retrieval
+**Bulk input manifests.**
 
 For an asynchronous cohort job, the Requester supplies an HTTPS URI identifying a JSON manifest that lists prepared input files. Each line of a listed NDJSON file contains one complete resource in the declared payload release. [Volume 1](volume-1.html) defines the scope for bulk data input and output.
 
 DIS uses the file listing conventions of the [HL7 Bulk Data Access IG STU 3](https://hl7.org/fhir/uv/bulkdata/STU3/en/export.html#response---output-manifest). For a manifest prepared for DIS, the required fields are `requiresAccessToken` (boolean) and `output` (array of file entries). Each entry SHALL identify the resource type in `type` and the file location in `url` as an absolute HTTPS URL. The manifest SHALL enumerate the complete dataset in one file listing. It may omit export-specific metadata such as `request` and `transactionTime`. The job's `payloadVersion` applies to all listed input files. A manifest with continuation links or reported export errors SHALL be rejected for processing under this binding.
-
-For asynchronous cohort jobs, the Manager returns a bulk file manifest for the de-identified NDJSON files and supplies the associated evidence with the job result. The result package carries the manifest DocumentReference and file descriptors. The manifest carrier attachment SHALL use `application/json` and exactly one of inline `data` or an authorized HTTPS `url`. Each file descriptor attachment SHALL use `application/fhir+ndjson` and the exact HTTPS URL listed for that file in the manifest. The receiver SHALL match descriptors one to one with the manifest file URLs and reject missing, duplicate or unlisted descriptors. Extract the JSON manifest for ordinary Bulk Data file retrieval. The Manager SHALL ensure that manifest and file access expires within the authorized release window. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset. The Manager SHALL report the failure through job status for an accepted asynchronous job.
-
-<a name="bulk-result-content-identity"> </a>
-
-**Bulk result content identity.** The producing actor is the De-Identifier for a task result and the De-ID Manager or Integrated De-ID Manager/De-Identifier for a job result. Before making a bulk result available to its receiver, the producing actor SHALL establish the exact output manifest and file versions covered by validation and evidence for that set. The manifest URL SHALL continue to resolve to that manifest version, and each file locator SHALL continue to resolve to its validated file version, for every successful retrieval of the released set. Content identity is based on the JSON and NDJSON bytes after HTTP decompression, when compression is used. A locator for a released result SHALL NOT serve substitute content, even when the replacement lists the same file URLs or contains the same FHIR resource type.
-
-The producing actor SHALL withhold the result if it cannot establish or preserve the validated versions before release. If it detects after release that a manifest or file no longer resolves to the validated version, it SHALL prevent further access to the affected result set. It SHALL NOT renew access to a substitute version. A failed retrieval alone does not indicate that an accepted job or task has failed.
-
-When a deployment supports renewal, the actor controlling access SHALL verify that the receiver is still authorized and that renewal is within the authorized release window. It MAY issue a new temporary download URL or credentials for the same version. The locators in the released manifest and the bytes of the manifest and files SHALL remain unchanged. The profile does not define a renewal transaction or prescribe how the deployment maintains object versions.
-
-<a name="bulk-result-download-authorization"> </a>
-
-**Bulk job result downloads.** The Manager SHALL ensure that services delivering a hosted result package, manifest or NDJSON file enforce the [current job release authorization](#job-result-recipient) on every new download request, including a range or resume request. This applies to the manifest URL, each stable file locator and every endpoint reached through a redirect. If the grant expires or is revoked, the recipient loses release authority, or current authorization cannot be established, the services SHALL deny further downloads and renewal. The final download service SHALL deny a request using an already-issued signed URL in these cases, even if the URL itself is still valid. The Manager SHALL enable signed downloads only where the complete delivery chain can enforce these rules. A finite URL lifetime is an additional limit on access.
-
-When a selected permission specifies a result destination, the Manager SHALL ensure that each referenced endpoint and redirect for the affected result stays within that approved HTTPS service boundary. The retrieving actor SHALL check the destination before following each redirect and stop if it cannot establish that the destination is authorized. Apply this check before forwarding any credentials. The Manager SHALL ensure that a cache in the delivery chain cannot serve a protected result or a reusable access redirect in place of a current authorization check.
 
 <a name="referenced-input-authorization"> </a>
 
@@ -773,11 +881,52 @@ The Manager SHALL reject the job if it cannot establish that the identified data
 
 <a name="3pxx325-inline-r5-manifest-package-example"> </a>
 
-##### 3:PXX.3.2.2.5 Inline R5 Manifest Package Example
+<a name="3pxx3225-inline-r5-manifest-package-example"> </a>
+
+##### 3:PXX.4.2.2.4 Inline R5 Manifest Package Example
 
 For inline submission, serialize the [R4 manifest package](Bundle-inline-r5-manifest-package.html) as `Task.input.valueAttachment.data` on the `payload-set` input with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The List selects the [R4 payload wrapper](DocumentReference-inline-r5-payload-wrapper.html) by its bundle-local UUID. The wrapper attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
 
-### 3:PXX.3.3 Proposed DICOM and CDA Bindings (Informative)
+<a name="fhir-result-packages-and-delivery"> </a>
+
+##### 3:PXX.4.2.2.5 Result Packages and Delivery
+
+**Result manifests.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence follows the rules below.
+
+<a name="result-evidence-placement"> </a>
+
+**Result package and evidence placement.** Each successful job or task result SHALL carry one [DIS Result Package](StructureDefinition-DIS-ResultPackage.html) in `payloadResult.resultPackage`. This FHIR R4 collection Bundle SHALL contain the manifest and at least one DIS Evidence Provenance entry. The attachment's `data` contains the serialized Bundle, or its HTTPS `url` identifies that Bundle at an authorized endpoint. Use `application/fhir+json` or `application/fhir+xml`. The same packaging applies when the result is returned immediately or by polling. Each distributed job result set that uses multiple stages also carries [staged release evidence](#staged-release-evidence). The receiver SHALL identify the manifest and evidence by profile and validate their references.
+
+| `manifestFormat` | Required package contents in addition to Provenance |
+|---|---|
+| `dis-resource-list` | Exactly one DIS Resource Manifest List. Its selected entries may be bundled resources or authorized HTTPS references. Apply the payload binding's wrapper or index rules. |
+| `fhir-bulk-data` | Exactly one [DIS Bulk Result Manifest](StructureDefinition-DIS-BulkResultManifest.html) DocumentReference and one [DIS Bulk Result File](StructureDefinition-DIS-BulkResultFile.html) DocumentReference per listed file. The manifest carrier holds or links to the JSON file listing. File descriptors link to the listed NDJSON files. |
+
+The List or bulk JSON manifest determines the selected output. Provenance and manifest carriers SHALL NOT be selected as clinical payload. The receiver SHALL verify that the package contents agree with the enclosing `manifestFormat`, binding and payload version, and validate evidence coverage before accepting or releasing the set. If the Manager changes how results are made available, it SHALL preserve the selected output and update the manifest and evidence targets to describe the same released set.
+
+The [mixed R4 result package](Bundle-mixed-r4-result.html) selects a bundled Patient and a hosted Observation in the same List. The [result response](Parameters-mixed-r4-result.html) carries the package inline.
+
+**Bulk result packages.**
+
+For asynchronous cohort jobs, the Manager returns a bulk file manifest for the de-identified NDJSON files and supplies the associated evidence with the job result. The result package carries the manifest DocumentReference and file descriptors. The manifest carrier attachment SHALL use `application/json` and exactly one of inline `data` or an authorized HTTPS `url`. Each file descriptor attachment SHALL use `application/fhir+ndjson` and the exact HTTPS URL listed for that file in the manifest. The receiver SHALL match descriptors one to one with the manifest file URLs and reject missing, duplicate or unlisted descriptors. Extract the JSON manifest for ordinary Bulk Data file retrieval. The Manager SHALL ensure that manifest and file access expires within the authorized release window. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset. The Manager SHALL report the failure through job status for an accepted asynchronous job.
+
+<a name="bulk-result-content-identity"> </a>
+
+**Bulk result content identity.** The producing actor is the De-Identifier for a task result and the De-ID Manager or Integrated De-ID Manager/De-Identifier for a job result. Before making a bulk result available to its receiver, the producing actor SHALL establish the exact output manifest and file versions covered by validation and evidence for that set. The manifest URL SHALL continue to resolve to that manifest version, and each file locator SHALL continue to resolve to its validated file version, for every successful retrieval of the released set. Content identity is based on the JSON and NDJSON bytes after HTTP decompression, when compression is used. A locator for a released result SHALL NOT serve substitute content, even when the replacement lists the same file URLs or contains the same FHIR resource type.
+
+The producing actor SHALL withhold the result if it cannot establish or preserve the validated versions before release. If it detects after release that a manifest or file no longer resolves to the validated version, it SHALL prevent further access to the affected result set. It SHALL NOT renew access to a substitute version. A failed retrieval alone does not indicate that an accepted job or task has failed.
+
+When a deployment supports renewal, the actor controlling access SHALL verify that the receiver is still authorized and that renewal is within the authorized release window. It MAY issue a new temporary download URL or credentials for the same version. The locators in the released manifest and the bytes of the manifest and files SHALL remain unchanged. The profile does not define a renewal transaction or prescribe how the deployment maintains object versions.
+
+<a name="bulk-result-download-authorization"> </a>
+
+**Bulk job result downloads.** The Manager SHALL ensure that services delivering a hosted result package, manifest or NDJSON file enforce the [current job release authorization](#job-result-recipient) on every new download request, including a range or resume request. This applies to the manifest URL, each stable file locator and every endpoint reached through a redirect. If the grant expires or is revoked, the recipient loses release authority, or current authorization cannot be established, the services SHALL deny further downloads and renewal. The final download service SHALL deny a request using an already-issued signed URL in these cases, even if the URL itself is still valid. The Manager SHALL enable signed downloads only where the complete delivery chain can enforce these rules. A finite URL lifetime is an additional limit on access.
+
+When a selected permission specifies a result destination, the Manager SHALL ensure that each referenced endpoint and redirect for the affected result stays within that approved HTTPS service boundary. The retrieving actor SHALL check the destination before following each redirect and stop if it cannot establish that the destination is authorized. Apply this check before forwarding any credentials. The Manager SHALL ensure that a cache in the delivery chain cannot serve a protected result or a reusable access redirect in place of a current authorization check.
+
+<a name="3pxx33-proposed-dicom-and-cda-bindings-informative"> </a>
+
+### 3:PXX.4.3 Proposed DICOM and CDA Bindings (Informative)
 
 The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe proposed mappings to the FHIR R4 envelope. Conformance to this supplement uses DIS-FHIR-Payload.
 
@@ -789,17 +938,21 @@ See the [informative mixed R5 and DICOM job walkthrough](draft-native-payload-bi
 
 <a name="3pxx15-evidence-baseline"> </a>
 
-## 3:PXX.4 De-Identification Evidence
+<a name="3pxx4-de-identification-evidence"> </a>
+
+## 3:PXX.5 De-Identification Evidence
 
 This section defines the minimum evidence elements that every completed de-identification task SHALL produce and specifies how they map to HL7 FHIR R4 Provenance resources.
 
 <a name="3pxx151-minimum-evidence-elements"> </a>
 
-### 3:PXX.4.1 Minimum Evidence Elements
+<a name="3pxx41-minimum-evidence-elements"> </a>
 
-Every completed de-identification task produces an HL7 FHIR R4 Provenance resource containing at minimum the nine evidence elements listed in Table 3:PXX.4-1.
+### 3:PXX.5.1 Minimum Evidence Elements
 
-<p id="tPXX.4-1" class="tableTitle"><strong>Table 3:PXX.4-1: DIS Evidence Baseline Elements</strong></p>
+Every completed de-identification task produces an HL7 FHIR R4 Provenance resource containing at minimum the nine evidence elements listed in Table 3:PXX.5-1.
+
+<p id="tPXX.4-1" class="tableTitle"><strong>Table 3:PXX.5-1: DIS Evidence Baseline Elements</strong></p>
 
 | # | Evidence Element | HL7 FHIR R4 Provenance Mapping | Description |
 |---|------------------|-------------------------------|-------------|
@@ -820,13 +973,15 @@ Elements 2, 6, 7, 8, and 9 use DIS-defined extensions on the HL7 FHIR R4 Provena
 
 <a name="3pxx42-provenance-resource-structure"> </a>
 
-### 3:PXX.4.2 R4 Provenance Resource Structure
+<a name="3pxx42-r4-provenance-resource-structure"> </a>
+
+### 3:PXX.5.2 R4 Provenance Resource Structure
 
 In addition to the nine baseline elements, the Provenance resource SHALL include the following standard HL7 FHIR R4 Provenance elements.
 
-Table 3:PXX.4-2 lists the required Provenance elements beyond the baseline.
+Table 3:PXX.5-2 lists the required Provenance elements beyond the baseline.
 
-<p id="tPXX.4-2" class="tableTitle"><strong>Table 3:PXX.4-2: Required Provenance Elements</strong></p>
+<p id="tPXX.4-2" class="tableTitle"><strong>Table 3:PXX.5-2: Required Provenance Elements</strong></p>
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
@@ -842,7 +997,9 @@ The `Provenance.agent` entry for the De-Identifier SHALL use `Provenance.agent.t
 
 <a name="3pxx3214-evidence-representation-across-versions"> </a>
 
-### 3:PXX.4.3 Identifying Results Across FHIR Releases
+<a name="3pxx43-identifying-results-across-fhir-releases"> </a>
+
+### 3:PXX.5.3 Identifying Results Across FHIR Releases
 
 De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources, which are part of the protocol layer. The following rules identify the payload covered by the R4 evidence:
 
@@ -859,13 +1016,15 @@ The target release extension on a direct hosted R5 reference governs retrieval o
 
 <a name="3pxx43-transformation-summary"> </a>
 
-### 3:PXX.4.4 Transformation Summary
+<a name="3pxx44-transformation-summary"> </a>
+
+### 3:PXX.5.4 Transformation Summary
 
 Each Provenance resource SHOULD include a transformation summary recording the actions applied to individual elements. The transformation summary is carried as a DIS-defined extension `dis-transformation-summary` containing an array of entries.
 
-Table 3:PXX.4-3 lists the elements of each transformation summary entry.
+Table 3:PXX.5-3 lists the elements of each transformation summary entry.
 
-<p id="tPXX.4-3" class="tableTitle"><strong>Table 3:PXX.4-3: Transformation Summary Entry Elements</strong></p>
+<p id="tPXX.4-3" class="tableTitle"><strong>Table 3:PXX.5-3: Transformation Summary Entry Elements</strong></p>
 
 | Element | Cardinality | Type | Description |
 |---------|-------------|------|-------------|
@@ -881,13 +1040,17 @@ The transformation summary enables audit and review of the specific actions appl
 
 <a name="3pxx44-evidence-example"> </a>
 
-### 3:PXX.4.5 Evidence Example
+<a name="3pxx45-evidence-example"> </a>
+
+### 3:PXX.5.5 Evidence Example
 
 The [evidence example](Provenance-dis-evidence-uc3-001.html) illustrates the Provenance produced when a pseudonymization task completes in Use Case 3 (Clinical Pathology Order). It conforms to the [DIS Evidence profile](StructureDefinition-DIS-Evidence.html) and references a synthetic [pseudonymized Patient](Patient-pseudonym-abc123.html).
 
 <a name="staged-release-evidence"> </a>
 
-### 3:PXX.4.6 Staged Release Evidence
+<a name="3pxx46-staged-release-evidence"> </a>
+
+### 3:PXX.5.6 Staged Release Evidence
 
 For each payload set processed in two or more stages in a distributed job, the De-ID Manager SHALL include exactly one [DIS Staged Release Evidence](StructureDefinition-DIS-StagedReleaseEvidence.html) Provenance in that set's job result package. This record is the Manager's assertion that it validated the assigned stage results and authorized release. The Manager SHALL include it only after validating all assigned results and rechecking release authorization. It applies to completed ITI-x1 and ITI-x4 job results.
 
@@ -896,7 +1059,7 @@ For each payload set processed in two or more stages in a distributed job, the D
 | `agent.who` | Identify the De-ID Manager as the record's author. |
 | `recorded` | Time the Manager recorded the release decision. |
 | `policy` | The version-specific evidence URI for the exact approved policy for the set. Use the same URI as the dispatched execution plans. |
-| `target` | Reference every final output entry selected by the manifest, exactly once, using the rules in [§3:PXX.4.3](#3pxx3214-evidence-representation-across-versions). |
+| `target` | Reference every final output entry selected by the manifest, exactly once, using the rules in [evidence targets](#3pxx3214-evidence-representation-across-versions). |
 | `extension[dis-validated-stage]` | One entry for every assigned ruleSet whose result the Manager validated. Each entry contains `stageId`, `ruleSetId` and a positive integer `sequence`. Number entries consecutively from 1 in policy stage order and ruleSet order within each stage. The sequence represents policy order, including where independent tasks run concurrently. |
 
 The Manager SHALL preserve DIS Evidence from the tasks that produced the selected final output. If it changes result delivery, apply the [result packaging rules](#result-evidence-placement) while preserving task attribution. Earlier task Provenance remains associated with its own task output. The Manager SHALL exclude from the job result any superseded intermediate output and its evidence, along with source identifiers, protected mappings, confidential salts and protected transformation parameters. The staged release record SHALL appear only in the job result package for the qualifying set.
@@ -909,11 +1072,17 @@ The [staged R4 Patient example](Bundle-staged-r4-patient-result.html) shows the 
 
 <a name="3pxx17-reversible-lookup-table"> </a>
 
-## 3:PXX.5 Reversible Lookup Table
+<a name="3pxx5-reversible-lookup-table"> </a>
+
+<a name="protected-lookup-tables"> </a>
+
+## 3:PXX.6 Protected Lookup Tables
 
 This section defines the protected lookup table used to supply or retain patient identifier mappings. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the rules that assign pseudonyms.
 
-### 3:PXX.5.1 Lookup Table Structure and Handling
+<a name="3pxx51-lookup-table-structure-and-handling"> </a>
+
+### 3:PXX.6.1 Lookup Table Structure and Handling
 
 [DIS-LookupTable](StructureDefinition-DIS-LookupTable.html) is a protected, identified R4 DocumentReference. The `lookupTable` input to ITI-x1 or ITI-x3 is a reference to a supplied table. The `generatedLookupTable` output in ITI-x3 or ITI-x7 is a task-generated instance carried inline as a resource in `Parameters`. Both use the [DIS patient lookup table JSON Schema](schemas/dis-lookup-table.schema.json) for patient identifier mappings. The generated table carries its JSON inline. A supplied table may carry JSON inline or reference a protected [DIS-LookupTableContent](StructureDefinition-DIS-LookupTableContent.html) Binary.
 
@@ -940,9 +1109,13 @@ Generated and supplied tables are protected operational material and SHALL be ex
 
 <a name="3pxx51-worked-mapping-examples"> </a>
 
-### 3:PXX.5.2 Worked Mapping Examples
+<a name="3pxx52-worked-mapping-examples"> </a>
 
-These synthetic, informative FHIR R4 examples accompany the [lookup table binding](#3pxx5-reversible-lookup-table). They also appear in the [artifact index](artifacts.html) and the [FHIR example downloads](download.html).
+<a name="lookup-table-examples"> </a>
+
+### 3:PXX.6.2 Worked Mapping Examples
+
+These synthetic, informative FHIR R4 examples accompany the [lookup table binding](#protected-lookup-tables). They also appear in the [artifact index](artifacts.html) and the [FHIR example downloads](download.html).
 
 | Published example | What it shows |
 |---|---|
@@ -953,54 +1126,12 @@ These synthetic, informative FHIR R4 examples accompany the [lookup table bindin
 | [Generated lookup table](DocumentReference-generated-lookup-uc3.html) | The patient identifier mapping generated by the clinical pathology salted hash example and returned to the Manager. |
 {: .grid}
 
-<a name="data-request-authorization"> </a>
+## Shared Contract Rules
 
-## 3:PXX.6 Data Request Authorization
+<a name="contract-signatures"> </a>
 
-The [DIS Data Request Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) carries the organizational grant used by ITI-x1. The Requester SHALL supply an absolute HTTPS FHIR version-specific reference ending in `/Contract/{id}/_history/{vid}`. The Manager SHALL verify that the resolved Contract's `id` and `meta.versionId` match the reference, and that a trusted authority issued the embedded Agreement for the stated assigner. An amended Agreement SHALL have a new `uid` and a new version-specific reference. The same `uid` SHALL identify the same issued Agreement bytes. See the [decoded ODRL Agreement example](odrl-content.html#decoded-authorization-example).
+### Contract Signatures and Disclosure
 
-Before acceptance or synchronous processing the Manager SHALL establish that the grant is currently effective. The Manager SHALL use a trusted status source for the exact Agreement revision. The method for obtaining status is deployment-defined. The Manager SHALL establish current effectiveness independently of the historical Contract and its `status`. If status cannot be established, or if the grant is expired, revoked or superseded, the Manager SHALL deny the job. The Manager SHALL check current authorization again before releasing the result, evidence or download access, including on retries and asynchronous retrieval.
+A DIS digital signature on a Contract SHALL be carried in [`Contract.signer.signature`]({{site.data.fhir.path}}contract-definitions.html#Contract.signer.signature). A deployment determines which signatures it requires on Data Request Authorization and Policy Contracts at ITI-x1 and on Execution Plan Contracts at ITI-x3. It configures the accepted signature format, signed bytes, trusted keys and signer authority. When a signature is required, the receiving actor SHALL reject an absent or unverifiable signature and verify that the signer is authorized to sign for `Contract.signer.party`. Apply the same rules to Requester-carried and Manager-resolved policies. The [UC-4 example](examples-cloud-decision-support.html#signature-verification) illustrates one configuration.
 
-For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy. An optional [purpose classification](odrl-content.html#purpose-classification) records the issuer’s ISO/TS 14265:2024 classification. The Manager SHALL evaluate the specific approved purpose IRI in the Agreement.
-
-<a name="job-result-recipient"> </a>
-
-### Result recipient eligibility
-
-Before accepting an asynchronous job or beginning synchronous processing, the Manager SHALL establish that all selected permissions use the same recipient organization IRI and that the chosen processing mode provides an eligible caller for the complete result.
-
-- **Synchronous job.** The authenticated submitting caller SHALL be authorized to receive the complete result on behalf of the recipient organization.
-- **Asynchronous job.** The Manager SHALL establish that the original Requester or an explicitly authorized retrieval delegate is authorized to receive the complete result on behalf of the recipient organization. The Manager uses deployment-defined trusted information to establish the caller's authority and any delegation. Agreement recipient status alone grants no access to the job.
-
-If either admission check fails, the Manager SHALL return HTTP 403 with an R4 `OperationOutcome` before accepting the job or dispatching work. Each admitted job has one release audience across all of its sets.
-
-Before returning or enabling access to a result, the Manager SHALL verify that the grant is still effective and that the actual caller remains entitled to receive every set on behalf of that recipient organization. Apply this check to synchronous responses, recovery and replay of synchronous results, and asynchronous retrieval. The Manager SHALL enforce all applicable destination restrictions on direct and referenced access. When a result service controls retrieval, the Manager SHALL ensure that the service enforces those restrictions and current release authorization. If the caller fails a release check, withhold every set, its evidence and download access from that caller.
-
-<a name="data-request-authorization-contract"> </a>
-
-### 3:PXX.6.1 Data Request Authorization Contract
-
-The Contract SHALL carry one `rule.contentAttachment` with `contentType` set to `application/ld+json` and the complete issued [DIS ODRL Agreement](odrl-content.html#odrl-authorization) in `data` as Base64-encoded UTF-8 JSON-LD. The attachment SHALL omit `url`. The Contract publisher SHALL protect the Contract, its narrative, and its search results under the authorization governing discovery of the embedded Agreement. See [FHIR R4 Contract.rule]({{site.data.fhir.path}}contract-definitions.html#Contract.rule).
-
-The publisher SHALL derive the mirrored fields from the embedded Agreement revision and verify the following mappings before making the Contract available for submission, display or search.
-
-| Contract element | Source and interpretation |
-| --- | --- |
-| `identifier` | Agreement revision `uid`, with `system = urn:ietf:rfc:3986`. |
-| `title` | Display title supplied by the publisher. |
-| `authority` | The common Agreement assigner as an Organization reference. Use the assigner IRI in `Reference.identifier.value` with `system = urn:ietf:rfc:3986`. A literal Organization reference may also be supplied when it identifies the same organization. |
-| `issued` | Issuance timestamp when supplied by the issuing authority. |
-| `term.identifier` | One term per Agreement permission, keyed by the permission `uid` using `system = urn:ietf:rfc:3986`. |
-| [DIS Permission Validity](StructureDefinition-dis-permission-validity.html) on `term` | Exact `inclusiveStart` and `exclusiveEnd` from the permission. The extension preserves the Agreement's exclusive upper bound. FHIR R4 `Period.end` is inclusive. |
-| `term.offer.party` | One Organization reference with role `requester` for the assignee and one with role `result-recipient` for the authorized recipient. Use the same IRI identifier form as for `authority`. |
-| [DIS Approved Purpose](StructureDefinition-dis-approved-purpose.html) on `term` | Exact approved purpose IRI. |
-| [DIS Purpose Classification](StructureDefinition-dis-purpose-classification.html) on `term` | One Coding for each distinct ISO classification code when supplied in the permission. Copy the system, edition, and code. |
-| [DIS Approved Policy Version](StructureDefinition-dis-approved-policy-version.html) on `term` | Exact approved policy URL and version joined by a vertical bar. |
-
-The publisher SHALL verify that each Agreement permission has exactly one matching term and that each mirrored field agrees with that permission. The publisher SHALL correct a Contract that fails verification before making it available for use. The Manager SHALL verify that `Contract.identifier.value` matches the embedded Agreement's `uid`. The Contract narrative or a client display MAY summarize the approved scope and conditions for authorized readers.
-
-The Manager SHALL use the embedded Agreement to evaluate the job's authorization. The Contract fields that mirror the Agreement support display and search.
-
-FHIR R4 defines [Contract search parameters]({{site.data.fhir.path}}contract.html#search) including `identifier`, `authority`, and `issued`. If the server indexes the logical Organization identifier for `authority`, declare the supported search behavior. Queries on mirrored permission terms, such as approved purpose or policy revision, require separately defined and advertised search parameters. A query that matches a combination of permission fields would need to correlate those fields within the same term.
-
-See the [UC-2 Contract example](Contract-grouped-fhir-authorization-contract.html), the [readable Agreement](odrl-content.html#decoded-authorization-example), and the [Contract verification checks](testplan.html#authorization-contract-validation).
+A deployment also determines whether to make signed authorization or policy Contracts available with a job result and how to handle unavailable or restricted supporting Contracts. The Manager SHALL apply the deployment's disclosure rules together with the [current grant and recipient checks](#data-request-authorization) before releasing the result or any supporting Contract. When supplied as part of a result package, supporting Contracts remain outside the clinical output manifest. Transformation Provenance records processing and release evidence.

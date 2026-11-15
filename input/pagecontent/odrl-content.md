@@ -1,3 +1,5 @@
+This page is the normative Volume 3 binding for the decoded DIS Agreement, Policy Set, and Execution Plan Set. The [Volume 3 overview](volume-3.html) links to the FHIR Contracts that carry them and to the applicable validation rules. Worked examples appear in the informative section below.
+
 ## Common JSON-LD requirements
 
 This section defines the DIS profile of [ODRL 2.2](https://www.w3.org/TR/odrl-model/) and its [JSON-LD representation](https://www.w3.org/TR/odrl-vocab/#json-ld) for the data request authorization, policy and plan. The carriers and transaction requirements are defined in [Volume 3](volume-3.html).
@@ -100,7 +102,7 @@ The policy carries `dis:representationLevel` (`semantic` or `syntax`), `dis:reve
 
 `dis:ruleSets` is an explicit `{"@list":[...]}` with one entry per rule set in processing order. Each entry carries a unique `dis:ruleSetId` string, optional `dis:description` string and a nonempty `dis:ruleOrder` list of `{"@id":"..."}` references to the Set's obligations in first-match order. Every obligation SHALL occur in exactly one list, exactly once. No processing order is inferred from the `obligation` array.
 
-Optional `dis:stages` is an explicit nonempty `@list` in dispatch order. Each entry has a unique `dis:stageId` string, optional `dis:description` string, and a nonempty `dis:ruleSetRefs` list of rule-set ID strings. Each defined rule set SHALL be referenced exactly once across the stages. When stages are present, the stage lists determine the effective rule-set execution order. Apply [Volume 3 compilation](volume-3.html#3pxx15-policy-compilation) and stage processing requirements.
+Optional `dis:stages` is an explicit nonempty `@list` in dispatch order. Each entry has a unique `dis:stageId` string, optional `dis:description` string, and a nonempty `dis:ruleSetRefs` list of rule-set ID strings. Each defined rule set SHALL be referenced exactly once across the stages. When stages are present, the stage lists determine the effective rule-set execution order. Apply [Volume 3 compilation](volume-3.html#policy-compilation) and stage processing requirements.
 
 ### Execution Plan Set
 

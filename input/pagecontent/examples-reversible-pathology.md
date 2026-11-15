@@ -109,6 +109,6 @@ The EHR submits the de-identification job through ITI-x1. The Manager verifies t
 | ITI-x1 response | The Requester receives one `payloadResult` with the submitted set ID, a result manifest, and evidence. | The Requester receives one `payloadResult` with the submitted set ID, a result manifest, and evidence. The Manager holds the mapping separately. |
 {: .grid}
 
-In the supplied-table variant, a missing mapping for `A123` fails the task. The Manager returns an OperationOutcome to the Requester and withholds the job output. The task does not substitute a generated pseudonym. See the [lookup table binding](volume-3.html#3pxx5-reversible-lookup-table) and [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).
+In the supplied-table variant, a missing mapping for `A123` fails the task. The Manager returns an OperationOutcome to the Requester and withholds the job output. The task does not substitute a generated pseudonym. See the [lookup table binding](volume-3.html#protected-lookup-tables) and [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).
 
 The EHR sends the pseudonymized order to the laboratory. When a result returns, the EHR uses authorized pseudonym resolution to associate it with the patient chart. The lab exchange and resolution are outside DIS.
