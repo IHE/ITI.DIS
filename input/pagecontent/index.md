@@ -30,14 +30,12 @@ This guide is organized into the following sections:
   - [Retrieve Job Output \[ITI-x4\]](volume-2.html#23x4-retrieve-job-output-iti-x4)
   - [Retrieve Task Output \[ITI-x7\]](volume-2.html#23x7-retrieve-task-output-iti-x7)
 - Volume 3: Content Specifications
+  - [Contents](volume-3.html)
   - [Data Request Authorization](volume-3.html#data-request-authorization)
   - [De-Identification Policy](volume-3.html#de-identification-policy)
-  - [De-Identification Execution Plan](volume-3.html#execution-plan-content)
+  - [Execution Plan](volume-3.html#execution-plan-content)
   - [Payload Bindings](volume-3.html#payload-bindings)
   - [De-Identification Evidence](volume-3.html#evidence-baseline)
-  - [Protected Lookup Tables](volume-3.html#protected-lookup-tables)
-  - [Shared Contract signatures and disclosure](volume-3.html#contract-signatures)
-  - [Normative ODRL Content Binding](odrl-content.html)
 - Examples
   - [UC-1 – Bulk FHIR Cohort Job](examples-bulk-fhir-cohort.html)
   - [UC-2 – Job with R4 and R5 Payload Sets](examples-grouped-fhir-job.html)

@@ -2,17 +2,18 @@ Volume 3 defines the DIS content artifacts, their carriers, and their validation
 
 The approved data request identifies the policy and covered inputs. The De-ID Manager compiles the policy for the declared payload binding and release. The De-Identifier applies the plan to the assigned content and returns validated output and evidence. The Integrated actor performs those functions locally when it claims standalone conformance.
 
-| Content specification | Carrier or normative binding | Worked example |
+| Content specification | Bindings and related content | Worked example |
 |---|---|---|
 | [Data Request Authorization](#data-request-authorization) | [Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) and [ODRL Agreement](odrl-content.html#odrl-authorization) | [UC-2 decoded Agreement](odrl-content.html#decoded-authorization-example) |
-| [De-Identification Policy](#de-identification-policy) | [Policy Contract](StructureDefinition-DIS-Policy.html) and [ODRL Policy Set](odrl-content.html#de-identification-policy-set) | [UC-2 decoded Policy Set](odrl-content.html#decoded-policy-example) |
+| [De-Identification Policy](#de-identification-policy) | [Policy Contract](StructureDefinition-DIS-Policy.html) and [ODRL Policy Set](odrl-content.html#de-identification-policy-set)<br />[Normative DPV–ODRL profile](draft-dpv-odrl-policy.html) and [transformation actions](#transformation-actions) | [UC-2 decoded Policy Set](odrl-content.html#decoded-policy-example) |
 | [De-Identification Execution Plan](#execution-plan-content) | [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) and [ODRL Execution Plan Set](odrl-content.html#execution-plan-set) | [UC-2 decoded Execution Plan](odrl-content.html#decoded-plan-example) |
-| [Payload Bindings](#payload-bindings) | [FHIR payload binding](#fhir-payload-binding), [input manifest](StructureDefinition-DIS-ResourceManifest.html), and [result package](StructureDefinition-DIS-ResultPackage.html) | [UC-2 mixed-release submission](examples-grouped-fhir-job.html#grouped-fhir-submission) |
+| [Payload Bindings](#payload-bindings) | [FHIR payload binding](#fhir-payload-binding), [input manifest](StructureDefinition-DIS-ResourceManifest.html), and [result package](StructureDefinition-DIS-ResultPackage.html)<br />[FHIR R4 DPV mapping](#fhir-r4-dpv-mapping) ([JSON-LD](bindings/dis-fhir-r4-dpv-mapping-1.jsonld), [CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv))<br />[Proposed DICOM and CDA bindings (informative)](#3pxx33-proposed-dicom-and-cda-bindings-informative) | [UC-2 mixed-release submission](examples-grouped-fhir-job.html#grouped-fhir-submission) |
 | [De-Identification Evidence](#evidence-baseline) | [DIS Evidence Provenance](StructureDefinition-DIS-Evidence.html) and [Staged Release Evidence](StructureDefinition-DIS-StagedReleaseEvidence.html) | [UC-3 pseudonymization evidence](Provenance-dis-evidence-uc3-001.html) |
 | [Protected Lookup Tables](#protected-lookup-tables) | [Lookup Table DocumentReference](StructureDefinition-DIS-LookupTable.html) and [JSON Schema](schemas/dis-lookup-table.schema.json) | [Worked mapping examples](#lookup-table-examples) |
+| [Shared Contract Rules](#shared-contract-rules) | [Signatures and disclosure](#contract-signatures) | [UC-4 signature verification](examples-cloud-decision-support.html#signature-verification) |
 {: .grid}
 
-The [normative DIS ODRL content binding](odrl-content.html) defines the decoded Agreement and Sets. The [shared Contract rules](#contract-signatures) cover deployment-configured signatures and disclosure.
+The [normative DIS ODRL content binding](odrl-content.html) defines the decoded Agreement and Sets.
 
 <a name="data-request-authorization"> </a>
 
