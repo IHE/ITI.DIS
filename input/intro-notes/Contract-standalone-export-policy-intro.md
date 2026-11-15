@@ -8,7 +8,7 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
 {
   "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
   "@type": "Set",
-  "uid": "https://export.example.org/fhir/Library/standalone-export-policy/versions/1.0",
+  "uid": "https://export.example.org/fhir/Contract/standalone-export-policy/versions/1.0",
   "profile": "dis:DeIdentificationPolicy",
   "dis:representationLevel": "syntax",
   "dis:reversibilityMode": "irreversible",
@@ -16,7 +16,7 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
   "dis:payloadVersion": "R4",
   "obligation": [
     {
-      "uid": "https://export.example.org/fhir/Library/standalone-export-policy/versions/1.0#remove-name",
+      "uid": "https://export.example.org/fhir/Contract/standalone-export-policy/versions/1.0#remove-name",
       "target": {
         "@type": "AssetCollection",
         "source": "dis:fhir-elements",
@@ -36,7 +36,7 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
         "dis:ruleOrder": {
           "@list": [
             {
-              "@id": "https://export.example.org/fhir/Library/standalone-export-policy/versions/1.0#remove-name"
+              "@id": "https://export.example.org/fhir/Contract/standalone-export-policy/versions/1.0#remove-name"
             }
           ]
         }

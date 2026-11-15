@@ -134,7 +134,7 @@ dis:actionParameter
 dis:approvedPolicy
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "Approved policy"@en ;
-    skos:definition "Versioned FHIR Library canonical approved for the selected permission."@en ;
+    skos:definition "Versioned FHIR Policy Contract canonical approved for the selected permission."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
 
 dis:resultDestination
