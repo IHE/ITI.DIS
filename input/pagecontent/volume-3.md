@@ -88,13 +88,13 @@ Before returning or enabling access to a result, the Manager SHALL verify that t
 
 ## 3:PXX.2 De-Identification Policy
 
-This section defines the structure, delivery, and validation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. A policy may be authored at the Semantic-Level (using semantic group references, format-neutral) or at the Syntax-Level (using concrete element paths for a specific payload family and version). Both representation levels use the same Contract carrier, delivery modes, and four-point validation. The De-ID Manager validates the policy, and when required, compiles it into one or more [payload-specific execution plans](#policy-compilation) before dispatching tasks.
+This section defines the structure, delivery, and validation of de-identification policies. A policy is a reusable knowledge artifact that governs what de-identification transformations are applied. Policies can use DPV categories, Semantic-Level group references, or Syntax-Level element selectors. All policies use the same Contract carrier, delivery modes, and validation procedures. The De-ID Manager validates the policy, and when required, compiles it into one or more [payload-specific execution plans](#policy-compilation) before dispatching tasks.
 
 The policy artifact is an HL7 FHIR R4 Contract resource, part of the protocol layer. It is fixed to HL7 FHIR R4 regardless of the payload version being de-identified.
 
 The [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) carries the policy. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines its FHIR constraints. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines the policy submission and admission behavior.
 
-The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html) proposes reusable targets based on a personal data category, the person's role, and the location of the information, with separate payload mappings. It is provided for review.
+The [normative DPV–ODRL policy profile](draft-dpv-odrl-policy.html) defines reusable targets by personal data category, the person's role, and the location of the information. During compilation, the Manager applies the versioned mapping for the assigned payload binding and release. The [normative FHIR R4 mapping](#fhir-r4-dpv-mapping) supplies the corresponding selectors for FHIR R4.
 
 <a name="3pxx21-policy-library-resource-structure"> </a>
 
@@ -300,7 +300,7 @@ A reversible policy MAY use the optional `encrypt` action to pseudonymize a sele
 
 ### 3:PXX.2.3 Policy Rules and Ordering
 
-The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
+The decoded policy attachment SHALL conform to the [DIS ODRL Policy Set](odrl-content.html#de-identification-policy-set). DPV–ODRL policies SHALL use the [DPV–ODRL target rules](draft-dpv-odrl-policy.html#policy-rules). Semantic-Level policies use semantic groups, such as `@subject-identifiers`. Syntax-Level policies use concrete element selectors and declare the applicable payload family and version. The Manager SHALL preserve first-match precedence within each rule set.
 
 A `job` linkage scope is limited to that job, including its tasks and retries. A `source-institution` scope permits authorized reuse across jobs of one source institution. A `cross-community` scope permits authorized reuse across participating communities. A policy SHALL declare a linkage scope when it selects lookup-backed replacement, encryption, salted hashing, or date shifting without an explicit consistency scope. See the [ODRL action parameters](odrl-content.html#action-parameters). Lookup-backed replacement requires reversible mode. The Manager SHALL resolve a `job` scope to a stable scope identifier for the job and retries. For other scope types the Manager SHALL preserve the approved identifier. The Manager SHALL include the resolved scope in each compiled salted hash rule. For other actions that require protected input or a lookup assignment, apply the applicable action and transaction rules.
 
@@ -423,7 +423,11 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 <a name="3pxx151-resolve-semantic-groups-or-validate-concrete-selectors"> </a>
 
-#### 3:PXX.3.2.1 Resolve Semantic Groups or Validate Concrete Selectors
+<a name="3pxx321-resolve-semantic-groups-or-validate-concrete-selectors"> </a>
+
+#### 3:PXX.3.2.1 Resolve Policy Targets
+
+**DPV–ODRL policies.** The Manager SHALL apply the [DPV–ODRL compilation rules](draft-dpv-odrl-policy.html#compilation-and-evidence) using the immutable mapping revision for the assigned payload binding and release. For FHIR R4, use the [FHIR R4 DPV category mapping](#fhir-r4-dpv-mapping).
 
 **Semantic-Level policies.** The De-ID Manager SHALL resolve each `@` group reference using the [Semantic Group Binding](#3pxx3213-semantic-group-bindings) for the declared payload family and release. If a referenced group has no binding for that release, the Manager SHALL fail compilation before dispatch.
 
@@ -451,7 +455,7 @@ For each applicable payload set, each ruleSet produces one execution plan Contra
 
 ### 3:PXX.3.3 Execution Plan Structure and Rule Evaluation
 
-The decoded plan attachment SHALL conform to the [DIS ODRL Execution Plan Set](odrl-content.html#execution-plan-set). Each compiled obligation SHALL identify its source policy obligation, a concrete selector and its resolved action parameters. The De-Identifier SHALL check the plan's set, rule-set, stage, binding and release declarations against the task before processing. It SHALL reject a plan that cannot be validated, including unrecognized selectors, actions or parameters.
+The decoded plan attachment SHALL conform to the [DIS ODRL Execution Plan Set](odrl-content.html#execution-plan-set). Each compiled obligation SHALL identify its source policy obligation, a concrete selector and its resolved action parameters. The De-Identifier SHALL check the plan's set, rule-set, stage, binding and release declarations against the task before processing. It SHALL reject a plan that cannot be validated, including unrecognized selectors, actions or parameters. For a DPV–ODRL plan, it SHALL validate the [mapping revision](draft-dpv-odrl-policy.html#compilation-and-evidence) for the declared binding and release.
 
 Within one plan, the De-Identifier SHALL evaluate all selectors against the input resource before applying any action. A selector that matches no elements on a resource contributes no action for that resource. If several rules select the same concrete element instance, the De-Identifier SHALL use the first matching rule in the plan's rule order for that instance. Each occurrence of a repeated element is a distinct instance. This lets a policy keep an entire selected `Patient.identifier` occurrence before removing the other occurrences.
 

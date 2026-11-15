@@ -1,4 +1,4 @@
-This Volume 3 proposal defines a reusable, format-independent De-Identification Policy using the Data Privacy Vocabulary (DPV) and ODRL. The requirements on this page describe the proposed policy profile. The linked FHIR R4 payload mapping is normative for implementations claiming its support.
+This normative part of Volume 3 defines the format-independent De-Identification Policy and its compiled Execution Plan using the Data Privacy Vocabulary (DPV) and ODRL. The [FHIR R4 payload mapping](volume-3.html#fhir-r4-dpv-mapping) defines how those policies become resource-local selectors for FHIR R4.
 
 ## Content artifacts
 
@@ -11,13 +11,13 @@ This Volume 3 proposal defines a reusable, format-independent De-Identification 
 | [De-Identification Evidence](volume-3.html#evidence-baseline) | FHIR R4 Provenance links the outcome to the exact source policy and returned results. The assignment record links the evidence to the plan and mapping revision. |
 {: .grid}
 
-The proposed Policy and Execution Plan use the existing DIS FHIR R4 Contract carriers and signature rules. The Agreement uses the existing [ODRL Agreement binding](odrl-content.html#odrl-authorization). Approval of a policy for one scope and recipient grants only the processing described by that permission.
+The Policy and Execution Plan use the existing DIS FHIR R4 Contract carriers and signature rules. The Agreement uses the existing [ODRL Agreement binding](odrl-content.html#odrl-authorization). Approval of a policy for one scope and recipient grants only the processing described by that permission.
 
 ## Common personal information model
 
 Each ODRL target describes a class of occurrences using exactly one value from each dimension.
 
-| Dimension | ODRL constraint operand | Proposed values |
+| Dimension | ODRL constraint operand | Values |
 | --- | --- | --- |
 | Personal data category | `disdpv:category` | The DPV v2.3 concept IRI. The FHIR R4 mapping covers `pd:Name`, `pd:Identifier`, and `pd:BirthDate`. |
 | Role in the record | `disdpv:personRole` | `disdpv:patient`, `disdpv:patient-contact`, `disdpv:care-provider`, or `disdpv:all-person-roles`. The FHIR R4 mapping defines additional role use. |
@@ -37,7 +37,7 @@ Location values are exact. To cover several locations, author a rule for each lo
 
 ## ODRL representation
 
-Use the [draft JSON-LD context](schemas/dis-dpv-odrl-draft-1.jsonld) as the sole context for the draft Policy and Execution Plan. The [draft Turtle vocabulary](schemas/dis-dpv-odrl-draft-1.ttl) identifies the new profiles and terms. The `dis:` prefix continues to identify the [existing DIS actions and shared terms](odrl-content.html#dis-odrl-vocabulary). Apply the [common JSON-LD requirements](odrl-content.html#common-json-ld-requirements) with the context and profile identifiers below.
+Use the [DPV–ODRL JSON-LD context](schemas/dis-dpv-odrl-draft-1.jsonld) as the sole context for the Policy and Execution Plan. The [DPV–ODRL vocabulary (RDF Turtle)](schemas/dis-dpv-odrl-draft-1.ttl) identifies the profiles and terms. The `dis:` prefix identifies the [DIS actions and shared terms](odrl-content.html#dis-odrl-vocabulary). Apply the [common JSON-LD requirements](odrl-content.html#common-json-ld-requirements). The context URL and `disdpv:` term IRIs retain their published identifiers for policies, plans, and FHIR R4 mapping revision 1.
 
 | Artifact | ODRL type | Profile identifier |
 | --- | --- | --- |
@@ -47,7 +47,7 @@ Use the [draft JSON-LD context](schemas/dis-dpv-odrl-draft-1.jsonld) as the sole
 
 ### Policy rules
 
-Use the `uid`, `obligation`, `dis:reversibilityMode`, `dis:ruleSets`, and optional staging and linkage scope fields of the [DIS Policy Set](odrl-content.html#de-identification-policy-set). In this draft, omit `dis:representationLevel`, `dis:payloadFamily`, and `dis:payloadVersion` from the Policy Set.
+Use the `uid`, `obligation`, `dis:reversibilityMode`, `dis:ruleSets`, and optional staging and linkage scope fields of the [DIS Policy Set](odrl-content.html#de-identification-policy-set). The Policy Set SHALL omit `dis:representationLevel`, `dis:payloadFamily`, and `dis:payloadVersion`.
 
 Each obligation SHALL have a unique `uid`, an `action`, and one `target`. The target is an ODRL `AssetCollection` with `source` equal to `disdpv:personal-information`. Its `refinement` is an array of three constraints, one for each dimension. Each constraint uses `eq` and an explicit `{"@id":"…"}` right operand. All three constraints SHALL match. Reject unknown or duplicate operands, unsupported values, and additional target properties. See the [ODRL Information Model, §2.5.5](https://www.w3.org/TR/odrl-model/).
 
@@ -59,7 +59,7 @@ Within a plan, the first matching rule controls each concrete occurrence. Put a 
 
 1. The Manager admits the job under [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1), including verification of the exact authorized Policy Contract revision and input scope. It chooses an immutable mapping revision for the assigned binding and release, checks the assignment against the mapping's declared scope, and verifies support for each category, role, location and applicable action.
 2. The Manager resolves roles from verified assignment inputs. If role uncertainty could change the winning rule or its action for a selected element, the Manager SHALL fail compilation. It SHALL fail before dispatch when requested coverage is unsupported. A supported optional element that is absent contributes zero matches. The Manager retains the selector for an optional mapped element where the binding permits that selector to be evaluated independently of the element's presence.
-3. The Manager compiles the [DIS Execution Plan Set](odrl-content.html#execution-plan-set) using the draft profile identifier and adds exactly one `disdpv:mappingRevision` as an absolute IRI reference. Every compiled obligation SHALL carry its `dis:sourceRule` and a concrete selector tied to the verified assignment manifest. The Manager SHALL preserve source rule order and the mapping's expansion order. The Manager SHALL check the dispatch actor's support for the draft plan profile and the applicable [processing capabilities](volume-3.html#fhir-processing-capabilities).
+3. The Manager compiles the [DIS Execution Plan Set](odrl-content.html#execution-plan-set) with `profile` equal to `disdpv:ExecutionPlan` and adds exactly one `disdpv:mappingRevision` as an absolute IRI reference. Every compiled obligation SHALL carry its `dis:sourceRule` and a concrete selector tied to the verified assignment manifest. The Manager SHALL preserve source rule order and the mapping's expansion order. The Manager SHALL check the dispatch actor's support for the DPV–ODRL Execution Plan profile and the applicable [processing capabilities](volume-3.html#fhir-processing-capabilities).
 4. The De-Identifier checks the plan, its mapping revision for the declared binding and release, and the exact inputs verified for [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3). It evaluates the concrete rules and validates the output. It uses the Plan Contract's exact source Policy Contract reference in `Provenance.policy`. The Manager records the authorization, plan, mapping revision, and returned evidence for the assignment. This trace stays subject to the existing DIS disclosure controls. Worker evidence need not disclose role-resolution details or source names.
 
 ## FHIR R4 payload mapping
@@ -80,7 +80,7 @@ The [normative FHIR R4 mapping](volume-3.html#fhir-r4-dpv-mapping) supplies the 
 
 The Manager checks each proposed DIS action against the applicable DICOM constraints for the concrete attribute, selected profile, and options. An incompatible action makes the assignment unsupported. For example, a Manager SHALL reject a policy that keeps Performing Physician's Name when the selected DICOM profile requires its removal. This table is a crosswalk for review.
 
-## Worked policies and expected evidence
+## Worked policies and expected evidence (Informative)
 
 Both policies target the same synthetic R4 input scope. They cover structured names under the FHIR R4 mapping. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
 
@@ -92,4 +92,4 @@ Both policies target the same synthetic R4 input scope. They cover structured na
 
 The attachments are shown decoded. The [fixture and trace](examples/dpv-odrl/example-trace.json) show the assigned resource-list manifest, resources, approved scope, exact Contract references, and expected evidence linkage for both assignments. In the fixture, the patient and the care-provider Practitioner represent the same fictional person in two roles. Policy B preserves the name only on the Practitioner. The Manager checks the exact source policy reference in `Provenance.policy` when accepting the evidence.
 
-[Draft Test Plan cases](testplan.html#draft-dpv-odrl-policy-cases) exercise these outcomes and the admission and compilation failures.
+[Test Plan cases](testplan.html#dpv-odrl-policy-cases) exercise these outcomes and the admission and compilation failures.

@@ -8,14 +8,14 @@
 
 <https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.ttl>
     a owl:Ontology ;
-    dct:title "DIS DPV–ODRL policy vocabulary, draft 1"@en ;
+    dct:title "DIS DPV–ODRL policy vocabulary"@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html> .
 
 disdpv:Policy a dct:Standard ;
-    rdfs:label "Draft DIS DPV De-Identification Policy"@en .
+    rdfs:label "DIS DPV–ODRL De-Identification Policy"@en .
 
 disdpv:ExecutionPlan a dct:Standard ;
-    rdfs:label "Draft DIS DPV Execution Plan"@en .
+    rdfs:label "DIS DPV–ODRL Execution Plan"@en .
 
 disdpv:personal-information a odrl:AssetCollection ;
     rdfs:label "Occurrences of personal information in the assigned scope"@en .

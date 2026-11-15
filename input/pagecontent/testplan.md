@@ -398,12 +398,16 @@ Use the [mixed payload walkthrough](draft-native-payload-bindings.html#illustrat
 
 <a name="draft-dpv-odrl-policy-cases"> </a>
 
-## Draft DPV–ODRL Policy Cases
+<a name="dpv-odrl-policy-cases"> </a>
 
-These procedures are for review of the [proposed policy profile](draft-dpv-odrl-policy.html) using its synthetic R4 fixtures.
+## DPV–ODRL Policy Cases
+
+Apply these procedures to implementations claiming support for the [DPV–ODRL policy profile](draft-dpv-odrl-policy.html). Use the synthetic R4 fixtures and the normative mapping.
 
 | Case | Procedure | Expected outcome |
 | --- | --- | --- |
+| Profile and context pairing | Submit a valid DPV–ODRL policy and plan. Repeat with the DIS version 1 context substituted, an extra context, or a mismatched policy or plan profile identifier. | Reject each invalid artifact before dispatch or execution, as applicable. |
+| Target constraints | Repeat with a missing, duplicated, or unknown target operand, a semantic group reference, or an operator other than `eq`. | The Manager rejects the policy without dispatch. |
 | All in-scope roles | Submit Policy A under Agreement A with the example manifest. | The Manager compiles the three mapped name paths. The De-Identifier removes every in-scope name, including the care provider's name. Evidence names the exact Policy A Contract revision. |
 | Care-provider exception | Submit Policy B under Agreement B. Repeat after reversing the serialized obligation array while retaining the explicit rule order and using a newly approved fixture revision. | Both executions preserve the assigned care-team Practitioner's name and remove the other names. The same individual represented as the Patient has their name removed on the Patient resource. |
 | Shared datatype | In a versioned assignment with an ActivityDefinition and a Library, place a name in each resource’s contact and check the resource-local matches for a structured contact-person name rule. | The mapping contains one `ContactDetail.name` entry. The plan includes each eligible use site once, including `ActivityDefinition.contact.name` and `Library.contact.name`. |
