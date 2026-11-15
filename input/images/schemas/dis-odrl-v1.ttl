@@ -282,6 +282,25 @@ dis:payloadSet
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> ;
     rdfs:range xsd:string .
 
+dis:inputDigests
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Assigned input digests"@en ;
+    skos:definition "Digest entries for externally retrieved objects in an execution plan."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> .
+
+dis:inputUrl
+    a owl:ObjectProperty, skos:Concept ;
+    rdfs:label "Assigned input URL"@en ;
+    skos:definition "Original assigned HTTPS URL whose authorized bytes are bound by an execution plan digest."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> .
+
+dis:sha256
+    a owl:DatatypeProperty, skos:Concept ;
+    rdfs:label "SHA-256 digest"@en ;
+    skos:definition "SHA-256 digest of the authorized bytes in lowercase hexadecimal."@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> ;
+    rdfs:range xsd:string .
+
 dis:ruleSets
     a owl:ObjectProperty, skos:Concept ;
     rdfs:label "Rule sets"@en ;

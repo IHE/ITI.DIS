@@ -220,6 +220,18 @@ Inspect all nine evidence elements: evidence identifier, outcome status, workflo
 
 Check Manager custody of mappings/reversibility records, mode-dependent retention, deletion of temporary mapping copies at task termination and exclusion of protected transformation material from recipient-facing output, evidence and logs. Patient association in UC-3/4 remains implementation-defined and outside standardized DIS transactions.
 
+### Assigned Input Verification
+
+Use authorized assignments, a trusted Manager and De-Identifier, and the [assigned input verification rules](volume-3.html#assigned-input-verification). For negative cases, verify that the De-Identifier applies no transformation and the Manager releases no job output. Repeat hosted-content failures after asynchronous task acceptance and check that ITI-x7 reports the failure.
+
+| Case | Procedure | Pass criteria |
+|---|---|---|
+| Inline package substitution | Verify and run the [preliminary stage assignment](Task-staged-async-preliminary-task.html) with its [decoded plan](Contract-staged-async-preliminary-plan.html#decoded-odrl). Resubmit with a fresh task identifier and change the inline Patient bytes while preserving the set ID and referenced plan. | The original matches the plan source. The substituted package fails the digest comparison and the De-Identifier returns HTTP 400 with an R4 OperationOutcome before acceptance. |
+| Hosted manifest identity | Run the [UC-2 R4 task](Task-grouped-fhir-task-patient-r4.html) using the expected immutable List and resource versions. For a new assignment, change the Task's manifest URL while keeping the plan fixed. | The original verifies and executes. The changed URL fails the plan source check before acceptance. |
+| Hosted manifest or file substitution | Use the [bulk input digests](odrl-content.html#hosted-input-digest-example) with the corresponding fixture bytes. In one run replace the manifest at its original URL. In another, replace one file at its original URL. Repeat the file case with its digest omitted and the host configured as a mutable source. | The original bytes pass. Changed bytes fail even when the URLs are unchanged. A mutable input without an expected digest fails verification. |
+| Hosted immutable version mismatch | Use the UC-2 R4 version-specific URLs. Have the trusted test endpoint return a Patient with a different `meta.versionId` at its assigned URL. | The De-Identifier detects the version mismatch and fails the task before transformation. |
+{: .grid}
+
 ### Bulk Result Content Identity and Access Renewal
 
 Test the [bulk result content identity rules](volume-3.html#bulk-result-content-identity) with the [two-file R4 cohort example](examples-bulk-fhir-cohort.html). Record the validated output manifest and NDJSON bytes before release. Use an authorized Requester to retrieve the result. Compare the retrieved bytes after decoding any HTTP content coding. The test harness may use byte comparison or locally computed digests.
