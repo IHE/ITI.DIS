@@ -107,13 +107,30 @@ To recover an uncertain submission outcome, the sender SHALL POST the equivalent
 |---|---|
 | Initial admission or synchronous execution is pending | HTTP 409 with `DIS-Submission: pending` and an R4 `OperationOutcome`. The receiver SHOULD include `Retry-After` in seconds. |
 | Asynchronous work was accepted and its polling URL remains available | The original HTTP 202 acceptance with the same `Content-Location`. Include `DIS-Submission: replayed`. The sender polls that URL for current status. |
-| A definitive rejection or synchronous outcome is retained | The recorded response with `DIS-Submission: replayed`. |
+| A definitive rejection or synchronous outcome is retained | The recorded response with `DIS-Submission: replayed`. For a synchronous ITI-x3 assignment include the [recorded task outcome](#synchronous-task-recovery). |
 | The receiver knows the recorded response or polling URL has expired | HTTP 410 with an R4 `OperationOutcome`. |
 | No record is visible to the authorized sender and recovery only was requested | HTTP 404 with an R4 `OperationOutcome`. This response does not establish that the original submission was rejected or that work has stopped. |
 
 {: .grid}
 
 The receiver SHALL document its minimum replay retention period in the applicable server operation's CapabilityStatement documentation. It SHALL retain the binding while work is active, for at least the documented period after a terminal outcome or definitive rejection, and for at least as long as the polling URL is valid. After an uncertain submission, the sender SHALL use recovery-only mode. A missing record or expired URL alone SHALL NOT cause the sender to submit replacement work. After a recorded definitive rejection, a fresh submission uses a new identifier. Recovery responses SHALL include `Cache-Control: no-store`.
+
+<a name="synchronous-task-recovery"> </a>
+
+### Synchronous Task Recovery
+
+For a synchronous ITI-x3 submission, the De-Identifier SHALL record the outcome classification with the terminal response in the scoped replay record before sending that response. It SHALL retain the classification for the same period as the response. On an authorized replay of the retained terminal response to an equivalent submission, the De-Identifier SHALL return the recorded status and body with `DIS-Submission: replayed` and exactly one `DIS-Task-Outcome` header as follows.
+
+| `DIS-Task-Outcome` value | Meaning |
+|---|---|
+| `rejected` | The De-Identifier definitively rejected the assignment before starting execution. The replay carries the recorded rejection status and an R4 `OperationOutcome`. |
+| `completed` | Execution finished successfully and the De-Identifier recorded an HTTP 200 result. |
+| `failed` | Execution started and stopped with a recorded processing failure. The replay carries the recorded error status and an R4 `OperationOutcome`. |
+{: .grid}
+
+The De-Identifier SHALL omit `DIS-Task-Outcome` on pending, expired or absent records and when the current recovery or result disclosure authorization checks fail. It SHALL also omit this header on identifier conflicts and asynchronous acceptance replays. The original replay authorization and result release rules apply to the status, headers and body.
+
+For an uncertain synchronous assignment, the Manager SHALL use recovery-only requests for the exact original submission. An authorized replay of that submission with a classification consistent with the replayed response establishes a known outcome. `rejected` establishes that execution did not start. `completed` and `failed` establish that execution has stopped. A pending replay check, HTTP 404 or 410, a denial of the recovery request itself, a transport error or an invalid replay leaves the assignment unresolved. A replay with a missing, unknown, repeated or inconsistent `DIS-Task-Outcome` value is invalid for this purpose. In particular, an `OperationOutcome` or an HTTP status alone does not establish a terminal outcome on a recovery request.
 
 <a name="asynchronous-cancellation"> </a>
 
@@ -134,7 +151,7 @@ The initiator SHALL send an authorized `DELETE` with an empty body to the exact 
 | Cancellation accepted and still pending | HTTP 202 with `DIS-Cancellation: pending` and an empty body. | HTTP 202 with `DIS-Cancellation: pending` and an empty body. |
 | Cancellation confirmed | HTTP 204 with `DIS-Cancellation: cancelled` and an empty body. | HTTP 410 with `DIS-Cancellation: cancelled` and an R4 `OperationOutcome`. |
 | Cancellation accepted, confirmation interval expired with work still unconfirmed | HTTP 422 with `DIS-Cancellation: unconfirmed` and an R4 `OperationOutcome`. | The same HTTP 422 outcome. |
-| Job cancellation rejected while a synchronous assignment is outstanding | HTTP 409 with an R4 `OperationOutcome` describing the conflict without exposing worker details. | Ordinary job polling continues. |
+| Job cancellation rejected while an original synchronous submission is still in flight | HTTP 409 with an R4 `OperationOutcome` describing the conflict without exposing worker details. | Ordinary job polling continues. |
 | Work was already terminal before cancellation took effect | HTTP 409 with an R4 `OperationOutcome` describing the conflict. | The ordinary terminal response for that work item. |
 
 {: .grid}
@@ -476,7 +493,7 @@ Upon receipt of a Submit De-Identification Task Response, the De-ID Manager SHAL
 
 In synchronous mode, on a successful response, the Manager SHALL validate and retain any required protected mapping output before release. The Manager SHALL accept the de-identified output and evidence for assembly into the job response to the Requester.
 
-On a definitive ITI-x3 rejection or processing failure, the Manager SHALL inspect the OperationOutcome and withhold job output. It SHALL report the failure on ITI-x1 for a synchronous job or through ITI-x4 for an accepted asynchronous job. An uncertain ITI-x3 submission outcome follows the [recovery rules](#submission-retries). If job cancellation has been accepted, the [job cancellation rules](#job-cancellation) apply.
+On a definitive ITI-x3 rejection or processing failure, the Manager SHALL inspect the OperationOutcome and withhold job output. It SHALL report the failure on ITI-x1 for a synchronous job or through ITI-x4 for an accepted asynchronous job. An uncertain ITI-x3 submission follows the [recovery rules](#submission-retries), including [outcome classification](#synchronous-task-recovery) for a synchronous assignment. If the Manager has accepted job cancellation, the [job cancellation rules](#job-cancellation) determine the job outcome and require withholding all output.
 
 In asynchronous mode (DIS-ASYNC-TASK), on a 202 Accepted response, the Manager SHALL retain the task handle and SHALL proceed to retrieve output using ITI-x7.
 
@@ -592,11 +609,11 @@ On an error response, the Requester SHALL inspect the OperationOutcome and SHALL
 
 The Requester uses the [shared cancellation contract](#asynchronous-cancellation) to request cancellation of an accepted asynchronous job. The Manager SHALL authorize only the original Requester or an explicitly authorized cancellation delegate to cancel the job.
 
-The Manager SHALL coordinate the cancellation decision with dispatch and terminal outcome publication. An assignment counts as outstanding from the point dispatch is committed until a known terminal outcome or a definitive rejection establishes that it did not start. If any outstanding assignment was submitted for synchronous processing, the Manager SHALL reject cancellation with HTTP 409 and an R4 `OperationOutcome` and SHALL omit the `DIS-Cancellation` response header. Rejection leaves the job status, dispatch and result release rules in effect. For an authorized cancellation request on an active job, the Manager SHALL accept cancellation when no outstanding assignment blocks it. The Requester may retry after the blocking assignments reach known terminal states.
+The Manager SHALL coordinate the cancellation decision with dispatch and terminal outcome publication. An assignment counts as outstanding from the point dispatch is committed until a known terminal outcome or a definitive rejection establishes that it did not start. If an original synchronous ITI-x3 submission is still in flight, the Manager SHALL reject cancellation with HTTP 409 and an R4 `OperationOutcome` and SHALL omit the `DIS-Cancellation` response header. Rejection leaves the job status, dispatch and result release rules in effect. The Requester may retry. If the original synchronous exchange has ended without a definitive response, for example after a request timeout or lost connection, the assignment is unresolved and does not prevent acceptance of cancellation of an active job. The Manager SHALL accept an authorized cancellation request for an active job when no original synchronous submission is still in flight.
 
-On accepting cancellation, the Manager SHALL stop new dispatch and further local de-identification, block all job result release, and request ITI-x7 cancellation for each outstanding asynchronous assignment for which it has a polling URL. It SHALL also account for submissions already in flight. If the polling URL becomes available while an assignment may still be running, the Manager SHALL request cancellation at that URL. For a lost polling URL, the Manager SHALL use the [recovery-only request](#submission-retries) for the original assignment. It SHALL account for a recorded definitive rejection as an assignment that did not start. A missing record or an expired URL alone does not establish that the assignment is terminal.
+On accepting cancellation, the Manager SHALL stop new dispatch and further local de-identification and SHALL block all job result release. It SHALL request ITI-x7 cancellation for each outstanding asynchronous assignment with a polling URL, including a URL it later obtains through [recovery](#submission-retries). For each synchronous assignment with an uncertain response, the Manager SHALL use [synchronous task recovery](#synchronous-task-recovery) to determine its outcome. It SHALL account for a recorded definitive rejection as an assignment that did not start.
 
-The Manager SHALL report confirmed cancellation only after local work has stopped and each dispatched assignment has reached a known terminal state. An assignment that completed or failed before its cancellation was applied counts as terminal. An unconfirmed cancellation response does not establish a terminal task state. The Manager SHALL discard any results from such assignments and SHALL NOT expose their evidence or mappings to the Requester. If the confirmation interval expires with an unresolved assignment, the Manager SHALL report unconfirmed cancellation and continue to withhold all job results. It SHALL continue cancellation of any outstanding assignments it can still address. An Integrated actor applies the same job rules to its local work.
+The Manager SHALL report confirmed cancellation only after local work has stopped and each dispatched assignment has reached a known terminal state or is known not to have started. An assignment that completed or failed before cancellation was applied counts as terminal. An unconfirmed task cancellation response leaves that assignment unresolved. Once job cancellation is accepted, the Manager SHALL discard all assignment results and SHALL NOT expose their evidence or mappings to the Requester. If the confirmation interval expires with an unresolved assignment, the Manager SHALL report unconfirmed cancellation and continue to withhold all job results. It SHALL continue recovery and cancellation of outstanding assignments it can still address. If all outstanding work is accounted for while the polling URL remains available, the Manager SHALL update the cancellation outcome under the [shared cancellation response rules](#asynchronous-cancellation). An Integrated actor applies the same job rules to its local work.
 
 ### 2:3.x4.5 CapabilityStatement Resource
 
