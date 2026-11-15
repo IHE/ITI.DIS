@@ -174,13 +174,13 @@ pages:
     title: "UC-5 – Standalone Clinical Export (Informative)"
     generation: markdown
   draft-native-payload-bindings.md:
-    title: "Draft DICOM and CDA Payload Bindings"
+    title: "Proposed DICOM and CDA Payload Bindings (Informative)"
     generation: markdown
   draft-encryption-based-pseudonymization.md:
-    title: "Encryption-Based Pseudonymization"
+    title: "Optional AES-FF1 Pseudonymization (DIS-REVERSIBLE)"
     generation: markdown
   odrl-content.md:
-    title: "DIS ODRL Content"
+    title: "DIS ODRL Content Binding (Normative)"
     generation: markdown
   testplan.md:
     title: "Test Plan"
@@ -213,12 +213,15 @@ menu:
     "Retrieve Task Output [ITI-x7]": volume-2.html#23x7-retrieve-task-output-iti-x7
   Volume 3:
     Data Request Authorization: volume-3.html#data-request-authorization
-    DIS ODRL Content: odrl-content.html
     De-Identification Policy: volume-3.html#de-identification-policy
     De-Identification Execution Plan: volume-3.html#execution-plan-content
     Payload Bindings: volume-3.html#payload-bindings
     De-Identification Evidence: volume-3.html#evidence-baseline
-    Reversible Lookup Table and Examples: volume-3.html#3pxx5-reversible-lookup-table
+    Protected Lookup Tables: volume-3.html#protected-lookup-tables
+    Shared Contract Signatures and Disclosure: volume-3.html#contract-signatures
+    Normative ODRL Content Binding: odrl-content.html
+    FHIR Transformation Actions: volume-3.html#transformation-actions
+    Optional AES-FF1 Pseudonymization: draft-encryption-based-pseudonymization.html
   Examples:
     "UC-1 – Bulk FHIR Cohort Job": examples-bulk-fhir-cohort.html
     "UC-2 – Job with R4 and R5 Payload Sets": examples-grouped-fhir-job.html
@@ -227,8 +230,7 @@ menu:
     "UC-5 – Standalone Clinical Export": examples-standalone-export.html
   Artifacts: artifacts.html
   Other:
-    Draft DICOM and CDA Payload Bindings: draft-native-payload-bindings.html
-    Encryption-Based Pseudonymization: draft-encryption-based-pseudonymization.html
+    Proposed DICOM and CDA Payload Bindings (Informative): draft-native-payload-bindings.html
     Changes to Other IHE Specifications: other.html
     Download and Analysis: download.html
     Test Plan: testplan.html

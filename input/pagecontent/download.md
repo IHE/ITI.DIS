@@ -22,7 +22,7 @@ These schemas describe the structure of the decoded JSON payloads used by DIS. V
 
 | JSON Schema | Purpose | Volume 3 binding |
 |---|---|---|
-| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3.html#3pxx5-reversible-lookup-table) |
+| [Patient lookup table](schemas/dis-lookup-table.schema.json) | Defines supplied and generated patient identifier mappings and their table metadata. | [Reversible Lookup Table](volume-3.html#protected-lookup-tables) |
 {: .grid}
 
 #### Cross Version Analysis
