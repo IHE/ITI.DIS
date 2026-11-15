@@ -113,4 +113,4 @@ The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe 
 
 <div id="mixed-payload-walkthrough"> </div>
 
-See the [informative DPV–DICOM crosswalk](draft-native-payload-bindings.html#dicom-crosswalk-informative) and the [mixed R5 and DICOM job walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job).
+See the [experimental DICOM DPV Category Mapping](experimental-dicom-dpv-mapping.html) and the [mixed R5 and DICOM job walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job).
