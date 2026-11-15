@@ -278,7 +278,7 @@ This Execution Plan Set fragment binds the manifest and two files in the [synthe
 
 ## DPV–ODRL worked policies and evidence
 
-Both policies target the same synthetic R4 input scope. They cover structured names under the FHIR R4 mapping. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
+Both policies target the same synthetic R4 input scope. The Manager compiles both plans with [FHIR R4 DPV mapping revision 2](volume-3-execution-plan.html#fhir-r4-dpv-mapping-revision-2). Revision 2 also supplies the selector for the optional Mother's Maiden Name extension. That selector matches zero elements in this fixture. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
 
 | Example | Authorization | Policy | Execution Plan | Expected result |
 | --- | --- | --- | --- | --- |

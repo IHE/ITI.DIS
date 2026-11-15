@@ -9,7 +9,7 @@
 
 <a name="3pxx422-input-and-result-delivery"> </a>
 
-See the [FHIR Payload Binding overview](volume-3-payload-bindings.html#fhir-payload-binding).
+See the [FHIR Payload Delivery overview](volume-3-payload-bindings.html#fhir-payload-binding).
 
 The job request identifies the proposed processing targets. The task request identifies the data assigned to the De-Identifier. The De-Identifier returns task results in ITI-x3 or ITI-x7. The Manager returns job results in ITI-x1 or ITI-x4. Result resources retain the declared input release.
 

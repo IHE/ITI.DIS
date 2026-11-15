@@ -61,3 +61,8 @@ disdpv:targetPath a rdf:Property ; rdfs:label "Path to the target element"@en .
 disdpv:selectorLanguage a rdf:Property ; rdfs:label "Selector language"@en .
 disdpv:roleRule a rdf:Property ; rdfs:label "Versioned role determination rule"@en .
 disdpv:expansionRule a rdf:Property ; rdfs:label "Versioned selector expansion rule"@en .
+
+disdpv:practitioner-role a skos:Concept ; skos:prefLabel "Practitioner represented by a PractitionerRole"@en .
+disdpv:subjectPath a rdf:Property ; rdfs:label "Reference path used to establish the subject"@en .
+disdpv:subjectResourceType a rdf:Property ; rdfs:label "FHIR resource type required for the resolved subject"@en .
+disdpv:subjectRule a rdf:Property ; rdfs:label "Versioned verified subject rule"@en .

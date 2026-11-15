@@ -14,21 +14,16 @@
 
 <a name="3pxx421-addressing-and-processing"> </a>
 
-The declared payload release determines the element selectors, traversal of the target resources, and validation of the result.
-
-<a name="3pxx111-version-identification"> </a>
-
-<a name="3pxx3211-version-identification"> </a>
-
-<a name="3pxx3211-fhir-release-and-capability-matching"> </a>
-
-## 3:PXX.4.2.1.1 FHIR Release Identification
-
-For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request if the declaration is absent or specifies a release other than `R4` or `R5`. The Manager SHALL use the same declaration in ITI-x3. A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
+The declared payload release determines the element selectors, traversal of the target resources, and validation of the result. See [FHIR Release Identification](volume-3-payload-bindings.html#3pxx421-fhir-release-identification) for release declarations in transaction messages and [FHIR R4 DPV Category Mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping) for mapping DPV–ODRL targets.
 
 <a name="fhir-processing-capabilities"> </a>
 
-## 3:PXX.4.2.1.2 FHIR Processing Capabilities
+<a name="3pxx4212-fhir-processing-capabilities"> </a>
+<a name="markdown-toc-3pxx4212-fhir-processing-capabilities"> </a>
+
+## 3:PXX.3.5.1 FHIR Processing Capabilities
+
+A De-Identifier declaring DIS-FHIR-Payload SHALL advertise the payload releases it supports. The Manager SHALL verify that the assigned De-Identifier supports the declared release before dispatch and SHALL reject the job when no available De-Identifier supports that release.
 
 A De-Identifier or Integrated actor SHALL support and declare all nine [core actions](volume-3-policy.html#transformation-actions) for DIS-FHIR-Payload. This requirement applies to the actor's processing capabilities as a whole. An individual entry may advertise a subset of actions for its release and manifest formats.
 
@@ -52,9 +47,12 @@ For each combination that includes `date-shift`, the processing actor SHALL docu
 
 <a name="3pxx3212-fhirpath-element-addressing"> </a>
 
-## 3:PXX.4.2.1.3 FHIRPath Element Addressing
+<a name="3pxx4213-fhirpath-element-addressing"> </a>
+<a name="markdown-toc-3pxx4213-fhirpath-element-addressing"> </a>
 
-DIS-FHIR-Payload uses FHIRPath expressions as the element addressing language. Execution plan rules and semantic group definitions reference HL7 FHIR elements using FHIRPath-compatible path expressions rooted at the resource type.
+## 3:PXX.3.5.2 FHIRPath Element Addressing
+
+DIS-FHIR-Payload uses [FHIRPath](https://hl7.org/fhirpath/) expressions as the element addressing language. Execution plan rules and semantic group definitions reference HL7 FHIR elements using FHIRPath-compatible path expressions rooted at the resource type.
 
 An element path SHALL be one of the following forms:
 
@@ -73,11 +71,14 @@ Semantic-Level policies use the same group codes across releases. The [Semantic 
 
 <a name="3pxx3213-semantic-group-bindings"> </a>
 
-## 3:PXX.4.2.1.4 Semantic Group Bindings
+<a name="3pxx4214-semantic-group-bindings"> </a>
+<a name="markdown-toc-3pxx4214-semantic-group-bindings"> </a>
+
+## 3:PXX.3.5.3 Semantic Group Bindings
 
 Semantic groups categorize HL7 FHIR elements by privacy sensitivity. Semantic-Level policies reference semantic groups instead of individual element paths. The De-ID Manager expands semantic group references to individual element paths during policy compilation (see [policy compilation](volume-3-execution-plan.html#policy-compilation)).
 
-The [DIS Semantic Group CodeSystem](CodeSystem-dis-semantic-group.html) defines the group codes and their meanings. Table 3:PXX.4.2.1-1 is the authoritative FHIR Semantic Group Binding for selector membership and order by payload release. The table defines binding version 0.2.0 independently of the FHIR payload version.
+The [DIS Semantic Group CodeSystem](CodeSystem-dis-semantic-group.html) defines the group codes and their meanings. Table 3:PXX.3.5-1 is the authoritative FHIR Semantic Group Binding for selector membership and order by payload release. The table defines binding version 0.2.0 independently of the FHIR payload version.
 
 The [R4/R5 PII path catalog](bindings/dis-fhir-pii-path-catalog-0.2.0.csv) and [classification and semantic group guide](fhir-semantic-group-guide.html) are informative. They help policy authors identify candidate FHIRPath selectors for syntax-level policies. Catalog groups and paths do not extend the selector membership defined in the table.
 
@@ -87,7 +88,7 @@ Policies may use the applicable date actions or remove the birth date. If the po
 
 <a name="tPXX.3.2.2-1"> </a>
 
-<p id="tPXX.3.2.1-1" class="tableTitle"><strong>Table 3:PXX.4.2.1-1: DIS FHIR Semantic Group Binding</strong></p>
+<p id="tPXX.3.2.1-1" class="tableTitle"><strong>Table 3:PXX.3.5-1: DIS FHIR Semantic Group Binding</strong></p>
 
 | Semantic group | FHIR R4 (4.0.1) | FHIR R5 (5.0.0) |
 | --- | --- | --- |
@@ -104,13 +105,13 @@ Policies may use the applicable date actions or remove the birth date. If the po
 | `device-identifiers` | `Device.identifier`, `Device.serialNumber`, `Device.deviceName`, `Device.udiCarrier` | `Device.identifier`, `Device.serialNumber`, `Device.name`, `Device.udiCarrier` |
 {: .grid}
 
-For the declared FHIR payload release, the Manager SHALL expand each semantic group using the selectors in the corresponding release column of Table 3:PXX.4.2.1-1. The Manager SHALL preserve the listed selector order and the order of source policy rules. A selector with a concrete resource root applies to resources of that type. `DomainResource.text` applies to the narrative element on each governed resource derived from `DomainResource`.
+For the declared FHIR payload release, the Manager SHALL expand each semantic group using the selectors in the corresponding release column of Table 3:PXX.3.5-1. The Manager SHALL preserve the listed selector order and the order of source policy rules. A selector with a concrete resource root applies to resources of that type. `DomainResource.text` applies to the narrative element on each governed resource derived from `DomainResource`.
 
 The FHIR payload binding defines group membership. A policy selects groups and actions. It cannot change the group's selectors. The `subject-identifiers` group intentionally shares its two selectors with `subject-business-identifiers` and `subject-names`. Use the narrower groups when applying different actions to identifiers and names. A group containing a composite element selects the element as a whole. The separate action applicability rules still apply to every expanded target.
 
 The `dates` group covers the listed structured temporal values. Its choice selectors constrain the selected FHIR types using `ofType()`. Free-text dates, ages, ranges, and schedules expressed as `Timing` are outside this binding. Other paths, including extensions and other references, require separate policy coverage as applicable. The binding does not establish that a policy covers all identifying content in a payload.
 
-Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.4.2.1-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the groups in Table 3:PXX.4.2.1-1.
+Implementations MAY define additional semantic groups beyond those listed in Table 3:PXX.3.5-1 for local governance requirements. Additional groups SHALL NOT conflict with the element assignments of the groups in Table 3:PXX.3.5-1.
 
 <a name="3pxx123-resource-traversal"> </a>
 
@@ -118,7 +119,10 @@ Implementations MAY define additional semantic groups beyond those listed in Tab
 
 <a name="3pxx3214-resource-traversal"> </a>
 
-## 3:PXX.4.2.1.5 Resource Traversal
+<a name="3pxx4215-resource-traversal"> </a>
+<a name="markdown-toc-3pxx4215-resource-traversal"> </a>
+
+## 3:PXX.3.5.4 Resource Traversal
 
 An execution plan applies to a set of processing target resources. The De-Identifier SHALL traverse the processing target according to the following rules.
 
@@ -134,7 +138,10 @@ An execution plan applies to a set of processing target resources. The De-Identi
 
 <a name="3pxx3215-output-validation-in-the-declared-release"> </a>
 
-## 3:PXX.4.2.1.6 Output Validation in the Declared Release
+<a name="3pxx4216-output-validation-in-the-declared-release"> </a>
+<a name="markdown-toc-3pxx4216-output-validation-in-the-declared-release"> </a>
+
+## 3:PXX.3.5.5 Output Validation in the Declared Release
 
 De-identified output SHALL be validated against the processing payload's declared HL7 FHIR version, not against the HL7 FHIR R4 protocol binding version.
 
@@ -161,26 +168,15 @@ The De-Identifier SHALL ensure that references between retained resources resolv
 
 Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](volume-3-policy.html#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
 
-<a name="fhir-r4-dpv-mapping"> </a>
-
-## 3:PXX.4.2.1.7 FHIR R4 DPV Category Mapping
-
-For the [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile), an implementation claiming FHIR R4 mapping support SHALL use the [normative FHIR R4 mapping revision 1 (JSON-LD)](bindings/dis-fhir-r4-dpv-mapping-1.jsonld). The [full CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv) and the sample below are generated from that artifact and identify the same revision. The [resource review inventory (CSV)](bindings/dis-fhir-r4-dpv-resource-review-1.csv) records the 146 concrete R4 resources and the two abstract base definitions examined for this mapping.
-
-<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE -->
-
-| Order | DPV category | Person role | FHIR R4 target |
-| --- | --- | --- | --- |
-| 1 | `pd:Name` | `disdpv:patient` | `Patient.name` |
-| 3 | `pd:Name` | `disdpv:care-provider` | `Practitioner.name` |
-| 5 | `pd:BirthDate` | `disdpv:patient` | `Patient.birthDate` |
-| 18 | `pd:Name` | `disdpv:contact-person` | `ContactDetail.name` |
-{: .grid}
-
-<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE -->
-
-The JSON-LD document's absolute `@id` is the mapping revision used in the compiled plan. Its context is embedded. The document identifies the payload binding, FHIR release, exact FHIR package, manifest format, DPV edition, and coverage rule. Each entry supplies a category IRI, role IRI, location IRI, unique positive integer expansion order, target path, selector language, role rule IRI, and expansion rule IRI. The Manager SHALL recognize the pinned mapping revision and implement its referenced rules before compilation. Changes to the mapping or its referenced rule semantics require a new revision.
-
-Read the entries by increasing `order`. Match `category` and `location` by exact IRI equality. A request for a specific role selects entries for that role and applies the entry's `roleRule`. A request for `disdpv:all-person-roles` selects every entry for the category and location and includes each instance irrespective of role. In particular, it uses `Practitioner.name` for both care-team members and other Practitioners in scope. A tuple that has no mapping is unsupported. Apply the mapping entry's `expansionRule` to produce resource-local FHIRPath selectors for the verified assignment. Preserve the policy's source rule order and the mapping's expansion order within each rule. Deduplicate identical selectors produced for the same source obligation while preserving first occurrence.
-
-{% include fhir-r4-dpv-mapping-rules.md %}
+<details>
+<summary>Earlier section links</summary>
+<ul>
+<li><a name="3pxx111-version-identification"> </a><a name="3pxx3211-version-identification"> </a><a name="3pxx3211-fhir-release-and-capability-matching"> </a><a name="3pxx4211-fhir-release-identification"> </a><a name="markdown-toc-3pxx4211-fhir-release-identification"> </a><a href="volume-3-payload-bindings.html#3pxx421-fhir-release-identification">FHIR Release Identification</a></li>
+<li><a name="fhir-r4-dpv-mapping"> </a><a name="3pxx4217-fhir-r4-dpv-category-mapping"> </a><a name="markdown-toc-3pxx4217-fhir-r4-dpv-category-mapping"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-mapping">FHIR R4 DPV Category Mapping</a></li>
+<li><a name="fhir-r4-dpv-coverage-1"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-coverage-1">Coverage rule, revision 1</a></li>
+<li><a name="fhir-r4-dpv-declared-role-1"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-declared-role-1">Declared role rule, revision 1</a></li>
+<li><a name="fhir-r4-dpv-care-team-role-1"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-care-team-role-1">Care-team role rule, revision 1</a></li>
+<li><a name="fhir-r4-dpv-local-path-1"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-local-path-1">Resource-local expansion rule, revision 1</a></li>
+<li><a name="fhir-r4-dpv-contact-detail-1"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-contact-detail-1">ContactDetail expansion rule, revision 1</a></li>
+</ul>
+</details>

@@ -1,18 +1,18 @@
+<a name="payload-delivery"> </a>
+
 <a name="payload-bindings"> </a>
 
 <a name="3pxx3-payload-bindings"> </a>
 
 <a name="3pxx4-payload-bindings"> </a>
 
-DIS uses HL7 FHIR R4 protocol resources. The selected payload binding determines the native format and version and how content is carried or resolved through the protocol. The common delivery contract applies to every payload set. The FHIR binding specifies the supported payload content.
+Payload Delivery specifies how DIS transaction messages carry or reference source data and de-identified results. It defines the message metadata and attachments, manifests and packages, inline and hosted delivery, and the checks receivers use to retrieve the intended payload.
 
 <a name="payload-binding-framework"> </a>
 
 <a name="payload-binding-requirements"> </a>
 
-**Payload binding requirements.**
-
-A payload binding defines how DIS applies to a particular format. It specifies the content model and element addressing, the mapping of DIS actions to that format, how to obtain inputs and deliver results, how to represent evidence, how to identify and validate versions and match capabilities, and how to carry or reference the data in the FHIR R4 workflow envelope. Each additional binding defines these requirements independently. The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) illustrate this structure.
+The common delivery contract applies to each payload set. The message's `payloadBinding` code identifies the payload format, and `payloadVersion` identifies its release. DIS uses FHIR R4 resources for the workflow envelope. [Execution Plan](volume-3-execution-plan.html#execution-plan-content) specifies selector compilation and processing, and [De-Identification Evidence](volume-3-evidence.html#evidence-baseline) defines Provenance and evidence coverage.
 
 <a name="payload-set-delivery"> </a>
 
@@ -39,7 +39,7 @@ The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.
 
 The manifest attachment SHALL identify its content type and contain exactly one of inline `data` or an absolute HTTPS `url`. The receiving actor SHALL apply the declared binding, version and manifest format when resolving and validating the payload. Volume 2 specifies the [submission and result exchanges](volume-2.html#grouped-payload-parameters).
 
-A job contains one or more payload sets. The same payload-set encoding applies to a single-set job. Each set uses one binding and version and carries one manifest at each exchange. Successful responses carry the manifest and evidence together in a result package. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The selected binding defines the native data, retrieval rules, execution plan, validation, and evidence mapping.
+A job contains one or more payload sets. The same payload-set encoding applies to a single-set job. Each set uses one binding and version and carries one manifest at each exchange. Successful responses carry the manifest and evidence together in a result package. The manifest can select bundled and externally hosted content. A job can combine, for example, an inline R5 Patient and a set of separately hosted FHIR Observations. The FHIR R4 envelope carries the delivery description. The declared payload format determines which packaging and retrieval rules apply.
 
 The [shared payload set parameters](volume-2.html#grouped-payload-parameters) define how the transactions carry a payload set.
 
@@ -99,22 +99,35 @@ The De-Identifier SHALL use the verified bytes or resource instance for subseque
 
 <a name="3pxx32-fhir-payload-binding"> </a>
 
-## 3:PXX.4.2 FHIR Payload Binding
+<a name="3pxx42-fhir-payload-binding"> </a>
+<a name="markdown-toc-3pxx42-fhir-payload-binding"> </a>
 
-The FHIR payload binding (`DIS-FHIR-Payload`) defines how actors identify, carry, retrieve, address, and validate FHIR processing payloads. The [execution plan](volume-3-execution-plan.html#execution-plan-content) and [evidence](volume-3-evidence.html#evidence-baseline) sections define the associated task and result artifacts.
+## 3:PXX.4.2 FHIR Payload Delivery
 
-DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports HL7 FHIR R4 and R5 processing payloads over the same R4 protocol binding through version identification, version-safe packaging, and version-neutral element addressing.
+The `DIS-FHIR-Payload` format supports independently versioned FHIR R4 and R5 payloads over the FHIR R4 transaction protocol. Apply the [common delivery contract](#payload-set-delivery) and the release-specific rules for carrying, locating, and retrieving FHIR data.
 
-The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing language. The [FHIR R4 DPV category mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping) defines the selectors for DPV–ODRL policies. The [common delivery contract](#payload-set-delivery) defines the manifest and package used in each exchange.
+<a name="3pxx111-version-identification"> </a>
 
-- [FHIR Addressing and Processing](volume-3-fhir-addressing.html)
-- [FHIR Input and Result Delivery](volume-3-fhir-delivery.html)
+<a name="3pxx3211-version-identification"> </a>
+
+<a name="3pxx3211-fhir-release-and-capability-matching"> </a>
+
+<a name="3pxx4211-fhir-release-identification"> </a>
+
+### 3:PXX.4.2.1 FHIR Release Identification
+
+For a FHIR set, the `payloadVersion` field declares the FHIR release of the processing payload. The De-ID Manager SHALL reject a request if the declaration is absent or specifies a release other than `R4` or `R5`. The Manager SHALL use the same declaration in ITI-x3. Source server capabilities and attachment metadata are used to check the declaration. The retrieving actor SHALL fail processing when the retrieved content or its version metadata conflicts with the declaration.
+
+See [§3:PXX.4.2.2 FHIR Input and Result Delivery](volume-3-fhir-delivery.html) for the packaging and retrieval rules.
 
 <a name="3pxx33-proposed-dicom-and-cda-bindings-informative"> </a>
 
-## 3:PXX.4.3 Proposed DICOM and CDA Bindings (Informative)
+<a name="3pxx43-proposed-dicom-and-cda-bindings-informative"> </a>
+<a name="markdown-toc-3pxx43-proposed-dicom-and-cda-bindings-informative"> </a>
 
-The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe proposed mappings to the FHIR R4 envelope. Conformance to this supplement uses DIS-FHIR-Payload.
+## 3:PXX.4.3 Proposed DICOM and CDA Delivery (Informative)
+
+The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe proposed delivery in the FHIR R4 envelope. Conformance to this supplement uses DIS-FHIR-Payload.
 
 <a name="mixed-payload-walkthrough"> </a>
 

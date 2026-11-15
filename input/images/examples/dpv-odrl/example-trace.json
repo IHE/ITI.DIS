@@ -134,13 +134,13 @@
       "policyContractReference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1",
       "policyContractUrl": "https://governance.example.org/policies/remove-all",
       "policyContractVersion": "1.0",
-      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/remove-all-plan/_history/2",
+      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/remove-all-plan/_history/3",
       "executionPlanContractSupportingInfo": [
         {
           "reference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1"
         }
       ],
-      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld",
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-2.jsonld",
       "expectedNameOutcomes": {
         "Patient/patient-example.name": "absent",
         "Patient/patient-example.contact.name": "absent",
@@ -169,7 +169,10 @@
         "ruleSet": "structured-names",
         "reversibility": "irreversible",
         "validationStatus": "valid"
-      }
+      },
+      "expectedZeroMatchSelectors": [
+        "Patient.extension.where(url = 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value.ofType(string)"
+      ]
     },
     "keep-providers": {
       "authorizationContractReference": "https://governance.example.org/fhir/Contract/keep-providers-authorization/_history/1",
@@ -177,13 +180,13 @@
       "policyContractReference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1",
       "policyContractUrl": "https://governance.example.org/policies/keep-providers",
       "policyContractVersion": "1.0",
-      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/keep-providers-plan/_history/2",
+      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/keep-providers-plan/_history/3",
       "executionPlanContractSupportingInfo": [
         {
           "reference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1"
         }
       ],
-      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld",
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-2.jsonld",
       "expectedNameOutcomes": {
         "Patient/patient-example.name": "absent",
         "Patient/patient-example.contact.name": "absent",
@@ -212,7 +215,10 @@
         "ruleSet": "structured-names",
         "reversibility": "irreversible",
         "validationStatus": "valid"
-      }
+      },
+      "expectedZeroMatchSelectors": [
+        "Patient.extension.where(url = 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value.ofType(string)"
+      ]
     }
   }
 }
