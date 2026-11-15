@@ -155,6 +155,42 @@ pages:
   volume-3.md:
     title: 3:PXX DIS Content Specifications
     generation: markdown
+    volume-3-authorization.md:
+      title: "3:PXX.1 Data Request Authorization"
+      generation: markdown
+    volume-3-policy.md:
+      title: "3:PXX.2 De-Identification Policy"
+      generation: markdown
+    volume-3-execution-plan.md:
+      title: "3:PXX.3 De-Identification Execution Plan"
+      generation: markdown
+    volume-3-payload-bindings.md:
+      title: "3:PXX.4 Payload Bindings"
+      generation: markdown
+      volume-3-fhir-addressing.md:
+        title: "3:PXX.4.2.1 FHIR Addressing and Processing"
+        generation: markdown
+      volume-3-fhir-delivery.md:
+        title: "3:PXX.4.2.2 FHIR Input and Result Delivery"
+        generation: markdown
+    volume-3-evidence.md:
+      title: "3:PXX.5 De-Identification Evidence"
+      generation: markdown
+    volume-3-lookup-tables.md:
+      title: "3:PXX.6 Protected Lookup Tables"
+      generation: markdown
+    odrl-content.md:
+      title: "DIS ODRL Content Binding (Normative)"
+      generation: markdown
+      examples-odrl.md:
+        title: "ODRL Worked Examples (Informative)"
+        generation: markdown
+    draft-dpv-odrl-policy.md:
+      title: "DPV–ODRL Policy and Plan Links"
+      generation: markdown
+    draft-encryption-based-pseudonymization.md:
+      title: "AES-FF1 Pseudonymization (Optional Normative Binding)"
+      generation: markdown
   fhir-semantic-group-guide.md:
     title: "FHIR PII Classification and Semantic Group Guide (Informative)"
     generation: markdown
@@ -175,15 +211,6 @@ pages:
     generation: markdown
   draft-native-payload-bindings.md:
     title: "Proposed DICOM and CDA Payload Bindings (Informative)"
-    generation: markdown
-  draft-encryption-based-pseudonymization.md:
-    title: "Optional AES-FF1 Pseudonymization (DIS-REVERSIBLE)"
-    generation: markdown
-  draft-dpv-odrl-policy.md:
-    title: "DPV–ODRL De-Identification Policy (Normative)"
-    generation: markdown
-  odrl-content.md:
-    title: "DIS ODRL Content Binding (Normative)"
     generation: markdown
   testplan.md:
     title: "Test Plan"
@@ -216,11 +243,11 @@ menu:
     "Retrieve Task Output [ITI-x7]": volume-2.html#23x7-retrieve-task-output-iti-x7
   Volume 3:
     Contents: volume-3.html
-    Data Request Authorization: volume-3.html#data-request-authorization
-    De-Identification Policy: volume-3.html#de-identification-policy
-    Execution Plan: volume-3.html#execution-plan-content
-    Payload Bindings: volume-3.html#payload-bindings
-    De-Identification Evidence: volume-3.html#evidence-baseline
+    Data Request Authorization: volume-3-authorization.html
+    De-Identification Policy: volume-3-policy.html
+    Execution Plan: volume-3-execution-plan.html
+    Payload Bindings: volume-3-payload-bindings.html
+    De-Identification Evidence: volume-3-evidence.html
   Examples:
     "UC-1 – Bulk FHIR Cohort Job": examples-bulk-fhir-cohort.html
     "UC-2 – Job with R4 and R5 Payload Sets": examples-grouped-fhir-job.html

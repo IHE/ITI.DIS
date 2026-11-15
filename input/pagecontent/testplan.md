@@ -114,7 +114,7 @@ Use a profiled Agreement with two permissions selecting distinct sets and exact 
 
 #### Result Recipient Eligibility
 
-Use a single Agreement with two selected permissions and distinct payload sets. Apply the [recipient eligibility rules](volume-3.html#job-result-recipient) to the original Requester and any retrieval delegate. Use a fresh job identifier for each submission.
+Use a single Agreement with two selected permissions and distinct payload sets. Apply the [recipient eligibility rules](volume-3-authorization.html#job-result-recipient) to the original Requester and any retrieval delegate. Use a fresh job identifier for each submission.
 
 | Actor and setup | Stimulus | Pass criteria |
 |---|---|---|
@@ -178,7 +178,7 @@ Run successful synchronous and asynchronous cases with supporting Contract discl
 
 #### Source Policy Identity in an ITI-x3 Plan
 
-Use the [source policy identity rules](volume-3.html#execution-plan-source-policy). Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) using the execution plan and approved Policy Contract from the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Keep the source Policy Contract inaccessible to the De-Identifier.
+Use the [source policy identity rules](volume-3-execution-plan.html#execution-plan-source-policy). Dispatch the [UC-2 R4 clinical task](Task-grouped-fhir-task-patient-r4.html) using the execution plan and approved Policy Contract from the [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html). Give the De-Identifier access to the plan and assigned payload. Keep the source Policy Contract inaccessible to the De-Identifier.
 
 | Actor | Stimulus | Pass criteria |
 |---|---|---|
@@ -202,7 +202,7 @@ Submit an ITI-x1 job containing an R4 Encounter set and an R5 Encounter set with
 
 | Actor and setup | Stimulus | Pass criteria |
 |---|---|---|
-| De-Identifier or Integrated actor | Inspect the [capability declarations](volume-3.html#fhir-processing-capabilities) against the [De-Identifier CapabilityStatement example](CapabilityStatement-example-async-de-identifier.html). | Each reversibility option is declared independently of the entries for release, manifest formats and actions. The processing entries together advertise all nine core actions. Actors claiming the reversible option support the required mapping mechanisms. |
+| De-Identifier or Integrated actor | Inspect the [capability declarations](volume-3-fhir-addressing.html#fhir-processing-capabilities) against the [De-Identifier CapabilityStatement example](CapabilityStatement-example-async-de-identifier.html). | Each reversibility option is declared independently of the entries for release, manifest formats and actions. The processing entries together advertise all nine core actions. Actors claiming the reversible option support the required mapping mechanisms. |
 | Manager choosing between De-Identifiers with identical R4 action entries, one declaring only `irreversible` and the other declaring both modes | Submit a reversible assignment using supported `hash` parameters with Manager-managed mappings. Repeat with an irreversible assignment using supported `hash` parameters. Submit the reversible assignment directly to the irreversible-only De-Identifier. | Only the actor with reversible support is eligible for the reversible assignment. Either actor is eligible for the irreversible assignment. The irreversible-only De-Identifier rejects the direct reversible submission with HTTP 422 before processing. |
 | Manager assigning an AES-FF1 rule to a De-Identifier declaring both modes | Check the advertised `encrypt` action and configuration revision. Try an authorized reversible assignment with the supported revision, then a reversible assignment with an unlisted revision. | The Manager dispatches only the compatible assignment after checking key availability. The approved policy must select reversible mode to use AES-FF1. |
 | Manager with several candidate processing combinations | Submit an assignment that requires actions split across entries with different supported formats or releases. Repeat with a single entry that supports the complete assignment. Send an unsupported assignment directly to the De-Identifier. | The Manager dispatches only the compatible assignment. The De-Identifier rejects the unsupported direct submission with HTTP 422 before processing. |
@@ -210,14 +210,14 @@ Submit an ITI-x1 job containing an R4 Encounter set and an R5 Encounter set with
 
 ### Transformation Actions
 
-Use the [Volume 3 action definitions](volume-3.html#transformation-actions) and [ODRL action parameters](odrl-content.html#action-parameters). Use approved rules with otherwise valid synthetic resources for the declared payload release. Use one rule per run unless the case specifies multiple rules. For a successful case, inspect the selected elements in the returned payload and validate the output in that release. For a negative case, use a separate submission. The De-Identifier rejects or fails the task with an R4 `OperationOutcome` and returns no partial output. The Integrated actor uses its local success or failure indication and produces the same valid output or withholds export on failure.
+Use the [Volume 3 action definitions](volume-3-policy.html#transformation-actions) and [ODRL action parameters](odrl-content.html#action-parameters). Use approved rules with otherwise valid synthetic resources for the declared payload release. Use one rule per run unless the case specifies multiple rules. For a successful case, inspect the selected elements in the returned payload and validate the output in that release. For a negative case, use a separate submission. The De-Identifier rejects or fails the task with an R4 `OperationOutcome` and returns no partial output. The Integrated actor uses its local success or failure indication and produces the same valid output or withholds export on failure.
 
 | Action | Input and applied rule | Expected output | Negative case |
 |---|---|---|---|
 | `remove` | Target `Patient.name` on a Patient with a name. | `Patient.name` and all its children are absent. | Target required `Observation.status`. |
 | `redact` | Target `Patient.text` containing a narrative with text and a link. | `text.status` is `empty`. The entire `text.div` is `<div xmlns="http://www.w3.org/1999/xhtml">Narrative redacted</div>`. | Target `Patient.name`, which is a `HumanName`. |
 | `replace` | Target `Patient.name` with `value = Withheld` on a name with `family = Example`, `given = [Alex]`, and `use = official`. | `family = Withheld` and `given = [Withheld]`. `use` stays `official`. | Send an empty `value`. Exercise lookup-backed replacement separately under [Reversible Lookup Mapping](#reversible-lookup-mapping). |
-| `hash` | Target a `Patient.name.family` value of `example` with `mode = unsalted` and `algorithm = SHA-256`. | The value is `7a5d5b43b1725c76debaedcb17ccfb99d6bd99299593c8b18eab0b4d0e4643b9`. | Apply `mode = unsalted` to `Patient.identifier` containing a patient business identifier. Exercise salted patient hashing against the [patient identifier vector](volume-3.html#3pxx123-patient-identifier-pseudonymization). |
+| `hash` | Target a `Patient.name.family` value of `example` with `mode = unsalted` and `algorithm = SHA-256`. | The value is `7a5d5b43b1725c76debaedcb17ccfb99d6bd99299593c8b18eab0b4d0e4643b9`. | Apply `mode = unsalted` to `Patient.identifier` containing a patient business identifier. Exercise salted patient hashing against the [patient identifier vector](volume-3-policy.html#3pxx123-patient-identifier-pseudonymization). |
 | `truncate-date` | Target `Patient.birthDate = 1985-03-15` with `precision = year`. Repeat with `precision = year-month`. | The resulting values are `1985` and `1985-03`, respectively. | Send `precision = day`. |
 | `date-shift` | In one task, apply one rule to `Patient.birthDate = 1985-03-15` and a second to an Encounter for that Patient using `Encounter.period` in R4 or `Encounter.actualPeriod` in R5, with start `2026-01-10` and end `2026-01-12`. Use the same authorized scope and set `maxOffsetDays = 0`. In a separate run, use a deployment test vector that derives `+2` days with `maxOffsetDays = 3`. | With a zero limit all three dates stay unchanged. With the `+2` test vector the dates are `1985-03-17`, `2026-01-12`, and `2026-01-14`. The interval remains two days. | Repeat with `Patient.birthDate = 1985-03`, which has insufficient precision for date shifting. |
 | `round` | Target `Observation.value.ofType(Quantity)` in three Observations with values `57`, `15`, and `-15`, a common UCUM unit, and `step = 10`. | The values are `60`, `20`, and `-20`, respectively. The unit stays unchanged. | Send `step = 0`. |
@@ -229,7 +229,7 @@ Use [Processing Capability Declarations](#processing-capability-declarations) an
 
 ### FHIRPath Selectors and Rule Overlap
 
-Use the [FHIRPath addressing requirements](volume-3.html#fhirpath-element-addressing) and [plan evaluation rules](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation). In the input resources, give each Observation a valid `status` and `code`. Give the Patient two valid identifiers with distinct systems and values. Run the applicable cases against each supported FHIR payload release. A standalone Integrated actor compiles and executes the same cases locally.
+Use the [FHIRPath addressing requirements](volume-3-fhir-addressing.html#fhirpath-element-addressing) and [plan evaluation rules](volume-3-execution-plan.html#3pxx212-execution-plan-json-structure-and-rule-evaluation). In the input resources, give each Observation a valid `status` and `code`. Give the Patient two valid identifiers with distinct systems and values. Run the applicable cases against each supported FHIR payload release. A standalone Integrated actor compiles and executes the same cases locally.
 
 | Case | Procedure | Pass criteria |
 |---|---|---|
@@ -251,19 +251,19 @@ Check Manager custody of mappings/reversibility records, mode-dependent retentio
 
 ### Assigned Input Verification
 
-Use authorized assignments, a trusted Manager and De-Identifier, and the [assigned input verification rules](volume-3.html#assigned-input-verification). For negative cases, verify that the De-Identifier applies no transformation and the Manager releases no job output. Repeat hosted-content failures after asynchronous task acceptance and check that ITI-x7 reports the failure.
+Use authorized assignments, a trusted Manager and De-Identifier, and the [assigned input verification rules](volume-3-payload-bindings.html#assigned-input-verification). For negative cases, verify that the De-Identifier applies no transformation and the Manager releases no job output. Repeat hosted-content failures after asynchronous task acceptance and check that ITI-x7 reports the failure.
 
 | Case | Procedure | Pass criteria |
 |---|---|---|
 | Inline package substitution | Verify and run the [preliminary stage assignment](Task-staged-async-preliminary-task.html) with its [decoded plan](Contract-staged-async-preliminary-plan.html#decoded-odrl). Resubmit with a fresh task identifier and change the inline Patient bytes while preserving the set ID and referenced plan. | The original matches the plan source. The substituted package fails the digest comparison and the De-Identifier returns HTTP 400 with an R4 OperationOutcome before acceptance. |
 | Hosted manifest identity | Run the [UC-2 R4 task](Task-grouped-fhir-task-patient-r4.html) using the expected immutable List and resource versions. For a new assignment, change the Task's manifest URL while keeping the plan fixed. | The original verifies and executes. The changed URL fails the plan source check before acceptance. |
-| Hosted manifest or file substitution | Use the [bulk input digests](odrl-content.html#hosted-input-digest-example) with the corresponding fixture bytes. In one run replace the manifest at its original URL. In another, replace one file at its original URL. Repeat the file case with its digest omitted and the host configured as a mutable source. | The original bytes pass. Changed bytes fail even when the URLs are unchanged. A mutable input without an expected digest fails verification. |
+| Hosted manifest or file substitution | Use the [bulk input digests](examples-odrl.html#hosted-input-digest-example) with the corresponding fixture bytes. In one run replace the manifest at its original URL. In another, replace one file at its original URL. Repeat the file case with its digest omitted and the host configured as a mutable source. | The original bytes pass. Changed bytes fail even when the URLs are unchanged. A mutable input without an expected digest fails verification. |
 | Hosted immutable version mismatch | Use the UC-2 R4 version-specific URLs. Have the trusted test endpoint return a Patient with a different `meta.versionId` at its assigned URL. | The De-Identifier detects the version mismatch and fails the task before transformation. |
 {: .grid}
 
 ### Bulk Result Content Identity and Access Renewal
 
-Test the [bulk result content identity rules](volume-3.html#bulk-result-content-identity) with the [two-file R4 cohort example](examples-bulk-fhir-cohort.html). Record the validated output manifest and NDJSON bytes before release. Use an authorized Requester to retrieve the result. Compare the retrieved bytes after decoding any HTTP content coding. The test harness may use byte comparison or locally computed digests.
+Test the [bulk result content identity rules](volume-3-fhir-delivery.html#bulk-result-content-identity) with the [two-file R4 cohort example](examples-bulk-fhir-cohort.html). Record the validated output manifest and NDJSON bytes before release. Use an authorized Requester to retrieve the result. Compare the retrieved bytes after decoding any HTTP content coding. The test harness may use byte comparison or locally computed digests.
 
 | Case | Procedure | Pass criteria |
 |---|---|---|
@@ -273,7 +273,7 @@ Test the [bulk result content identity rules](volume-3.html#bulk-result-content-
 
 For a signed-download deployment, repeat the renewal case with `requiresAccessToken = false`. The manifest lists a stable HTTPS capability URL for the selected file version. A request to that URL redirects to a short-lived signed download URL. Verify that the client follows the redirect without a SMART bearer token. After the signed URL expires, verify that the unchanged file URL listed in the manifest can yield a fresh signed link and that the expired link still fails. Compare the downloaded bytes with the validated version after HTTP decompression. Repeat with the capability removed or revoked and with the original file version unavailable. Neither case grants renewed access or returns a substitute version.
 
-Exercise [bulk job result download authorization](volume-3.html#bulk-result-download-authorization) at the file service, including the final endpoint after a redirect.
+Exercise [bulk job result download authorization](volume-3-fhir-delivery.html#bulk-result-download-authorization) at the file service, including the final endpoint after a redirect.
 
 | Case | Procedure | Pass criteria |
 |---|---|---|
@@ -373,11 +373,11 @@ The [Data Recipient and push-delivery proposal](issues.html#data-recipient-and-p
 
 ### Published UC-2 ODRL Examples
 
-Decode the ODRL attachments for the R4 clinical set in the [UC-2 hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) and compare them with the [readable ODRL examples](odrl-content.html#decoded-authorization-example). Verify that the Agreement, Policy Set, and Execution Plan Set match their readable JSON-LD, including the revision identifiers and rule order. Verify that the permission approves the Policy Contract version carried by the job, and that the R4 plan expands `@subject-names` to `Patient.name` while preserving the action and source rule reference.
+Decode the ODRL attachments for the R4 clinical set in the [UC-2 hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) and compare them with the [readable ODRL examples](examples-odrl.html#decoded-authorization-example). Verify that the Agreement, Policy Set, and Execution Plan Set match their readable JSON-LD, including the revision identifiers and rule order. Verify that the permission approves the Policy Contract version carried by the job, and that the R4 plan expands `@subject-names` to `Patient.name` while preserving the action and source rule reference.
 
 ### Published Lookup Table Examples
 
-Validate the [published lookup table examples](volume-3.html#3pxx52-worked-mapping-examples) against their declared FHIR profiles. Decode the Binary and inline attachments and check that they carry the same table. Check that the task-scoped example references the source version and contains only the assigned mappings. Validate the generated table and confirm that its pseudonym matches the salted test vector and the published Patient example.
+Validate the [published lookup table examples](volume-3-lookup-tables.html#3pxx52-worked-mapping-examples) against their declared FHIR profiles. Decode the Binary and inline attachments and check that they carry the same table. Check that the task-scoped example references the source version and contains only the assigned mappings. Validate the generated table and confirm that its pseudonym matches the salted test vector and the published Patient example.
 
 ## Informative Future Binding Feasibility
 
@@ -402,7 +402,7 @@ Use the [mixed payload walkthrough](draft-native-payload-bindings.html#illustrat
 
 ## DPV–ODRL Policy Cases
 
-Apply these procedures to implementations claiming support for the [DPV–ODRL policy profile](draft-dpv-odrl-policy.html). Use the synthetic R4 fixtures and the normative mapping.
+Apply these procedures to implementations claiming support for the [DPV–ODRL policy profile](volume-3-policy.html#dpv-odrl-policy-profile). Use the synthetic R4 fixtures and the normative mapping.
 
 | Case | Procedure | Expected outcome |
 | --- | --- | --- |

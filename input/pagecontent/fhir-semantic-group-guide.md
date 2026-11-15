@@ -1,4 +1,4 @@
-This informative guide accompanies the [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv). The [Volume 3 binding table](volume-3.html#3pxx3213-semantic-group-bindings) defines the authoritative selectors for DIS semantic-level policies. The catalog helps authors identify candidate paths for syntax-level policies.
+This informative guide accompanies the [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv). The [Volume 3 binding table](volume-3-fhir-addressing.html#3pxx3213-semantic-group-bindings) defines the authoritative selectors for DIS semantic-level policies. The catalog helps authors identify candidate paths for syntax-level policies.
 
 The companion CSV contains 8,489 unique declaration and value-type rows. It covers all 146 concrete FHIR R4 (4.0.1) resource types and all 158 concrete FHIR R5 (5.0.0) resource types, their base types, and reusable complex datatypes. Each row identifies a path, allowed value type, screening classification, semantic group, source StructureDefinition and element ID, and any recursive expansion rule. Deployment profiles, custom extensions, and actual instances require separate review. [HL7 R4 definitions](https://hl7.org/fhir/R4/downloads.html) · [HL7 R5 definitions](https://hl7.org/fhir/R5/downloads.html)
 
@@ -33,7 +33,7 @@ Every row other than `Non-PII` has a semantic group. The group describes the kin
 
 For fields that require inspection, groups such as `free-text`, `attachment`, and `extension-content` describe the carrier. The actual content may resolve to a more specific group. A `Non-PII` parent can still contain classified children. For example, `Organization.contact` is a container and the applicable name declaration belongs to `person-name`.
 
-`Patient.birthDate` belongs to the dedicated `birth-dates` group in both versions and remains QI. Event dates and recorded ages retain their separate groups. [DIS Volume 3](volume-3.html#3pxx3213-semantic-group-bindings)
+`Patient.birthDate` belongs to the dedicated `birth-dates` group in both versions and remains QI. Event dates and recorded ages retain their separate groups. [DIS Volume 3](volume-3-fhir-addressing.html#3pxx3213-semantic-group-bindings)
 
 ## Device and care-provider identifiers
 
@@ -57,7 +57,7 @@ A declaration appears under its defining type. Inherited copies are omitted usin
 
 ## Path conventions
 
-- Paths start with the declaring type and omit array indices. Apply a path to each repetition. Choice rows use concrete FHIR names such as `Observation.valueString`. Their source element IDs retain the original `[x]` notation. When using these rows to author a policy, translate choice paths to [FHIRPath selector syntax](volume-3.html#fhirpath-element-addressing), such as `Observation.value.ofType(string)` for `Observation.valueString`. Container rows and their descendants can both appear. [FHIR JSON representation](https://hl7.org/fhir/R4/json.html)
+- Paths start with the declaring type and omit array indices. Apply a path to each repetition. Choice rows use concrete FHIR names such as `Observation.valueString`. Their source element IDs retain the original `[x]` notation. When using these rows to author a policy, translate choice paths to [FHIRPath selector syntax](volume-3-fhir-addressing.html#fhirpath-element-addressing), such as `Observation.value.ofType(string)` for `Observation.valueString`. Container rows and their descendants can both appear. [FHIR JSON representation](https://hl7.org/fhir/R4/json.html)
 - For an extension, apply the `Extension` template at the field path and repeat for nested extensions. Use the actual extension definition and slice to determine the allowed values. Primitive extensions use the JSON underscore companion property, such as `Patient._birthDate.extension`, and follow the same template. [Extensibility](https://hl7.org/fhir/R4/extensibility.html) · [FHIR JSON representation](https://hl7.org/fhir/R4/json.html)
 - For an embedded resource, apply the rows for its actual `resourceType` at the embedding path. For a recursive backbone element, repeat the children at the source indicated in the expansion rule. This covers arbitrarily nested structures using a finite set of rows. [DomainResource](https://hl7.org/fhir/R4/domainresource.html) · [ElementDefinition](https://hl7.org/fhir/R4/elementdefinition.html)
 - Treat `.reference`, `.identifier`, and `.display` as separate exposure routes. Target types appear on the parent reference row. Reference resolution, parsing free text, and decoding attachments require access to the actual instance or payload. [References](https://hl7.org/fhir/R4/references.html)

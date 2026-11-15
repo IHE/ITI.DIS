@@ -2,7 +2,7 @@
 **Draft design material.** This page preserves proposed DICOM and CDA bindings for review. Conformance to this supplement uses DIS-FHIR-Payload.
 </div>
 
-The proposals use the [common manifest contract](volume-3.html#payload-set-delivery) and [payload set parameters](volume-2.html#grouped-payload-parameters). The [illustrative mixed FHIR and DICOM walkthrough](#illustrative-mixed-fhir-and-dicom-job) shows the proposed DICOM exchange.
+The proposals use the [common manifest contract](volume-3-payload-bindings.html#payload-set-delivery) and [payload set parameters](volume-2.html#grouped-payload-parameters). The [illustrative mixed FHIR and DICOM walkthrough](#illustrative-mixed-fhir-and-dicom-job) shows the proposed DICOM exchange.
 
 ## Proposed Manifest Resolution
 
@@ -27,6 +27,20 @@ The proposals use the [common manifest contract](volume-3.html#payload-set-deliv
 A DICOM wrapper would use `application/dicom` for the native instance.
 
 The informative examples include a [DICOM study index](ImagingStudy-study-42.html) with its [WADO-RS endpoint](Endpoint-wado-42.html), and a [hosted CDA document index](DocumentReference-draft-cda-document-index.html).
+
+## DICOM crosswalk (informative)
+
+[DICOM PS3.15 Annex E](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html) helps locate personal information and identify the requirements of the selected DICOM Attribute Confidentiality Profile and options. A future DICOM binding must address dataset attributes, nested items, textual content and image pixels according to its declared scope.
+
+| DPV category and role | DICOM attribute example | Annex E Basic Profile consideration |
+| --- | --- | --- |
+| `pd:Name`, patient | Patient's Name `(0010,0010)` | `Z` allows an empty or valid dummy value. A required attribute that permits an empty value may still prohibit DIS `remove`, which requires absence. |
+| `pd:Identifier`, patient | Patient ID `(0010,0020)` | `Z/D` requires handling appropriate to the attribute type. Evaluate the identifier and its issuer context together. |
+| `pd:BirthDate`, patient | Patient's Birth Date `(0010,0030)` | `Z` requires checking the attribute type and output constraints. |
+| `pd:Name`, care provider | Performing Physician's Name `(0008,1050)` | `X` requires removal under the Basic Profile. A `keep` policy rule requires a separately applicable DICOM profile or option permitting retention. |
+{: .grid}
+
+Under this proposal, the Manager would check each DIS action against the applicable DICOM constraints for the concrete attribute, selected profile, and options. An incompatible action makes the assignment unsupported. For example, the Manager would reject a policy that keeps Performing Physician's Name when the selected DICOM profile requires its removal. This table is a crosswalk for review.
 
 ## Open Binding Work
 
@@ -71,7 +85,7 @@ The Requester sends `POST /fhir/$submit-dis-job` with `Content-Type: application
 | `Task.input.valueAttachment.data` or `.url` | Base64-encoded R4 manifest package in `data` | `https://index.example.org/fhir/List/images-42/_history/1` in `url` |
 {: .grid}
 
-Use the [inline R5 package structure](volume-3.html#inline-r5-manifest-package) for the clinical set. In this walkthrough the inner attachment carries the UTF-8 JSON shown below, encoded as base64. The UUID in the List resolves to the R4 wrapper in the same package.
+Use the [inline R5 package structure](volume-3-fhir-delivery.html#inline-r5-manifest-package) for the clinical set. In this walkthrough the inner attachment carries the UTF-8 JSON shown below, encoded as base64. The UUID in the List resolves to the R4 wrapper in the same package.
 
 ```json
 {"resourceType":"Patient","id":"example","name":[{"family":"Sample"}],"active":true}
@@ -123,7 +137,7 @@ Each successful synchronous task returns `200 OK` with one R4 `payloadResult` gr
 | `Provenance.target` | Bundled `target.reference` equals the `fullUrl` of the selected R4 wrapper | Draft mapping using `target.reference = https://results.example.org/fhir/ImagingStudy/images-result-42/_history/1`. The index enumerates the exact DICOM outputs |
 {: .grid}
 
-For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched ruleSet identifier, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3.html#3pxx4-de-identification-evidence).
+For each evidence resource, `Provenance.id` identifies the record and `activity` codes the DIS task. `target` uses the mapping in the table. `policy` identifies the approved policy version. The DIS outcome, ruleSet, reversibility, and validation extensions carry `complete`, the dispatched ruleSet identifier, `irreversible`, and `valid` respectively. The audit correlation identifier links the record to the task's audit event. The worker also supplies `recorded` and the performer agent under the [evidence baseline](volume-3-evidence.html#3pxx4-de-identification-evidence).
 
 The Manager correlates both results by `setId` and checks that the result manifests, objects, and evidence agree. It keeps the hosted imaging output accessible only to authorized processing actors until the job is ready to release. Once both sets pass, the Requester polls `GET https://dis.example.org/jobs/job-42` with authorized credentials. The Manager returns `200 OK` with both `payloadResult` groups in one R4 `Parameters` response. The Requester can decode the clinical result immediately and use its authorized access to retrieve the imaging result. The result index enumerates only the replacement UIDs, and the result manifests and evidence exclude source identifiers and protected transformation material.
 

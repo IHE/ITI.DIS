@@ -8,13 +8,13 @@ The cohort job has two payload sets. One contains **R4 clinical records and labo
 
 ## Submit the Job
 
-Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one version-specific authorization reference identifies the ODRL Agreement covering both sets. Each payload set carries the matching permission IRI and requested purpose. See the [decoded ODRL Agreement](odrl-content.html#decoded-authorization-example). Both permissions classify the approved project under ISO/TS 14265:2024 code `4.2`. The job continues to identify the project by its specific purpose IRI. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 manifests for both releases and the R4 clinical resources at their example locations. The Requester sends the R4 `Task` directly as the ITI-x1 request body.
+Send the [ITI-x1 request](Task-grouped-fhir-job-request.html) to `POST /fhir/$submit-dis-job` with `Content-Type: application/fhir+json` and `Prefer: respond-async`. Its one version-specific authorization reference identifies the ODRL Agreement covering both sets. Each payload set carries the matching permission IRI and requested purpose. See the [decoded ODRL Agreement](examples-odrl.html#decoded-authorization-example). Both permissions classify the approved project under ISO/TS 14265:2024 code `4.2`. The job continues to identify the project by its specific purpose IRI. The [hosted artifact collection](Bundle-grouped-fhir-hosted-artifacts.html) shows the permit, R4 manifests for both releases and the R4 clinical resources at their example locations. The Requester sends the R4 `Task` directly as the ITI-x1 request body.
 
 The [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorization-contract.html) carries the complete Agreement in its inline rule attachment. The de-identification job references this exact Contract version and selects one permission for each payload set. Each term shows its own approved policy version.
 
 ### Payload Sets and Approved Policies
 
-Each payload-set input in the job submission names the versioned policy approved for that set. The hosted artifact collection includes both Policy Contracts and their Execution Plan Contracts. Both policies use irreversible processing. See the [decoded Policy Set for the R4 clinical set](odrl-content.html#decoded-policy-example).
+Each payload-set input in the job submission names the versioned policy approved for that set. The hosted artifact collection includes both Policy Contracts and their Execution Plan Contracts. Both policies use irreversible processing. See the [decoded Policy Set for the R4 clinical set](examples-odrl.html#decoded-policy-example).
 
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
@@ -28,7 +28,7 @@ The Manager verifies the permit, resolves and validates both policies, and estab
 
 ## Dispatch and Complete the Tasks
 
-Send each task to `POST /fhir/$submit-dis-task`. The task request carries one payload set and a reference to the execution plan for its declared release. Both tasks use irreversible removal. See the [decoded Execution Plan Set for the R4 clinical task](odrl-content.html#decoded-plan-example). The Manager pins the two hosted R4 resources and the hosted R5 report to the revisions identified by their Lists. It records both assignments under the job. The sample permit authorizes the assigned R4 worker to receive an opaque parent identifier in `Task.partOf.identifier`. The R5 task omits it. Each worker can execute its assignment using the supplied inputs. See [assignment correlation and disclosure](volume-2.html#assignment-correlation).
+Send each task to `POST /fhir/$submit-dis-task`. The task request carries one payload set and a reference to the execution plan for its declared release. Both tasks use irreversible removal. See the [decoded Execution Plan Set for the R4 clinical task](examples-odrl.html#decoded-plan-example). The Manager pins the two hosted R4 resources and the hosted R5 report to the revisions identified by their Lists. It records both assignments under the job. The sample permit authorizes the assigned R4 worker to receive an opaque parent identifier in `Task.partOf.identifier`. The R5 task omits it. Each worker can execute its assignment using the supplied inputs. See [assignment correlation and disclosure](volume-2.html#assignment-correlation).
 
 | Set | ITI-x3 request | ITI-x3 success response | Evidence targets |
 |-----|----------------|-------------------------|------------------|
@@ -46,7 +46,7 @@ Host: source.example.org
 Accept: application/fhir+json; fhirVersion=5.0
 ```
 
-See the [direct hosted R5 retrieval rules](volume-3.html#direct-hosted-r5-references).
+See the [direct hosted R5 retrieval rules](volume-3-fhir-delivery.html#direct-hosted-r5-references).
 
 <a name="grouped-fhir-release"> </a>
 
