@@ -396,6 +396,8 @@ Use the [mixed payload walkthrough](draft-native-payload-bindings.html#illustrat
 | 5 | Repeat with one imaging instance unavailable after acceptance and the clinical task successful. | The imaging task reports failure. ITI-x4 returns HTTP 422 with an `OperationOutcome`. Neither set is made available to the Requester. |
 {: .grid}
 
+<a name="draft-dpv-odrl-policy-cases"> </a>
+
 ## Draft DPV–ODRL Policy Cases
 
 These procedures are for review of the [proposed policy profile](draft-dpv-odrl-policy.html) using its synthetic R4 fixtures.
