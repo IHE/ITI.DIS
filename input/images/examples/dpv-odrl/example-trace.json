@@ -134,13 +134,13 @@
       "policyContractReference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1",
       "policyContractUrl": "https://governance.example.org/policies/remove-all",
       "policyContractVersion": "1.0",
-      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/remove-all-plan/_history/1",
+      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/remove-all-plan/_history/2",
       "executionPlanContractSupportingInfo": [
         {
           "reference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1"
         }
       ],
-      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1",
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld",
       "expectedNameOutcomes": {
         "Patient/patient-example.name": "absent",
         "Patient/patient-example.contact.name": "absent",
@@ -177,13 +177,13 @@
       "policyContractReference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1",
       "policyContractUrl": "https://governance.example.org/policies/keep-providers",
       "policyContractVersion": "1.0",
-      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/keep-providers-plan/_history/1",
+      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/keep-providers-plan/_history/2",
       "executionPlanContractSupportingInfo": [
         {
           "reference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1"
         }
       ],
-      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1",
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld",
       "expectedNameOutcomes": {
         "Patient/patient-example.name": "absent",
         "Patient/patient-example.contact.name": "absent",

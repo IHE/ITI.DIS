@@ -1,4 +1,4 @@
-This Volume 3 proposal defines a reusable, format-independent De-Identification Policy using the Data Privacy Vocabulary (DPV) and ODRL. The requirements on this page describe the proposed binding for review.
+This Volume 3 proposal defines a reusable, format-independent De-Identification Policy using the Data Privacy Vocabulary (DPV) and ODRL. The requirements on this page describe the proposed policy profile. The linked FHIR R4 payload mapping is normative for implementations claiming its support.
 
 ## Content artifacts
 
@@ -19,9 +19,9 @@ Each ODRL target describes a class of occurrences using exactly one value from e
 
 | Dimension | ODRL constraint operand | Proposed values |
 | --- | --- | --- |
-| Personal data category | `disdpv:category` | The DPV v2.3 concept IRI. The pilot maps `pd:Name`, `pd:Identifier`, and `pd:BirthDate`. |
-| Role in the record | `disdpv:personRole` | `disdpv:patient`, `disdpv:patient-contact`, `disdpv:care-provider`, or `disdpv:all-person-roles`. |
-| Location | `disdpv:location` | `disdpv:structured` for structured elements, `disdpv:narrative` for names or other information within free text, and `disdpv:pixel` for information in image pixels. The pilot supports only `disdpv:structured`. |
+| Personal data category | `disdpv:category` | The DPV v2.3 concept IRI. The FHIR R4 mapping covers `pd:Name`, `pd:Identifier`, and `pd:BirthDate`. |
+| Role in the record | `disdpv:personRole` | `disdpv:patient`, `disdpv:patient-contact`, `disdpv:care-provider`, or `disdpv:all-person-roles`. The FHIR R4 mapping defines additional role use. |
+| Location | `disdpv:location` | `disdpv:structured` for structured elements, `disdpv:narrative` for names or other information within free text, and `disdpv:pixel` for information in image pixels. The FHIR R4 mapping supports only `disdpv:structured`. |
 {: .grid}
 
 Category matching uses the exact IRI defined in [DPV Personal Data Categories v2.3](https://w3c-cg.github.io/dpv/2.3/pd/). A binding declares the categories it can evaluate. The Manager SHALL reject an unsupported category and SHALL use no implicit expansion to related, broader, or narrower categories. For example, selecting `pd:BirthDate` does not select a recorded age. The [DPV Health Sector Concepts v2.3 draft](https://w3c-cg.github.io/dpv/2.3/sector/health/) provides context for interpreting health sector roles. The DIS role codes below have their own matching rules.
@@ -30,6 +30,8 @@ Category matching uses the exact IRI defined in [DPV Personal Data Categories v2
 - **Patient contact** applies to information about a person represented as a patient's contact.
 - **Care provider** applies to information about a person represented as participating in the patient's care in the assigned record. A person can have another role elsewhere in the same payload. A name in a patient record remains in the patient role even if the same person is also named as a care provider.
 - **All person roles** matches every occurrence with the selected category and location within the supported assignment scope. It also matches occurrences where the person's precise role is unnecessary to determine the action.
+
+Other FHIR R4 roles include a related person, the person described by a `Person` record, a family member, a named contact, a subscriber, and a research participant. Their occurrence-level bindings are defined in the [FHIR R4 mapping](volume-3.html#fhir-r4-dpv-mapping).
 
 Location values are exact. To cover several locations, author a rule for each location. Where an action requires complete coverage of a location, a binding SHALL establish that coverage for the governed assignment. For example, a mapping for a person's structured name does not cover the same name in a narrative or image. The policy's coverage statement applies to the selected locations and the input scope admitted under the Agreement.
 
@@ -60,30 +62,9 @@ Within a plan, the first matching rule controls each concrete occurrence. Put a 
 3. The Manager compiles the [DIS Execution Plan Set](odrl-content.html#execution-plan-set) using the draft profile identifier and adds exactly one `disdpv:mappingRevision` as an absolute IRI reference. Every compiled obligation SHALL carry its `dis:sourceRule` and a concrete selector tied to the verified assignment manifest. The Manager SHALL preserve source rule order and the mapping's expansion order. The Manager SHALL check the dispatch actor's support for the draft plan profile and the applicable [processing capabilities](volume-3.html#fhir-processing-capabilities).
 4. The De-Identifier checks the plan, its mapping revision for the declared binding and release, and the exact inputs verified for [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3). It evaluates the concrete rules and validates the output. It uses the Plan Contract's exact source Policy Contract reference in `Provenance.policy`. The Manager records the authorization, plan, mapping revision, and returned evidence for the assignment. This trace stays subject to the existing DIS disclosure controls. Worker evidence need not disclose role-resolution details or source names.
 
-## FHIR R4 pilot mapping
+## FHIR R4 payload mapping
 
-In the worked examples, `https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1` identifies this immutable pilot mapping revision. A change to a mapping entry or its classification or coverage rules requires a new revision identifier.
-
-<a name="fhir-r4-pilot-1"> </a>
-
-### Structured elements and roles
-
-The pilot input scope is a versioned resource-list assignment containing R4 Patient, Practitioner, and CareTeam resources. It is limited to information explicitly covered by the following table, with no additional in-scope locations for the same targets. A Manager SHALL check the actual assignment against those limits, including name occurrences in reference displays, contained resources, extensions or narrative that might otherwise be mistaken for covered information. The examples do not contain these locations. Any excluded locations in a broader deployment require their own declared scope and coverage. This pilot uses whole `HumanName` and `Identifier` occurrences.
-
-| Order | DPV category | FHIR R4 path | Role determination |
-| --- | --- | --- | --- |
-| 1 | `pd:Name` | `Patient.name` | Patient. |
-| 2 | `pd:Name` | `Patient.contact.name` | Patient contact. |
-| 3 | `pd:Name` | `Practitioner.name` | Care provider if a qualified CareTeam member reference identifies the Practitioner in the assigned care context. Include this path for an all-person-roles target. |
-| 4 | `pd:Identifier` | `Patient.identifier` | Patient. This maps patient business identifiers. |
-| 5 | `pd:BirthDate` | `Patient.birthDate` | Patient. |
-{: .grid}
-
-For role-specific matching in the pilot, the Manager verifies that the approved assignment scope identifies the active CareTeam records that collectively provide the complete in-scope care roster. Each such record links its `subject` to an assigned Patient and links a clinician through a direct `participant.member` reference to an assigned Practitioner. Membership in any of these care teams establishes the care-provider role for that Practitioner's name in this context. Use the matching immutable manifest entries as the reference resolution scope. A known non-member of the complete roster remains included in all-person-roles matching. An incomplete roster, ambiguous identity or unresolved reference prevents a role-specific decision when it could affect the result. Names on distinct Patient and Practitioner resources remain separate occurrences even when they describe the same individual.
-
-The Manager SHALL bind the role-specific selector to the identified Practitioner in the verified input. In this pilot, the assigned resources have unique logical IDs within their resource type, and the Manager can compile a resource-local selector such as `Practitioner.where(id = 'provider-example').name`. Qualify each selected Practitioner separately and emit those selectors in manifest order. If the complete roster contains no qualified Practitioner, emit `Practitioner.where(false).name` for the care-provider name rule so that a valid zero-match rule still has a concrete selector. The De-Identifier evaluates the selector independently on each assigned input resource. Role resolution takes place during compilation, before FHIRPath is evaluated on a single resource.
-
-See the HL7 FHIR R4 definitions for [Patient](https://hl7.org/fhir/R4/patient-definitions.html), [Practitioner](https://hl7.org/fhir/R4/practitioner-definitions.html#Practitioner.name), and [CareTeam](https://hl7.org/fhir/R4/careteam-definitions.html#CareTeam.participant.member). FHIR R5 requires a separately reviewed mapping revision and corresponding tests.
+The [normative FHIR R4 mapping](volume-3.html#fhir-r4-dpv-mapping) supplies the versioned category-to-path rules for this profile. It includes the JSON-LD used in compilation, the full CSV, and a sample table. The worked plans reference the mapping's canonical JSON-LD identifier. FHIR R5 requires its own mapping revision.
 
 ## DICOM crosswalk (informative)
 
@@ -101,7 +82,7 @@ The Manager checks each proposed DIS action against the applicable DICOM constra
 
 ## Worked policies and expected evidence
 
-Both policies target the same synthetic R4 input scope. They cover structured names under the pilot mapping. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
+Both policies target the same synthetic R4 input scope. They cover structured names under the FHIR R4 mapping. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
 
 | Example | Authorization | Policy | Execution Plan | Expected result |
 | --- | --- | --- | --- | --- |

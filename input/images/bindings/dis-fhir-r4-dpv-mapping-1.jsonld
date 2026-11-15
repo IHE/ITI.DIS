@@ -1,0 +1,299 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "dis": "https://profiles.ihe.net/ITI/DIS/odrl/v1#",
+    "disdpv": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#",
+    "category": {
+      "@id": "disdpv:category",
+      "@type": "@id"
+    },
+    "personRole": {
+      "@id": "disdpv:personRole",
+      "@type": "@id"
+    },
+    "location": {
+      "@id": "disdpv:location",
+      "@type": "@id"
+    },
+    "payloadBinding": "dis:payloadBinding",
+    "payloadVersion": "dis:payloadVersion",
+    "dpvEdition": {
+      "@id": "disdpv:dpvEdition",
+      "@type": "@id"
+    },
+    "fhirPackage": "disdpv:fhirPackage",
+    "manifestFormat": "disdpv:manifestFormat",
+    "coverageRule": {
+      "@id": "disdpv:coverageRule",
+      "@type": "@id"
+    },
+    "entries": {
+      "@id": "disdpv:mappingEntry",
+      "@container": "@set"
+    },
+    "order": "disdpv:expansionOrder",
+    "targetPath": "disdpv:targetPath",
+    "selectorLanguage": {
+      "@id": "disdpv:selectorLanguage",
+      "@type": "@id"
+    },
+    "roleRule": {
+      "@id": "disdpv:roleRule",
+      "@type": "@id"
+    },
+    "expansionRule": {
+      "@id": "disdpv:expansionRule",
+      "@type": "@id"
+    }
+  },
+  "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld",
+  "@type": "disdpv:PayloadMapping",
+  "payloadBinding": "DIS-FHIR-Payload",
+  "payloadVersion": "R4",
+  "fhirPackage": "hl7.fhir.r4.core#4.0.1",
+  "manifestFormat": "dis-resource-list",
+  "dpvEdition": "https://w3id.org/dpv/2.3/pd",
+  "coverageRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-coverage-1",
+  "entries": [
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Patient.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 1,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#patient",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Patient.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Patient.contact.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 2,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#patient-contact",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Patient.contact.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Practitioner.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 3,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#care-provider",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Practitioner.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-care-team-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Patient.identifier",
+      "@type": "disdpv:MappingEntry",
+      "order": 4,
+      "category": "https://w3id.org/dpv/pd#Identifier",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#patient",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Patient.identifier",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Patient.birthDate",
+      "@type": "disdpv:MappingEntry",
+      "order": 5,
+      "category": "https://w3id.org/dpv/pd#BirthDate",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#patient",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Patient.birthDate",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Practitioner.identifier",
+      "@type": "disdpv:MappingEntry",
+      "order": 6,
+      "category": "https://w3id.org/dpv/pd#Identifier",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#care-provider",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Practitioner.identifier",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-care-team-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Practitioner.birthDate",
+      "@type": "disdpv:MappingEntry",
+      "order": 7,
+      "category": "https://w3id.org/dpv/pd#BirthDate",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#care-provider",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Practitioner.birthDate",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-care-team-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#RelatedPerson.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 8,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#related-person",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "RelatedPerson.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#RelatedPerson.identifier",
+      "@type": "disdpv:MappingEntry",
+      "order": 9,
+      "category": "https://w3id.org/dpv/pd#Identifier",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#related-person",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "RelatedPerson.identifier",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#RelatedPerson.birthDate",
+      "@type": "disdpv:MappingEntry",
+      "order": 10,
+      "category": "https://w3id.org/dpv/pd#BirthDate",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#related-person",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "RelatedPerson.birthDate",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Person.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 11,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#person-record",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Person.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Person.identifier",
+      "@type": "disdpv:MappingEntry",
+      "order": 12,
+      "category": "https://w3id.org/dpv/pd#Identifier",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#person-record",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Person.identifier",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Person.birthDate",
+      "@type": "disdpv:MappingEntry",
+      "order": 13,
+      "category": "https://w3id.org/dpv/pd#BirthDate",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#person-record",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Person.birthDate",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#FamilyMemberHistory.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 14,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#family-member",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "FamilyMemberHistory.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#FamilyMemberHistory.born.ofType(date)",
+      "@type": "disdpv:MappingEntry",
+      "order": 15,
+      "category": "https://w3id.org/dpv/pd#BirthDate",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#family-member",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "FamilyMemberHistory.born.ofType(date)",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Organization.contact.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 16,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#contact-person",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Organization.contact.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#InsurancePlan.contact.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 17,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#contact-person",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "InsurancePlan.contact.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#ContactDetail.name",
+      "@type": "disdpv:MappingEntry",
+      "order": 18,
+      "category": "https://w3id.org/dpv/pd#Name",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#contact-person",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "ContactDetail.name",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-contact-detail-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#Coverage.subscriberId",
+      "@type": "disdpv:MappingEntry",
+      "order": 19,
+      "category": "https://w3id.org/dpv/pd#Identifier",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#subscriber",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "Coverage.subscriberId",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    },
+    {
+      "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld#ResearchSubject.identifier",
+      "@type": "disdpv:MappingEntry",
+      "order": 20,
+      "category": "https://w3id.org/dpv/pd#Identifier",
+      "personRole": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#research-participant",
+      "location": "https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#structured",
+      "targetPath": "ResearchSubject.identifier",
+      "selectorLanguage": "http://hl7.org/fhirpath",
+      "roleRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-declared-role-1",
+      "expansionRule": "https://profiles.ihe.net/ITI/DIS/volume-3.html#fhir-r4-dpv-local-path-1"
+    }
+  ]
+}
