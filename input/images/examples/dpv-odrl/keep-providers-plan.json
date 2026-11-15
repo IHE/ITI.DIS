@@ -8,7 +8,7 @@
   "dis:payloadVersion": "R4",
   "dis:payloadSet": "name-pilot",
   "disdpv:mappingRevision": {
-    "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-2.jsonld"
+    "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-3.jsonld"
   },
   "obligation": [
     {

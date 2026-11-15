@@ -1,24 +1,18 @@
-<a name="payload-delivery"> </a>
-
-<a name="payload-bindings"> </a>
-
-<a name="3pxx3-payload-bindings"> </a>
-
-<a name="3pxx4-payload-bindings"> </a>
+<div id="payload-delivery"> </div>
+<div id="payload-bindings"> </div>
+<div id="3pxx3-payload-bindings"> </div>
+<div id="3pxx4-payload-bindings"> </div>
 
 Payload Delivery specifies how DIS transaction messages carry or reference source data and de-identified results. It defines the message metadata and attachments, manifests and packages, inline and hosted delivery, and the checks receivers use to retrieve the intended payload.
 
-<a name="payload-binding-framework"> </a>
-
-<a name="payload-binding-requirements"> </a>
+<div id="payload-binding-framework"> </div>
+<div id="payload-binding-requirements"> </div>
 
 The common delivery contract applies to each payload set. The message's `payloadBinding` code identifies the payload format, and `payloadVersion` identifies its release. DIS uses FHIR R4 resources for the workflow envelope. [Execution Plan](volume-3-execution-plan.html#execution-plan-content) specifies selector compilation and processing, and [De-Identification Evidence](volume-3-evidence.html#evidence-baseline) defines Provenance and evidence coverage.
 
-<a name="payload-set-delivery"> </a>
-
-<a name="3pxx3-common-payload-set-delivery"> </a>
-
-<a name="3pxx31-common-payload-set-delivery"> </a>
+<div id="payload-set-delivery"> </div>
+<div id="3pxx3-common-payload-set-delivery"> </div>
+<div id="3pxx31-common-payload-set-delivery"> </div>
 
 ## 3:PXX.4.1 Common Payload Set Delivery
 
@@ -43,11 +37,9 @@ A job contains one or more payload sets. The same payload-set encoding applies t
 
 The [shared payload set parameters](volume-2.html#grouped-payload-parameters) define how the transactions carry a payload set.
 
-<a name="3pxx31-manifest-formats"> </a>
-
-<a name="3pxx311-manifest-formats"> </a>
-
-<a name="3pxx311-manifest-formats-and-packages"> </a>
+<div id="3pxx31-manifest-formats"> </div>
+<div id="3pxx311-manifest-formats"> </div>
+<div id="3pxx311-manifest-formats-and-packages"> </div>
 
 ### 3:PXX.4.1.1 Manifest Formats and Packages
 
@@ -55,15 +47,14 @@ The `dis-resource-list` format carries an R4 DIS Resource Manifest as a standalo
 
 The `fhir-bulk-data` format uses the JSON [bulk file manifest](volume-3-fhir-delivery.html#3pxx3224-bulk-file-manifests-and-authorized-retrieval) of DIS-FHIR-Payload. It enumerates NDJSON files.
 
-<a name="manifest-package"> </a>
+<div id="manifest-package"> </div>
 
 Use an R4 `Bundle` of type `collection` when the manifest and its targets or indexes travel together. It SHALL contain exactly one List declaring the DIS Resource Manifest profile. Each entry in that List SHALL use either an absolute HTTPS FHIR REST reference allowed by the selected payload binding or a `urn:uuid` reference matching exactly one `Bundle.entry.fullUrl` in the same package. A standalone List SHALL use absolute HTTPS references. Only the List's selected entries determine the payload set. Other Bundle entries may support resolution under the selected binding.
 
 A bundled R4 resource can be the target itself or a wrapper or index. Any non-R4 payload bytes included in the package SHALL be carried inside the attachment of an R4 resource. Each Bundle entry SHALL be an R4 resource.
 
-<a name="3pxx32-authorization-and-stable-retrieval"> </a>
-
-<a name="3pxx312-authorization-and-stable-retrieval"> </a>
+<div id="3pxx32-authorization-and-stable-retrieval"> </div>
+<div id="3pxx312-authorization-and-stable-retrieval"> </div>
 
 ### 3:PXX.4.1.2 Authorization and Stable Retrieval
 
@@ -71,9 +62,8 @@ The Manager SHALL verify that the job authorization covers every set, including 
 
 The Manager SHALL establish the authorized target set before dispatch, including any expansion of references. For ITI-x3 it SHALL bind the assigned manifest and every required input to the plan under the [assigned input verification rules](#assigned-input-verification). The Integrated actor SHALL verify the same authorized input versions for local execution. Each retry SHALL use the same authorized inputs and compiled plan version. A changed input or plan that cannot be resolved to the pinned version SHALL cause task or job failure. When publishing results by reference or manifest, the producing actor SHALL ensure the locators resolve to the intended de-identified objects and are accessible only to authorized recipients. A failed or inaccessible required set SHALL cause job failure without release of any set to the Requester.
 
-<a name="assigned-input-verification"> </a>
-
-<a name="3pxx313-assigned-input-verification"> </a>
+<div id="assigned-input-verification"> </div>
+<div id="3pxx313-assigned-input-verification"> </div>
 
 ### 3:PXX.4.1.3 Assigned Input Verification
 
@@ -91,28 +81,21 @@ For each externally retrieved object required by the assignment, the Manager and
 
 The De-Identifier SHALL use the verified bytes or resource instance for subsequent resolution and transformation. It SHALL fail the task before applying transformations if any required input is missing, changed or cannot be verified. It SHALL return no partial result. The Manager SHALL withhold job output on task failure. Plan input identifiers and digests SHALL be confined to the assignment and protected like the source inputs. The job authorization remains with the Manager.
 
-<a name="fhir-payload-binding"> </a>
-
-<a name="fhir-payload-content-module"> </a>
-
-<a name="3pxx1-dis-fhir-payload-content-module"> </a>
-
-<a name="3pxx32-fhir-payload-binding"> </a>
-
-<a name="3pxx42-fhir-payload-binding"> </a>
-<a name="markdown-toc-3pxx42-fhir-payload-binding"> </a>
+<div id="fhir-payload-binding"> </div>
+<div id="fhir-payload-content-module"> </div>
+<div id="3pxx1-dis-fhir-payload-content-module"> </div>
+<div id="3pxx32-fhir-payload-binding"> </div>
+<div id="3pxx42-fhir-payload-binding"> </div>
+<div id="markdown-toc-3pxx42-fhir-payload-binding"> </div>
 
 ## 3:PXX.4.2 FHIR Payload Delivery
 
 The `DIS-FHIR-Payload` format supports independently versioned FHIR R4 and R5 payloads over the FHIR R4 transaction protocol. Apply the [common delivery contract](#payload-set-delivery) and the release-specific rules for carrying, locating, and retrieving FHIR data.
 
-<a name="3pxx111-version-identification"> </a>
-
-<a name="3pxx3211-version-identification"> </a>
-
-<a name="3pxx3211-fhir-release-and-capability-matching"> </a>
-
-<a name="3pxx4211-fhir-release-identification"> </a>
+<div id="3pxx111-version-identification"> </div>
+<div id="3pxx3211-version-identification"> </div>
+<div id="3pxx3211-fhir-release-and-capability-matching"> </div>
+<div id="3pxx4211-fhir-release-identification"> </div>
 
 ### 3:PXX.4.2.1 FHIR Release Identification
 
@@ -120,15 +103,14 @@ For a FHIR set, the `payloadVersion` field declares the FHIR release of the proc
 
 See [§3:PXX.4.2.2 FHIR Input and Result Delivery](volume-3-fhir-delivery.html) for the packaging and retrieval rules.
 
-<a name="3pxx33-proposed-dicom-and-cda-bindings-informative"> </a>
-
-<a name="3pxx43-proposed-dicom-and-cda-bindings-informative"> </a>
-<a name="markdown-toc-3pxx43-proposed-dicom-and-cda-bindings-informative"> </a>
+<div id="3pxx33-proposed-dicom-and-cda-bindings-informative"> </div>
+<div id="3pxx43-proposed-dicom-and-cda-bindings-informative"> </div>
+<div id="markdown-toc-3pxx43-proposed-dicom-and-cda-bindings-informative"> </div>
 
 ## 3:PXX.4.3 Proposed DICOM and CDA Delivery (Informative)
 
 The [draft DICOM and CDA bindings](draft-native-payload-bindings.html) describe proposed delivery in the FHIR R4 envelope. Conformance to this supplement uses DIS-FHIR-Payload.
 
-<a name="mixed-payload-walkthrough"> </a>
+<div id="mixed-payload-walkthrough"> </div>
 
 See the [informative DPV–DICOM crosswalk](draft-native-payload-bindings.html#dicom-crosswalk-informative) and the [mixed R5 and DICOM job walkthrough](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job).

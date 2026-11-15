@@ -85,8 +85,6 @@ resources:
     description: "R4 result Bundle containing a bulk JSON manifest, two NDJSON file descriptors, worker Provenance, and staged release Provenance."
   Parameters/bulk-r4-result:
     description: "Successful ITI-x4 response carrying the two-file cohort result package."
-  Bundle/grouped-fhir-r4-hosted-result:
-    description: "R4 result Bundle with a manifest List and Provenance for a hosted de-identified Patient and hemoglobin Observation."
   Bundle/mixed-r4-result:
     description: "R4 result Bundle with a manifest List and Provenance covering a bundled Patient and a hosted Observation."
   Parameters/mixed-r4-result:
@@ -194,9 +192,6 @@ pages:
     draft-encryption-based-pseudonymization.md:
       title: "AES-FF1 Pseudonymization (Optional Normative Binding)"
       generation: markdown
-  fhir-semantic-group-guide.md:
-    title: "FHIR PII Classification and Semantic Group Guide (Informative)"
-    generation: markdown
   examples-grouped-fhir-job.md:
     title: "UC-2 – Job with R4 and R5 Payload Sets (Informative)"
     generation: markdown

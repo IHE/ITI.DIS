@@ -32,7 +32,7 @@ Submit and discuss profile feedback through [IHE ITI.DIS GitHub Issues](https://
 
 #### FHIR R6 Processing Payloads
 
-This supplement assesses conformance with published FHIR R4 or R5 processing payloads. Evaluate R6 processing over the same R4 workflow protocol when the R6 definitions are stable. This requires release-specific validation, semantic group mappings, capability matching, and worked examples with conformance tests.
+This supplement assesses conformance with published FHIR R4 or R5 processing payloads. Evaluate R6 processing over the same R4 workflow protocol when the R6 definitions are stable. This requires release-specific validation, a release-specific DPV Category Mapping, capability matching, and worked examples with conformance tests.
 
 <a name="data-recipient-and-push-delivery"> </a>
 

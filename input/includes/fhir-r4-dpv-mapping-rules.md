@@ -1,26 +1,26 @@
-<a name="fhir-r4-dpv-coverage-1"> </a>
+<div id="fhir-r4-dpv-coverage-1"> </div>
 
 **Coverage rule, revision 1.** This mapping covers the declared structured occurrences of `pd:Name`, `pd:Identifier`, and `pd:BirthDate` in a versioned R4 `dis-resource-list` assignment. Verify the resource type, release, and version for each selected resource. Logical IDs SHALL be unique within each resource type in the assignment. The review uses the base definitions in `hl7.fhir.r4.core#4.0.1` and evaluates inherited declarations at their defining type. Reusable datatype entries appear once in the mapping. A generated execution plan still names concrete use sites as required by the assignment.
 
 The mapping covers whole `HumanName` and `Identifier` occurrences where those types are selected. It covers a declared date of birth on `FamilyMemberHistory.born[x]` through `ofType(date)`. A birth period or textual estimate, references and their displays or logical identifiers, narrative, arbitrary string values, generic choice values, contained or embedded resources, and extensions require separate coverage when in scope. Business identifiers for encounters, studies, plans, and other records are distinct from identifiers assigned to people. `Resource.id` is a logical record key. The review inventory counts each declaration at its defining resource and lists other name, identifier, and birth-date candidates separately from the mapped paths. A candidate may describe a non-person entity or need context that the base definition does not provide. The Manager SHALL fail compilation if the authorization scope requires coverage outside the mapping. An absent optional mapped element contributes zero matches.
 
-<a name="fhir-r4-dpv-declared-role-1"> </a>
+<div id="fhir-r4-dpv-declared-role-1"> </div>
 
 **Declared role rule, revision 1.** The path definition establishes the role. For example, `Coverage.subscriberId` identifies the subscriber, and `FamilyMemberHistory.name` names the relative. A `Person` record describes the person in that record. It does not supply the patient or care-provider role for other resources linked to the same person.
 
-<a name="fhir-r4-dpv-care-team-role-1"> </a>
+<div id="fhir-r4-dpv-care-team-role-1"> </div>
 
 **Care-team role rule, revision 1.** For a role-specific care-provider rule, verify that the approved scope identifies the active CareTeam records that collectively provide the complete in-scope care roster. Each applicable record links its `subject` to an assigned Patient and its clinician `participant.member` directly to an assigned Practitioner. Resolve both links against the verified immutable manifest entries. Membership in any of these care teams qualifies the Practitioner's mapped occurrences in the care-provider role. An incomplete roster, ambiguous identity, or unresolved relevant reference SHALL fail compilation when it could change the winning rule or action for a selected occurrence. A name on a Patient resource remains in the patient role even when a Practitioner resource describes the same person.
 
-<a name="fhir-r4-dpv-local-path-1"> </a>
+<div id="fhir-r4-dpv-local-path-1"> </div>
 
 **Resource-local expansion rule, revision 1.** Emit the entry's FHIRPath when its root resource type is assigned. If the care-team role rule applies, qualify the resource root by each matching Practitioner ID in manifest order, as in `Practitioner.where(id = 'provider-example').name`. A complete roster with no qualifying Practitioner yields zero matches. If a supported policy rule generates no selector for an assignment, it contributes no compiled obligation. If this leaves the entire rule set empty, compile the first applicable resource-rooted entry in mapping order with `where(false)` on its resource root. For a rule set with only the reusable datatype entry, use `ActivityDefinition.where(false).contact.name` as the zero-match selector. This preserves the nonempty plan structure and makes no change to the assigned content.
 
-<a name="fhir-r4-dpv-contact-detail-1"> </a>
+<div id="fhir-r4-dpv-contact-detail-1"> </div>
 
 **ContactDetail expansion rule, revision 1.** For each assigned resource type, read its effective R4 element definitions and find the local paths whose only declared type is `ContactDetail`. Include the paths inherited by that resource once. Use the resource's concrete type as the root, append `.name`, and emit the resulting FHIRPath selectors in lexicographic order. For example, `Organization.contact.name` comes from its own declared entry, while `ActivityDefinition.contact.name` expands from the shared `ContactDetail.name` entry. Generic choice elements and locations within embedded resources remain outside this rule.
 
-<a name="fhir-r4-dpv-coverage-2"> </a>
+<div id="fhir-r4-dpv-coverage-2"> </div>
 
 **Coverage rule, revision 2.** Use the declared category, person role, location, selector, and any subject guard of each entry for a versioned R4 `dis-resource-list` assignment. Verify the selected resources and require unique logical IDs within each resource type as in revision 1. Revision 2 expands structured coverage. It includes only the listed HL7 R4 extension URLs and the listed coded observation selectors. The Manager SHALL fail compilation if the approved scope requires coverage outside the mapping. Narrative, embedded resources, and unlisted extension or code payloads require separate coverage. The Manager SHALL treat the absence of an optional mapped element as zero matches.
 
@@ -28,16 +28,28 @@ An unqualified type or code element does not establish a narrower category. For 
 
 Some categories select the same occurrence under different predicates. For example, work email is also an email address. The execution plan applies its existing first-match rule to such occurrences. A category targeting a composite element and one targeting its descendant remain subject to the ancestor and descendant conflict checks. A mapped path still has to support the selected action and produce valid output.
 
-<a name="fhir-r4-dpv-verified-subject-2"> </a>
+<div id="fhir-r4-dpv-verified-subject-2"> </div>
 
 **Verified subject rule, revision 2.** When the entry has `subjectPath`, the Manager SHALL evaluate the mapping selector and the named reference path on the same verified resource. For any resource on which the selector has a candidate occurrence, resolve the reference against the same immutable assignment manifest. Require an unambiguous, verified resource of the entry's `subjectResourceType`. A verified subject of a different type is outside that entry. A missing, unresolved, ambiguous, or multiple subject association SHALL cause compilation failure if the approved scope requires a decision for that occurrence and the association could change it. The `all-person-roles` selector does not bypass this subject guard. For example, an entry requiring a verified Patient subject does not apply to an observation about a verified Device.
 
 The Manager SHALL qualify the compiled selector by the logical ID of the resource containing the target occurrence. Preserve the entry's local predicates and type restrictions. Reference resolution belongs to compilation. A dispatched selector operates on one resource and never follows a subject reference to select or modify another resource. A `practitioner-role` occurrence describes the verified Practitioner in the context of a PractitionerRole record. Care-team membership for `care-provider` remains governed by the separate care-team role rule.
 
-<a name="fhir-r4-dpv-local-path-2"> </a>
+<div id="fhir-r4-dpv-local-path-2"> </div>
 
 **Resource-local expansion rule, revision 2.** Emit the entry's FHIRPath when its root resource type is assigned. For an entry requiring the verified subject rule, or a care-team rule for a role-specific target, qualify the root with each matching resource's logical ID in manifest order. Insert the qualification immediately after the resource type and before the entry's own path or predicate. For example, a verified prescription in `MedicationRequest/medication-example` uses a selector beginning with `MedicationRequest.where(id = 'medication-example')` followed by the entry's intent predicate and medication selector. A supported entry with no applicable resource or matching occurrence contributes zero matches. If no selector remains for the rule set, apply the corresponding typed zero-match construction from revision 1 using `where(false)` at the resource root. Preserve the source rule, action, and expected target type for the zero-match selector.
 
-<a name="fhir-r4-dpv-contact-detail-2"> </a>
+<div id="fhir-r4-dpv-contact-detail-2"> </div>
 
 **ContactDetail expansion rule, revision 2.** Use the declared ContactDetail use sites from revision 1. Replace the datatype root in the entry's FHIRPath with the resource-local path of each declared use site, retaining the entry's predicates and suffix. A telecom entry requires a named contact as specified by its selector. For example, the email entry on ActivityDefinition expands to `ActivityDefinition.contact.where(name.hasValue()).telecom.where(system = 'email')` and corresponding selectors for other declared ContactDetail use sites. Emit matching paths in the order defined by the ContactDetail expansion rule. If the entire rule set produces no selector and its first applicable entry is a shared ContactDetail entry, use the corresponding `ActivityDefinition` contact selector with `where(false)` on the resource root.
+
+<div id="fhir-r4-dpv-coverage-3"> </div>
+
+**FHIR R4 coverage rule, revision 3.** Apply the structured R4 selectors and coverage checks above to verified resource-list and Bulk FHIR assignments. For Bulk FHIR, verify the assigned manifest and each listed NDJSON file under the [assigned input verification rules](volume-3-payload-bindings.html#assigned-input-verification). Validate the release and declared resource type of each selected record, and verify that selection and identity are unambiguous across the files. Use the verified file bytes to bind records that lack a resource version identifier. For standalone documents, use the authorized R4 Bundle entries as the verified resource selection. Resolve any subject guard only within the verified assignment. Fail compilation before dispatch or local execution when any required coverage is unsupported.
+
+<div id="fhir-r5-dpv-coverage-1"> </div>
+
+**FHIR R5 coverage rule.** Apply the same resource verification and assignment coverage checks using FHIR R5 definitions and the published R5 selectors. Support extends to the listed structured paths in verified resource-list and Bulk FHIR assignments. A mapped subject guard requires an unambiguous reference resolved within the verified assignment. A supported optional element that is absent contributes zero matches. An unlisted category, role, location, or required selector is unsupported for that assignment.
+
+<div id="fhir-r5-dpv-contact-detail-1"> </div>
+
+**FHIR R5 ContactDetail expansion rule.** Find the local elements whose only declared type is ContactDetail in the effective FHIR R5 definitions for the assigned resource types. Include inherited locations once. Replace the datatype root with each concrete resource-local path, retaining the entry's predicates and suffix and emitting selectors in lexicographic order. For a zero-match rule set whose first applicable entry is a shared ContactDetail entry, use the corresponding ActivityDefinition contact selector with `where(false)` on the resource root.

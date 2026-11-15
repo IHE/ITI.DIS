@@ -1,6 +1,5 @@
-<a name="shared-contract-rules"> </a>
-
-<a name="contract-signatures"> </a>
+<div id="shared-contract-rules"> </div>
+<div id="contract-signatures"> </div>
 
 ## Contract Signatures and Disclosure
 

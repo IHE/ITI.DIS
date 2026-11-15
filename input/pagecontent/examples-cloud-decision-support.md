@@ -8,9 +8,9 @@ An EHR prepares the authorized data for one encounter before sending them to a c
 
 The de-identification job references the [synthetic Data Request Authorization](Contract-uc4-care-approval.html) and selects the permission that binds its set to the approved policy version.
 
-The EHR declares `https://governance.example.org/policies/uc4-cloud-decision-support|1.0` and carries the approved [R4 Syntax-Level Policy Contract](Contract-uc4-cloud-decision-support-policy.html). The payload-set metadata's `policyContent` references `#approved-policy`, a contained Binary with `contentType = application/fhir+json`. Decoding `Binary.data` yields the complete Policy Contract, with the issuer's signature in `Contract.signer.signature`.
+The EHR declares `https://governance.example.org/policies/uc4-cloud-decision-support|1.0` and carries the approved [DPV–ODRL Policy Contract](Contract-uc4-cloud-decision-support-policy.html). The payload-set metadata's `policyContent` references `#approved-policy`, a contained Binary with `contentType = application/fhir+json`. Decoding `Binary.data` yields the complete Policy Contract, with the issuer's signature in `Contract.signer.signature`.
 
-The policy targets `Patient.identifier` for reversible salted pseudonymization within the authorized `cloud-cds-2026` linkage scope and removes `Patient.name`. The Manager validates these concrete R4 paths and packages the approved rules in the execution plan. The selected Encounter and Observations retain references that resolve to the pseudonymized Patient. A real release needs approved rules covering any additional identifying content in its selected resources.
+The policy selects the patient's structured `pd:Identifier` and `pd:Name` data. The Manager uses the [FHIR R4 DPV Category Mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping) to compile salted pseudonymization of `Patient.identifier` within the authorized `cloud-cds-2026` linkage scope and removal of `Patient.name`. The selected Encounter and Observations retain references that resolve to the pseudonymized Patient. A real release needs approved rules covering any additional identifying content in its selected resources.
 
 <a name="signature-verification"></a>
 
@@ -21,7 +21,7 @@ This example deployment requires a Policy Contract signature in both delivery mo
 ```json
 {
   "kty": "RSA",
-  "n": "573gBsCLCcv7m2iX_gX2ldogOt-ubxBR04zsoujM924s1LWwzxbE-FNkjH-a9AWuh3y5KFAeuUBPvIMSAQyGMvOuAlW-iWkCk6TwsOyv8cpHa5uYxaW0Ls-YJcHnJSH5LRU9XgOY3VBzB673sgXK5Uh2K2Nj5I5g_tdQ9CTD5QBUK8XD8FcsJZVb3ECLgmWbJthnc2eSCzOKBfFdDiMs_TLloTA4d0lckyjdzx2WBYWRbKA8S0CReDgGaCWht_RhN-kogh_11ks62nSSU_Np3mbGb2BS_LPIl423W_ERCFCq5cid3YacmXTJV7Z61j69j5XrlWBgZZ9y2KVoVXHwZw",
+  "n": "3LecM0jPFVz51yHZGhVa_ngfFkl9F_-Kkp_wIbbDx2opt43kHCihHChW6awuc0fpZ0OOPyQOxWpoRxOwk7m2HRBwQCDTZ2-wi87H9NP0EeBfTZ7OiVYVscN7dVHyAochdgskRX7R0Bl7wXTnY6pOrlTsa3wIoJ9OUXUeTQwsNi5lY_dIR3iQwOVqmz9Kl4GY4NCv0KxI7IF0LlUf3xjBSLFsv_LCD0fY-5bd6FoCZDyNKm51dAIoZFUiP5nYxUu-YLnZVYbUIPXXvgpdjDJ4OU4l8nk8PgzmTgG2AkKPfVh30XJMnZnAR-y6bf8L6T4smxX1LKmlWGzV1Q55rNKkQw",
   "e": "AQAB",
   "kid": "dis-example-issuer-rs256"
 }

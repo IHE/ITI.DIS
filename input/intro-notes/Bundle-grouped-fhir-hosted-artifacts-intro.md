@@ -10,25 +10,40 @@ This JSON-LD is the decoded `Contract.rule.contentAttachment.data` of `grouped-f
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://governance.example.org/policies/imaging-report-subject-removal/versions/1.0",
-  "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "syntax",
+  "profile": "disdpv:Policy",
   "dis:reversibilityMode": "irreversible",
-  "dis:payloadFamily": "fhir",
-  "dis:payloadVersion": "R5",
   "obligation": [
     {
       "uid": "https://governance.example.org/policies/imaging-report-subject-removal/versions/1.0#remove-01",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:fhir-elements",
-        "refinement": {
-          "leftOperand": "dis:fhirPath",
-          "operator": "eq",
-          "rightOperand": "DiagnosticReport.subject"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Identifying"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": "dis:remove"
     }
@@ -58,10 +73,10 @@ This JSON-LD is the decoded `Contract.rule.contentAttachment.data` of `grouped-f
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://dis.example.org/fhir/plans/imaging-report-r5/versions/1.0",
-  "profile": "dis:ExecutionPlan",
+  "profile": "disdpv:ExecutionPlan",
   "dis:ruleSetId": "remove-direct-link",
   "dis:payloadBinding": "DIS-FHIR-Payload",
   "dis:payloadVersion": "R5",
@@ -75,7 +90,7 @@ This JSON-LD is the decoded `Contract.rule.contentAttachment.data` of `grouped-f
         "refinement": {
           "leftOperand": "dis:fhirPath",
           "operator": "eq",
-          "rightOperand": "DiagnosticReport.subject"
+          "rightOperand": "DiagnosticReport.where(id = 'grouped-fhir-report-input').subject"
         }
       },
       "action": "dis:remove",
@@ -90,6 +105,9 @@ This JSON-LD is the decoded `Contract.rule.contentAttachment.data` of `grouped-f
         "@id": "https://dis.example.org/fhir/plans/imaging-report-r5/versions/1.0#remove-01"
       }
     ]
+  },
+  "disdpv:mappingRevision": {
+    "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r5-dpv-mapping-1.jsonld"
   }
 }
 ```

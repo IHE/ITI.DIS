@@ -6,15 +6,14 @@ In [UC-3 Clinical Pathology Order](volume-1.html#1pxx423-use-case-3-clinical-pat
 
 ## Approved Reversible Policy
 
-The job submission declares the approved versioned canonical and the Manager resolves it from the hospital policy store. This decoded Semantic-Level policy governs the Manager-managed variant. The Manager resolves the scope and expands the rule targets when compiling the [execution plan Set](odrl-content.html#execution-plan-set).
+The job submission declares the approved versioned canonical and the Manager resolves it from the hospital policy store. This decoded DPV–ODRL policy governs the Manager-managed variant. The Manager resolves the scope and expands the rule targets when compiling the [execution plan Set](odrl-content.html#execution-plan-set).
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://hospital.example.org/policies/pathology/versions/1",
-  "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "semantic",
+  "profile": "disdpv:Policy",
   "dis:reversibilityMode": "reversible",
   "dis:identity-linkage-scope": {
     "@type": "@json",
@@ -31,12 +30,30 @@ The job submission declares the approved versioned canonical and the Manager res
       "uid": "https://hospital.example.org/policies/pathology/versions/1#P01",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:semantic-elements",
-        "refinement": {
-          "leftOperand": "dis:semanticGroup",
-          "operator": "eq",
-          "rightOperand": "@subject-business-identifiers"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Identifier"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": {
         "rdf:value": {
@@ -67,12 +84,30 @@ The job submission declares the approved versioned canonical and the Manager res
       "uid": "https://hospital.example.org/policies/pathology/versions/1#P02",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:semantic-elements",
-        "refinement": {
-          "leftOperand": "dis:semanticGroup",
-          "operator": "eq",
-          "rightOperand": "@subject-names"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Name"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": "dis:remove"
     }
@@ -99,7 +134,7 @@ The job submission declares the approved versioned canonical and the Manager res
 
 ## Synchronous Exchange
 
-The EHR submits the de-identification job through ITI-x1. The Manager verifies the authorization and approved policy, expands the semantic groups into concrete R4 selectors, and dispatches a de-identification task through ITI-x3. Both calls use synchronous processing. The worker assigns the pseudonym, removes `Patient.name`, and updates the order's `ServiceRequest.subject` to reference the pseudonymized Patient. The Manager validates that the link resolves in the result package before completing ITI-x1.
+The EHR submits the de-identification job through ITI-x1. The Manager verifies the authorization and approved policy, compiles the DPV targets using the [FHIR R4 DPV Category Mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping), and dispatches a de-identification task through ITI-x3. Both calls use synchronous processing. The worker assigns the pseudonym, removes `Patient.name`, and updates the order's `ServiceRequest.subject` to reference the pseudonymized Patient. The Manager validates that the link resolves in the result package before completing ITI-x1.
 
 | Step | Requester-supplied mapping | Manager-managed mapping |
 |------|---------------------------|-------------------------|

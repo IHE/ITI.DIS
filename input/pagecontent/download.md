@@ -7,12 +7,9 @@ You can also download:
 
 The [IHE ITI.DIS repository](https://github.com/IHE/ITI.DIS) contains the source for this guide.
 
-#### FHIR Semantic Group Binding
+#### FHIR DPV Category Mappings
 
-Volume 3 publishes the [authoritative R4 and R5 selector table](volume-3-fhir-addressing.html#3pxx3213-semantic-group-bindings). The following informative resources support policy authoring.
-
-- [R4/R5 PII path catalog CSV](bindings/dis-fhir-pii-path-catalog-0.2.0.csv)
-- [FHIR PII classification and semantic group guide](fhir-semantic-group-guide.html)
+The [FHIR R4](volume-3-execution-plan.html#fhir-r4-dpv-mapping) and [FHIR R5](volume-3-execution-plan.html#fhir-r5-dpv-mapping) mappings are available as JSON-LD and CSV. The mapping sections also link to their review artifacts.
 
 #### ODRL and JSON Schema Artifacts
 

@@ -140,7 +140,7 @@
           "reference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1"
         }
       ],
-      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-2.jsonld",
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-3.jsonld",
       "expectedNameOutcomes": {
         "Patient/patient-example.name": "absent",
         "Patient/patient-example.contact.name": "absent",
@@ -186,7 +186,7 @@
           "reference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1"
         }
       ],
-      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-2.jsonld",
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-3.jsonld",
       "expectedNameOutcomes": {
         "Patient/patient-example.name": "absent",
         "Patient/patient-example.contact.name": "absent",

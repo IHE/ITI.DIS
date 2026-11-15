@@ -1,23 +1,17 @@
-<a name="data-plane-access"> </a>
-<a name="obtaining-processing-targets"> </a>
-
-<a name="3pxx16-obtaining-processing-targets"> </a>
-
-<a name="3pxx323-obtaining-processing-targets"> </a>
-
-<a name="3pxx322-input-and-result-delivery"> </a>
-
-<a name="3pxx422-input-and-result-delivery"> </a>
+<div id="data-plane-access"> </div>
+<div id="obtaining-processing-targets"> </div>
+<div id="3pxx16-obtaining-processing-targets"> </div>
+<div id="3pxx323-obtaining-processing-targets"> </div>
+<div id="3pxx322-input-and-result-delivery"> </div>
+<div id="3pxx422-input-and-result-delivery"> </div>
 
 See the [FHIR Payload Delivery overview](volume-3-payload-bindings.html#fhir-payload-binding).
 
 The job request identifies the proposed processing targets. The task request identifies the data assigned to the De-Identifier. The De-Identifier returns task results in ITI-x3 or ITI-x7. The Manager returns job results in ITI-x1 or ITI-x4. Result resources retain the declared input release.
 
-<a name="3pxx33-fhir-payload-delivery"> </a>
-
-<a name="3pxx324-fhir-payload-delivery-summary"> </a>
-
-<a name="3pxx3221-payload-set-delivery"> </a>
+<div id="3pxx33-fhir-payload-delivery"> </div>
+<div id="3pxx324-fhir-payload-delivery-summary"> </div>
+<div id="3pxx3221-payload-set-delivery"> </div>
 
 ## 3:PXX.4.2.2.1 Payload Set Delivery
 
@@ -33,23 +27,21 @@ The job request identifies the proposed processing targets. The task request ide
 
 For both exchanges, use `dis-resource-list` for bundled or hosted FHIR resources, or `fhir-bulk-data` for bulk files. A single inline R4 input uses an R4 manifest package containing the List and that resource. Its result uses a DIS Result Package. The FHIR task result uses the same manifest format as the assigned input, as specified in [ITI-x3](volume-2.html#23x3422-message-semantics). The Manager MAY repackage inline or hosted inputs at dispatch while preserving the authorized content and set identity.
 
-<a name="3pxx112-version-safe-packaging"> </a>
-
-<a name="3pxx3212-version-safe-packaging"> </a>
-
-<a name="3pxx3223-version-safe-packaging-of-inline-and-hosted-resources"> </a>
+<div id="3pxx112-version-safe-packaging"> </div>
+<div id="3pxx3212-version-safe-packaging"> </div>
+<div id="3pxx3223-version-safe-packaging-of-inline-and-hosted-resources"> </div>
 
 ## 3:PXX.4.2.2.2 Version-Safe Packaging of Inline and Hosted Resources
 
 The DIS transaction envelope and manifest package use HL7 FHIR R4. For inline R5, carry the serialized resource in the attachment of a DIS Payload Wrapper selected by the manifest. Hosted R5 resources can use [direct release-qualified references](#direct-hosted-r5-references) or an R4 wrapper with an attachment URL. For an inline R5 example, see [the manifest package below](#inline-r5-manifest-package).
 
-<a name="protocol-resources-remain-hl7-fhir-r4"> </a>
+<div id="protocol-resources-remain-hl7-fhir-r4"> </div>
 
 **Protocol Resources Remain HL7 FHIR R4**
 
 Table 3:PXX.4.2.2-2 lists the resources that are part of the HL7 FHIR R4 protocol layer and remain HL7 FHIR R4 regardless of the payload version.
 
-<a name="tPXX.3.2.1-2"> </a>
+<div id="tPXX.3.2.1-2"> </div>
 
 <p id="tPXX.3.2.2-3" class="tableTitle"><strong>Table 3:PXX.4.2.2-2: HL7 FHIR R4 Protocol Resources</strong></p>
 
@@ -64,19 +56,13 @@ Table 3:PXX.4.2.2-2 lists the resources that are part of the HL7 FHIR R4 protoco
 | `CapabilityStatement` | Actor capability declaration |
 {: .grid}
 
-<a name="3pxx163-bulk-file-manifests"> </a>
-
-<a name="3pxx3233-bulk-file-manifests"> </a>
-
-<a name="resource-manifest"> </a>
-
-<a name="resource-manifest-resolution"> </a>
-
-<a name="fhir-resource-manifest-resolution"> </a>
-
-<a name="3pxx3222-fhir-resource-manifest-and-wrapper-resolution"> </a>
-
-<a name="fhir-input-manifests-and-retrieval"> </a>
+<div id="3pxx163-bulk-file-manifests"> </div>
+<div id="3pxx3233-bulk-file-manifests"> </div>
+<div id="resource-manifest"> </div>
+<div id="resource-manifest-resolution"> </div>
+<div id="fhir-resource-manifest-resolution"> </div>
+<div id="3pxx3222-fhir-resource-manifest-and-wrapper-resolution"> </div>
+<div id="fhir-input-manifests-and-retrieval"> </div>
 
 ## 3:PXX.4.2.2.3 Input Manifests and Retrieval
 
@@ -100,21 +86,15 @@ Table 3:PXX.4.2.2-3 shows how a List entry identifies the payload.
 
 The receiving actor SHALL follow the attachment only when the DocumentReference declares and conforms to the DIS Payload Wrapper profile. A DocumentReference claiming that profile but failing validation SHALL cause a set failure. To deliver a resource that itself declares the wrapper profile as a FHIR payload, serialize it inside a separate wrapper. An inline R5 DocumentReference is therefore carried as R5 bytes in the R4 wrapper, just like any other R5 resource.
 
-<a name="direct-hosted-r5-references"> </a>
+<div id="direct-hosted-r5-references"> </div>
 
 **Direct hosted R5 references.** For a FHIR resource-list payload set declared as `R5`, a List item MAY reference a hosted R5 resource directly using an absolute HTTPS FHIR [version-specific read URL](https://hl7.org/fhir/R5/http.html#vread). The item SHALL carry the [DIS Target FHIR Release extension](StructureDefinition-dis-target-fhir-version.html) with `valueCode = 5.0`. Resolve List items without the extension as R4 workflow resources or native R4 payloads, as applicable. For an R5 set, an unqualified item SHALL resolve to a conformant R4 Payload Wrapper. The extension SHALL NOT qualify an R4 wrapper or index, a bundle-local reference, or a reference in a set declared as R4. This rule defines cross-release resolution for DIS, including [evidence targets](volume-3-evidence.html#3pxx3214-evidence-representation-across-versions).
 
 The retrieving actor SHALL use the target release to set the [FHIR media-type parameter](https://hl7.org/fhir/R5/versioning.html) on the separate GET, for example `Accept: application/fhir+json; fhirVersion=5.0`. It SHALL confirm the release using the response media-type parameter or verified FHIR server capabilities for that endpoint. If a response media-type parameter is present, it SHALL agree with the requested release. If it is absent, the actor SHALL verify that the resource endpoint serves R5 exclusively, using trusted endpoint configuration and its R5 CapabilityStatement. A multi-release endpoint SHALL identify the returned release in its response media type for this exchange. The actor SHALL verify that the resource type, logical ID, and `meta.versionId` match the URL and validate the returned resource against R5. A successful HTTP status alone does not establish the release. Apply the [authorization and stable retrieval rules](volume-3-payload-bindings.html#3pxx32-authorization-and-stable-retrieval). Reject the submission or fail the accepted work if a required input cannot be verified and retrieved. For results, apply the [result packaging checks](#fhir-result-packages-and-delivery) and [evidence target rules](volume-3-evidence.html#3pxx3214-evidence-representation-across-versions).
 
-See the [hosted R5 input List](List-hosted-r5-input.html) and [hosted R5 result package](Bundle-hosted-r5-result.html). These artifacts illustrate the resource-list manifest and evidence for a set with `payloadBinding = DIS-FHIR-Payload` and `payloadVersion = R5`. They use illustrative URLs. The result package pairs an R4 manifest List with R4 Provenance. Both identify the same hosted R5 output revision. A receiver requests that revision as follows.
+The [UC-2 task walkthrough](examples-grouped-fhir-job.html#grouped-fhir-dispatch) shows the version-specific GET for a hosted R5 DiagnosticReport. In the [UC-2 result package](Bundle-grouped-fhir-r5-output.html), the R4 List and Provenance identify the same hosted R5 output revisions for the report and Patient.
 
-```http
-GET /fhir/r5/Observation/hosted-imaging-output/_history/1
-Host: results.example.org
-Accept: application/fhir+json; fhirVersion=5.0
-```
-
-<a name="3pxx3224-bulk-file-manifests-and-authorized-retrieval"> </a>
+<div id="3pxx3224-bulk-file-manifests-and-authorized-retrieval"> </div>
 
 **Bulk input manifests.**
 
@@ -122,11 +102,9 @@ For an asynchronous cohort job, the Requester supplies an HTTPS URI identifying 
 
 DIS uses the file listing conventions of the [HL7 Bulk Data Access IG STU 3](https://hl7.org/fhir/uv/bulkdata/STU3/en/export.html#response---output-manifest). For a manifest prepared for DIS, the required fields are `requiresAccessToken` (boolean) and `output` (array of file entries). Each entry SHALL identify the resource type in `type` and the file location in `url` as an absolute HTTPS URL. The manifest SHALL enumerate the complete dataset in one file listing. It may omit export-specific metadata such as `request` and `transactionTime`. The job's `payloadVersion` applies to all listed input files. A manifest with continuation links or reported export errors SHALL be rejected for processing under this binding.
 
-<a name="referenced-input-authorization"> </a>
-
-<a name="3pxx164-authorization-for-referenced-inputs"> </a>
-
-<a name="3pxx3234-authorization-for-referenced-inputs"> </a>
+<div id="referenced-input-authorization"> </div>
+<div id="3pxx164-authorization-for-referenced-inputs"> </div>
+<div id="3pxx3234-authorization-for-referenced-inputs"> </div>
 
 **Authorization for referenced inputs.**
 
@@ -138,25 +116,22 @@ Authorization SHALL cover retrieval of each manifest and each resource or file l
 
 The Manager SHALL reject the job if it cannot establish that the identified dataset is authorized. If a required input is missing, inaccessible, invalid or outside the authorized scope, the Manager SHALL reject the job before acceptance or fail the accepted job and withhold all job output. A De-Identifier that detects such a failure SHALL report it to the Manager using the applicable task transaction.
 
-<a name="inline-r5-manifest-package"></a>
-
-<a name="3pxx34-inline-r5-manifest-package-example"> </a>
-
-<a name="3pxx325-inline-r5-manifest-package-example"> </a>
-
-<a name="3pxx3225-inline-r5-manifest-package-example"> </a>
+<div id="inline-r5-manifest-package"> </div>
+<div id="3pxx34-inline-r5-manifest-package-example"> </div>
+<div id="3pxx325-inline-r5-manifest-package-example"> </div>
+<div id="3pxx3225-inline-r5-manifest-package-example"> </div>
 
 ## 3:PXX.4.2.2.4 Inline R5 Manifest Package Example
 
 For inline submission, serialize the [R4 manifest package](Bundle-inline-r5-manifest-package.html) as `Task.input.valueAttachment.data` on the `payload-set` input with `contentType` of `application/fhir+json`. The set declares `DIS-FHIR-Payload`, `R5`, and manifest format `dis-resource-list`. The List selects the [R4 payload wrapper](DocumentReference-inline-r5-payload-wrapper.html) by its bundle-local UUID. The wrapper attachment decodes to `{"resourceType":"Patient","id":"example"}` and is interpreted as R5.
 
-<a name="fhir-result-packages-and-delivery"> </a>
+<div id="fhir-result-packages-and-delivery"> </div>
 
 ## 3:PXX.4.2.2.5 Result Packages and Delivery
 
 **Result manifests.** A result manifest SHALL reference only result resources or result indexes whose native targets resolve to the authorized de-identified output. The producing actor SHALL verify retrieval and identity of the referenced results before returning the manifest. Recipient-facing manifests, result indexes, and their referenced metadata SHALL exclude source identifiers and protected transformation material. Associated evidence follows the rules below.
 
-<a name="result-evidence-placement"> </a>
+<div id="result-evidence-placement"> </div>
 
 **Result package and evidence placement.** Each successful job or task result SHALL carry one [DIS Result Package](StructureDefinition-DIS-ResultPackage.html) in `payloadResult.resultPackage`. This FHIR R4 collection Bundle SHALL contain the manifest and at least one DIS Evidence Provenance entry. The attachment's `data` contains the serialized Bundle, or its HTTPS `url` identifies that Bundle at an authorized endpoint. Use `application/fhir+json` or `application/fhir+xml`. The same packaging applies when the result is returned immediately or by polling. Each distributed job result set that uses multiple stages also carries [staged release evidence](volume-3-evidence.html#staged-release-evidence). The receiver SHALL identify the manifest and evidence by profile and validate their references.
 
@@ -173,7 +148,7 @@ The [mixed R4 result package](Bundle-mixed-r4-result.html) selects a bundled Pat
 
 For asynchronous cohort jobs, the Manager returns a bulk file manifest for the de-identified NDJSON files and supplies the associated evidence with the job result. The result package carries the manifest DocumentReference and file descriptors. The manifest carrier attachment SHALL use `application/json` and exactly one of inline `data` or an authorized HTTPS `url`. Each file descriptor attachment SHALL use `application/fhir+ndjson` and the exact HTTPS URL listed for that file in the manifest. The receiver SHALL match descriptors one to one with the manifest file URLs and reject missing, duplicate or unlisted descriptors. Extract the JSON manifest for ordinary Bulk Data file retrieval. The Manager SHALL ensure that manifest and file access expires within the authorized release window. Recipient-facing manifests and files SHALL NOT contain confidential salts or other protected transformation material. A failed job SHALL NOT release a partial dataset. The Manager SHALL report the failure through job status for an accepted asynchronous job.
 
-<a name="bulk-result-content-identity"> </a>
+<div id="bulk-result-content-identity"> </div>
 
 **Bulk result content identity.** The producing actor is the De-Identifier for a task result and the De-ID Manager or Integrated De-ID Manager/De-Identifier for a job result. Before making a bulk result available to its receiver, the producing actor SHALL establish the exact output manifest and file versions covered by validation and evidence for that set. The manifest URL SHALL continue to resolve to that manifest version, and each file locator SHALL continue to resolve to its validated file version, for every successful retrieval of the released set. Content identity is based on the JSON and NDJSON bytes after HTTP decompression, when compression is used. A locator for a released result SHALL NOT serve substitute content, even when the replacement lists the same file URLs or contains the same FHIR resource type.
 
@@ -181,7 +156,7 @@ The producing actor SHALL withhold the result if it cannot establish or preserve
 
 When a deployment supports renewal, the actor controlling access SHALL verify that the receiver is still authorized and that renewal is within the authorized release window. It MAY issue a new temporary download URL or credentials for the same version. The locators in the released manifest and the bytes of the manifest and files SHALL remain unchanged. The profile does not define a renewal transaction or prescribe how the deployment maintains object versions.
 
-<a name="bulk-result-download-authorization"> </a>
+<div id="bulk-result-download-authorization"> </div>
 
 **Bulk job result downloads.** The Manager SHALL ensure that services delivering a hosted result package, manifest or NDJSON file enforce the [current job release authorization](volume-3-authorization.html#job-result-recipient) on every new download request, including a range or resume request. This applies to the manifest URL, each stable file locator and every endpoint reached through a redirect. If the grant expires or is revoked, the recipient loses release authority, or current authorization cannot be established, the services SHALL deny further downloads and renewal. The final download service SHALL deny a request using an already-issued signed URL in these cases, even if the URL itself is still valid. The Manager SHALL enable signed downloads only where the complete delivery chain can enforce these rules. A finite URL lifetime is an additional limit on access.
 

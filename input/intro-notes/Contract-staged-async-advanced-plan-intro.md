@@ -6,10 +6,10 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://dis.example.org/plans/staged-async-advanced-plan/versions/1.0",
-  "profile": "dis:ExecutionPlan",
+  "profile": "disdpv:ExecutionPlan",
   "dis:ruleSetId": "generalize-birth-date",
   "dis:payloadBinding": "DIS-FHIR-Payload",
   "dis:payloadVersion": "R4",
@@ -50,6 +50,9 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
         "@id": "https://dis.example.org/plans/staged-async-advanced-plan/versions/1.0#birth-year"
       }
     ]
+  },
+  "disdpv:mappingRevision": {
+    "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-3.jsonld"
   }
 }
 ```

@@ -66,7 +66,7 @@ This draft walkthrough exercises ITI-x1, ITI-x3, and ITI-x4. The job is asynchro
 
 The tables describe the R4 work-order inputs and result parameters. Each successful task and job response carries top-level `validationStatus = valid`. Example artifact URLs denote the contents described in the walkthrough.
 
-<a name="job-submission"> </a>
+<div id="job-submission"> </div>
 
 ### ITI-x1 Job Submission
 
@@ -101,9 +101,9 @@ The imaging List references `https://index.example.org/fhir/ImagingStudy/study-4
 | SOP instance 2 | `1004` |
 {: .grid}
 
-The Manager resolves the permit and checks both policy assignments. It resolves the imaging List, index and applicable Endpoint using authorized access. It checks that the enumerated DICOM instances are within the approved scope. It preserves the submitted R5 bytes and the DICOM selection, including the resolved Endpoint and instance UIDs, in protected job state for task dispatch and retries. It checks that compatible De-Identifiers are available for both sets. On acceptance it returns an empty `202 Accepted` response with `Content-Location: https://dis.example.org/jobs/job-42`.
+The Manager resolves the permit and checks both policy assignments. It resolves the imaging List, index and applicable Endpoint using authorized access. It checks that the enumerated DICOM instances are within the approved scope. It preserves the submitted R5 bytes and the DICOM selection, including the resolved Endpoint and instance UIDs, in protected job state for task dispatch and retries. For the clinical set, the Manager compiles the patient's structured `pd:Name` target to `Patient.name` using the [FHIR R5 DPV Category Mapping](volume-3-execution-plan.html#fhir-r5-dpv-mapping). It checks that compatible De-Identifiers are available for both sets. On acceptance it returns an empty `202 Accepted` response with `Content-Location: https://dis.example.org/jobs/job-42`.
 
-<a name="task-dispatch"> </a>
+<div id="task-dispatch"> </div>
 
 ### ITI-x3 Task Dispatch and Execution
 
@@ -125,7 +125,7 @@ The clinical De-Identifier decodes the wrapper and checks that the payload is va
 
 The imaging De-Identifier uses credentials accepted by the index server to read the versioned R4 resources. It obtains credentials accepted by the imaging endpoint for the separate WADO-RS requests. For each listed SOP instance it requests the native DICOM representation at `/studies/{studyUID}/series/{seriesUID}/instances/{instanceUID}`. It compares the returned Study, Series, and SOP Instance UIDs with the assigned selection. A retry uses the same two instance identifiers and does not expand to the whole study. For this example, the proposed plan calls for the DICOM Basic Application Level Confidentiality Profile with Clean Pixel Data and consistent replacement of the Study, Series and SOP Instance UIDs. The worker validates the two resulting instances, including their replacement UIDs, internal references and the selected pixel handling. See [DICOM PS3.15 Annex E](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html). Output UID suffixes are `2001` for the study, `2002` for the series and `2003` and `2004` for the instances.
 
-<a name="results-and-release"> </a>
+<div id="results-and-release"> </div>
 
 ### ITI-x3 Task Results and ITI-x4 Release
 
@@ -141,13 +141,13 @@ For each evidence resource, `Provenance.id` identifies the record and `activity`
 
 The Manager correlates both results by `setId` and checks that the result manifests, objects, and evidence agree. It keeps the hosted imaging output accessible only to authorized processing actors until the job is ready to release. Once both sets pass, the Requester polls `GET https://dis.example.org/jobs/job-42` with authorized credentials. The Manager returns `200 OK` with both `payloadResult` groups in one R4 `Parameters` response. The Requester can decode the clinical result immediately and use its authorized access to retrieve the imaging result. The result index enumerates only the replacement UIDs, and the result manifests and evidence exclude source identifiers and protected transformation material.
 
-<a name="failure-after-acceptance"> </a>
+<div id="failure-after-acceptance"> </div>
 
 ### Failure After Job Acceptance
 
 Repeat the job with access to instance `1004` withdrawn after acceptance and before DICOM retrieval. The imaging worker can retrieve `1003` but cannot obtain the complete authorized set. Its ITI-x3 response is `500 Internal Server Error` with an `OperationOutcome` and no `payloadResult`. The clinical task may already have succeeded. The Manager marks the whole job failed and the next authorized ITI-x4 poll returns an error `OperationOutcome`. Neither the clinical result nor a partial imaging result is made available to the Requester.
 
-<a name="cross-set-linkage"> </a>
+<div id="cross-set-linkage"> </div>
 
 ### Cross-Set Linkage Follow-Up
 
@@ -155,150 +155,9 @@ The first walkthrough assumes independent result sets. A later example requiring
 
 ### Hosted R5 Submission Variant
 
-Post this FHIR R4 `Task` directly to ITI-x1 with `Prefer: respond-async`. Both payload sets use hosted manifests. The R5 wrapper locates the Patient through its attachment URL. The example DICOM edition is illustrative. The final DICOM option will declare its supported edition codes.
+Adapt the [UC-2 hosted job submission](examples-grouped-fhir-job.html#grouped-fhir-submission) to the two payload sets in this walkthrough. For `clinical`, put the version-specific R4 List URL in `Task.input.valueAttachment.url`. The List selects an R4 DIS Payload Wrapper whose attachment URL retrieves the R5 Patient. For `images`, use the version-specific DICOM List URL, the proposed binding code `DIS-DICOM1`, and the illustrative DICOM edition `2026d`. Both sets retain their own approved permission, purpose, policy version, and `dis-resource-list` manifest format.
 
-```json
-{
-  "resourceType": "Task",
-  "id": "mixed-hosted-job-42",
-  "meta": {
-    "profile": [
-      "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-DeIdentificationJob"
-    ]
-  },
-  "identifier": [
-    {
-      "system": "https://requester.example.org/dis/job-identifiers",
-      "value": "mixed-hosted-job-42"
-    }
-  ],
-  "status": "requested",
-  "intent": "order",
-  "code": {
-    "coding": [
-      {
-        "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-work-order-type",
-        "code": "de-identification-job"
-      }
-    ]
-  },
-  "input": [
-    {
-      "type": {
-        "coding": [
-          {
-            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
-            "code": "authorization"
-          }
-        ]
-      },
-      "valueReference": {
-        "reference": "https://governance.example.org/fhir/Contract/permit-42/_history/1"
-      }
-    },
-    {
-      "type": {
-        "coding": [
-          {
-            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
-            "code": "payload-set"
-          }
-        ]
-      },
-      "valueAttachment": {
-        "contentType": "application/fhir+json",
-        "url": "https://index.example.org/fhir/List/clinical-42/_history/1"
-      },
-      "extension": [
-        {
-          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
-          "extension": [
-            {
-              "url": "setId",
-              "valueString": "clinical"
-            },
-            {
-              "url": "payloadBinding",
-              "valueCode": "DIS-FHIR-Payload"
-            },
-            {
-              "url": "payloadVersion",
-              "valueCode": "R5"
-            },
-            {
-              "url": "manifestFormat",
-              "valueCode": "dis-resource-list"
-            },
-            {
-              "url": "policy",
-              "valueCanonical": "https://governance.example.org/policies/fhir-research|1.0"
-            },
-            {
-              "url": "permission",
-              "valueUri": "https://governance.example.org/permits/permit-42/versions/1#clinical"
-            },
-            {
-              "url": "purpose",
-              "valueUri": "https://governance.example.org/purposes/multimodal-research"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": {
-        "coding": [
-          {
-            "system": "https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-task-input",
-            "code": "payload-set"
-          }
-        ]
-      },
-      "valueAttachment": {
-        "contentType": "application/fhir+json",
-        "url": "https://index.example.org/fhir/List/images-42/_history/1"
-      },
-      "extension": [
-        {
-          "url": "https://profiles.ihe.net/ITI/DIS/StructureDefinition/dis-payload-set",
-          "extension": [
-            {
-              "url": "setId",
-              "valueString": "images"
-            },
-            {
-              "url": "payloadBinding",
-              "valueCode": "DIS-DICOM1"
-            },
-            {
-              "url": "payloadVersion",
-              "valueCode": "2026d"
-            },
-            {
-              "url": "manifestFormat",
-              "valueCode": "dis-resource-list"
-            },
-            {
-              "url": "policy",
-              "valueCanonical": "https://governance.example.org/policies/dicom-research|1.0"
-            },
-            {
-              "url": "permission",
-              "valueUri": "https://governance.example.org/permits/permit-42/versions/1#images"
-            },
-            {
-              "url": "purpose",
-              "valueUri": "https://governance.example.org/purposes/multimodal-research"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-The clinical List references an R4 DIS Payload Wrapper whose attachment URL retrieves the R5 Patient. The DICOM List returned by its manifest URL has this form. Its entry resolves to a profiled R4 ImagingStudy. The study index enumerates the exact SOP instances to retrieve from the imaging service.
+The `images` manifest is an R4 List. Its entry resolves to the profiled ImagingStudy that enumerates the exact SOP instances.
 
 ```json
 {
@@ -321,8 +180,6 @@ The clinical List references an R4 DIS Payload Wrapper whose attachment URL retr
 ```
 
 The Manager validates both assignments against the permit. It dispatches the FHIR and DICOM work with separate execution plans and correlates the results using `clinical` and `images`. Once both sets pass validation, the job response has one `payloadResult` group for each of those identifiers.
-
-<a name="offline-feasibility-check"> </a>
 
 ### Offline Feasibility Check
 

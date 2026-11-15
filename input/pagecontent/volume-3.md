@@ -2,13 +2,13 @@ Volume 3 defines the DIS content artifacts, their carriers, and their validation
 
 The approved data request identifies the policy and covered inputs. The De-ID Manager compiles the policy for the declared payload binding and release. The De-Identifier applies the plan to the assigned content and returns validated output and evidence. The Integrated actor performs those functions locally when it claims standalone conformance.
 
-<a name="markdown-toc"> </a>
+<div id="markdown-toc"> </div>
 
 | Content specification | Bindings and related content | Worked example |
 |---|---|---|
 | [Data Request Authorization](volume-3-authorization.html#data-request-authorization) | [Authorization Contract](StructureDefinition-DIS-DataRequestAuthorizationContract.html) and [ODRL Agreement](odrl-content.html#odrl-authorization) | [UC-2 decoded Agreement](examples-odrl.html#decoded-authorization-example) |
 | [De-Identification Policy](volume-3-policy.html#de-identification-policy) | [Policy Contract](StructureDefinition-DIS-Policy.html) and [ODRL Policy Set](odrl-content.html#de-identification-policy-set)<br />[Personal Data](volume-3-policy.html#personal-data) and [transformation actions](volume-3-policy.html#transformation-actions) | [UC-2 decoded Policy Set](examples-odrl.html#decoded-policy-example) |
-| [De-Identification Execution Plan](volume-3-execution-plan.html#execution-plan-content) | [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) and [ODRL Execution Plan Set](odrl-content.html#execution-plan-set)<br />[FHIR R4 DPV mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping) ([revision 2 JSON-LD](bindings/dis-fhir-r4-dpv-mapping-2.jsonld), [revision 2 CSV](bindings/dis-fhir-r4-dpv-mapping-2.csv)) | [UC-2 decoded Execution Plan](examples-odrl.html#decoded-plan-example) |
+| [De-Identification Execution Plan](volume-3-execution-plan.html#execution-plan-content) | [Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) and [ODRL Execution Plan Set](odrl-content.html#execution-plan-set)<br />[FHIR R4 DPV mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping) and [FHIR R5 DPV mapping](volume-3-execution-plan.html#fhir-r5-dpv-mapping) | [UC-2 decoded Execution Plan](examples-odrl.html#decoded-plan-example) |
 | [Payload Delivery](volume-3-payload-bindings.html#payload-delivery) | [FHIR payload delivery](volume-3-payload-bindings.html#fhir-payload-binding), [input manifest](StructureDefinition-DIS-ResourceManifest.html), and [result package](StructureDefinition-DIS-ResultPackage.html)<br />[Proposed DICOM and CDA delivery (informative)](volume-3-payload-bindings.html#3pxx33-proposed-dicom-and-cda-bindings-informative) | [UC-2 mixed-release submission](examples-grouped-fhir-job.html#grouped-fhir-submission) |
 | [De-Identification Evidence](volume-3-evidence.html#evidence-baseline) | [DIS Evidence Provenance](StructureDefinition-DIS-Evidence.html) and [Staged Release Evidence](StructureDefinition-DIS-StagedReleaseEvidence.html) | [UC-3 pseudonymization evidence](Provenance-dis-evidence-uc3-001.html) |
 | [Protected Lookup Tables](volume-3-lookup-tables.html#protected-lookup-tables) | [Lookup Table DocumentReference](StructureDefinition-DIS-LookupTable.html) and [JSON Schema](schemas/dis-lookup-table.schema.json) | [Worked mapping examples](volume-3-lookup-tables.html#lookup-table-examples) |
@@ -17,8 +17,8 @@ The approved data request identifies the policy and covered inputs. The De-ID Ma
 
 The [normative DIS ODRL content binding](odrl-content.html) defines the decoded Agreement and Sets.
 
-<a name="earlier-volume-3-section-links"> </a>
-<a name="markdown-toc-earlier-volume-3-section-links"> </a>
+<div id="earlier-volume-3-section-links"> </div>
+<div id="markdown-toc-earlier-volume-3-section-links"> </div>
 
 <details markdown="1">
 <summary>Earlier section links and published mapping rule references</summary>
@@ -29,7 +29,7 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="fhir-r4-dpv-mapping"> </a><a name="3pxx4217-fhir-r4-dpv-category-mapping"> </a><a name="markdown-toc-3pxx4217-fhir-r4-dpv-category-mapping"> </a><a href="volume-3-execution-plan.html#fhir-r4-dpv-mapping">FHIR R4 DPV Category Mapping</a></li>
 </ul>
 
-<a name="earlier-links-for-data-request-authorization"> </a>
+<div id="earlier-links-for-data-request-authorization"> </div>
 <p><strong>Earlier links for Data Request Authorization</strong></p>
 
 <ul>
@@ -39,7 +39,7 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="job-result-recipient"> </a><a name="result-recipient-eligibility"> </a><a name="3pxx13-result-recipient-eligibility-and-release"> </a><a href="volume-3-authorization.html#3pxx13-result-recipient-eligibility-and-release">3:PXX.1.3 Result Recipient Eligibility and Release</a></li>
 </ul>
 
-<a name="earlier-links-for-de-identification-policy"> </a>
+<div id="earlier-links-for-de-identification-policy"> </div>
 <p><strong>Earlier links for De-Identification Policy</strong></p>
 
 <ul>
@@ -71,7 +71,7 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="3pxx25-policy-lifecycle"> </a><a name="3pxx15-policy-lifecycle"> </a><a name="3pxx16-policy-lifecycle"> </a><a href="volume-3-policy.html#3pxx25-policy-lifecycle">3:PXX.2.6 Policy Lifecycle</a></li>
 </ul>
 
-<a name="earlier-links-for-de-identification-execution-plan"> </a>
+<div id="earlier-links-for-de-identification-execution-plan"> </div>
 <p><strong>Earlier links for De-Identification Execution Plan</strong></p>
 
 <ul>
@@ -80,13 +80,13 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="3pxx141-library-resource-structure"> </a><a name="3pxx211-execution-plan-contract-structure"> </a><a name="3pxx311-execution-plan-contract-structure"> </a><a href="volume-3-execution-plan.html#3pxx311-execution-plan-contract-structure">3:PXX.3.1.1 Execution Plan Contract Structure</a></li>
 <li><a name="execution-plan-source-policy"> </a><a href="volume-3-execution-plan.html#execution-plan-source-policy">3:PXX.3.1.1 Execution Plan Contract Structure</a></li>
 <li><a name="policy-compilation"> </a><a name="3pxx24-policy-compilation"> </a><a name="3pxx14-policy-compilation"> </a><a name="3pxx15-policy-compilation"> </a><a name="3pxx32-policy-compilation"> </a><a href="volume-3-execution-plan.html#3pxx32-policy-compilation">3:PXX.3.2 Policy Compilation</a></li>
-<li><a name="3pxx241-semantic-level-compilation"> </a><a name="3pxx141-semantic-level-compilation"> </a><a name="3pxx242-syntax-level-validation"> </a><a name="3pxx142-syntax-level-validation"> </a><a name="3pxx152-syntax-level-validation"> </a><a name="3pxx151-semantic-level-compilation"> </a><a name="3pxx151-resolve-semantic-groups-or-validate-concrete-selectors"> </a><a name="3pxx321-resolve-semantic-groups-or-validate-concrete-selectors"> </a><a name="3pxx321-resolve-policy-targets"> </a><a href="volume-3-execution-plan.html#3pxx321-resolve-policy-targets">3:PXX.3.2.1 Resolve Policy Targets</a></li>
+<li><a name="3pxx321-resolve-policy-targets"> </a><a href="volume-3-execution-plan.html#3pxx321-resolve-policy-targets">3:PXX.3.2.1 Resolve Policy Targets</a></li>
 <li><a name="execution-plan-assembly"> </a><a name="3pxx152-assemble-the-plan-and-check-capabilities"> </a><a name="3pxx322-assemble-the-plan-and-check-capabilities"> </a><a href="volume-3-execution-plan.html#3pxx322-assemble-the-plan-and-check-capabilities">3:PXX.3.2.2 Assemble the Plan and Check Capabilities</a></li>
 <li><a name="3pxx142-execution-plan-json-structure"> </a><a name="3pxx212-execution-plan-json-structure"> </a><a name="3pxx212-execution-plan-json-structure-and-rule-evaluation"> </a><a name="3pxx212-execution-plan-structure-and-rule-evaluation"> </a><a name="3pxx33-execution-plan-structure-and-rule-evaluation"> </a><a href="volume-3-execution-plan.html#3pxx33-execution-plan-structure-and-rule-evaluation">3:PXX.3.3 Execution Plan Structure and Rule Evaluation</a></li>
 <li><a name="3pxx143-execution-plan-example"> </a><a name="3pxx213-execution-plan-example"> </a><a name="3pxx34-execution-plan-examples"> </a><a href="volume-3-execution-plan.html#3pxx34-execution-plan-examples">3:PXX.3.4 Execution Plan Examples</a></li>
 </ul>
 
-<a name="earlier-links-for-payload-bindings"> </a>
+<div id="earlier-links-for-payload-bindings"> </div>
 <p><strong>Earlier links for Payload Delivery</strong></p>
 
 <ul>
@@ -102,7 +102,7 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="mixed-payload-walkthrough"> </a><a href="volume-3-payload-bindings.html#mixed-payload-walkthrough">3:PXX.4.3 Proposed DICOM and CDA Delivery (Informative)</a></li>
 </ul>
 
-<a name="earlier-links-for-fhir-addressing-and-processing"> </a>
+<div id="earlier-links-for-fhir-addressing-and-processing"> </div>
 <p><strong>Earlier links for FHIR Addressing and Processing</strong></p>
 
 <ul>
@@ -110,15 +110,12 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="3pxx111-version-identification"> </a><a name="3pxx3211-version-identification"> </a><a name="3pxx3211-fhir-release-and-capability-matching"> </a><a name="3pxx4211-fhir-release-identification"> </a><a href="volume-3-payload-bindings.html#3pxx421-fhir-release-identification">3:PXX.4.2.1 FHIR Release Identification</a></li>
 <li><a name="fhir-processing-capabilities"> </a><a name="3pxx4212-fhir-processing-capabilities"> </a><a href="volume-3-fhir-addressing.html#3pxx4212-fhir-processing-capabilities">3:PXX.3.5.1 FHIR Processing Capabilities</a></li>
 <li><a name="3pxx121-element-addressing"> </a><a name="3pxx113-version-neutral-element-addressing"> </a><a name="3pxx3213-version-neutral-element-addressing"> </a><a name="3pxx3221-element-addressing"> </a><a name="fhirpath-element-addressing"> </a><a name="3pxx3212-fhirpath-element-addressing"> </a><a name="3pxx4213-fhirpath-element-addressing"> </a><a href="volume-3-fhir-addressing.html#3pxx4213-fhirpath-element-addressing">3:PXX.3.5.2 FHIRPath Element Addressing</a></li>
-<li><a name="3pxx122-semantic-groups"> </a><a name="3pxx3222-semantic-groups"> </a><a name="3pxx3213-semantic-group-bindings"> </a><a name="3pxx4214-semantic-group-bindings"> </a><a href="volume-3-fhir-addressing.html#3pxx4214-semantic-group-bindings">3:PXX.3.5.3 Semantic Group Bindings</a></li>
-<li><a name="tPXX.3.2.2-1"> </a><a href="volume-3-fhir-addressing.html#tPXX.3.2.2-1">3:PXX.3.5.3 Semantic Group Bindings</a></li>
-<li><a name="tPXX.3.2.1-1"> </a><a href="volume-3-fhir-addressing.html#tPXX.3.2.1-1">Table 3:PXX.3.5-1: DIS FHIR Semantic Group Binding</a></li>
-<li><a name="3pxx123-resource-traversal"> </a><a name="3pxx3223-resource-traversal"> </a><a name="3pxx3214-resource-traversal"> </a><a name="3pxx4215-resource-traversal"> </a><a href="volume-3-fhir-addressing.html#3pxx4215-resource-traversal">3:PXX.3.5.4 Resource Traversal</a></li>
-<li><a name="3pxx115-validation-across-versions"> </a><a name="3pxx3215-validation-across-versions"> </a><a name="3pxx3215-output-validation-in-the-declared-release"> </a><a name="3pxx4216-output-validation-in-the-declared-release"> </a><a href="volume-3-fhir-addressing.html#3pxx4216-output-validation-in-the-declared-release">3:PXX.3.5.5 Output Validation in the Declared Release</a></li>
+<li><a name="3pxx123-resource-traversal"> </a><a name="3pxx3223-resource-traversal"> </a><a name="3pxx3214-resource-traversal"> </a><a name="3pxx4215-resource-traversal"> </a><a href="volume-3-fhir-addressing.html#3pxx4215-resource-traversal">3:PXX.3.5.3 Resource Traversal</a></li>
+<li><a name="3pxx115-validation-across-versions"> </a><a name="3pxx3215-validation-across-versions"> </a><a name="3pxx3215-output-validation-in-the-declared-release"> </a><a name="3pxx4216-output-validation-in-the-declared-release"> </a><a href="volume-3-fhir-addressing.html#3pxx4216-output-validation-in-the-declared-release">3:PXX.3.5.4 Output Validation in the Declared Release</a></li>
 <li><a name="3pxx22-fhir-reference-integrity"> </a><a name="fhir-reference-integrity"> </a><a href="volume-3-fhir-addressing.html#3pxx22-fhir-reference-integrity">FHIR reference integrity</a></li>
 </ul>
 
-<a name="earlier-links-for-fhir-input-and-result-delivery"> </a>
+<div id="earlier-links-for-fhir-input-and-result-delivery"> </div>
 <p><strong>Earlier links for FHIR Input and Result Delivery</strong></p>
 
 <ul>
@@ -141,7 +138,7 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="bulk-result-download-authorization"> </a><a href="volume-3-fhir-delivery.html#bulk-result-download-authorization">Bulk job result downloads</a></li>
 </ul>
 
-<a name="earlier-links-for-de-identification-evidence"> </a>
+<div id="earlier-links-for-de-identification-evidence"> </div>
 <p><strong>Earlier links for De-Identification Evidence</strong></p>
 
 <ul>
@@ -157,7 +154,7 @@ The [normative DIS ODRL content binding](odrl-content.html) defines the decoded 
 <li><a name="staged-release-evidence"> </a><a name="3pxx46-staged-release-evidence"> </a><a name="3pxx56-staged-release-evidence"> </a><a href="volume-3-evidence.html#3pxx56-staged-release-evidence">3:PXX.5.6 Staged Release Evidence</a></li>
 </ul>
 
-<a name="earlier-links-for-protected-lookup-tables"> </a>
+<div id="earlier-links-for-protected-lookup-tables"> </div>
 <p><strong>Earlier links for Protected Lookup Tables</strong></p>
 
 <ul>

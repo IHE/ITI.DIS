@@ -1,16 +1,12 @@
-<a name="evidence-baseline"> </a>
-
-<a name="3pxx15-evidence-baseline"> </a>
-
-<a name="3pxx4-de-identification-evidence"> </a>
-
-<a name="3pxx5-de-identification-evidence"> </a>
+<div id="evidence-baseline"> </div>
+<div id="3pxx15-evidence-baseline"> </div>
+<div id="3pxx4-de-identification-evidence"> </div>
+<div id="3pxx5-de-identification-evidence"> </div>
 
 This section defines the minimum evidence elements that every completed de-identification task SHALL produce and specifies how they map to HL7 FHIR R4 Provenance resources.
 
-<a name="3pxx151-minimum-evidence-elements"> </a>
-
-<a name="3pxx41-minimum-evidence-elements"> </a>
+<div id="3pxx151-minimum-evidence-elements"> </div>
+<div id="3pxx41-minimum-evidence-elements"> </div>
 
 ## 3:PXX.5.1 Minimum Evidence Elements
 
@@ -33,11 +29,9 @@ Every completed de-identification task produces an HL7 FHIR R4 Provenance resour
 
 Elements 2, 6, 7, 8, and 9 use DIS-defined extensions on the HL7 FHIR R4 Provenance resource. The extension URLs follow the pattern `https://profiles.ihe.net/ITI/DIS/StructureDefinition/<extension-name>`.
 
-<a name="3pxx152-provenance-resource-structure"> </a>
-
-<a name="3pxx42-provenance-resource-structure"> </a>
-
-<a name="3pxx42-r4-provenance-resource-structure"> </a>
+<div id="3pxx152-provenance-resource-structure"> </div>
+<div id="3pxx42-provenance-resource-structure"> </div>
+<div id="3pxx42-r4-provenance-resource-structure"> </div>
 
 ## 3:PXX.5.2 R4 Provenance Resource Structure
 
@@ -57,11 +51,9 @@ Table 3:PXX.5-2 lists the required Provenance elements beyond the baseline.
 
 The `Provenance.agent` entry for the De-Identifier SHALL use `Provenance.agent.type` with coding `http://terminology.hl7.org/CodeSystem/provenance-participant-type|performer`. The `Provenance.agent.who` SHALL reference or identify the De-Identifier.
 
-<a name="3pxx114-evidence-representation-across-versions"> </a>
-
-<a name="3pxx3214-evidence-representation-across-versions"> </a>
-
-<a name="3pxx43-identifying-results-across-fhir-releases"> </a>
+<div id="3pxx114-evidence-representation-across-versions"> </div>
+<div id="3pxx3214-evidence-representation-across-versions"> </div>
+<div id="3pxx43-identifying-results-across-fhir-releases"> </div>
 
 ## 3:PXX.5.3 Identifying Results Across FHIR Releases
 
@@ -76,11 +68,9 @@ De-identification evidence is represented as HL7 FHIR R4 `Provenance` resources,
 
 The target release extension on a direct hosted R5 reference governs retrieval of that target. The Provenance resource itself remains R4.
 
-<a name="3pxx153-transformation-summary"> </a>
-
-<a name="3pxx43-transformation-summary"> </a>
-
-<a name="3pxx44-transformation-summary"> </a>
+<div id="3pxx153-transformation-summary"> </div>
+<div id="3pxx43-transformation-summary"> </div>
+<div id="3pxx44-transformation-summary"> </div>
 
 ## 3:PXX.5.4 Transformation Summary
 
@@ -100,19 +90,16 @@ Table 3:PXX.5-3 lists the elements of each transformation summary entry.
 
 The transformation summary enables audit and review of the specific actions applied to each element. It does not contain the original or transformed values. Original values SHALL NOT appear in evidence, including in selector literals. If the producer cannot express a summary entry without exposing source values or protected material, it SHALL omit that entry from recipient-facing evidence.
 
-<a name="3pxx154-evidence-example"> </a>
-
-<a name="3pxx44-evidence-example"> </a>
-
-<a name="3pxx45-evidence-example"> </a>
+<div id="3pxx154-evidence-example"> </div>
+<div id="3pxx44-evidence-example"> </div>
+<div id="3pxx45-evidence-example"> </div>
 
 ## 3:PXX.5.5 Evidence Example
 
 The [evidence example](Provenance-dis-evidence-uc3-001.html) illustrates the Provenance produced when a pseudonymization task completes in Use Case 3 (Clinical Pathology Order). It conforms to the [DIS Evidence profile](StructureDefinition-DIS-Evidence.html) and references a synthetic [pseudonymized Patient](Patient-pseudonym-abc123.html).
 
-<a name="staged-release-evidence"> </a>
-
-<a name="3pxx46-staged-release-evidence"> </a>
+<div id="staged-release-evidence"> </div>
+<div id="3pxx46-staged-release-evidence"> </div>
 
 ## 3:PXX.5.6 Staged Release Evidence
 

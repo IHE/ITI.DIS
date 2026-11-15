@@ -28,7 +28,7 @@ Before release, the Manager SHALL retain the protected association of the output
 
 The De-Identifier SHALL NOT return a generated lookup table for identifiers transformed with FF1. Apply the usual generated-table requirements to any separate salted-hash rules requiring authorized reversal. Key bytes and local key handles SHALL stay in the protected deployment and SHALL NOT appear in a plan, result, evidence, log, or error. A De-Identifier's access SHALL permit only the assigned encryption operations. An Integrated actor applies the applicable checks internally.
 
-<a name="ff1-interoperability-vector"> </a>
+<div id="ff1-interoperability-vector"> </div>
 
 ## Ten-Digit Decimal Example and Interoperability Vector
 
