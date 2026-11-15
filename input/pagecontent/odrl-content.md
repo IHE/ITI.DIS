@@ -72,7 +72,7 @@ The De-ID Manager SHALL validate the object when present. The object SHALL conta
 
 Both Sets carry `obligation` as a nonempty array of ODRL Duty rules. Each obligation has a unique absolute IRI `uid`, exactly one `target` and one `action`. An obligation SHALL NOT carry its own assigner or assignee. The eligible role performs each obligation. The Manager compiles the Policy obligations, and the De-Identifier or Integrated actor applies the compiled Plan obligations to its assigned inputs.
 
-The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI and one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the [concrete FHIRPath selector](volume-3.html#fhirpath-element-addressing) as a string. For a plan, use an assignment-specific manifest IRI as the source and the same concrete selector operand for the binding. Every obligation in a plan SHALL use the same source IRI for the manifest in the de-identification task. For inline manifests the Manager SHALL mint an assignment-specific absolute IRI and use it consistently across all targets in the plan. For referenced manifests it SHALL use the assigned manifest URL. The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
+The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI and one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the [concrete FHIRPath selector](volume-3.html#fhirpath-element-addressing) as a string. For a plan, use the same concrete selector operand for the binding. Every obligation in the plan SHALL use the same manifest source IRI. Use the URI derived from the exact inline bytes or the assigned manifest URL, as specified under [assigned input verification](volume-3.html#assigned-input-verification). The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
 
 ### Action parameters
 
@@ -105,6 +105,8 @@ Optional `dis:stages` is an explicit nonempty `@list` in dispatch order. Each en
 ### Execution Plan Set
 
 The plan carries `dis:ruleSetId`, `dis:payloadSet`, `dis:payloadBinding` and `dis:payloadVersion` as strings equal to the corresponding task inputs. It also carries `dis:stageId` as a string exactly when the task has a stage ID. The root `dis:ruleOrder` is a nonempty explicit `@list` of IRI references to the compiled obligations. Each obligation SHALL be listed exactly once and SHALL carry a `dis:sourceRule` IRI reference to the original policy obligation. A source obligation can produce several compiled obligations, for example when a semantic group expands to several paths. The Manager SHALL preserve original order and the binding's expansion order. The De-Identifier SHALL validate the Set, and apply the [execution rules in Volume 3](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation).
+
+When any externally retrieved input relies on digest verification, the Set SHALL include a nonempty `dis:inputDigests` array. Each item has exactly one `dis:inputUrl` as an `{"@id":"..."}` reference to the original assigned HTTPS URL and one `dis:sha256` as a 64-character lowercase hexadecimal string. A URL SHALL occur at most once. Include only URLs required for this assignment and omit the array when there are no externally retrieved inputs with digests. The array has no processing order. Apply the [input verification rules](volume-3.html#assigned-input-verification) to the manifest and to all required external objects reached through it.
 
 ## Examples (Informative)
 
@@ -346,5 +348,36 @@ This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Executi
       }
     ]
   }
+}
+```
+
+<a name="hosted-input-digest-example"> </a>
+
+### Hosted Input Digests Example
+
+This Execution Plan Set fragment binds the manifest and two files in the [synthetic bulk input example](examples-bulk-fhir-cohort.html). Its obligation targets use the manifest URL as `source`.
+
+```json
+{
+  "dis:inputDigests": [
+    {
+      "dis:inputUrl": {
+        "@id": "https://source.example.org/bulk/input-manifest.json"
+      },
+      "dis:sha256": "28173d50a4cf5c753ed8be98700054824dd03c55ce1426a2baaffe99cf7ec315"
+    },
+    {
+      "dis:inputUrl": {
+        "@id": "https://source.example.org/bulk/input-patients-1.ndjson"
+      },
+      "dis:sha256": "1ee32345f27e8e7008ffdedcb7f7e802ecb2069ebe2cd6ff68fdbb2e70603df6"
+    },
+    {
+      "dis:inputUrl": {
+        "@id": "https://source.example.org/bulk/input-patients-2.ndjson"
+      },
+      "dis:sha256": "6d8de3efa2474b4e81609cad605556c5325f0869b2567cba9c49ff7a368c0fbf"
+    }
+  ]
 }
 ```

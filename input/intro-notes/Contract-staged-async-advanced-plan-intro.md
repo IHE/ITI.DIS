@@ -20,7 +20,7 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
       "uid": "https://dis.example.org/plans/staged-async-advanced-plan/versions/1.0#birth-year",
       "target": {
         "@type": "AssetCollection",
-        "source": "https://dis.example.org/manifests/staged-async-advanced-task",
+        "source": "ni:///sha-256;wlqk8TimK8jRiH6jNJM20cK7EZwglJnlPGfC2ydOkLw",
         "refinement": {
           "leftOperand": "dis:fhirPath",
           "operator": "eq",

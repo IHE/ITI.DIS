@@ -375,7 +375,7 @@ The request body SHALL be a FHIR R4 `Task` conforming to the [De-Identification 
 
 | Input code | Cardinality | Value | Description |
 |------------|-------------|-------|-------------|
-| `payload-set` | 1..1 | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | Manifest for the assigned set or subset |
+| `payload-set` | 1..1 | `valueAttachment` with [DIS Payload Set Metadata](StructureDefinition-dis-payload-set.html) on the input | [Verified manifest](volume-3.html#assigned-input-verification) for the assigned set or subset |
 | `execution-plan` | 1..1 | `valueReference` | [DIS Execution Plan Contract](StructureDefinition-DIS-ExecutionPlan.html) for this ruleSet, including the [source policy identity](volume-3.html#execution-plan-source-policy) |
 | `rule-set-id` | 1..1 | `valueString` | RuleSet from the source policy that this assignment executes |
 | `stage-id` | 0..1 | `valueString` | Required when the source policy declares staged execution |
@@ -403,17 +403,19 @@ To request asynchronous task processing when both actors support DIS-ASYNC-TASK,
 **Editorial Note:** The draft [Submit DIS Task OperationDefinition](OperationDefinition-submit-dis-task.html) describes this exchange. Its parameter definitions remain under review alongside the transaction text.
 </div>
 
+<a name="iti-x3-task-validation"> </a>
+
 ##### 2:3.x3.4.1.3 Expected Actions
 
 The De-Identifier SHALL apply the [shared identifier and retry rules](#submission-retries). The following actions apply to a new submission.
 
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
-Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Contract, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL verify that the resolved plan matches the referenced resource revision, that its identifier matches the Set revision `uid`, and that it identifies the authenticated Manager and the assigned De-Identifier. It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan. It SHALL verify that the plan's targets all select within the assigned manifest. It SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the Execution Plan Contract before acceptance or synchronous processing. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
+Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Contract, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL verify that the resolved plan matches the referenced resource revision, that its identifier matches the Set revision `uid`, and that it identifies the authenticated Manager and the assigned De-Identifier. It SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the Execution Plan Contract. It SHALL verify that the plan's source IRI binds to the submitted manifest under the [assigned input verification rules](volume-3.html#assigned-input-verification). It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan, including a manifest identity mismatch. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
 
 Before accepting the task, the De-Identifier SHALL verify the task's reversibility mode separately from its processing combination, required actions and parameters under the [FHIR processing capability rules](volume-3.html#fhir-processing-capabilities). For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an otherwise valid assignment that requires an unsupported mode, combination, action or parameter with HTTP 422 and an R4 OperationOutcome.
 
-The De-Identifier SHALL retrieve the assigned processing targets using the [retrieval authorization rules](volume-3.html#obtaining-processing-targets) and verify the declared payload release before transformation.
+The De-Identifier SHALL retrieve the assigned processing targets using the [retrieval authorization rules](volume-3.html#obtaining-processing-targets). It SHALL verify the [assigned input content](volume-3.html#assigned-input-verification) and the declared payload release before transformation. It SHALL apply the plan's selectors only within the verified assigned manifest.
 
 The De-Identifier SHALL apply supplied patient mappings or generate patient pseudonyms according to the execution plan. For `encrypt`, it SHALL apply the [AES-FF1 binding](draft-encryption-based-pseudonymization.html) and SHALL NOT return a generated lookup table for those identifiers. It SHALL obtain and validate the deployment-provisioned salt for each salted hash rule before transformation. A missing or invalid salt SHALL fail the task without partial output.
 
@@ -435,7 +437,7 @@ In asynchronous mode (DIS-ASYNC-TASK), the De-Identifier SHALL return a task han
 
 ##### 2:3.x3.4.2.1 Trigger Events
 
-For synchronous processing, the De-Identifier sends the response when the result or failure is determined. Before accepting an asynchronous task, it SHALL validate the Task body, verify the caller's authority to submit the assignment, and check that the exchange mode, payload binding, and declared version are supported. It returns HTTP 202 on acceptance. Checks that require obtaining the execution plan or payload may continue after acceptance. It reports failures detected after acceptance through ITI-x7.
+For synchronous processing, the De-Identifier sends the response when the result or failure is determined. Before accepting an asynchronous task, it SHALL validate the Task body, verify the caller's authority to submit the assignment, and check that the exchange mode, payload binding, and declared version are supported. It returns HTTP 202 on acceptance. The De-Identifier SHALL complete the plan validation and submitted manifest identity checks in the [expected actions](#iti-x3-task-validation) before acceptance. Retrieval and verification of hosted input content may continue after acceptance. The De-Identifier reports failures detected after acceptance through ITI-x7.
 
 ##### 2:3.x3.4.2.2 Message Semantics
 

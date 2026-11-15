@@ -20,7 +20,7 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
       "uid": "https://dis.example.org/plans/staged-async-preliminary-plan/versions/1.0#hash-identifier",
       "target": {
         "@type": "AssetCollection",
-        "source": "https://dis.example.org/manifests/staged-async-preliminary-task",
+        "source": "ni:///sha-256;yOA2T_r0Tn60JVdmwauHMMSlgWQ-Lcb67t8-5v5-z20",
         "refinement": {
           "leftOperand": "dis:fhirPath",
           "operator": "eq",
@@ -73,7 +73,7 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
       "uid": "https://dis.example.org/plans/staged-async-preliminary-plan/versions/1.0#remove-name",
       "target": {
         "@type": "AssetCollection",
-        "source": "https://dis.example.org/manifests/staged-async-preliminary-task",
+        "source": "ni:///sha-256;yOA2T_r0Tn60JVdmwauHMMSlgWQ-Lcb67t8-5v5-z20",
         "refinement": {
           "leftOperand": "dis:fhirPath",
           "operator": "eq",
