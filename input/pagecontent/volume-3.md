@@ -574,7 +574,7 @@ The FHIR payload binding (`DIS-FHIR-Payload`) defines how actors identify, carry
 
 DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports HL7 FHIR R4 and R5 processing payloads over the same R4 protocol binding through version identification, version-safe packaging, and version-neutral element addressing.
 
-The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing language. The [common delivery contract](#payload-set-delivery) defines the manifest and package used in each exchange.
+The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing language. The [FHIR R4 DPV category mapping](#fhir-r4-dpv-mapping) defines the selectors for DPV–ODRL policies. The [common delivery contract](#payload-set-delivery) defines the manifest and package used in each exchange.
 
 <a name="3pxx11-cross-version-payload-support"> </a>
 
@@ -745,6 +745,51 @@ Patient pseudonymization transforms the business identifier pair in `Patient.ide
 <a name="3pxx16-obtaining-processing-targets"> </a>
 
 <a name="3pxx323-obtaining-processing-targets"> </a>
+
+<a name="fhir-r4-dpv-mapping"> </a>
+
+##### 3:PXX.4.2.1.7 FHIR R4 DPV Category Mapping
+
+For the [DPV–ODRL policy profile](draft-dpv-odrl-policy.html), an implementation claiming FHIR R4 mapping support SHALL use the [normative FHIR R4 mapping revision 1 (JSON-LD)](bindings/dis-fhir-r4-dpv-mapping-1.jsonld). The [full CSV](bindings/dis-fhir-r4-dpv-mapping-1.csv) and the sample below are generated from that artifact and identify the same revision. The [resource review inventory (CSV)](bindings/dis-fhir-r4-dpv-resource-review-1.csv) records the 146 concrete R4 resources and the two abstract base definitions examined for this mapping.
+
+<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE -->
+
+| Order | DPV category | Person role | FHIR R4 target |
+| --- | --- | --- | --- |
+| 1 | `pd:Name` | `disdpv:patient` | `Patient.name` |
+| 3 | `pd:Name` | `disdpv:care-provider` | `Practitioner.name` |
+| 5 | `pd:BirthDate` | `disdpv:patient` | `Patient.birthDate` |
+| 18 | `pd:Name` | `disdpv:contact-person` | `ContactDetail.name` |
+{: .grid}
+
+<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE -->
+
+The JSON-LD document's absolute `@id` is the mapping revision used in the compiled plan. Its context is embedded. The document identifies the payload binding, FHIR release, exact FHIR package, manifest format, DPV edition, and coverage rule. Each entry supplies a category IRI, role IRI, location IRI, unique positive integer expansion order, target path, selector language, role rule IRI, and expansion rule IRI. The Manager SHALL recognize the pinned mapping revision and implement its referenced rules before compilation. Changes to the mapping or its referenced rule semantics require a new revision.
+
+Read the entries by increasing `order`. Match `category` and `location` by exact IRI equality. A request for a specific role selects entries for that role and applies the entry's `roleRule`. A request for `disdpv:all-person-roles` selects every entry for the category and location and includes each instance irrespective of role. In particular, it uses `Practitioner.name` for both care-team members and other Practitioners in scope. A tuple that has no mapping is unsupported. Apply the mapping entry's `expansionRule` to produce resource-local FHIRPath selectors for the verified assignment. Preserve the policy's source rule order and the mapping's expansion order within each rule. Deduplicate identical selectors produced for the same source obligation while preserving first occurrence.
+
+<a name="fhir-r4-dpv-coverage-1"> </a>
+
+**Coverage rule, revision 1.** This mapping covers the declared structured occurrences of `pd:Name`, `pd:Identifier`, and `pd:BirthDate` in a versioned R4 `dis-resource-list` assignment. Verify the resource type, release, and version for each selected resource. Logical IDs SHALL be unique within each resource type in the assignment. The review uses the base definitions in `hl7.fhir.r4.core#4.0.1` and evaluates inherited declarations at their defining type. Reusable datatype entries appear once in the mapping. A generated execution plan still names concrete use sites as required by the assignment.
+
+The mapping covers whole `HumanName` and `Identifier` occurrences where those types are selected. It covers a declared date of birth on `FamilyMemberHistory.born[x]` through `ofType(date)`. A birth period or textual estimate, references and their displays or logical identifiers, narrative, arbitrary string values, generic choice values, contained or embedded resources, and extensions require separate coverage when in scope. Business identifiers for encounters, studies, plans, and other records are distinct from identifiers assigned to people. `Resource.id` is a logical record key. The review inventory counts each declaration at its defining resource and lists other name, identifier, and birth-date candidates separately from the mapped paths. A candidate may describe a non-person entity or need context that the base definition does not provide. The Manager SHALL fail compilation if the authorization scope requires coverage outside the mapping. An absent optional mapped element contributes zero matches.
+
+<a name="fhir-r4-dpv-declared-role-1"> </a>
+
+**Declared role rule, revision 1.** The path definition establishes the role. For example, `Coverage.subscriberId` identifies the subscriber, and `FamilyMemberHistory.name` names the relative. A `Person` record describes the person in that record. It does not supply the patient or care-provider role for other resources linked to the same person.
+
+<a name="fhir-r4-dpv-care-team-role-1"> </a>
+
+**Care-team role rule, revision 1.** For a role-specific care-provider rule, verify that the approved scope identifies the active CareTeam records that collectively provide the complete in-scope care roster. Each applicable record links its `subject` to an assigned Patient and its clinician `participant.member` directly to an assigned Practitioner. Resolve both links against the verified immutable manifest entries. Membership in any of these care teams qualifies the Practitioner's mapped occurrences in the care-provider role. An incomplete roster, ambiguous identity, or unresolved relevant reference SHALL fail compilation when it could change the winning rule or action for a selected occurrence. A name on a Patient resource remains in the patient role even when a Practitioner resource describes the same person.
+
+<a name="fhir-r4-dpv-local-path-1"> </a>
+
+**Resource-local expansion rule, revision 1.** Emit the entry's FHIRPath when its root resource type is assigned. If the care-team role rule applies, qualify the resource root by each matching Practitioner ID in manifest order, as in `Practitioner.where(id = 'provider-example').name`. A complete roster with no qualifying Practitioner yields zero matches. If a supported policy rule generates no selector for an assignment, it contributes no compiled obligation. If this leaves the entire rule set empty, compile the first applicable resource-rooted entry in mapping order with `where(false)` on its resource root. For a rule set with only the reusable datatype entry, use `ActivityDefinition.where(false).contact.name` as the zero-match selector. This preserves the nonempty plan structure and makes no change to the assigned content.
+
+<a name="fhir-r4-dpv-contact-detail-1"> </a>
+
+**ContactDetail expansion rule, revision 1.** For each assigned resource type, read its effective R4 element definitions and find the local paths whose only declared type is `ContactDetail`. Include the paths inherited by that resource once. Use the resource's concrete type as the root, append `.name`, and emit the resulting FHIRPath selectors in lexicographic order. For example, `Organization.contact.name` comes from its own declared entry, while `ActivityDefinition.contact.name` expands from the shared `ContactDetail.name` entry. Generic choice elements and locations within embedded resources remain outside this rule.
+
 
 <a name="3pxx322-input-and-result-delivery"> </a>
 

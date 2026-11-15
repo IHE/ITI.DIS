@@ -40,3 +40,24 @@ disdpv:all-person-roles a skos:Concept ; skos:prefLabel "All person roles"@en .
 disdpv:structured a skos:Concept ; skos:prefLabel "Structured elements"@en .
 disdpv:narrative a skos:Concept ; skos:prefLabel "Narrative or free text"@en .
 disdpv:pixel a skos:Concept ; skos:prefLabel "Image pixels"@en .
+
+disdpv:related-person a skos:Concept ; skos:prefLabel "Related person"@en .
+disdpv:person-record a skos:Concept ; skos:prefLabel "Person described by a person record"@en .
+disdpv:family-member a skos:Concept ; skos:prefLabel "Family member"@en .
+disdpv:contact-person a skos:Concept ; skos:prefLabel "Named contact"@en .
+disdpv:subscriber a skos:Concept ; skos:prefLabel "Insurance subscriber"@en .
+disdpv:research-participant a skos:Concept ; skos:prefLabel "Research participant"@en .
+
+disdpv:PayloadMapping a rdfs:Class ; rdfs:label "Versioned payload mapping"@en .
+disdpv:MappingEntry a rdfs:Class ; rdfs:label "Payload mapping entry"@en .
+
+disdpv:mappingEntry a rdf:Property ; rdfs:label "Mapping entry"@en .
+disdpv:dpvEdition a rdf:Property ; rdfs:label "Pinned DPV edition"@en .
+disdpv:fhirPackage a rdf:Property ; rdfs:label "Pinned FHIR package"@en .
+disdpv:manifestFormat a rdf:Property ; rdfs:label "Applicable DIS manifest format"@en .
+disdpv:coverageRule a rdf:Property ; rdfs:label "Versioned coverage rule"@en .
+disdpv:expansionOrder a rdf:Property ; rdfs:label "Entry expansion order"@en .
+disdpv:targetPath a rdf:Property ; rdfs:label "Path to the target element"@en .
+disdpv:selectorLanguage a rdf:Property ; rdfs:label "Selector language"@en .
+disdpv:roleRule a rdf:Property ; rdfs:label "Versioned role determination rule"@en .
+disdpv:expansionRule a rdf:Property ; rdfs:label "Versioned selector expansion rule"@en .

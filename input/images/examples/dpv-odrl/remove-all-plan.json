@@ -1,18 +1,18 @@
 {
   "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
-  "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.0",
+  "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.1",
   "profile": "disdpv:ExecutionPlan",
   "dis:ruleSetId": "structured-names",
   "dis:payloadBinding": "DIS-FHIR-Payload",
   "dis:payloadVersion": "R4",
   "dis:payloadSet": "name-pilot",
   "disdpv:mappingRevision": {
-    "@id": "https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1"
+    "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-1.jsonld"
   },
   "obligation": [
     {
-      "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.0#remove-1",
+      "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.1#remove-1",
       "target": {
         "@type": "AssetCollection",
         "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
@@ -28,7 +28,7 @@
       }
     },
     {
-      "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.0#remove-2",
+      "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.1#remove-2",
       "target": {
         "@type": "AssetCollection",
         "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
@@ -44,7 +44,7 @@
       }
     },
     {
-      "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.0#remove-3",
+      "uid": "https://manager.example.org/fhir/plans/remove-all/versions/1.1#remove-3",
       "target": {
         "@type": "AssetCollection",
         "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
@@ -63,13 +63,13 @@
   "dis:ruleOrder": {
     "@list": [
       {
-        "@id": "https://manager.example.org/fhir/plans/remove-all/versions/1.0#remove-1"
+        "@id": "https://manager.example.org/fhir/plans/remove-all/versions/1.1#remove-1"
       },
       {
-        "@id": "https://manager.example.org/fhir/plans/remove-all/versions/1.0#remove-2"
+        "@id": "https://manager.example.org/fhir/plans/remove-all/versions/1.1#remove-2"
       },
       {
-        "@id": "https://manager.example.org/fhir/plans/remove-all/versions/1.0#remove-3"
+        "@id": "https://manager.example.org/fhir/plans/remove-all/versions/1.1#remove-3"
       }
     ]
   }
