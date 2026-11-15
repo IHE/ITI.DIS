@@ -242,8 +242,6 @@ Before accepting an asynchronous job or beginning synchronous processing, the Ma
 
 The Manager SHALL obtain the Policy Contract through [inline delivery or Manager resolution](volume-3.html#3pxx14-policy-delivery-and-validation). Before acceptance or synchronous execution, the Manager SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the authorization and policy Contracts.
 
-The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html#compilation-and-evidence) describes proposed admission and compilation checks for its policy profile.
-
 The Manager SHALL perform three-point policy content validation:
 
 1. **Structure** — verify the Contract and decoded ODRL Set against the applicable DIS profiles.
@@ -264,7 +262,7 @@ The Manager SHALL verify that the same data request authorization covers every s
 
 The Manager SHALL verify that the data request authorization covers the identified processing target set, including the resources or files listed in a manifest. It SHALL check that references are resolvable and use the [input retrieval and failure rules](volume-3.html#referenced-input-authorization).
 
-When the policy is authored at the Semantic-Level (using semantic group references), the Manager SHALL compile the validated policy into a payload-specific execution plan for the applicable payload binding before dispatching tasks. When the policy is authored at the Syntax-Level (using concrete element paths for a specific payload family), the Manager SHALL validate that all rule targets are valid paths for the declared payload family and version, then package the rules as an execution plan for dispatch.
+For a DPV–ODRL policy, the Manager SHALL apply the [DPV–ODRL compilation requirements](draft-dpv-odrl-policy.html#compilation-and-evidence) to the verified assignment before dispatch. When the policy is authored at the Semantic-Level (using semantic group references), the Manager SHALL compile the validated policy into a payload-specific execution plan for the applicable payload binding before dispatching tasks. When the policy is authored at the Syntax-Level (using concrete element paths for a specific payload family), the Manager SHALL validate that all rule targets are valid paths for the declared payload family and version, then package the rules as an execution plan for dispatch.
 
 The Manager SHALL verify that the policy's linkage scope is authorized for the job and resolve it before dispatch. For a job-level scope it SHALL bind a unique scope identifier to the job and reuse it on retries. A supplied job-level table may provide that identifier when it can be bound to this job only. The Manager SHALL copy the resolved scope into each salted hash or encryption rule and check a supplied table against its authorized scope.
 
@@ -442,7 +440,7 @@ Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL
 
 Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Contract, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL verify that the resolved plan matches the referenced resource revision, that its identifier matches the Set revision `uid`, and that it identifies the authenticated Manager and the assigned De-Identifier. It SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the Execution Plan Contract. It SHALL verify that the plan's source IRI binds to the submitted manifest under the [assigned input verification rules](volume-3.html#assigned-input-verification). It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan, including a manifest identity mismatch. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
 
-The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html#compilation-and-evidence) describes proposed validation of its compiled plan and mapping revision.
+For a DPV–ODRL execution plan, the De-Identifier SHALL verify that the [pinned mapping revision](draft-dpv-odrl-policy.html#compilation-and-evidence) is recognized and applies to the assigned payload binding and release before processing.
 
 Before accepting the task, the De-Identifier SHALL verify the task's reversibility mode separately from its processing combination, required actions and parameters under the [FHIR processing capability rules](volume-3.html#fhir-processing-capabilities). For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an otherwise valid assignment that requires an unsupported mode, combination, action or parameter with HTTP 422 and an R4 OperationOutcome.
 

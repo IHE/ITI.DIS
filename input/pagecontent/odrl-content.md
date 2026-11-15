@@ -1,21 +1,21 @@
 This page is the normative Volume 3 binding for the decoded DIS Agreement, Policy Set, and Execution Plan Set. The [Volume 3 overview](volume-3.html) links to the FHIR Contracts that carry them and to the applicable validation rules. Worked examples appear in the informative section below.
 
-The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html) proposes additional Policy Set and Execution Plan Set profiles for review.
-
 ## Common JSON-LD requirements
 
 This section defines the DIS profile of [ODRL 2.2](https://www.w3.org/TR/odrl-model/) and its [JSON-LD representation](https://www.w3.org/TR/odrl-vocab/#json-ld) for the data request authorization, policy and plan. The carriers and transaction requirements are defined in [Volume 3](volume-3.html).
 
-The decoded attachment SHALL be one UTF-8 JSON object. It SHALL use the [DIS version 1 context](schemas/dis-odrl-v1.jsonld) as its sole `@context`, and one `profile` and `@type` from the table. The context defines `dis:` as `https://profiles.ihe.net/ITI/DIS/odrl/v1#` and includes the W3C ODRL context. Receivers SHALL resolve the two known contexts using their published definitions and SHALL reject additional or overridden contexts. Receivers may use local copies.
+The decoded attachment SHALL be one UTF-8 JSON object. Use exactly one `profile`, `@type`, and sole `@context` URL as specified for that artifact in the table. Both DIS contexts define `dis:` as `https://profiles.ihe.net/ITI/DIS/odrl/v1#` and include the W3C ODRL context. The DPV–ODRL context also defines `disdpv:` and `pd:`. Receivers SHALL resolve the selected DIS context and its W3C context using their published definitions and SHALL reject incorrect, additional, or overridden contexts. Receivers may use local copies.
 
-| Artifact | `@type` | `profile` |
-| --- | --- | --- |
-| Data Request Authorization | `Agreement` | `dis:DataRequestAuthorization` |
-| De-Identification Policy | `Set` | `dis:DeIdentificationPolicy` |
-| Execution Plan | `Set` | `dis:ExecutionPlan` |
+| Artifact | `@type` | `profile` | Sole `@context` |
+| --- | --- | --- | --- |
+| Data Request Authorization | `Agreement` | `dis:DataRequestAuthorization` | [DIS version 1 context](schemas/dis-odrl-v1.jsonld) |
+| Semantic-Level or Syntax-Level Policy | `Set` | `dis:DeIdentificationPolicy` | [DIS version 1 context](schemas/dis-odrl-v1.jsonld) |
+| Execution Plan for a Semantic-Level or Syntax-Level Policy | `Set` | `dis:ExecutionPlan` | [DIS version 1 context](schemas/dis-odrl-v1.jsonld) |
+| DPV–ODRL Policy | `Set` | `disdpv:Policy` | [DPV–ODRL context](schemas/dis-dpv-odrl-draft-1.jsonld) |
+| DPV–ODRL Execution Plan | `Set` | `disdpv:ExecutionPlan` | [DPV–ODRL context](schemas/dis-dpv-odrl-draft-1.jsonld) |
 {: .grid}
 
-Use the compact terms and value forms defined here. An artifact or rule `uid` SHALL be an absolute IRI and unique within its artifact. Unless a compact value is explicitly prescribed, IRI fields carry an absolute IRI without a compact prefix. A policy or plan's `uid` SHALL identify one immutable attachment revision and be bound to the carrier's `Contract.url` and `Contract.version`. Unless marked optional, listed properties are required. Arrays specified as nonempty SHALL contain at least one entry. A receiver SHALL reject duplicate JSON members, unknown properties or terms, unsupported values or conditions, unresolved required references, and inconsistent identifiers. Policy inheritance, ODRL conflict strategies, prohibitions, permission duties, and obligation consequences are outside this profile. Version 1 uses no alternate wire encoding for the three artifacts.
+Use the compact terms and value forms defined here. An artifact or rule `uid` SHALL be an absolute IRI and unique within its artifact. Unless a compact value is explicitly prescribed, IRI fields carry an absolute IRI without a compact prefix. A policy or plan's `uid` SHALL identify one immutable attachment revision and be bound to the carrier's `Contract.url` and `Contract.version`. Unless marked optional, listed properties are required. Arrays specified as nonempty SHALL contain at least one entry. A receiver SHALL reject duplicate JSON members, unknown properties or terms, unsupported values or conditions, unresolved required references, and inconsistent identifiers. Policy inheritance, ODRL conflict strategies, prohibitions, permission duties, and obligation consequences are outside these profiles.
 
 ## DIS ODRL vocabulary
 
@@ -24,8 +24,9 @@ The [DIS ODRL vocabulary, version 1 (RDF Turtle)](schemas/dis-odrl-v1.ttl) decla
 | Profile | Allowed DIS actions | Profile-specific terms and usage |
 | --- | --- | --- |
 | Data Request Authorization | `dis:deIdentify` in a permission | Use the Agreement properties and constraint operands defined in [Agreement for organizational data request authorization](#odrl-authorization). |
-| De-Identification Policy | `dis:remove`, `dis:replace`, `dis:keep`, `dis:hash`, `dis:truncate-date`, `dis:date-shift`, `dis:round`, `dis:truncate`, and `dis:redact` in obligations. A reversible policy may use `dis:encrypt` when the AES-FF1 capability applies. | Use policy representation, rule sets, and optional stages. Use `dis:semanticGroup` for Semantic-Level selectors or the binding's concrete selector for Syntax-Level selectors. |
-| Execution Plan | The same nine core actions and optional `dis:encrypt` in obligations | Use concrete selectors, the assigned payload set, the explicit compiled rule order, and `dis:sourceRule`. A compiled salted hash rule uses the resolved linkage scope. |
+| Semantic-Level or Syntax-Level Policy | `dis:remove`, `dis:replace`, `dis:keep`, `dis:hash`, `dis:truncate-date`, `dis:date-shift`, `dis:round`, `dis:truncate`, and `dis:redact` in obligations. A reversible policy may use `dis:encrypt` when the AES-FF1 capability applies. | Use policy representation, rule sets, and optional stages. Use `dis:semanticGroup` for Semantic-Level selectors or the binding's concrete selector for Syntax-Level selectors. |
+| Execution Plan for a Semantic-Level or Syntax-Level Policy | The same nine core actions and optional `dis:encrypt` in obligations | Use concrete selectors, the assigned payload set, the explicit compiled rule order, and `dis:sourceRule`. A compiled salted hash rule uses the resolved linkage scope. |
+| DPV–ODRL Policy and Execution Plan | The nine core actions in obligations | Use the [DPV–ODRL policy profile](draft-dpv-odrl-policy.html) for the policy targets and mapping revision rules. The plan uses concrete selectors. |
 {: .grid}
 
 The action and procedure definitions in [Volume 3](volume-3.html#transformation-actions) apply to both Sets. Vocabulary declarations describe terms and their relationships. Receivers use the exact action IRIs allowed by the declared DIS profile when validating an exchange.
@@ -76,7 +77,7 @@ The De-ID Manager SHALL validate the object when present. The object SHALL conta
 
 Both Sets carry `obligation` as a nonempty array of ODRL Duty rules. Each obligation has a unique absolute IRI `uid`, exactly one `target` and one `action`. An obligation SHALL NOT carry its own assigner or assignee. The eligible role performs each obligation. The Manager compiles the Policy obligations, and the De-Identifier or Integrated actor applies the compiled Plan obligations to its assigned inputs.
 
-The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI and one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the [concrete FHIRPath selector](volume-3.html#fhirpath-element-addressing) as a string. For a plan, use the same concrete selector operand for the binding. Every obligation in the plan SHALL use the same manifest source IRI. Use the URI derived from the exact inline bytes or the assigned manifest URL, as specified under [assigned input verification](volume-3.html#assigned-input-verification). The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
+The target SHALL be an ODRL `AssetCollection` with exactly one `source` IRI. A DPV–ODRL Policy SHALL use the three refinements defined in its [Policy rules](draft-dpv-odrl-policy.html#policy-rules). Other policies and all plans use one `refinement` using `eq`. For a Semantic-Level Policy, use the IRI `dis:semantic-elements` and `dis:semanticGroup` with the semantic-group string including its `@` prefix. For a Syntax-Level Policy, use `dis:fhir-elements` and `dis:fhirPath` for FHIR, with the [concrete FHIRPath selector](volume-3.html#fhirpath-element-addressing) as a string. For a plan, use the same concrete selector operand for the binding. Every obligation in the plan SHALL use the same manifest source IRI. Use the URI derived from the exact inline bytes or the assigned manifest URL, as specified under [assigned input verification](volume-3.html#assigned-input-verification). The De-Identifier SHALL apply rule selectors only to the manifest supplied with the de-identification task.
 
 ### Action parameters
 
@@ -100,7 +101,7 @@ For a `dis:pseudonymSystem` value use `{"@id":"..."}` with an absolute IRI. For 
 
 ### De-Identification Policy Set
 
-The policy carries `dis:representationLevel` (`semantic` or `syntax`), `dis:reversibilityMode` (`irreversible` or `reversible`) and the `obligation` array. Syntax-Level content SHALL also declare `dis:payloadFamily` (`fhir` for DIS-FHIR-Payload) and `dis:payloadVersion` (`R4` or `R5` for FHIR). Semantic-Level content SHALL omit those two fields. `dis:identity-linkage-scope` carries the policy linkage scope when required by the selected actions.
+Both policy profiles carry `dis:reversibilityMode` (`irreversible` or `reversible`) and the `obligation` array. A `dis:DeIdentificationPolicy` also carries `dis:representationLevel` (`semantic` or `syntax`). A `disdpv:Policy` uses the fields and target rules in the [DPV–ODRL binding](draft-dpv-odrl-policy.html#policy-rules). Syntax-Level content SHALL also declare `dis:payloadFamily` (`fhir` for DIS-FHIR-Payload) and `dis:payloadVersion` (`R4` or `R5` for FHIR). Semantic-Level content SHALL omit those two fields. `dis:identity-linkage-scope` carries the policy linkage scope when required by the selected actions.
 
 `dis:ruleSets` is an explicit `{"@list":[...]}` with one entry per rule set in processing order. Each entry carries a unique `dis:ruleSetId` string, optional `dis:description` string and a nonempty `dis:ruleOrder` list of `{"@id":"..."}` references to the Set's obligations in first-match order. Every obligation SHALL occur in exactly one list, exactly once. No processing order is inferred from the `obligation` array.
 
@@ -108,7 +109,9 @@ Optional `dis:stages` is an explicit nonempty `@list` in dispatch order. Each en
 
 ### Execution Plan Set
 
-The plan carries `dis:ruleSetId`, `dis:payloadSet`, `dis:payloadBinding` and `dis:payloadVersion` as strings equal to the corresponding task inputs. It also carries `dis:stageId` as a string exactly when the task has a stage ID. The root `dis:ruleOrder` is a nonempty explicit `@list` of IRI references to the compiled obligations. Each obligation SHALL be listed exactly once and SHALL carry a `dis:sourceRule` IRI reference to the original policy obligation. A source obligation can produce several compiled obligations, for example when a semantic group expands to several paths. The Manager SHALL preserve original order and the binding's expansion order. The De-Identifier SHALL validate the Set, and apply the [execution rules in Volume 3](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation).
+The Manager SHALL use `disdpv:ExecutionPlan` when compiling a `disdpv:Policy`. That plan SHALL contain the mapping revision specified by the [DPV–ODRL compilation rules](draft-dpv-odrl-policy.html#compilation-and-evidence). Use `dis:ExecutionPlan` when compiling a `dis:DeIdentificationPolicy`.
+
+The plan carries `dis:ruleSetId`, `dis:payloadSet`, `dis:payloadBinding` and `dis:payloadVersion` as strings equal to the corresponding task inputs. It also carries `dis:stageId` as a string exactly when the task has a stage ID. The root `dis:ruleOrder` is a nonempty explicit `@list` of IRI references to the compiled obligations. Each obligation SHALL be listed exactly once and SHALL carry a `dis:sourceRule` IRI reference to the original policy obligation. A source obligation can produce several compiled obligations when a DPV target or semantic group expands to several paths. The Manager SHALL preserve original order and the binding's expansion order. The De-Identifier SHALL validate the Set, and apply the [execution rules in Volume 3](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation).
 
 When any externally retrieved input relies on digest verification, the Set SHALL include a nonempty `dis:inputDigests` array. Each item has exactly one `dis:inputUrl` as an `{"@id":"..."}` reference to the original assigned HTTPS URL and one `dis:sha256` as a 64-character lowercase hexadecimal string. A URL SHALL occur at most once. Include only URLs required for this assignment and omit the array when there are no externally retrieved inputs with digests. The array has no processing order. Apply the [input verification rules](volume-3.html#assigned-input-verification) to the manifest and to all required external objects reached through it.
 
