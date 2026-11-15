@@ -179,6 +179,9 @@ pages:
     volume-3-lookup-tables.md:
       title: "3:PXX.6 Protected Lookup Tables"
       generation: markdown
+    volume-3-contract-rules.md:
+      title: "Shared Contract Rules"
+      generation: markdown
     odrl-content.md:
       title: "DIS ODRL Content Binding (Normative)"
       generation: markdown

@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BINDINGS = ROOT / "input/images/bindings"
 REVISION = "dis-fhir-r4-dpv-mapping-1"
-VOLUME = ROOT / "input/pagecontent/volume-3.md"
+VOLUME = ROOT / "input/pagecontent/volume-3-fhir-addressing.md"
 START = "<!-- BEGIN GENERATED FHIR R4 DPV MAPPING SAMPLE -->\n"
 END = "<!-- END GENERATED FHIR R4 DPV MAPPING SAMPLE -->"
 DISPLAY_PATHS = {"Patient.name", "Practitioner.name", "ContactDetail.name", "Patient.birthDate"}

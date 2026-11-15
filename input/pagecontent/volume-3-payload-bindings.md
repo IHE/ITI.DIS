@@ -105,7 +105,7 @@ The FHIR payload binding (`DIS-FHIR-Payload`) defines how actors identify, carry
 
 DIS-FHIR-Payload is independent of the DIS HL7 FHIR R4 protocol binding version. It supports HL7 FHIR R4 and R5 processing payloads over the same R4 protocol binding through version identification, version-safe packaging, and version-neutral element addressing.
 
-The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing language. The [FHIR R4 DPV category mapping](volume-3.html#fhir-r4-dpv-mapping) defines the selectors for DPV–ODRL policies. The [common delivery contract](#payload-set-delivery) defines the manifest and package used in each exchange.
+The [FHIRPath specification](https://hl7.org/fhirpath/) defines the addressing language. The [FHIR R4 DPV category mapping](volume-3-fhir-addressing.html#fhir-r4-dpv-mapping) defines the selectors for DPV–ODRL policies. The [common delivery contract](#payload-set-delivery) defines the manifest and package used in each exchange.
 
 - [FHIR Addressing and Processing](volume-3-fhir-addressing.html)
 - [FHIR Input and Result Delivery](volume-3-fhir-delivery.html)
