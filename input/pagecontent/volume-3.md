@@ -739,13 +739,6 @@ The De-Identifier SHALL ensure that references between retained resources resolv
 
 Patient pseudonymization transforms the business identifier pair in `Patient.identifier`. See [Patient Identifier Pseudonymization](#3pxx123-patient-identifier-pseudonymization) for the supported methods. The output packaging rules govern FHIR resource identities and references.
 
-<a name="data-plane-access"> </a>
-<a name="obtaining-processing-targets"> </a>
-
-<a name="3pxx16-obtaining-processing-targets"> </a>
-
-<a name="3pxx323-obtaining-processing-targets"> </a>
-
 <a name="fhir-r4-dpv-mapping"> </a>
 
 ##### 3:PXX.4.2.1.7 FHIR R4 DPV Category Mapping
@@ -790,6 +783,12 @@ The mapping covers whole `HumanName` and `Identifier` occurrences where those ty
 
 **ContactDetail expansion rule, revision 1.** For each assigned resource type, read its effective R4 element definitions and find the local paths whose only declared type is `ContactDetail`. Include the paths inherited by that resource once. Use the resource's concrete type as the root, append `.name`, and emit the resulting FHIRPath selectors in lexicographic order. For example, `Organization.contact.name` comes from its own declared entry, while `ActivityDefinition.contact.name` expands from the shared `ContactDetail.name` entry. Generic choice elements and locations within embedded resources remain outside this rule.
 
+<a name="data-plane-access"> </a>
+<a name="obtaining-processing-targets"> </a>
+
+<a name="3pxx16-obtaining-processing-targets"> </a>
+
+<a name="3pxx323-obtaining-processing-targets"> </a>
 
 <a name="3pxx322-input-and-result-delivery"> </a>
 
