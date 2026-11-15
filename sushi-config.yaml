@@ -179,6 +179,9 @@ pages:
   draft-encryption-based-pseudonymization.md:
     title: "Optional AES-FF1 Pseudonymization (DIS-REVERSIBLE)"
     generation: markdown
+  draft-dpv-odrl-policy.md:
+    title: "Proposed DPV–ODRL De-Identification Policy (Draft)"
+    generation: markdown
   odrl-content.md:
     title: "DIS ODRL Content Binding (Normative)"
     generation: markdown
@@ -214,6 +217,7 @@ menu:
   Volume 3:
     Data Request Authorization: volume-3.html#data-request-authorization
     De-Identification Policy: volume-3.html#de-identification-policy
+    DPV–ODRL Policy Draft: draft-dpv-odrl-policy.html
     De-Identification Execution Plan: volume-3.html#execution-plan-content
     Payload Bindings: volume-3.html#payload-bindings
     De-Identification Evidence: volume-3.html#evidence-baseline

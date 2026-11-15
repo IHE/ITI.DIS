@@ -1,0 +1,95 @@
+{
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
+  "@type": "Set",
+  "uid": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0",
+  "profile": "disdpv:ExecutionPlan",
+  "dis:ruleSetId": "structured-names",
+  "dis:payloadBinding": "DIS-FHIR-Payload",
+  "dis:payloadVersion": "R4",
+  "dis:payloadSet": "name-pilot",
+  "disdpv:mappingRevision": {
+    "@id": "https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1"
+  },
+  "obligation": [
+    {
+      "uid": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#keep-1",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
+        "refinement": {
+          "leftOperand": "dis:fhirPath",
+          "operator": "eq",
+          "rightOperand": "Practitioner.where(id = 'provider-example').name"
+        }
+      },
+      "action": "dis:keep",
+      "dis:sourceRule": {
+        "@id": "https://governance.example.org/policies/keep-providers/versions/1.0#keep"
+      }
+    },
+    {
+      "uid": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#remove-1",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
+        "refinement": {
+          "leftOperand": "dis:fhirPath",
+          "operator": "eq",
+          "rightOperand": "Patient.name"
+        }
+      },
+      "action": "dis:remove",
+      "dis:sourceRule": {
+        "@id": "https://governance.example.org/policies/keep-providers/versions/1.0#remove"
+      }
+    },
+    {
+      "uid": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#remove-2",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
+        "refinement": {
+          "leftOperand": "dis:fhirPath",
+          "operator": "eq",
+          "rightOperand": "Patient.contact.name"
+        }
+      },
+      "action": "dis:remove",
+      "dis:sourceRule": {
+        "@id": "https://governance.example.org/policies/keep-providers/versions/1.0#remove"
+      }
+    },
+    {
+      "uid": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#remove-3",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
+        "refinement": {
+          "leftOperand": "dis:fhirPath",
+          "operator": "eq",
+          "rightOperand": "Practitioner.name"
+        }
+      },
+      "action": "dis:remove",
+      "dis:sourceRule": {
+        "@id": "https://governance.example.org/policies/keep-providers/versions/1.0#remove"
+      }
+    }
+  ],
+  "dis:ruleOrder": {
+    "@list": [
+      {
+        "@id": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#keep-1"
+      },
+      {
+        "@id": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#remove-1"
+      },
+      {
+        "@id": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#remove-2"
+      },
+      {
+        "@id": "https://manager.example.org/fhir/plans/keep-providers/versions/1.0#remove-3"
+      }
+    ]
+  }
+}

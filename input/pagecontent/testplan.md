@@ -395,3 +395,21 @@ Use the [mixed payload walkthrough](draft-native-payload-bindings.html#illustrat
 | 4 | Complete imaging and poll ITI-x4 again. | One successful response contains two `payloadResult` groups with the original set IDs. Verify that the clinical evidence resolves to the R4 wrapper, the draft imaging evidence resolves to the result index, and the manifest selects only the two de-identified DICOM instances. |
 | 5 | Repeat with one imaging instance unavailable after acceptance and the clinical task successful. | The imaging task reports failure. ITI-x4 returns HTTP 422 with an `OperationOutcome`. Neither set is made available to the Requester. |
 {: .grid}
+
+<a name="draft-dpv-odrl-policy-cases"> </a>
+
+## Draft DPV–ODRL Policy Cases
+
+These procedures are for review of the [proposed policy profile](draft-dpv-odrl-policy.html) using its synthetic R4 fixtures.
+
+| Case | Procedure | Expected outcome |
+| --- | --- | --- |
+| All in-scope roles | Submit Policy A under Agreement A with the pilot manifest. | The Manager compiles the three mapped name paths. The De-Identifier removes every in-scope name, including the care provider's name. Evidence names the exact Policy A Contract revision. |
+| Care-provider exception | Submit Policy B under Agreement B. Repeat after reversing the serialized obligation array while retaining the explicit rule order and using a newly approved fixture revision. | Both executions preserve the assigned care-team Practitioner's name and remove the other names. The same individual represented as the Patient has their name removed on the Patient resource. |
+| Optional element absent | Remove the contact name from a new version of the approved fixture and submit Policy A. | The supported contact selector matches zero elements. The other selected names are removed. |
+| Unknown role | Run Policy B against new approved fixtures with an unresolved relevant care-team reference or incomplete evidence of the roster. Run Policy A against the same fixtures with verified inputs and mapped name locations. | Policy B fails before dispatch if role uncertainty could change the result. Policy A can apply the same action to all in-scope names regardless of role. |
+| Unsupported category, role, or location | Add a rule for a category or role without a pilot mapping, request narrative or pixels, or expand the pilot assignment to cover an unmapped structured name occurrence. | The Manager reports unsupported coverage before dispatch. |
+| Conflicting actions | Compile test rules that keep a whole element and alter one of its descendants in a binding that maps both targets. | The execution fails without releasing partial output. Reordering rules gives the same failure. |
+| Revision mismatch | Substitute a different policy revision under the same Agreement or tamper with a plan's mapping revision or assigned input reference. Substitute a different source policy reference in otherwise valid returned evidence. | The applicable stage rejects the mismatch. The Manager releases no result for the failed assignment. |
+| Unsupported DICOM action | In an informative Annex E feasibility check, require `keep` on Performing Physician's Name while using a DICOM profile and options that require `X`. Repeat with `remove` on an attribute that must remain present. | The proposed binding rejects the incompatible action. Empty and absent attributes remain distinct outcomes. |
+{: .grid}
