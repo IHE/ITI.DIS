@@ -2,7 +2,7 @@
 **Informative example.** This synthetic job illustrates [UC-2 FHIR Input Preparation for Multimodal AI/ML](volume-1.html#uc-2). The job is asynchronous and each worker task is synchronous. The two policies demonstrate selected field removals. Release of real data requires a policy appropriate to the approved use and the identifying content in the input.
 </div>
 
-The cohort job has two payload sets. One contains **R4 clinical records and laboratory results** and the other contains a **hosted R5 CT diagnostic report**. Each set uses its own policy and declared FHIR release. The permit authorizes independent analysis of the report. The [illustrative FHIR and DICOM extension](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) shows how a separate payload set could carry native CT images. The job and task submissions, result Parameters, manifests, and Provenance use FHIR R4.
+The cohort job has two payload sets. One contains **R4 clinical records and laboratory results** and the other contains a **hosted R5 CT diagnostic report and its subject Patient**. Each set uses its own policy and declared FHIR release. The permit authorizes independent analysis of the report. The [illustrative FHIR and DICOM extension](draft-native-payload-bindings.html#illustrative-mixed-fhir-and-dicom-job) shows how a separate payload set could carry native CT images. The job and task submissions, result Parameters, manifests, and Provenance use FHIR R4.
 
 <a name="grouped-fhir-submission"> </a>
 
@@ -14,12 +14,12 @@ The [UC-2 Data Request Authorization Contract](Contract-grouped-fhir-authorizati
 
 ### Payload Sets and Approved Policies
 
-Each payload-set input in the job submission names the versioned policy approved for that set. The hosted artifact collection includes both Policy Contracts and their Execution Plan Contracts. Both policies use irreversible processing. See the [decoded Policy Set for the R4 clinical set](examples-odrl.html#decoded-policy-example).
+Each payload-set input in the job submission names the versioned policy approved for that set. The hosted artifact collection includes both Policy Contracts and their Execution Plan Contracts. Both use DPV–ODRL and irreversible processing. See the [decoded Policy Set for the R4 clinical set](examples-odrl.html#decoded-policy-example).
 
 | Set | Manifest and payload | Approved policy |
 |-----|----------------------|-----------------|
-| `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Semantic-Level policy `patient-name-removal` version `1.0` removes `@subject-names`. The Manager compiles the group to `Patient.name` for R4. |
-| `imaging-report-r5` | A versioned R4 List uses the DIS Target FHIR Release extension to select the [hosted R5 DiagnosticReport](examples/grouped-fhir/grouped-fhir-report-input.json). | Syntax-Level policy `imaging-report-subject-removal` version `1.0` removes `DiagnosticReport.subject` in R5. |
+| `patient-r4` | A versioned HTTPS List selects specific versions of an R4 Patient and a linked hemoglobin Observation. | Policy `patient-name-removal` version `1.0` removes the patient's structured `pd:Name` data. The [R4 mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping) supplies `Patient.name`. |
+| `imaging-report-r5` | A versioned R4 List uses the DIS Target FHIR Release extension to select the [hosted R5 DiagnosticReport](examples/grouped-fhir/grouped-fhir-report-input.json) and its [subject Patient](examples/grouped-fhir/grouped-fhir-report-patient-input.json). | Policy `imaging-report-subject-removal` version `1.0` removes the patient's structured `pd:Identifying` data. The [R5 mapping](volume-3-execution-plan.html#fhir-r5-dpv-mapping) supplies an ID-qualified `DiagnosticReport.subject` selector after the Manager verifies the reference to the Patient. |
 {: .grid}
 
 The Manager verifies the permit, resolves and validates both policies, and establishes the authorized target sets. On acceptance, it returns `202 Accepted` with `Content-Location: https://dis.example.org/jobs/job-51`. If the acceptance response is lost, the Requester repeats the original request bytes and processing selections with `DIS-Submission: recover`. The Manager returns the same polling URL with `DIS-Submission: replayed`, and the job runs once. See [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) and the [recovery rules](volume-2.html#submission-retries).
@@ -28,17 +28,17 @@ The Manager verifies the permit, resolves and validates both policies, and estab
 
 ## Dispatch and Complete the Tasks
 
-Send each task to `POST /fhir/$submit-dis-task`. The task request carries one payload set and a reference to the execution plan for its declared release. Both tasks use irreversible removal. See the [decoded Execution Plan Set for the R4 clinical task](examples-odrl.html#decoded-plan-example). The Manager pins the two hosted R4 resources and the hosted R5 report to the revisions identified by their Lists. It records both assignments under the job. The sample permit authorizes the assigned R4 worker to receive an opaque parent identifier in `Task.partOf.identifier`. The R5 task omits it. Each worker can execute its assignment using the supplied inputs. See [assignment correlation and disclosure](volume-2.html#assignment-correlation).
+Send each task to `POST /fhir/$submit-dis-task`. The task request carries one payload set and a reference to the execution plan for its declared release. Both tasks use irreversible removal. See the [decoded Execution Plan Set for the R4 clinical task](examples-odrl.html#decoded-plan-example). The Manager pins the resources in both releases to the revisions identified by their Lists. It records both assignments under the job. The sample permit authorizes the assigned R4 worker to receive an opaque parent identifier in `Task.partOf.identifier`. The R5 task omits it. Each worker can execute its assignment using the supplied inputs. See [assignment correlation and disclosure](volume-2.html#assignment-correlation).
 
 | Set | ITI-x3 request | ITI-x3 success response | Evidence targets |
 |-----|----------------|-------------------------|------------------|
 | `patient-r4` | [Task submission for the R4 clinical set](Task-grouped-fhir-task-patient-r4.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-patient-r4.html) | Versioned HTTPS references to the result Patient and hemoglobin Observation selected by the hosted result List. |
-| `imaging-report-r5` | [Task submission for the R5 diagnostic report](Task-grouped-fhir-task-imaging-report-r5.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-imaging-report-r5.html) | Provenance in the [result package](Bundle-grouped-fhir-r5-output.html) and its R4 result List both use the same release-qualified reference to the [hosted R5 output report](examples/grouped-fhir/grouped-fhir-report-output.json). |
+| `imaging-report-r5` | [Task submission for the R5 diagnostic report](Task-grouped-fhir-task-imaging-report-r5.html) | [R4 Parameters result](Parameters-grouped-fhir-task-result-imaging-report-r5.html) | Provenance in the [result package](Bundle-grouped-fhir-r5-output.html) and its R4 result List both use matching release-qualified references to the [hosted R5 output report](examples/grouped-fhir/grouped-fhir-report-output.json) and the [result Patient](examples/grouped-fhir/grouped-fhir-report-patient-output.json). |
 {: .grid}
 
-Both synchronous task responses use `200 OK` and include the corresponding `payloadResult` with R4 Provenance. In the sample R4 records, a hemoglobin result of 12.4 g/dL remains linked to the de-identified Patient. The R5 report retains the 28 mm CT lesion finding in its conclusion. The policy removes the source patient reference. The Manager and Requester verify the hosted output by resolving the exact report revision identified in both the result List and Provenance. See [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).
+Both synchronous task responses use `200 OK` and include the corresponding `payloadResult` with R4 Provenance. In the sample R4 records, a hemoglobin result of 12.4 g/dL remains linked to the de-identified Patient. The R5 report retains the 28 mm CT lesion finding in its conclusion. The policy removes the report's source patient reference. The result Patient carries a fresh resource identity. The Manager and Requester verify both output revisions identified by the result List and Provenance. See [ITI-x3](volume-2.html#23x3-submit-de-identification-task-iti-x3).
 
-The R5 worker retrieves the input report with a separate GET. The manifest itself is retrieved as R4. Both URLs in this illustration represent authorized endpoints.
+The R5 worker retrieves the input report and the Patient with separate version-specific GETs. It retrieves their manifest as R4. The example shows the GET for the report.
 
 ```http
 GET /fhir/r5/DiagnosticReport/grouped-fhir-report-input/_history/1

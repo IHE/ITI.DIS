@@ -21,18 +21,6 @@ dis:DataRequestAuthorization
     skos:definition "Profile for an Agreement that authorizes a specific data request."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
 
-dis:DeIdentificationPolicy
-    a dct:Standard, skos:Concept ;
-    rdfs:label "De-Identification Policy"@en ;
-    skos:definition "Profile for a reusable Set of de-identification obligations."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> .
-
-dis:ExecutionPlan
-    a dct:Standard, skos:Concept ;
-    rdfs:label "De-Identification Execution Plan"@en ;
-    skos:definition "Profile for a Set of compiled obligations bound to a de-identification task."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#execution-plan-set> .
-
 # Actions
 
 dis:deIdentify
@@ -143,12 +131,6 @@ dis:resultDestination
     skos:definition "Approved HTTPS service base for access to the job result."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> .
 
-dis:semanticGroup
-    a odrl:LeftOperand, skos:Concept ;
-    rdfs:label "Semantic group"@en ;
-    skos:definition "Semantic group identifier including its @ prefix, resolved using the payload binding."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
-
 dis:fhirPath
     a odrl:LeftOperand, skos:Concept ;
     rdfs:label "FHIRPath"@en ;
@@ -254,24 +236,10 @@ dis:parentAliasRecipient
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#odrl-authorization> ;
     rdfs:range odrl:Party .
 
-dis:representationLevel
-    a owl:DatatypeProperty, skos:Concept ;
-    rdfs:label "Representation level"@en ;
-    skos:definition "Whether the policy uses semantic group identifiers or concrete selectors."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
-    rdfs:range xsd:string .
-
 dis:reversibilityMode
     a owl:DatatypeProperty, skos:Concept ;
     rdfs:label "Reversibility mode"@en ;
     skos:definition "Reversibility mode declared by the De-Identification Policy Set."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
-    rdfs:range xsd:string .
-
-dis:payloadFamily
-    a owl:DatatypeProperty, skos:Concept ;
-    rdfs:label "Payload family"@en ;
-    skos:definition "Payload family governed by a Syntax-Level policy."@en ;
     rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#de-identification-policy-set> ;
     rdfs:range xsd:string .
 
@@ -408,15 +376,3 @@ dis:identity-linkage-scope
     rdfs:range rdf:JSON .
 
 # Selector collection sources
-
-dis:semantic-elements
-    a odrl:Asset, skos:Concept ;
-    rdfs:label "Semantic elements"@en ;
-    skos:definition "Collection source used when a policy selects a semantic group."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .
-
-dis:fhir-elements
-    a odrl:Asset, skos:Concept ;
-    rdfs:label "FHIR elements"@en ;
-    skos:definition "Collection source used when a Syntax-Level policy selects concrete FHIR elements."@en ;
-    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/odrl-content.html#sets-for-policy-and-plan> .

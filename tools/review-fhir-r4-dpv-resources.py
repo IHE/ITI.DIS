@@ -155,7 +155,7 @@ def revision_two_rows(resources, mapping):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("package", type=Path, help="package directory for hl7.fhir.r4.core#4.0.1")
-    parser.add_argument("--revision", type=int, choices=[1, 2], default=1, help="mapping revision to review")
+    parser.add_argument("--revision", type=int, choices=[1, 2, 3], default=3, help="mapping revision to review")
     args = parser.parse_args()
     mapping_path = ROOT / f"dis-fhir-r4-dpv-mapping-{args.revision}.jsonld"
     review_path = ROOT / f"dis-fhir-r4-dpv-resource-review-{args.revision}.csv"

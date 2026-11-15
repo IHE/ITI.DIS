@@ -9,7 +9,7 @@
     "text": "CT chest diagnostic report"
   },
   "subject": {
-    "reference": "Patient/example-synthetic-r5"
+    "reference": "https://source.example.org/fhir/r5/Patient/grouped-fhir-report-patient-input/_history/1"
   },
   "conclusion": "The longest diameter of the target lung lesion is 28 mm on CT."
 }

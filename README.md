@@ -99,7 +99,7 @@ DIS separates policy definition from policy execution. DIS assumes that the Requ
 - **Requester-carried content** — optional `policyContent` references a contained Binary carrying the Policy Contract as FHIR JSON. The Manager matches the Contract's URL and version to the declaration. Both delivery modes use the same deployment-configured signature rules, with signatures carried in `Contract.signer.signature`.
 - **Manager-resolved content** — when `policyContent` is absent, the Manager resolves the declared version by implementation-defined means, such as a trusted local store or external retrieval.
 
-The Manager validates **authorization consistency**, **integrity**, **content conformance**, and **currency** before acceptance or dispatch. Semantic-Level policies use format-neutral semantic groups and are compiled into payload-specific execution plans. Syntax-Level policies use concrete paths for a declared payload family and version; the Manager validates and packages them as execution plans. The baseline execution plan uses flat, ordered rules, with one task per ruleSet and optional stage ordering; full policy composition is deferred.
+The Manager validates **authorization consistency**, **integrity**, **content conformance**, and **currency** before acceptance or dispatch. DPV–ODRL policies select categories of personal data, roles, and locations. The Manager compiles them to resource-local FHIRPath selectors using the DPV Category Mapping for the assigned FHIR release. The baseline execution plan uses flat, ordered rules, with one task per ruleSet and optional stage ordering; full policy composition is deferred.
 
 For full details, see [Volume 1 Section 1:PXX.4.1](input/pagecontent/volume-1.md#1pxx41-concepts) and [Section 1:PXX.5.3](input/pagecontent/volume-1.md#1pxx53-policy-carrier-integrity).
 
@@ -167,7 +167,7 @@ java -jar input-cache/publisher.jar -ig .
 
 Keep the Publisher's terminology service enabled for the publication build. An offline build with `-tx n/a` cannot verify external codes such as UN M49 jurisdiction and UCUM units. Read `output/qa.html` for validation and link diagnostics. Use the values agreed for the formal publication milestone to complete `publication-request.json`. The draft source includes narrative in `input/pagecontent`, conformance definitions in `input/fsh`, and downloadable content schemas in `input/images/schemas`.
 
-Edit the authoritative FHIR Semantic Group Binding table in Volume 3. Check its group codes against the DIS Semantic Group CodeSystem before publishing changes. The informative catalog CSV is in `input/images/bindings` and its guide is in `input/pagecontent`.
+The current [R4 and R5 DPV mappings](input/pagecontent/volume-3-execution-plan.md#fhir-r4-dpv-mapping) are published as JSON-LD and CSV. The R5 draft starts from the R4 selectors and records the comparison against the pinned FHIR packages. Run `python3 tools/derive-fhir-r5-dpv-mapping.py R4_PACKAGE R5_PACKAGE --check` with the extracted FHIR core package directories to verify the R5 draft and review report. Run `python3 tools/generate-fhir-r4-dpv-views.py --check` to verify the published CSVs and R4 sample table.
 
 **Published FHIR examples** appear in the guide's artifact index and FHIR example downloads. The [lookup table](input/fsh/LookupTableExamples.fsh) and [evidence](input/fsh/EvidenceExamples.fsh) examples are authored in FSH. SUSHI generates their JSON during the build.
 

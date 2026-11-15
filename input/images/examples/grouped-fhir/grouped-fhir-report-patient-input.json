@@ -1,0 +1,8 @@
+{
+  "resourceType": "Patient",
+  "id": "grouped-fhir-report-patient-input",
+  "meta": {
+    "versionId": "1"
+  },
+  "active": true
+}

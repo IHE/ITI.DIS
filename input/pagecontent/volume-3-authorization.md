@@ -1,14 +1,11 @@
-<a name="data-request-authorization"> </a>
-
-<a name="3pxx6-data-request-authorization"> </a>
-
-<a name="3pxx1-data-request-authorization"> </a>
+<div id="data-request-authorization"> </div>
+<div id="3pxx6-data-request-authorization"> </div>
+<div id="3pxx1-data-request-authorization"> </div>
 
 This section defines the organizational grant, how the De-ID Manager establishes coverage for a job, and who may receive the result. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) specifies admission and [ITI-x4](volume-2.html#23x4-retrieve-job-output-iti-x4) specifies asynchronous retrieval.
 
-<a name="data-request-authorization-contract"> </a>
-
-<a name="3pxx61-data-request-authorization-contract"> </a>
+<div id="data-request-authorization-contract"> </div>
+<div id="3pxx61-data-request-authorization-contract"> </div>
 
 ## 3:PXX.1.1 Data Request Authorization Contract
 
@@ -39,7 +36,7 @@ FHIR R4 defines [Contract search parameters]({{site.data.fhir.path}}contract.htm
 
 See the [UC-2 Contract example](Contract-grouped-fhir-authorization-contract.html), the [readable Agreement](examples-odrl.html#decoded-authorization-example), and the [Contract verification checks](testplan.html#authorization-contract-validation).
 
-<a name="grant-validation-and-scope"> </a>
+<div id="grant-validation-and-scope"> </div>
 
 ## 3:PXX.1.2 Grant Validation and Approved Scope
 
@@ -47,9 +44,8 @@ Before acceptance or synchronous processing the Manager SHALL establish that the
 
 For each payload set, the Manager SHALL validate the selected permission against the authenticated Requester or authorized delegate, the purpose of the submission, the declared binding and release, the selected policy canonical and version, and the approved data scope. The Manager SHALL establish coverage for the exact manifest and versions of its inputs, either by verifying the selection against authoritative scope criteria or by verifying trusted preparation evidence that binds the Agreement revision, permission, manifest and input versions. The methods of evaluating source-specific criteria and conveying preparation evidence depend on the deployment. The Manager SHALL deny processing if coverage cannot be established. The grant SHALL NOT be inferred from service credentials or from the selected transformation policy. An optional [purpose classification](odrl-content.html#purpose-classification) records the issuer’s ISO/TS 14265:2024 classification. The Manager SHALL evaluate the specific approved purpose IRI in the Agreement.
 
-<a name="job-result-recipient"> </a>
-
-<a name="result-recipient-eligibility"> </a>
+<div id="job-result-recipient"> </div>
+<div id="result-recipient-eligibility"> </div>
 
 ## 3:PXX.1.3 Result Recipient Eligibility and Release
 

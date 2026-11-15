@@ -1,4 +1,4 @@
-"""Generate the CSVs and Volume 3 sample tables from the FHIR R4 DPV mappings."""
+"""Generate the FHIR DPV mapping CSVs and the current draft R4 sample table."""
 
 import argparse
 import csv
@@ -9,10 +9,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BINDINGS = ROOT / "input/images/bindings"
 MAPPING_PAGE = ROOT / "input/pagecontent/volume-3-execution-plan.md"
+CURRENT_REVISION = 3
 SAMPLE_PATHS = {
-    1: {"Patient.name", "Practitioner.name", "Patient.birthDate", "ContactDetail.name"},
-    2: {"Patient.name", "Patient.address.postalCode", "Patient.telecom.where(system = 'email')",
-        "Condition.code", "Coverage.type"},
+    "Patient.name",
+    "Patient.address.postalCode",
+    "Patient.telecom.where(system = 'email')",
+    "Condition.code",
+    "Coverage.type",
 }
 
 
@@ -36,6 +39,7 @@ def csv_view(mapping, rows, include_context):
             "dpvEdition", "manifestFormat", "coverageRule",
         ]
     ]
+    prefix = [" | ".join(value) if isinstance(value, list) else value for value in prefix]
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
     writer.writerow(headers)
@@ -44,7 +48,7 @@ def csv_view(mapping, rows, include_context):
     return output.getvalue()
 
 
-def sample_table(rows, revision):
+def sample_table(rows):
     table = [
         "",
         "| Order | DPV category | Person role | FHIR R4 target |",
@@ -52,7 +56,7 @@ def sample_table(rows, revision):
     ]
     for row in rows:
         target = row["targetPath"]
-        if target not in SAMPLE_PATHS[revision]:
+        if target not in SAMPLE_PATHS:
             continue
         category = row["category"].rsplit("#", 1)[1]
         role = row["personRole"].rsplit("#", 1)[1]
@@ -75,7 +79,7 @@ def update_sample(section, rows, revision):
     _, end, after = following.partition(end_marker)
     if not start or not end:
         raise SystemExit(f"Missing generated sample markers for revision {revision}")
-    return before + start + sample_table(rows, revision) + end + after
+    return before + start + sample_table(rows) + end + after
 
 
 def main():
@@ -83,17 +87,23 @@ def main():
     parser.add_argument("--check", action="store_true", help="check that the views match the mappings")
     args = parser.parse_args()
     section = MAPPING_PAGE.read_text(encoding="utf-8")
-    for revision in sorted(SAMPLE_PATHS):
-        basename = BINDINGS / f"dis-fhir-r4-dpv-mapping-{revision}"
+    mappings = [
+        (f"dis-fhir-r4-dpv-mapping-{revision}", revision)
+        for revision in range(1, CURRENT_REVISION + 1)
+    ]
+    mappings.append(("dis-fhir-r5-dpv-mapping-1", None))
+    for name, revision in mappings:
+        basename = BINDINGS / name
         mapping = json.loads(basename.with_suffix(".jsonld").read_text(encoding="utf-8"))
         rows = sorted(mapping["entries"], key=lambda row: row["order"])
         if [row["order"] for row in rows] != list(range(1, len(rows) + 1)):
-            raise SystemExit(f"Revision {revision} has missing or duplicate expansion orders")
+            raise SystemExit(f"{basename.name} has missing or duplicate expansion orders")
         keys = {(row["category"], row["personRole"], row["location"], row["targetPath"]) for row in rows}
         if len(keys) != len(rows):
-            raise SystemExit(f"Revision {revision} has duplicate mapping entries")
-        section = update_sample(section, rows, revision)
-        update(basename.with_suffix(".csv"), csv_view(mapping, rows, revision >= 2), args.check)
+            raise SystemExit(f"{basename.name} has duplicate mapping entries")
+        if revision == CURRENT_REVISION:
+            section = update_sample(section, rows, revision)
+        update(basename.with_suffix(".csv"), csv_view(mapping, rows, revision != 1), args.check)
     update(MAPPING_PAGE, section, args.check)
 
 

@@ -4,7 +4,7 @@ These informative examples show the decoded JSON-LD attachments and their relati
 
 These JSON-LD examples show the decoded attachments for the [mixed-release exchange](examples-grouped-fhir-job.html#grouped-fhir-submission). The FHIR resources carry the same JSON-LD as Base64 in their attachment data fields. The policy and plan below follow the R4 clinical set.
 
-<a name="decoded-authorization-example"> </a>
+<div id="decoded-authorization-example"> </div>
 
 ### Data Request Authorization Agreement Example
 
@@ -153,31 +153,48 @@ This Agreement is the decoded attachment in the [UC-2 Data Request Authorization
 }
 ```
 
-<a name="decoded-policy-example"> </a>
+<div id="decoded-policy-example"> </div>
 
 ### De-Identification Policy Set Example
 
-This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Contract. The `patient-r4` permission approves version `1.0` of that Contract. The policy selects `@subject-names` for removal. The Manager expands the group to `Patient.name` for the R4 clinical set.
+This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Policy Contract. The `patient-r4` permission approves version `1.0` of that Contract. The policy targets the patient's structured `pd:Name` data for removal. The Manager compiles it to `Patient.name` using the [FHIR R4 DPV Category Mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping).
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0",
-  "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "semantic",
+  "profile": "disdpv:Policy",
   "dis:reversibilityMode": "irreversible",
   "obligation": [
     {
       "uid": "https://governance.example.org/policies/patient-name-removal/versions/1.0#remove-01",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:semantic-elements",
-        "refinement": {
-          "leftOperand": "dis:semanticGroup",
-          "operator": "eq",
-          "rightOperand": "@subject-names"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Name"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": "dis:remove"
     }
@@ -199,7 +216,7 @@ This Set is the decoded attachment in the `grouped-fhir-policy-patient-r4` Polic
 }
 ```
 
-<a name="decoded-plan-example"> </a>
+<div id="decoded-plan-example"> </div>
 
 ### Execution Plan Set Example
 
@@ -207,10 +224,10 @@ This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Executi
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0",
-  "profile": "dis:ExecutionPlan",
+  "profile": "disdpv:ExecutionPlan",
   "dis:ruleSetId": "remove-direct-link",
   "dis:payloadBinding": "DIS-FHIR-Payload",
   "dis:payloadVersion": "R4",
@@ -239,11 +256,14 @@ This Set is the decoded attachment in the `grouped-fhir-plan-patient-r4` Executi
         "@id": "https://dis.example.org/fhir/plans/patient-r4/versions/1.0#remove-01"
       }
     ]
+  },
+  "disdpv:mappingRevision": {
+    "@id": "https://profiles.ihe.net/ITI/DIS/bindings/dis-fhir-r4-dpv-mapping-3.jsonld"
   }
 }
 ```
 
-<a name="hosted-input-digest-example"> </a>
+<div id="hosted-input-digest-example"> </div>
 
 ### Hosted Input Digests Example
 
@@ -274,11 +294,11 @@ This Execution Plan Set fragment binds the manifest and two files in the [synthe
 }
 ```
 
-<a name="dpv-odrl-worked-examples"> </a>
+<div id="dpv-odrl-worked-examples"> </div>
 
 ## DPV–ODRL worked policies and evidence
 
-Both policies target the same synthetic R4 input scope. The Manager compiles both plans with [FHIR R4 DPV mapping revision 2](volume-3-execution-plan.html#fhir-r4-dpv-mapping-revision-2). Revision 2 also supplies the selector for the optional Mother's Maiden Name extension. That selector matches zero elements in this fixture. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
+Both policies target the same synthetic R4 input scope. The Manager compiles both plans with [FHIR R4 DPV Category Mapping](volume-3-execution-plan.html#fhir-r4-dpv-mapping). The mapping also supplies the selector for the optional Mother's Maiden Name extension. That selector matches zero elements in this fixture. The through-line uses two independent assignments, each granted to the same Requester and recipient for the same purpose. Each permission explicitly authorizes its own policy revision.
 
 | Example | Authorization | Policy | Execution Plan | Expected result |
 | --- | --- | --- | --- | --- |

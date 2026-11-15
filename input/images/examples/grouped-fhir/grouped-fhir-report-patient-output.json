@@ -1,0 +1,8 @@
+{
+  "resourceType": "Patient",
+  "id": "grouped-fhir-report-patient-output",
+  "meta": {
+    "versionId": "1"
+  },
+  "active": true
+}

@@ -6,14 +6,11 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
 
 ```json
 {
-  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-odrl-v1.jsonld",
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
   "@type": "Set",
   "uid": "https://governance.example.org/policies/staged-patient/versions/1.0",
-  "profile": "dis:DeIdentificationPolicy",
-  "dis:representationLevel": "syntax",
+  "profile": "disdpv:Policy",
   "dis:reversibilityMode": "irreversible",
-  "dis:payloadFamily": "fhir",
-  "dis:payloadVersion": "R4",
   "dis:identity-linkage-scope": {
     "@type": "@json",
     "@value": {
@@ -29,12 +26,30 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
       "uid": "https://governance.example.org/policies/staged-patient/versions/1.0#hash-identifier",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:fhir-elements",
-        "refinement": {
-          "leftOperand": "dis:fhirPath",
-          "operator": "eq",
-          "rightOperand": "Patient.identifier"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Identifier"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": {
         "rdf:value": {
@@ -65,12 +80,30 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
       "uid": "https://governance.example.org/policies/staged-patient/versions/1.0#remove-name",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:fhir-elements",
-        "refinement": {
-          "leftOperand": "dis:fhirPath",
-          "operator": "eq",
-          "rightOperand": "Patient.name"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Name"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": "dis:remove"
     },
@@ -78,12 +111,30 @@ This JSON-LD is the decoded Base64 content of `Contract.rule.contentAttachment.d
       "uid": "https://governance.example.org/policies/staged-patient/versions/1.0#birth-year",
       "target": {
         "@type": "AssetCollection",
-        "source": "dis:fhir-elements",
-        "refinement": {
-          "leftOperand": "dis:fhirPath",
-          "operator": "eq",
-          "rightOperand": "Patient.birthDate"
-        }
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:BirthDate"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:patient"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
       },
       "action": {
         "rdf:value": {
