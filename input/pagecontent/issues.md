@@ -8,7 +8,7 @@ The [AES-FF1 binding](draft-encryption-based-pseudonymization.html) specifies th
 
 <a name="iua-grouping-and-denial-responses"> </a>
 
-#### IUA Grouping and Authorization Denials
+### IUA Grouping and Authorization Denials
 
 The draft assigns [IUA roles by interface](volume-1.html#required-groupings). [Volume 2](volume-2.html#transaction-authorization) uses HTTP 401 for ITI-72 denials and HTTP 403 for a DIS authorization denial after ITI-72 succeeds.
 

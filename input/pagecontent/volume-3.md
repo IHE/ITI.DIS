@@ -310,7 +310,7 @@ Before dispatching tasks via ITI-x3, the De-ID Manager resolves targets against 
 
 #### 3:PXX.1.5.2 Assemble the Plan and Check Capabilities
 
-**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager binds the rules to the [verified assignment inputs](#assigned-input-verification) and assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Contract resource with `Contract.type` coding `dis-execution-plan`.
+**Execution plan assembly.** The Manager preserves rule order and source rule IDs and adds the resolved scope to salted hash and encryption rules. The Manager binds the rules to the [verified assignment inputs](#assigned-input-verification) and assembles the resolved or validated rules into a compiled ODRL Set (see [§3:PXX.2.1.2](#3pxx212-execution-plan-json-structure-and-rule-evaluation)) and packages the plan in a Contract resource with `Contract.type` coding `dis-execution-plan` from the [DIS Document Type CodeSystem](CodeSystem-dis-document-type.html).
 
 **Capability verification.** The De-ID Manager SHALL verify that the complete assignment is supported by the target De-Identifier's [declared processing capabilities](#fhir-processing-capabilities) before dispatch. The Integrated actor applies the same check before local execution.
 
@@ -402,6 +402,8 @@ The [De-Identification Job profile](StructureDefinition-DIS-DeIdentificationJob.
 | `payloadBinding` | code | Required | Required, matches the assigned job set |
 | `payloadVersion` | code | Required | Required, matches the assigned job set |
 | `manifestFormat` | code | Required | Required for the assigned manifest |
+| `permission` | uri | Required, identifies the selected Agreement permission by its `uid` | ITI-x1 only |
+| `purpose` | uri | Required, matches the selected Agreement permission’s approved purpose IRI | ITI-x1 only |
 | `policy` | canonical | Required, use `Contract.url\|Contract.version` | The execution plan carries the policy identity |
 | `policyContent` | Reference | Optional local reference to a contained Policy Content Binary | ITI-x1 only |
 | `lookupTable` | Reference | Optional supplied lookup table for this set | Use the separate `lookup-table` input for an assigned lookup |

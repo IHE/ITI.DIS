@@ -192,6 +192,7 @@ Description: "Document types for identified DIS operational artifacts."
 * ^experimental = false
 * ^caseSensitive = true
 * #lookup-table "DIS reversible lookup table"
+* #dis-execution-plan "DIS execution plan"
 
 CodeSystem: DisLinkageScopeType
 Id: dis-linkage-scope-type

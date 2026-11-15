@@ -91,6 +91,8 @@ Id: DIS-ExecutionPlan
 Title: "DIS De-Identification Execution Plan Contract"
 Description: "Task-specific Contract carrying a compiled ODRL Set derived from the approved policy."
 * insert DISODRLContract
+* type 1..1
+* type = https://profiles.ihe.net/ITI/DIS/CodeSystem/dis-document-type#dis-execution-plan
 * authority 1..1
 * authority only Reference(Organization)
 * subject 1..1

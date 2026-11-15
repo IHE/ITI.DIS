@@ -44,7 +44,7 @@ This guide is organized into the following sections:
 - Other
   - [Changes to Other IHE Specifications](other.html)
   - [Download and Analysis](download.html)
-  - [JSON Schema Artifacts](download.html#json-schema-artifacts)
+  - [ODRL and JSON Schema Artifacts](download.html#odrl-and-json-schema-artifacts)
   - [Test Plan](testplan.html)
 
 See also the [Table of Contents](toc.html) and the index of [Artifacts](artifacts.html) defined as part of this implementation guide.
