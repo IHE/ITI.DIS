@@ -94,6 +94,8 @@ The policy artifact is an HL7 FHIR R4 Contract resource, part of the protocol la
 
 The [HL7 FHIR R4 Contract]({{site.data.fhir.path}}contract.html) carries the policy. The [DIS Policy profile](StructureDefinition-DIS-Policy.html) defines its FHIR constraints. [ITI-x1](volume-2.html#23x1-submit-de-identification-job-iti-x1) defines the policy submission and admission behavior.
 
+The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html) proposes reusable targets based on a personal data category, the person's role, and the location of the information, with separate payload mappings. It is provided for review.
+
 <a name="3pxx21-policy-library-resource-structure"> </a>
 
 <a name="3pxx11-policy-library-resource-structure"> </a>

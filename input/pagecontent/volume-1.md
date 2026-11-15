@@ -7,6 +7,8 @@ DIS separates the mandatory HL7 FHIR R4 **protocol binding** from the processing
 
 Each processing payload explicitly identifies its format and version. De-Identifiers declare supported payload bindings and versions, and the Manager verifies compatibility before dispatch. Payloads whose version differs from the HL7 FHIR R4 protocol binding are carried or referenced using the payload binding's packaging rules rather than embedded as native resources in the HL7 FHIR R4 transaction envelope. Detailed version identification, packaging rules, and normative requirements are specified in the applicable actor, option, and transaction sections.
 
+The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html) explores a reusable personal information model for policies across payload bindings.
+
 <a name="actors-and-transactions"> </a>
 
 <a name="1pxx1-dis-actors-transactions-and-content-modules"> </a>

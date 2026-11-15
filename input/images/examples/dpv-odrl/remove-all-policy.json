@@ -1,0 +1,54 @@
+{
+  "@context": "https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.jsonld",
+  "@type": "Set",
+  "uid": "https://governance.example.org/policies/remove-all/versions/1.0",
+  "profile": "disdpv:Policy",
+  "dis:reversibilityMode": "irreversible",
+  "obligation": [
+    {
+      "uid": "https://governance.example.org/policies/remove-all/versions/1.0#remove",
+      "target": {
+        "@type": "AssetCollection",
+        "source": "disdpv:personal-information",
+        "refinement": [
+          {
+            "leftOperand": "disdpv:category",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "pd:Name"
+            }
+          },
+          {
+            "leftOperand": "disdpv:personRole",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:all-person-roles"
+            }
+          },
+          {
+            "leftOperand": "disdpv:location",
+            "operator": "eq",
+            "rightOperand": {
+              "@id": "disdpv:structured"
+            }
+          }
+        ]
+      },
+      "action": "dis:remove"
+    }
+  ],
+  "dis:ruleSets": {
+    "@list": [
+      {
+        "dis:ruleSetId": "structured-names",
+        "dis:ruleOrder": {
+          "@list": [
+            {
+              "@id": "https://governance.example.org/policies/remove-all/versions/1.0#remove"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

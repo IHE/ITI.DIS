@@ -242,6 +242,8 @@ Before accepting an asynchronous job or beginning synchronous processing, the Ma
 
 The Manager SHALL obtain the Policy Contract through [inline delivery or Manager resolution](volume-3.html#3pxx14-policy-delivery-and-validation). Before acceptance or synchronous execution, the Manager SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the authorization and policy Contracts.
 
+The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html#compilation-and-evidence) describes proposed admission and compilation checks for its policy profile.
+
 The Manager SHALL perform three-point policy content validation:
 
 1. **Structure** — verify the Contract and decoded ODRL Set against the applicable DIS profiles.
@@ -439,6 +441,8 @@ The De-Identifier SHALL apply the [shared identifier and retry rules](#submissio
 Upon receipt of a Submit De-Identification Task Request, the De-Identifier SHALL perform the following actions.
 
 Before accepting an asynchronous task or beginning synchronous processing, the De-Identifier SHALL resolve the Execution Plan Contract, validate the decoded ODRL Set under the [execution plan binding](volume-3.html#3pxx212-execution-plan-json-structure-and-rule-evaluation), and compare its rule-set ID, stage ID, set ID, payload binding and payload version with the task. It SHALL verify that the resolved plan matches the referenced resource revision, that its identifier matches the Set revision `uid`, and that it identifies the authenticated Manager and the assigned De-Identifier. It SHALL apply the [deployment signature requirements](volume-3.html#contract-signatures) to the Execution Plan Contract. It SHALL verify that the plan's source IRI binds to the submitted manifest under the [assigned input verification rules](volume-3.html#assigned-input-verification). It SHALL return HTTP 400 and an R4 OperationOutcome for an invalid or inconsistent plan, including a manifest identity mismatch. For `encrypt`, it SHALL validate the pinned configuration, namespace and locally authorized key version before accepting the task. Unavailable configuration support or key material produces HTTP 422 and an R4 OperationOutcome for an otherwise valid and authorized submission.
+
+The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html#compilation-and-evidence) describes proposed validation of its compiled plan and mapping revision.
 
 Before accepting the task, the De-Identifier SHALL verify the task's reversibility mode separately from its processing combination, required actions and parameters under the [FHIR processing capability rules](volume-3.html#fhir-processing-capabilities). For DIS-FHIR-Payload, use the assigned input manifest format as the result manifest format for this check. The De-Identifier SHALL reject an otherwise valid assignment that requires an unsupported mode, combination, action or parameter with HTTP 422 and an R4 OperationOutcome.
 

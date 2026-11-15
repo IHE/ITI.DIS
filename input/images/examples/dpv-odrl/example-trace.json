@@ -1,0 +1,218 @@
+{
+  "description": "Synthetic example trace for the draft policy and plan profiles",
+  "approvedScope": {
+    "uid": "https://governance.example.org/scopes/name-pilot/versions/1",
+    "manifest": "https://source.example.org/fhir/r4/List/name-pilot/_history/1",
+    "careRoster": [
+      "https://source.example.org/fhir/r4/CareTeam/team-example/_history/1"
+    ],
+    "careRosterComplete": true
+  },
+  "inputManifest": {
+    "resourceType": "List",
+    "id": "name-pilot",
+    "meta": {
+      "versionId": "1",
+      "profile": [
+        "https://profiles.ihe.net/ITI/DIS/StructureDefinition/DIS-ResourceManifest"
+      ]
+    },
+    "status": "current",
+    "mode": "snapshot",
+    "entry": [
+      {
+        "deleted": false,
+        "item": {
+          "reference": "https://source.example.org/fhir/r4/Patient/patient-example/_history/1"
+        }
+      },
+      {
+        "deleted": false,
+        "item": {
+          "reference": "https://source.example.org/fhir/r4/Practitioner/provider-example/_history/1"
+        }
+      },
+      {
+        "deleted": false,
+        "item": {
+          "reference": "https://source.example.org/fhir/r4/Practitioner/other-example/_history/1"
+        }
+      },
+      {
+        "deleted": false,
+        "item": {
+          "reference": "https://source.example.org/fhir/r4/CareTeam/team-example/_history/1"
+        }
+      }
+    ]
+  },
+  "inputResourcesByVersionedReference": {
+    "https://source.example.org/fhir/r4/Patient/patient-example/_history/1": {
+      "resourceType": "Patient",
+      "id": "patient-example",
+      "meta": {
+        "versionId": "1"
+      },
+      "name": [
+        {
+          "family": "Vale",
+          "given": [
+            "Alex"
+          ]
+        }
+      ],
+      "contact": [
+        {
+          "name": {
+            "family": "Vale",
+            "given": [
+              "Taylor"
+            ]
+          },
+          "telecom": [
+            {
+              "system": "email",
+              "value": "contact@example.org"
+            }
+          ]
+        }
+      ]
+    },
+    "https://source.example.org/fhir/r4/Practitioner/provider-example/_history/1": {
+      "resourceType": "Practitioner",
+      "id": "provider-example",
+      "meta": {
+        "versionId": "1"
+      },
+      "name": [
+        {
+          "family": "Vale",
+          "given": [
+            "Alex"
+          ]
+        }
+      ]
+    },
+    "https://source.example.org/fhir/r4/Practitioner/other-example/_history/1": {
+      "resourceType": "Practitioner",
+      "id": "other-example",
+      "meta": {
+        "versionId": "1"
+      },
+      "name": [
+        {
+          "family": "Reed",
+          "given": [
+            "Jordan"
+          ]
+        }
+      ]
+    },
+    "https://source.example.org/fhir/r4/CareTeam/team-example/_history/1": {
+      "resourceType": "CareTeam",
+      "id": "team-example",
+      "meta": {
+        "versionId": "1"
+      },
+      "status": "active",
+      "subject": {
+        "reference": "https://source.example.org/fhir/r4/Patient/patient-example/_history/1"
+      },
+      "participant": [
+        {
+          "member": {
+            "reference": "https://source.example.org/fhir/r4/Practitioner/provider-example/_history/1"
+          }
+        }
+      ]
+    }
+  },
+  "assignments": {
+    "remove-all": {
+      "authorizationContractReference": "https://governance.example.org/fhir/Contract/remove-all-authorization/_history/1",
+      "permissionUid": "https://governance.example.org/permits/remove-all/versions/1#names",
+      "policyContractReference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1",
+      "policyContractUrl": "https://governance.example.org/policies/remove-all",
+      "policyContractVersion": "1.0",
+      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/remove-all-plan/_history/1",
+      "executionPlanContractSupportingInfo": [
+        {
+          "reference": "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1"
+        }
+      ],
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1",
+      "expectedNameOutcomes": {
+        "Patient/patient-example.name": "absent",
+        "Patient/patient-example.contact.name": "absent",
+        "Practitioner/provider-example.name": "absent",
+        "Practitioner/other-example.name": "absent"
+      },
+      "expectedProvenance": {
+        "policy": [
+          "https://governance.example.org/fhir/Contract/remove-all-policy/_history/1"
+        ],
+        "target": [
+          {
+            "reference": "https://results.example.org/fhir/r4/Patient/remove-all-patient-example/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/Practitioner/remove-all-provider-example/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/Practitioner/remove-all-other-example/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/CareTeam/remove-all-team-example/_history/1"
+          }
+        ],
+        "outcomeStatus": "complete",
+        "ruleSet": "structured-names",
+        "reversibility": "irreversible",
+        "validationStatus": "valid"
+      }
+    },
+    "keep-providers": {
+      "authorizationContractReference": "https://governance.example.org/fhir/Contract/keep-providers-authorization/_history/1",
+      "permissionUid": "https://governance.example.org/permits/keep-providers/versions/1#names",
+      "policyContractReference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1",
+      "policyContractUrl": "https://governance.example.org/policies/keep-providers",
+      "policyContractVersion": "1.0",
+      "executionPlanContractReference": "https://manager.example.org/fhir/Contract/keep-providers-plan/_history/1",
+      "executionPlanContractSupportingInfo": [
+        {
+          "reference": "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1"
+        }
+      ],
+      "mappingRevision": "https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html#fhir-r4-pilot-1",
+      "expectedNameOutcomes": {
+        "Patient/patient-example.name": "absent",
+        "Patient/patient-example.contact.name": "absent",
+        "Practitioner/provider-example.name": "unchanged",
+        "Practitioner/other-example.name": "absent"
+      },
+      "expectedProvenance": {
+        "policy": [
+          "https://governance.example.org/fhir/Contract/keep-providers-policy/_history/1"
+        ],
+        "target": [
+          {
+            "reference": "https://results.example.org/fhir/r4/Patient/keep-providers-patient-example/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/Practitioner/keep-providers-provider-example/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/Practitioner/keep-providers-other-example/_history/1"
+          },
+          {
+            "reference": "https://results.example.org/fhir/r4/CareTeam/keep-providers-team-example/_history/1"
+          }
+        ],
+        "outcomeStatus": "complete",
+        "ruleSet": "structured-names",
+        "reversibility": "irreversible",
+        "validationStatus": "valid"
+      }
+    }
+  }
+}

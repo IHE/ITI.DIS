@@ -1,5 +1,7 @@
 This page is the normative Volume 3 binding for the decoded DIS Agreement, Policy Set, and Execution Plan Set. The [Volume 3 overview](volume-3.html) links to the FHIR Contracts that carry them and to the applicable validation rules. Worked examples appear in the informative section below.
 
+The [DPV–ODRL policy draft](draft-dpv-odrl-policy.html) proposes additional Policy Set and Execution Plan Set profiles for review.
+
 ## Common JSON-LD requirements
 
 This section defines the DIS profile of [ODRL 2.2](https://www.w3.org/TR/odrl-model/) and its [JSON-LD representation](https://www.w3.org/TR/odrl-vocab/#json-ld) for the data request authorization, policy and plan. The carriers and transaction requirements are defined in [Volume 3](volume-3.html).

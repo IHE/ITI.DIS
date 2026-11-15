@@ -1,0 +1,42 @@
+@prefix disdpv: <https://profiles.ihe.net/ITI/DIS/odrl/dpv/draft-1#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://profiles.ihe.net/ITI/DIS/schemas/dis-dpv-odrl-draft-1.ttl>
+    a owl:Ontology ;
+    dct:title "DIS DPV–ODRL policy vocabulary, draft 1"@en ;
+    rdfs:seeAlso <https://profiles.ihe.net/ITI/DIS/draft-dpv-odrl-policy.html> .
+
+disdpv:Policy a dct:Standard ;
+    rdfs:label "Draft DIS DPV De-Identification Policy"@en .
+
+disdpv:ExecutionPlan a dct:Standard ;
+    rdfs:label "Draft DIS DPV Execution Plan"@en .
+
+disdpv:personal-information a odrl:AssetCollection ;
+    rdfs:label "Occurrences of personal information in the assigned scope"@en .
+
+disdpv:category a odrl:LeftOperand ;
+    rdfs:label "DPV personal data category of the occurrence"@en .
+
+disdpv:personRole a odrl:LeftOperand ;
+    rdfs:label "Role of the person for the occurrence in the record"@en .
+
+disdpv:location a odrl:LeftOperand ;
+    rdfs:label "Location of the occurrence"@en .
+
+disdpv:mappingRevision a rdf:Property ;
+    rdfs:label "Immutable payload mapping revision used to compile the execution plan"@en .
+
+disdpv:patient a skos:Concept ; skos:prefLabel "Patient"@en .
+disdpv:patient-contact a skos:Concept ; skos:prefLabel "Patient contact"@en .
+disdpv:care-provider a skos:Concept ; skos:prefLabel "Care provider"@en .
+disdpv:all-person-roles a skos:Concept ; skos:prefLabel "All person roles"@en .
+
+disdpv:structured a skos:Concept ; skos:prefLabel "Structured elements"@en .
+disdpv:narrative a skos:Concept ; skos:prefLabel "Narrative or free text"@en .
+disdpv:pixel a skos:Concept ; skos:prefLabel "Image pixels"@en .
