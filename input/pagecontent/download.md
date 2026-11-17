@@ -11,6 +11,10 @@ The [IHE ITI.DIS repository](https://github.com/IHE/ITI.DIS) contains the source
 
 The [FHIR R4](volume-3-execution-plan.html#fhir-r4-dpv-mapping) and [FHIR R5](volume-3-execution-plan.html#fhir-r5-dpv-mapping) mappings are available as JSON-LD and CSV. The mapping sections also link to their review artifacts.
 
+#### DICOM DPV Category Mapping (Experimental)
+
+The [experimental DICOM 2026d mapping](experimental-dicom-dpv-mapping.html) is available as [JSON-LD](bindings/dis-dicom-2026d-dpv-mapping-1.jsonld) and [CSV](bindings/dis-dicom-2026d-dpv-mapping-1.csv). Download the [definition comparison CSV](bindings/dis-dicom-2026d-dpv-definition-review-1.csv) for the evidence and review findings.
+
 #### ODRL and JSON Schema Artifacts
 
 The [DIS ODRL binding](odrl-content.html) defines the Agreement, De-Identification Policy, and Execution Plan. Download the [version 1 RDF vocabulary](schemas/dis-odrl-v1.ttl) and [version 1 JSON-LD context](schemas/dis-odrl-v1.jsonld).

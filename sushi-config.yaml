@@ -210,6 +210,9 @@ pages:
   draft-native-payload-bindings.md:
     title: "Proposed DICOM and CDA Payload Bindings (Informative)"
     generation: markdown
+  experimental-dicom-dpv-mapping.md:
+    title: "DICOM DPV Category Mapping (Experimental)"
+    generation: markdown
   testplan.md:
     title: "Test Plan"
     generation: markdown
@@ -253,7 +256,8 @@ menu:
     "UC-4 – Cloud Decision Support": examples-cloud-decision-support.html
     "UC-5 – Standalone Clinical Export": examples-standalone-export.html
   Artifacts: artifacts.html
-  Other:
+  Others:
+    DICOM DPV Category Mapping (Experimental): experimental-dicom-dpv-mapping.html
     Proposed DICOM and CDA Payload Bindings (Informative): draft-native-payload-bindings.html
     Changes to Other IHE Specifications: other.html
     Download and Analysis: download.html

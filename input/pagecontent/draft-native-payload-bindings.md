@@ -28,19 +28,12 @@ A DICOM wrapper would use `application/dicom` for the native instance.
 
 The informative examples include a [DICOM study index](ImagingStudy-study-42.html) with its [WADO-RS endpoint](Endpoint-wado-42.html), and a [hosted CDA document index](DocumentReference-draft-cda-document-index.html).
 
+<div id="dicom-dpv-category-mapping"> </div>
+<div id="dicom-patient-associated-uids"> </div>
+
 ## DICOM crosswalk (informative)
 
-[DICOM PS3.15 Annex E](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html) helps locate personal information and identify the requirements of the selected DICOM Attribute Confidentiality Profile and options. A future DICOM binding must address dataset attributes, nested items, textual content and image pixels according to its declared scope.
-
-| DPV category and role | DICOM attribute example | Annex E Basic Profile consideration |
-| --- | --- | --- |
-| `pd:Name`, patient | Patient's Name `(0010,0010)` | `Z` allows an empty or valid dummy value. A required attribute that permits an empty value may still prohibit DIS `remove`, which requires absence. |
-| `pd:Identifier`, patient | Patient ID `(0010,0020)` | `Z/D` requires handling appropriate to the attribute type. Evaluate the identifier and its issuer context together. |
-| `pd:BirthDate`, patient | Patient's Birth Date `(0010,0030)` | `Z` requires checking the attribute type and output constraints. |
-| `pd:Name`, care provider | Performing Physician's Name `(0008,1050)` | `X` requires removal under the Basic Profile. A `keep` policy rule requires a separately applicable DICOM profile or option permitting retention. |
-{: .grid}
-
-Under this proposal, the Manager would check each DIS action against the applicable DICOM constraints for the concrete attribute, selected profile, and options. An incompatible action makes the assignment unsupported. For example, the Manager would reject a policy that keeps Performing Physician's Name when the selected DICOM profile requires its removal. This table is a crosswalk for review.
+The [experimental DICOM DPV Category Mapping](experimental-dicom-dpv-mapping.html) provides the Annex E attribute crosswalk, the CSV and JSON-LD mapping files, and the definition comparison.
 
 ## Open Binding Work
 
